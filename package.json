@@ -8,14 +8,15 @@
     "name": "Cenk Bilgin",
     "url": "https://github.com/cenkbilgin"
   },
-  "dependencies": {
-	"com.unity.nuget.newtonsoft-json": "3.2.2",
+	"license": "Proprietary",
+	"dependencies": {
+		"com.unity.nuget.newtonsoft-json": "3.2.2",
   },
   "samples": [
     {
-      "displayName": "Template",
-      "description": "Template",
-      "path": "Samples~"
+		"displayName": "Template",
+		"description": "Template",
+		"path": "Samples~"
     }
   ]
 }

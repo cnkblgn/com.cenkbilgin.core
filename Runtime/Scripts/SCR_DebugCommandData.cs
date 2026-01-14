@@ -1,3 +1,4 @@
+using UnityEngine;
 using System.Collections.Generic;
 
 namespace Core
@@ -133,7 +134,7 @@ namespace Core
         {
             if (commandInstance == null)
             {
-                LogError("DebugCommandData.Insert() commandInstance == null");
+                Debug.LogError("DebugCommandData.Insert() commandInstance == null");
                 return;
             }
 
@@ -151,13 +152,13 @@ namespace Core
         {
             if (commandInstance == null)
             {
-                LogError("DebugCommandData.Remove() commandInstance == null");
+                Debug.LogError("DebugCommandData.Remove() commandInstance == null");
                 return;
             }
 
             if (!data.Contains(commandInstance))
             {
-                LogError("DebugCommandData.Remove() !data.Contains(commandInstance)");
+                Debug.LogError("DebugCommandData.Remove() !data.Contains(commandInstance)");
                 return;
             }
 

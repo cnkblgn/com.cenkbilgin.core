@@ -21,7 +21,7 @@ namespace Core.Input
         {
             if (actionReferance == null)
             {
-                LogError("InputKey.Initialize() actionReferance == null");
+                Debug.LogError("InputKey.Initialize() actionReferance == null");
                 return;
             }
 

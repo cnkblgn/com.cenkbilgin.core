@@ -36,7 +36,7 @@ namespace Core.Input
         {
             if (actionReferance == null)
             {
-                LogError("InputAxis.Initialize() actionReferance == null");
+                Debug.LogError("InputAxis.Initialize() actionReferance == null");
                 return;
             }
 

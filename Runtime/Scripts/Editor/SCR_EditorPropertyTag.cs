@@ -16,7 +16,7 @@ namespace Core.Editor
             }
             else
             {
-                EditorGUI.LabelField(position, label.text, LOG_ERROR + "Incompatible type!");
+                EditorGUI.LabelField(position, label.text, "Error Incompatible type!");
             }
         }
     }

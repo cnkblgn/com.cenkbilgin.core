@@ -17,13 +17,13 @@ namespace Core.Audio
         {
             if (listener == null)
             {
-                LogError("PoolSystemAudio.Spawn() listener == null");
+                Debug.LogError("PoolSystemAudio.Spawn() listener == null");
                 return null;
             }
 
             if (clip == null)
             {
-                LogError("PoolSystemAudio.Spawn() clip == null");
+                Debug.LogError("PoolSystemAudio.Spawn() clip == null");
                 return null;
             }
 

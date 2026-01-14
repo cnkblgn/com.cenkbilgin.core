@@ -76,7 +76,7 @@ namespace Core
         public void Populate()
         {
             entityList = GetComponentsInChildren<PersistentInstanceObject>(true).ToList();
-            LogWarning($"PersistentSceneController.Populate() collected {entityList.Count} objects!");
+            Debug.LogWarning($"PersistentSceneController.Populate() collected {entityList.Count} objects!");
         }
 #endif
 
@@ -84,7 +84,7 @@ namespace Core
         {
             if (!gameObject.TryGetComponent(out persistentObject))
             {
-                LogError($"PersistentSceneController.RegisterController() [{gameObject}] has no [PersistentInstanceObject]");
+                Debug.LogError($"PersistentSceneController.RegisterController() [{gameObject}] has no [PersistentInstanceObject]");
                 Destroy(gameObject);
                 return false;
             }
@@ -103,13 +103,13 @@ namespace Core
 
             if (string.IsNullOrEmpty(entityObject.InstanceID))
             {
-                LogError($"PersistentSceneController.RegisterController() Trying to register {entityObject.gameObject} without InstanceID");
+                Debug.LogError($"PersistentSceneController.RegisterController() Trying to register {entityObject.gameObject} without InstanceID");
                 return;
             }
 
             if (entityTable.ContainsKey(entityObject.InstanceID))
             {
-                LogError($"PersistentSceneController.RegisterController() Trying to duplicate {entityObject.InstanceID}");
+                Debug.LogError($"PersistentSceneController.RegisterController() Trying to duplicate {entityObject.InstanceID}");
                 return;
             }
 
@@ -211,7 +211,7 @@ namespace Core
                 }
                 else
                 {
-                    LogWarning($"PersistentSceneController.ImportFrom() Prefab not found for Orphan data: [{remainingData.Value.PrefabID}]");
+                    Debug.LogWarning($"PersistentSceneController.ImportFrom() Prefab not found for Orphan data: [{remainingData.Value.PrefabID}]");
                 }
             }
 

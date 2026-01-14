@@ -17,7 +17,7 @@ namespace Core
 
             if (sceneController == null)
             {
-                LogError("ManagerCorePersistent.TrySpawnObject() sceneController == null");
+                Debug.LogError("ManagerCorePersistent.TrySpawnObject() sceneController == null");
                 return false;
             }
 
@@ -28,7 +28,7 @@ namespace Core
         {
             if (sceneController == null)
             {
-                LogError("ManagerCorePersistent.RegisterController() sceneController == null");
+                Debug.LogError("ManagerCorePersistent.RegisterController() sceneController == null");
                 return;
             }
 
@@ -38,7 +38,7 @@ namespace Core
         {
             if (this.sceneController != sceneController)
             {
-                LogError("ManagerCorePersistent.UnregisterController() this.sceneController != sceneController");
+                Debug.LogError("ManagerCorePersistent.UnregisterController() this.sceneController != sceneController");
                 return;
             }
 

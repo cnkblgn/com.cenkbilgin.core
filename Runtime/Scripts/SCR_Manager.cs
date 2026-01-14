@@ -26,7 +26,7 @@ namespace Core
 
             if (this != Instance)
             {
-                LogError("Manager.Awake() " + typeof(T).Name + " type duplicate is found!");
+                Debug.LogError("Manager.Awake() " + typeof(T).Name + " type duplicate is found!");
                 Destroy(this.gameObject);
             }
         }

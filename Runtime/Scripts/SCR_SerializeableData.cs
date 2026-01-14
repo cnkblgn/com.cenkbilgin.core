@@ -63,13 +63,13 @@ namespace Core
             if (data == null)
             {
                 Save(useInEditor);
-                LogError("SerializeableData.Load() data == null");
+                Debug.LogError("SerializeableData.Load() data == null");
                 return;
             }
 
             if (!string.Equals(data.version, version))
             {
-                LogError($"SerializeableData.Load() Version Mismatch! || " + "Path: " + data.Path + " << Path Version: " + data.version + " << Game Version : " + version);
+                Debug.LogError($"SerializeableData.Load() Version Mismatch! || " + "Path: " + data.Path + " << Path Version: " + data.version + " << Game Version : " + version);
 
                 Save(useInEditor);
                 OnLoad(SerializerObject.Load<T>(Path, useInEditor));

@@ -307,7 +307,7 @@ namespace Core.Audio
             if (clip == null)
             {
 #if UNITY_EDITOR
-                LogError("AudioEmitter.Play() clip is null!");
+                Debug.LogError("AudioEmitter.Play() clip is null!");
 #endif
                 return;
             }

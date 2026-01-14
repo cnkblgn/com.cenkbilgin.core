@@ -31,7 +31,7 @@ namespace Core.Editor
 
             if (selectedObjects.Length == 0)
             {
-                LogWarning("No objects selected!");
+                Debug.LogWarning("No objects selected!");
                 return;
             }
 
@@ -51,7 +51,7 @@ namespace Core.Editor
             }
 
             AssetDatabase.SaveAssets();
-            LogWarning("Selected objects renamed!");
+            Debug.LogWarning("Selected objects renamed!");
         }
     }
 }

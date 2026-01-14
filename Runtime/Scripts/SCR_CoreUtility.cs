@@ -210,7 +210,7 @@ namespace Core
             {
                 onStart?.Invoke();
                 onComplete?.Invoke();
-                LogWarning("CoreUtility.WaitSeconds() seconds <= 0!");
+                Debug.LogWarning("CoreUtility.WaitSeconds() seconds <= 0!");
                 return;
             }
 
@@ -228,7 +228,7 @@ namespace Core
             {
                 onStart?.Invoke();
                 onComplete?.Invoke();
-                LogWarning("CoreUtility.WaitSeconds() seconds <= 0!");
+                Debug.LogWarning("CoreUtility.WaitSeconds() seconds <= 0!");
                 return null;
             }
 
@@ -1943,7 +1943,7 @@ namespace Core
         {
             if (rootCanvas == null)
             {
-                LogError("CoreUtility.ClampToView() rootCanvas == null!");
+                Debug.LogError("CoreUtility.ClampToView() rootCanvas == null!");
                 return;
             }
 
@@ -1951,7 +1951,7 @@ namespace Core
 
             if (pivot.x > 0 || pivot.y > 0)
             {
-                LogWarning("CoreUtility.ClampToView() wrong pivot, pivot must be = (0,0)");
+                Debug.LogWarning("CoreUtility.ClampToView() wrong pivot, pivot must be = (0,0)");
             }
 
             Vector2 position = screenPosition / rootCanvas.localScale.x; 
@@ -2192,14 +2192,6 @@ namespace Core
         }
         #endregion
 
-        #region LOG
-        public static readonly string LOG_ERROR = $"ERROR: ".ToBold().ToRed();
-        public static readonly string LOG_WARNING = $"WARNING: ".ToBold().ToYellow();
-
-        public static void LogError(string value, UnityEngine.Object context = null, Type type = null) => Debug.LogError(LOG_ERROR + (type != null ? $"[{type.Name}] " : STRING_EMPTY) + value, context);
-        public static void LogWarning(string value, UnityEngine.Object context = null, Type type = null) => Debug.LogWarning(LOG_WARNING + (type != null ? $"[{type.Name}] " : STRING_EMPTY) + value, context);
-        #endregion
-
         #region STRING
         public const string STRING_FORMAT_0 = "0";
         public const string STRING_FORMAT_00 = "0.0";
@@ -2314,7 +2306,7 @@ namespace Core
             {
                 if (Count >= items.Length)
                 {
-                    LogError("SwapBackArray.Add() does not support for each loop!");
+                    Debug.LogError("SwapBackArray.Add() does not support for each loop!");
                     throw new InvalidOperationException("SwapBackArray.Add() capacity exceeded.");                    
                 }
 
@@ -2370,7 +2362,7 @@ namespace Core
 
             public IEnumerator<T> GetEnumerator()
             {
-                LogError("SwapBackArray.GetEnumerator() does not support for each loop!");
+                Debug.LogError("SwapBackArray.GetEnumerator() does not support for each loop!");
                 throw new InvalidOperationException("SwapBackArray.GetEnumerator() does not support for each loop!");
             }
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -2400,7 +2392,7 @@ namespace Core
                     {
                         if (disableRequesters.Count > ERROR_STEP)
                         {
-                            LogError("Flag.Disable() called too frequently! << requrester: " + requester.GetType());
+                            Debug.LogError("Flag.Disable() called too frequently! << requrester: " + requester.GetType());
                             return;
                         }
 
@@ -2420,7 +2412,7 @@ namespace Core
                     {            
                         if (disableRequesters.Count > ERROR_STEP)
                         {
-                            LogError("Flag.Disable() called too frequently! << requrester: " + requester.GetType());
+                            Debug.LogError("Flag.Disable() called too frequently! << requrester: " + requester.GetType());
                             return;
                         }
 

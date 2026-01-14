@@ -16,7 +16,7 @@ namespace Core
         {
             if (database == null)
             {
-                LogWarning("ManagerCorePrefab.Start() database == null");
+                Debug.LogWarning("ManagerCorePrefab.Start() database == null");
                 return;
             }
 
@@ -54,7 +54,7 @@ namespace Core
         {
             if (id == null)
             {
-                LogError("ManagerCorePrefab.Contains() id == null");
+                Debug.LogError("ManagerCorePrefab.Contains() id == null");
                 return false;
             }
 

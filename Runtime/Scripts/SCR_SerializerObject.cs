@@ -64,7 +64,7 @@ namespace Core
             }
             catch (Exception exception)
             {
-                LogError($"SerializerObject.Save() Failed to save data: {exception.Message} {exception.StackTrace}");
+                Debug.LogError($"SerializerObject.Save() Failed to save data: {exception.Message} {exception.StackTrace}");
                 return false;
             }
         }
@@ -80,7 +80,7 @@ namespace Core
 
             if (!File.Exists(path))
             {
-                LogError($"SerializerObject.Load() File at {path} not exists!");
+                Debug.LogError($"SerializerObject.Load() File at {path} not exists!");
                 return default;
             }
 
@@ -94,7 +94,7 @@ namespace Core
             }
             catch (Exception exception)
             {
-                LogError($"SerializerObject.Load() Failed to load data: {exception.Message} {exception.StackTrace}");
+                Debug.LogError($"SerializerObject.Load() Failed to load data: {exception.Message} {exception.StackTrace}");
                 return default;
                 //throw exception;
             }

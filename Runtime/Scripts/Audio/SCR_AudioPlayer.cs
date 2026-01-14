@@ -44,7 +44,7 @@ namespace Core.Audio
         {
             if (TryGetComponent(out AudioEmitter _))
             {
-                LogError($"{"AudioPlayer.Validate() [AudioPlayer]".ToYellow()} and {"[AudioEmitter]".ToYellow()} components can't exist in same gameobject!");
+                Debug.LogError($"{"AudioPlayer.Validate() [AudioPlayer]".ToYellow()} and {"[AudioEmitter]".ToYellow()} components can't exist in same gameobject!");
                 return;
             }
 

@@ -220,7 +220,7 @@ namespace Core.Editor
             string[] guids = AssetDatabase.FindAssets(searchQuery, new[] { searchFolder });
             if (guids.Length == 0)
             {
-                LogError("EditorUtility.FindAssetByName() No asset found with keyword: " + nameKeyword);
+                Debug.LogError("EditorUtility.FindAssetByName() No asset found with keyword: " + nameKeyword);
                 return null;
             }
 

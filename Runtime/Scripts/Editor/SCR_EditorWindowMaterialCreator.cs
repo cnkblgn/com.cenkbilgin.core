@@ -40,7 +40,7 @@ namespace Core.Editor
         {
             if (shader == null)
             {
-                LogError("EditorWindowMaterialCreator.Create() shader == null");
+                Debug.LogError("EditorWindowMaterialCreator.Create() shader == null");
                 return;
             }
 

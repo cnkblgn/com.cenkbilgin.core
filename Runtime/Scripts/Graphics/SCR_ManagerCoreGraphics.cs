@@ -120,7 +120,7 @@ namespace Core.Graphics
         {
             if (particle == null)
             {
-                LogError("ManagerCoreGraphics.SpawnParticle() particle == null");
+                Debug.LogError("ManagerCoreGraphics.SpawnParticle() particle == null");
                 return null;
             }
 
@@ -135,7 +135,7 @@ namespace Core.Graphics
         {
             if (decal == null)
             {
-                LogError("ManagerCoreGraphics.SpawnDecal() decal == null");
+                Debug.LogError("ManagerCoreGraphics.SpawnDecal() decal == null");
                 return null;
             }
 
@@ -259,7 +259,7 @@ namespace Core.Graphics
 
             if (mainCamera == null)
             {
-                LogError("ManagerCoreGraphics.GetMainCamera() mainCamera == null");
+                Debug.LogError("ManagerCoreGraphics.GetMainCamera() mainCamera == null");
             }
 
             defaultCamera = mainCamera;
@@ -273,7 +273,7 @@ namespace Core.Graphics
 
             if (mainCamera == null)
             {
-                LogError("ManagerCoreGraphics.GetMainCamera() mainCamera == null");
+                Debug.LogError("ManagerCoreGraphics.GetMainCamera() mainCamera == null");
             }
 
             return mainCamera;

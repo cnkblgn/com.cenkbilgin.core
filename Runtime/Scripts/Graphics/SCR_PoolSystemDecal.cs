@@ -14,7 +14,7 @@ namespace Core.Graphics
             if (item == null)
             {
                 // also maybe restore from prefabDatabase via ID?
-                LogError("PoolSystemDecal.OnReset() item == null! possible illegal destroyed decal");
+                Debug.LogError("PoolSystemDecal.OnReset() item == null! possible illegal destroyed decal");
                 return;
             }
 
@@ -27,7 +27,7 @@ namespace Core.Graphics
 
             if (decalEmitter == null)
             {
-                LogError("PoolSystemDecal.Spawn() decalEmitter == null! possible illegal destroyed decal");
+                Debug.LogError("PoolSystemDecal.Spawn() decalEmitter == null! possible illegal destroyed decal");
                 return null;
             }
 

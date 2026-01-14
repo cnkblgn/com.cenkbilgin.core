@@ -33,14 +33,14 @@ namespace Core
 
             if (!IsMarkedForDestroy && Application.isPlaying && !ManagerCorePersistent.Instance.IsLoading && !ManagerCoreGame.Instance.IsLoading)
             {
-                LogError($"PersistentInstanceObject.OnDestroy() [{name}] destroyed without persistence or destroyed illegally");
+                Debug.LogError($"PersistentInstanceObject.OnDestroy() [{name}] destroyed without persistence or destroyed illegally");
             }
         }
         protected virtual void Start()
         {
             if (string.IsNullOrEmpty(InstanceID))
             {
-                LogError($"PersistentInstanceObject.Start() InstanceID missing for {gameObject.name}", gameObject);
+                Debug.LogError($"PersistentInstanceObject.Start() InstanceID missing for {gameObject.name}", gameObject);
             }
         }
 
@@ -48,7 +48,7 @@ namespace Core
         {
             if (!string.IsNullOrEmpty(instanceID))
             {
-                LogError($"PersistentInstanceObject.SetID() InstanceID already set for {gameObject.name}");
+                Debug.LogError($"PersistentInstanceObject.SetID() InstanceID already set for {gameObject.name}");
                 return;
             }
 

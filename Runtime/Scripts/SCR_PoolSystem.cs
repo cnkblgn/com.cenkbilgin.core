@@ -60,7 +60,7 @@ namespace Core
         {
             if (!isInitialized)
             {
-                LogError($"PoolSystem.GetNext() pool system is not initialized!");
+                Debug.LogError($"PoolSystem.GetNext() pool system is not initialized!");
                 return null;
             }
 
@@ -71,7 +71,7 @@ namespace Core
                 case PoolType.RING_BUFFER:
                     return GetRing();
                 default:
-                    LogWarning($"PoolSystem.GetNext() [{Type}] not defined");
+                    Debug.LogWarning($"PoolSystem.GetNext() [{Type}] not defined");
                     break;
             }
 

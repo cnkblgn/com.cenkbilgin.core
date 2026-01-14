@@ -790,7 +790,7 @@ namespace Core.Misc
         {
             if (requester == null)
             {
-                LogError("Requester is null!", this.gameObject);
+                Debug.LogError("Requester is null!", this.gameObject);
                 return;
             }
 
@@ -809,7 +809,7 @@ namespace Core.Misc
         {
             if (requester == null)
             {
-                LogError("Requester is null!", this.gameObject);
+                Debug.LogError("Requester is null!", this.gameObject);
                 return;
             }
 
@@ -828,7 +828,7 @@ namespace Core.Misc
         {
             if (requester == null)
             {
-                LogError("Requester is null!", this.gameObject);
+                Debug.LogError("Requester is null!", this.gameObject);
                 return;
             }
 
@@ -847,7 +847,7 @@ namespace Core.Misc
         {
             if (requester == null)
             {
-                LogError("Requester is null!", this.gameObject);
+                Debug.LogError("Requester is null!", this.gameObject);
                 return;
             }
 
@@ -866,7 +866,7 @@ namespace Core.Misc
         {
             if (requester == null)
             {
-                LogError("Requester is null!", this.gameObject);
+                Debug.LogError("Requester is null!", this.gameObject);
                 return;
             }
 
@@ -893,7 +893,7 @@ namespace Core.Misc
         {
             if (requester == null)
             {
-                LogError("Requester is null!", this.gameObject);
+                Debug.LogError("Requester is null!", this.gameObject);
                 return;
             }
 
@@ -912,7 +912,7 @@ namespace Core.Misc
         {
             if (requester == null)
             {
-                LogError("Requester is null!", this.gameObject);
+                Debug.LogError("Requester is null!", this.gameObject);
                 return;
             }
 

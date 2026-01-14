@@ -31,7 +31,7 @@ namespace Core.Localization
 
             if (target == -1)
             {
-                LogError("ManagerCoreLocalization.Initialize() currentLocalizationIndex == -1, setting force to 0");
+                Debug.LogError("ManagerCoreLocalization.Initialize() currentLocalizationIndex == -1, setting force to 0");
                 target = 0;
             }
 
@@ -42,7 +42,7 @@ namespace Core.Localization
         {
             if (database == null)
             {
-                LogError("ManagerCoreLocalization.Set() database == null!");
+                Debug.LogError("ManagerCoreLocalization.Set() database == null!");
                 return;
             }
 
@@ -77,7 +77,7 @@ namespace Core.Localization
                 }
             }
 
-            LogWarning($"Missing localization for '{key}' in '{languages[currentLocalizationIndex]}'");
+            Debug.LogWarning($"Missing localization for '{key}' in '{languages[currentLocalizationIndex]}'");
             return $"[{key}]";
         }
         public string Get(string key, string arg0)
@@ -95,7 +95,7 @@ namespace Core.Localization
                 }
             }
 
-            LogWarning($"Missing localization for '{key}' in '{languages[currentLocalizationIndex]}'");
+            Debug.LogWarning($"Missing localization for '{key}' in '{languages[currentLocalizationIndex]}'");
             return $"[{key}]";
         }
         public string Get(string key, params object[] args)
@@ -113,7 +113,7 @@ namespace Core.Localization
                 }
             }
 
-            LogWarning($"Missing localization for '{key}' in '{languages[currentLocalizationIndex]}'");
+            Debug.LogWarning($"Missing localization for '{key}' in '{languages[currentLocalizationIndex]}'");
             return $"[{key}]";
         }
         private Dictionary<string, string> Parse(string csvFile, int languageIndex, char separator = ',')

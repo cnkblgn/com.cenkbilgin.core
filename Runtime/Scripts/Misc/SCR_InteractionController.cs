@@ -180,7 +180,7 @@ namespace Core.Misc
                         }
                         else
                         {
-                            LogError("InteractionController interactableObject.Type == null");
+                            Debug.LogError("InteractionController interactableObject.Type == null");
                         }
                     }
                 }
@@ -216,7 +216,7 @@ namespace Core.Misc
         {
             if (requester == null)
             {
-                LogError("Requester is null!", this.gameObject);
+                Debug.LogError("Requester is null!", this.gameObject);
                 return;
             }
 

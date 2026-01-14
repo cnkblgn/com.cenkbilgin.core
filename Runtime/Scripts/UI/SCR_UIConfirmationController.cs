@@ -56,7 +56,7 @@ namespace Core.UI
         {
             if (onAcceptEvent == null)
             {
-                LogError("UIConfirmationController.Show() onAcceptEvent == null!");
+                Debug.LogError("UIConfirmationController.Show() onAcceptEvent == null!");
                 return;
             }
 

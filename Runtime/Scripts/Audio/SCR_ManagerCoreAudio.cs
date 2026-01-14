@@ -23,7 +23,7 @@ namespace Core.Audio
                     }
                     else
                     {
-                        LogError("ManagerCoreAudio.AudioListener() listener not found in scene!");
+                        Debug.LogError("ManagerCoreAudio.AudioListener() listener not found in scene!");
                     }
                 }
 
@@ -455,7 +455,7 @@ namespace Core.Audio
         {
             if (clip == null)
             {
-                LogError("ManagerCoreAudio.PlaySound() clip == null");
+                Debug.LogError("ManagerCoreAudio.PlaySound() clip == null");
                 return null;
             }
 

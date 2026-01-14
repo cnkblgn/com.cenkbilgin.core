@@ -78,7 +78,7 @@ namespace Core
 
             if (!mappedBones.TryGetValue(collider, out var rigidbody))
             {
-                LogError("RagdollController.Hit() rigidbody == null!", collider);
+                Debug.LogError("RagdollController.Hit() rigidbody == null!", collider);
                 return;
             }
 

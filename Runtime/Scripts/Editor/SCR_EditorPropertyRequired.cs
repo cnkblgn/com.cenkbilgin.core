@@ -40,7 +40,7 @@ namespace Core.Editor
 
                     if (guids.Length <= 0)
                     {
-                        LogError($"EditorPropertyRequired.OnGUI() Could not find texture: {iconName}");
+                        Debug.LogError($"EditorPropertyRequired.OnGUI() Could not find texture: {iconName}");
                         return;
                     }
 
