@@ -15,6 +15,7 @@ namespace Core
         [JsonProperty("s", NullValueHandling = NullValueHandling.Ignore)] public string String;
         [JsonProperty("v3", NullValueHandling = NullValueHandling.Ignore)] public Float3? Vector3;
         [JsonProperty("v2", NullValueHandling = NullValueHandling.Ignore)] public Float2? Vector2;
-        [JsonProperty("data", NullValueHandling = NullValueHandling.Ignore)] public Dictionary<string, PersistentValue> Data;
+        [JsonProperty("g", NullValueHandling = NullValueHandling.Ignore)] public Guid? Guid;
+        [JsonProperty("d", NullValueHandling = NullValueHandling.Ignore)] public Dictionary<string, PersistentValue> Data;
     }
 }

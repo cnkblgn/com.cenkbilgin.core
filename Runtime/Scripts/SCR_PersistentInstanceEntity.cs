@@ -7,19 +7,20 @@ namespace Core
     using static CoreUtility;
 
     [DisallowMultipleComponent]
-    public abstract class PersistentInstanceObject : MonoBehaviour
+    public abstract class PersistentInstanceEntity : MonoBehaviour
     {
-        public static event Action<PersistentInstanceObject> OnMarkedForDestroy;
+        public static event Action<PersistentInstanceEntity> OnEntityMarkedForDestroy;
 
         public abstract string TypeID { get; }
-        public string InstanceID => instanceID;
+        public Guid InstanceID => instanceID;
         public string PrefabID => prefabID;
         public bool IsMarkedForDestroy => isMarkedForDestroy;
 
         [Header("_")]
         [SerializeField] private string prefabID = null;
-        [SerializeField, ReadOnly] private string instanceID = null;
+        [SerializeField] private string _instanceID = "";
 
+        private Guid instanceID = default;
         private bool isQuitting = false;
         private bool isMarkedForDestroy = false;
 
@@ -33,26 +34,42 @@ namespace Core
 
             if (!IsMarkedForDestroy && Application.isPlaying && !ManagerCorePersistent.Instance.IsLoading && !ManagerCoreGame.Instance.IsLoading)
             {
-                Debug.LogError($"PersistentInstanceObject.OnDestroy() [{name}] destroyed without persistence or destroyed illegally");
+                Debug.LogError($"PersistentInstanceEntity.OnDestroy() [{name}] destroyed without persistence or destroyed illegally");
             }
         }
         protected virtual void Start()
         {
-            if (string.IsNullOrEmpty(InstanceID))
+            if (instanceID == Guid.Empty)
             {
-                Debug.LogError($"PersistentInstanceObject.Start() InstanceID missing for {gameObject.name}", gameObject);
+                Debug.LogError($"PersistentInstanceEntity.Start() instanceID missing for {gameObject.name}", gameObject);
             }
         }
-
-        internal void SetID(string value)
+#if UNITY_EDITOR
+        private void OnValidate()
         {
-            if (!string.IsNullOrEmpty(instanceID))
+            if (!string.IsNullOrEmpty(_instanceID))
             {
-                Debug.LogError($"PersistentInstanceObject.SetID() InstanceID already set for {gameObject.name}");
+                instanceID = Guid.Parse(_instanceID);
+            }
+        }
+#endif
+        internal void GenerateID(bool force = false)
+        {
+            if (instanceID != Guid.Empty && !force)
+            {
                 return;
             }
 
-            instanceID = value;
+            if (string.IsNullOrEmpty(_instanceID) || force)
+            {
+                instanceID = Guid.NewGuid();
+            }
+            else
+            {
+                instanceID = Guid.Parse(_instanceID);
+            }
+
+            _instanceID = instanceID.ToString();
         }
         public void MarkForDestroy()
         {
@@ -62,16 +79,18 @@ namespace Core
             }
 
             isMarkedForDestroy = true;
-            OnMarkedForDestroy?.Invoke(this);
+            OnEntityMarkedForDestroy?.Invoke(this);
         }
-
         public PersistentInstanceData Export() => new(TypeID, prefabID, instanceID, isMarkedForDestroy, ExportInternal());
         protected abstract Dictionary<string, PersistentValue> ExportInternal();
         public void Import(PersistentInstanceData data)
         {
-            prefabID = data.PrefabID;
             instanceID = data.InstanceID;
             isMarkedForDestroy = data.IsMarkedForDestroy;
+
+#if UNITY_EDITOR
+            _instanceID = instanceID.ToString();
+#endif
             ImportInternal(data.Data);
         }
         protected abstract void ImportInternal(Dictionary<string, PersistentValue> data);

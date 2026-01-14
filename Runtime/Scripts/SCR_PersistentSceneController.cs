@@ -1,3 +1,4 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -12,29 +13,21 @@ namespace Core
         public bool IsLoading => isLoading;
 
         [Header("_")]
-        [SerializeField, Required] private List<PersistentInstanceObject> entityList = new();
+        [SerializeField, Required] private List<PersistentInstanceEntity> entityList = new();
 
-        private readonly Dictionary<string, PersistentInstanceObject> entityTable = new();
-        private PersistentIDGenerator thisGenerator = new(0, "entity");
+        private readonly Dictionary<Guid, PersistentInstanceEntity> entityTable = new();     
         private PersistentSceneData thisData = new();
         private bool isLoading = false;
 
         private void Awake()
         {
-            PersistentInstanceObject.OnMarkedForDestroy += OnRequestDestroy;
+            PersistentInstanceEntity.OnEntityMarkedForDestroy += OnEntityRequestDestroy;
 
-            thisGenerator.Sync(entityList.Select(e => e.InstanceID));
-
-            foreach (PersistentInstanceObject entity in entityList)
+            foreach (PersistentInstanceEntity entity in entityList)
             {
                 if (entity == null)
                 {
-                    continue;
-                }
-
-                if (string.IsNullOrEmpty(entity.InstanceID))
-                {
-                    entity.SetID(thisGenerator.Generate().ToString());
+                    throw new Exception("PersistentSceneController.Awake() entity == null");
                 }
 
                 entityTable[entity.InstanceID] = entity;
@@ -44,14 +37,14 @@ namespace Core
         }
         private void OnDisable()
         {
-            PersistentInstanceObject.OnMarkedForDestroy -= OnRequestDestroy;
+            PersistentInstanceEntity.OnEntityMarkedForDestroy -= OnEntityRequestDestroy;
 
             if (ManagerCorePersistent.Instance != null)
             {
                 ManagerCorePersistent.Instance.UnregisterController(this);
             }         
         }
-        private void OnRequestDestroy(PersistentInstanceObject entityObject)
+        private void OnEntityRequestDestroy(PersistentInstanceEntity entityObject)
         {
             if (entityObject == null)
             {
@@ -71,55 +64,75 @@ namespace Core
             Unregister(entityObject);
             Destroy(entityObject.gameObject);
         }
-
 #if UNITY_EDITOR
         public void Populate()
         {
-            entityList = GetComponentsInChildren<PersistentInstanceObject>(true).ToList();
+            entityList = GetComponentsInChildren<PersistentInstanceEntity>(true).ToList();
+            var duplicatedGroups = entityList.GroupBy(e => e.InstanceID).Where(g => g.Count() > 1).ToList();
+
+            foreach (var entity in entityList)
+            {
+                entity.GenerateID();
+
+                UnityEditor.EditorUtility.SetDirty(entity);
+            }
+
+            foreach (var group in duplicatedGroups)
+            {
+                foreach (var entity in group.Skip(1))
+                {
+                    entity.GenerateID(true);
+
+                    Debug.LogWarning($"PersistentSceneController.Populate() Duplicate GUID fixed: {group.Key} on object {entity.name}, new GUID: {entity.InstanceID}");
+
+                    UnityEditor.EditorUtility.SetDirty(entity);
+                }
+            }
+
+            UnityEditor.EditorUtility.SetDirty(gameObject);
             Debug.LogWarning($"PersistentSceneController.Populate() collected {entityList.Count} objects!");
         }
 #endif
-
-        public bool TryRegister(GameObject gameObject, out PersistentInstanceObject persistentObject)
+        public bool TryRegister(GameObject gameObject, out PersistentInstanceEntity persistentObject)
         {
             if (!gameObject.TryGetComponent(out persistentObject))
             {
-                Debug.LogError($"PersistentSceneController.RegisterController() [{gameObject}] has no [PersistentInstanceObject]");
+                Debug.LogError($"PersistentSceneController.RegisterController() [{gameObject}] has no [PersistentInstanceEntity]");
                 Destroy(gameObject);
                 return false;
             }
 
-            persistentObject.SetID(thisGenerator.Generate().ToString());
+            persistentObject.GenerateID();
             Register(persistentObject);
 
             return true;
         }
-        private void Register(PersistentInstanceObject entityObject)
+        private void Register(PersistentInstanceEntity entityObject)
         {
             if (entityObject == null)
             {
                 return;
             }
 
-            if (string.IsNullOrEmpty(entityObject.InstanceID))
-            {
-                Debug.LogError($"PersistentSceneController.RegisterController() Trying to register {entityObject.gameObject} without InstanceID");
-                return;
-            }
-
             if (entityTable.ContainsKey(entityObject.InstanceID))
             {
-                Debug.LogError($"PersistentSceneController.RegisterController() Trying to duplicate {entityObject.InstanceID}");
+                Debug.LogError($"PersistentSceneController.Register() Trying to duplicate {entityObject.InstanceID}");
                 return;
             }
 
             entityList.Add(entityObject);
             entityTable[entityObject.InstanceID] = entityObject;
         }
-        private void Unregister(PersistentInstanceObject entityObject)
+        private void Unregister(PersistentInstanceEntity entityObject)
         {
-            if (entityObject == null || !entityTable.ContainsKey(entityObject.InstanceID))
+            if (entityObject == null)
             {
+                return;
+            }
+
+            if (!entityTable.ContainsKey(entityObject.InstanceID))
+            {
+                Debug.LogError($"PersistentSceneController.Unregister() Trying to unregister twice {entityObject.InstanceID}");
                 return;
             }
 
@@ -127,22 +140,24 @@ namespace Core
             entityTable.Remove(entityObject.InstanceID);
         }
 
-        public void ExportTo(ref PersistentSceneData sceneData)
+        public PersistentSceneData Export()
         {
-            sceneData.Database.Clear();
-            sceneData.ID = ManagerCoreGame.Instance.GetCurrentScene();
+            PersistentSceneData sceneData = new(ManagerCoreGame.Instance.GetCurrentScene(), new());
 
             foreach (var item in thisData.Database)
             {
-                if (item.Value.IsMarkedForDestroy)
+                Guid id = item.Key;
+                PersistentInstanceData data = item.Value;
+
+                if (data.IsMarkedForDestroy)
                 {
                     continue;
                 }
 
-                sceneData.Database[item.Key] = new(item.Value.TypeID, item.Value.PrefabID, item.Value.InstanceID, item.Value.IsMarkedForDestroy, item.Value.Data);
+                sceneData.Database[id] = new(data.TypeID, data.PrefabID, data.InstanceID, data.IsMarkedForDestroy, data.Data);
             }
 
-            foreach (PersistentInstanceObject entityObject in entityList)
+            foreach (PersistentInstanceEntity entityObject in entityList)
             {
                 if (entityObject.IsMarkedForDestroy)
                 {
@@ -152,31 +167,25 @@ namespace Core
                 sceneData.Database[entityObject.InstanceID] = entityObject.Export();
             }
 
-            sceneData.Generator = new(thisGenerator.NextID, thisGenerator.Prefix);
+            return sceneData;
         }
-        public void ImportFrom(ref PersistentSceneData sceneData)
+        public void Import(PersistentSceneData sceneData)
         {
             isLoading = true;
 
-            thisData = new(sceneData.ID, sceneData.Database, sceneData.Generator);
-
-            thisGenerator = thisData.Generator;
-
-            Dictionary<string, PersistentInstanceData> dataLookup = sceneData.Database;
+            thisData = new(sceneData.ID, sceneData.Database);
 
             // Iterate snapshot to allow safe removal
-            foreach (PersistentInstanceObject entityObject in new List<PersistentInstanceObject>(entityList))
+            foreach (PersistentInstanceEntity entityObject in new List<PersistentInstanceEntity>(entityList))
             {
-                // If data not in database => destroy and unregister
-                if (!dataLookup.TryGetValue(entityObject.InstanceID, out var incomingData))
+                // If data not in database
+                if (!thisData.Database.TryGetValue(entityObject.InstanceID, out var incomingData))
                 {
                     entityObject.MarkForDestroy();
-                    Unregister(entityObject);
-                    Destroy(entityObject.gameObject);
                     continue;
                 }
 
-                // If explicitly marked for destroy => destroy and unregister
+                // If data not in database or expilicitly marked as destroyed
                 if (incomingData.IsMarkedForDestroy)
                 {
                     Unregister(entityObject);
@@ -189,7 +198,7 @@ namespace Core
             }
 
             // Initialize any newly spawned objects, eg. Orphan datas
-            foreach (var remainingData in dataLookup)
+            foreach (var remainingData in thisData.Database)
             {
                 if (remainingData.Value.IsMarkedForDestroy)
                 {
@@ -203,28 +212,31 @@ namespace Core
 
                 if (ManagerCorePrefab.Instance.TrySpawn(remainingData.Value.PrefabID, Vector3.zero, Quaternion.identity, null, out GameObject gameObject))
                 {
-                    if (gameObject.TryGetComponent(out PersistentInstanceObject entityObject))
+                    if (gameObject.TryGetComponent(out PersistentInstanceEntity entityObject))
                     {
                         entityObject.Import(remainingData.Value);
                         Register(entityObject);
                     }
+                    else
+                    {
+                        Debug.LogWarning($"PersistentSceneController.Import() [PersistentInstanceEntity] component not found in [{gameObject.name}]");
+                    }
                 }
                 else
                 {
-                    Debug.LogWarning($"PersistentSceneController.ImportFrom() Prefab not found for Orphan data: [{remainingData.Value.PrefabID}]");
+                    Debug.LogWarning($"PersistentSceneController.Import() Prefab not found for Orphan data: [{remainingData.Value.PrefabID}]");
                 }
             }
 
             entityTable.Clear();
-            foreach (PersistentInstanceObject entity in entityList)
+
+            foreach (PersistentInstanceEntity entity in entityList)
             {
                 if (entity != null)
                 {
                     entityTable[entity.InstanceID] = entity;
                 }
             }
-
-            thisGenerator.Sync(entityList.Select(e => e.InstanceID));
 
             isLoading = false;
         }

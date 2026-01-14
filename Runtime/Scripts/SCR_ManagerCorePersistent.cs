@@ -11,7 +11,7 @@ namespace Core
 
         private PersistentSceneController sceneController = null;
 
-        public bool TryRegisterObject(GameObject gameObject, out PersistentInstanceObject persistentObject)
+        public bool TryRegisterObject(GameObject gameObject, out PersistentInstanceEntity persistentObject)
         {
             persistentObject = null;
 
@@ -23,7 +23,6 @@ namespace Core
 
             return sceneController.TryRegister(gameObject, out persistentObject);
         }
-
         public void RegisterController(PersistentSceneController sceneController)
         {
             if (sceneController == null)
@@ -44,8 +43,23 @@ namespace Core
 
             this.sceneController = null;
         }
+        public PersistentSceneData Export()
+        {
+            if (sceneController == null)
+            {
+                Debug.LogError("ManagerCorePersistent.Export() sceneController == null");
+            }
 
-        public void ExportTo(ref PersistentSceneData sceneData) => sceneController.ExportTo(ref sceneData);
-        public void ImportFrom(ref PersistentSceneData sceneData) => sceneController.ImportFrom(ref sceneData);
+            return sceneController.Export();
+        }
+        public void Import(PersistentSceneData sceneData)
+        {
+            if (sceneController == null)
+            {
+                Debug.LogError("ManagerCorePersistent.Import() sceneController == null");
+            }
+
+            sceneController.Import(sceneData);
+        }
     }
 }

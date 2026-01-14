@@ -1,7 +1,7 @@
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using System;
 using System.IO;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using UnityEngine;
 
 namespace Core
@@ -10,15 +10,6 @@ namespace Core
 
     public static class SerializerObject
     {
-        private static readonly JsonSerializerSettings SETTINGS = new() 
-        {
-            TypeNameHandling = TypeNameHandling.Auto, // See JsonConverter<T>, override ReadJson(), override WriteJson()
-            NullValueHandling = NullValueHandling.Ignore,
-            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-            MissingMemberHandling = MissingMemberHandling.Ignore,
-            DefaultValueHandling = DefaultValueHandling.Include,
-        };
-
         public static bool Clear(string path, bool useInEditor = false)
         {
             if (!useInEditor)
@@ -51,15 +42,16 @@ namespace Core
             {
                 if (File.Exists(path))
                 {
+                    Debug.LogWarning($"SerializerObject.Save() File at {path} is exist. Deleting old file!");
                     File.Delete(path);
                 }
 
                 // For custom assembly names: ("$type": "Game.Logic.Runtime.SCR_SectorPersistentDataDefault, ASM_LogicRuntime") -> "$type": "SectorData"
-                SETTINGS.SerializationBinder = serializationBinder;
+                SerializerSettings.SETTINGS.SerializationBinder = serializationBinder;
 
                 using FileStream fileStream = File.Create(path);
                 fileStream.Close();
-                File.WriteAllText(path, JsonConvert.SerializeObject(Data, useOptimization ? Formatting.None : Formatting.Indented, SETTINGS));
+                File.WriteAllText(path, JsonConvert.SerializeObject(Data, useOptimization ? Formatting.None : Formatting.Indented, SerializerSettings.SETTINGS));
                 return true;
             }
             catch (Exception exception)
@@ -87,16 +79,15 @@ namespace Core
             try
             {
                 // For custom assembly names: ("$type": "Game.Logic.Runtime.SCR_SectorPersistentDataDefault, ASM_LogicRuntime") -> "$type": "SectorData"
-                SETTINGS.SerializationBinder = serializationBinder;
+                SerializerSettings.SETTINGS.SerializationBinder = serializationBinder;
 
-                T data = JsonConvert.DeserializeObject<T>(File.ReadAllText(path), SETTINGS);
+                T data = JsonConvert.DeserializeObject<T>(File.ReadAllText(path), SerializerSettings.SETTINGS);
                 return data;
             }
             catch (Exception exception)
             {
                 Debug.LogError($"SerializerObject.Load() Failed to load data: {exception.Message} {exception.StackTrace}");
                 return default;
-                //throw exception;
             }
         }
     }

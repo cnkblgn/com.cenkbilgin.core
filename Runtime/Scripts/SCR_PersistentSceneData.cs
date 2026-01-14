@@ -12,14 +12,12 @@ namespace Core
     {
         [Header("_")]
         [JsonProperty("0")] public string ID = STRING_NULL;
-        [JsonProperty("1")] public Dictionary<string, PersistentInstanceData> Database = new();
-        [JsonProperty("2")] public PersistentIDGenerator Generator = default;
+        [JsonProperty("1")] public Dictionary<Guid, PersistentInstanceData> Database = new();
 
-        [JsonConstructor] public PersistentSceneData([JsonProperty("0")] string id, [JsonProperty("1")] Dictionary<string, PersistentInstanceData> database, [JsonProperty("2")] PersistentIDGenerator idGenerator)
+        [JsonConstructor] public PersistentSceneData([JsonProperty("0")] string id, [JsonProperty("1")] Dictionary<Guid, PersistentInstanceData> database)
         {
             ID = id ?? STRING_NULL;
             Database = new();
-            Generator = idGenerator ?? new(0, "entity");
 
             if (database != null)
             {
@@ -33,7 +31,6 @@ namespace Core
         {
             ID = STRING_NULL;
             Database = new();
-            Generator = new(0, "entity");
         }      
     }
 }
