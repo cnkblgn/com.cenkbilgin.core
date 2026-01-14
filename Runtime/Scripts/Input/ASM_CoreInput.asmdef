@@ -1,0 +1,23 @@
+{
+    "name": "ASM_CoreInput",
+    "rootNamespace": "Core.Input",
+    "references": [
+        "GUID:75469ad4d38634e559750d17036d5f7c",
+        "GUID:cd1711b8a18680d4d823307638cb8090"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.inputsystem",
+            "expression": "1.13.1",
+            "define": "UNITY_INPUT_SYSTEM_ACTIVE"
+        }
+    ],
+    "noEngineReferences": false
+}

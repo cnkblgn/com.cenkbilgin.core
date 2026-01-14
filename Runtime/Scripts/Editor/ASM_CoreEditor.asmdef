@@ -1,0 +1,18 @@
+{
+    "name": "ASM_CoreEditor",
+    "rootNamespace": "Core.Editor",
+    "references": [
+        "GUID:cd1711b8a18680d4d823307638cb8090"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,16 @@
+{
+    "name": "ASM_CoreLocalization",
+    "rootNamespace": "Core.Localization",
+    "references": [
+        "GUID:cd1711b8a18680d4d823307638cb8090"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

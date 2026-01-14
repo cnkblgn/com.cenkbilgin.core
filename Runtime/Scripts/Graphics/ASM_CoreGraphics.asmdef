@@ -1,0 +1,29 @@
+{
+    "name": "ASM_CoreGraphics",
+    "rootNamespace": "Core.Graphics",
+    "references": [
+        "GUID:15fc0a57446b3144c949da3e2b9737a9",
+        "GUID:df380645f10b7bc4b97d4f5eb6303d95",
+        "GUID:cd1711b8a18680d4d823307638cb8090"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.render-pipelines.universal",
+            "expression": "17.0.4",
+            "define": "UNITY_URP_PIPELINE_ACTIVE"
+        },
+        {
+            "name": "com.unity.render-pipelines.universal-config",
+            "expression": "17.0.3",
+            "define": "UNITY_URP_CONFIG_ACTIVE"
+        }
+    ],
+    "noEngineReferences": false
+}

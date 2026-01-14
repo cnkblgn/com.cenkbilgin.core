@@ -1,0 +1,21 @@
+{
+    "name": "ASM_CoreUI",
+    "rootNamespace": "Core.UI",
+    "references": [
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:cd1711b8a18680d4d823307638cb8090",
+        "GUID:9b3f4fcd3f124874caa88177fd42f44e",
+        "GUID:df327811a3f531848a147f47b221dc70",
+        "GUID:f62c9ea0b96bbb2459be64c5a6ee7d67",
+        "GUID:f2df4e96f8a40fc4a99ccdd2aef35e6f"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

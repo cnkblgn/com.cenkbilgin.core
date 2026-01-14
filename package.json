@@ -1,0 +1,21 @@
+{
+  "name": "com.cenkbilgin.core",
+  "displayName": "Core Systems",
+  "version": "1.0.0",
+  "unity": "6000.3.1f1",
+  "description": "Core template for future unity projects.",
+  "author": {
+    "name": "Cenk Bilgin",
+    "url": "https://github.com/cenkbilgin"
+  },
+  "dependencies": {
+	"com.unity.nuget.newtonsoft-json": "3.2.2",
+  },
+  "samples": [
+    {
+      "displayName": "Template",
+      "description": "Template",
+      "path": "Samples~"
+    }
+  ]
+}

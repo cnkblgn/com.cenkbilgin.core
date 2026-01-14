@@ -1,0 +1,9 @@
+key,en,tr
+menu.startGame,New Game,Yeni Oyun
+menu.loadGame,Load Game,Kayıt Yükle
+menu.exitGame,Exit,Çık
+menu.resumeGame,Resume,Devam Et
+menu.exitMenu,Exit,Çık
+menu.options,Options,Ayarlar
+menu.loading,Loading...,Yükleniyor...
+menu.paused,Paused...,Durduruldu...
