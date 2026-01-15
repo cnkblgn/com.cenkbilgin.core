@@ -459,6 +459,12 @@ namespace Core.Audio
                 return null;
             }
 
+            if (clip.Length <= 0)
+            {
+                Debug.LogError("ManagerCoreAudio.PlaySound() clip.Length <= 0");
+                return null;
+            }
+
             return PlaySound(clip[Random.Range(0, clip.Length)], group, position, blend, volume, pitch * Random.Range(0.9f, 1.1f), minDistance, maxDistance, occulusion);
         }
     }

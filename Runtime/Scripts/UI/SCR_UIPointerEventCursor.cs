@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
-using Core.Input;
 
 namespace Core.UI
 {

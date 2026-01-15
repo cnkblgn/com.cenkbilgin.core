@@ -1,5 +1,3 @@
-using Core;
-using Core.Localization;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -12,21 +10,20 @@ namespace Core.UI
         public bool IsFocused { get; private set; } = false;
 
         [Header("_")]
-        [SerializeField, TextArea()] private string baseText = STRING_EMPTY;
-        [SerializeField] private string localizedID = STRING_EMPTY;
+        [SerializeField] private bool disableEventPosition = true;
+        [SerializeField, Range(0, 4)] private int cornerIndex = 0;
 
+        [Header("_")]
+        [SerializeField, TextArea()] private string baseText = STRING_EMPTY;
+
+        private RectTransform thisTransform = null;
+        private readonly Vector3[] cornerOrigins = new Vector3[4];
+        private readonly Vector2 cornerOffset = new(16, 16);
+        private string runtimeText = STRING_EMPTY;
         private bool autoUpdate = true;
         private bool isOpened = false;
-        private string thisText = STRING_EMPTY;
-        private string localizedText = STRING_EMPTY;
 
-        private void Start()
-        {
-            if (!string.IsNullOrEmpty(localizedID))
-            {
-                localizedText = ManagerCoreLocalization.Instance.Get(localizedID);
-            }
-        }
+        private void Awake() => thisTransform = GetComponent<RectTransform>();
         private void OnDestroy()
         {
             if (!isOpened)
@@ -39,8 +36,6 @@ namespace Core.UI
 
         protected override void OnPointerEnterInternal(PointerEventData eventData)
         {
-            base.OnPointerEnterInternal(eventData);
-
             IsFocused = true;
 
             if (!autoUpdate)
@@ -48,12 +43,10 @@ namespace Core.UI
                 return;
             }
 
-            Show();
+            Show(disableEventPosition ? null : eventData.position);
         }
         protected override void OnPointerExitInternal(PointerEventData eventData)
         {
-            base.OnPointerExitInternal(eventData);
-
             IsFocused = false;
 
             if (!autoUpdate)
@@ -63,19 +56,61 @@ namespace Core.UI
 
             Hide();
         }
+        protected override void OnPointerMoveInternal(PointerEventData eventData)
+        {
+            if (!IsFocused)
+            {
+                return;
+            }
+
+            if (disableEventPosition)
+            {
+                return;
+            }
+
+            ManagerCoreUI.Instance.MoveTooltip(eventData.position);
+        }
+        private Vector3 GetPosition()
+        {
+            Vector3 position;
+
+            if (cornerIndex > 3)
+            {
+                position = thisTransform.TransformPoint(thisTransform.rect.center);
+            }
+            else
+            {
+                thisTransform.GetWorldCorners(cornerOrigins);
+                float x = (cornerIndex == 0 || cornerIndex == 1) ? +cornerOffset.x : -cornerOffset.x;
+                float y = (cornerIndex == 0 || cornerIndex == 3) ? +cornerOffset.y : -cornerOffset.y;
+                position = cornerOrigins[cornerIndex] + new Vector3(x, y, 0);
+            }
+
+            return RectTransformUtility.WorldToScreenPoint(null, position);
+        }
 
         public void Initialize(string text, bool autoUpdate)
         {
             this.autoUpdate = autoUpdate;
-            thisText = text;
+            runtimeText = text;
         }
-        public virtual void Show()
+        public virtual void Show(Vector2? position)
         {
-            ManagerCoreUI.Instance.ShowTooltip(baseText + localizedText + thisText);
+            if (isOpened)
+            {
+                return;
+            }
+
+            ManagerCoreUI.Instance.ShowTooltip(baseText + runtimeText, position ?? GetPosition());
             isOpened = true;
         }
         public virtual void Hide()
         {
+            if (!isOpened)
+            {
+                return;
+            }
+
             ManagerCoreUI.Instance.HideTooltip();
             isOpened = false;
         }

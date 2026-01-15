@@ -54,7 +54,8 @@ namespace Core.UI
         public void ShowMessage(string text, float duration = 2.5f) => messageController.Show(text, duration);
         public void HideMessage() => messageController.Hide();
 
-        public void ShowTooltip(string value) => tooltipController.Show(value);
+        public void MoveTooltip(Vector2 screenPosition) => tooltipController.Move(screenPosition);
+        public void ShowTooltip(string value, Vector2 screenPosition) => tooltipController.Show(value, screenPosition);
         public void HideTooltip() => tooltipController.Hide();
 
         public void ShowConfirmation(string text, Action onAcceptEvent, Action onCancelEvent) => confirmationController.Show(text, onAcceptEvent, onCancelEvent);
@@ -99,6 +100,7 @@ namespace Core.UI
         public UIOptionSlider InsertSettingSlider(float initial, float @default, string description, string[] values, Action<float> onApply, Action<float> onChanged) => settingsController.InsertSlider(initial, @default, description, values, onApply, onChanged);
         public UIOptionSlider InsertSettingSlider(float initial, float @default, string description, float minValue, float maxValue, bool isInt, Action<float> onApply, Action<float> onChanged) => settingsController.InsertSlider(initial, @default, description, minValue, maxValue, isInt, onApply, onChanged);
 
+        public void MoveCursor(Vector2 pointerPosition) => cursorController.MoveCursor(pointerPosition);
         public void SetCursor(UICursorType type = UICursorType.DEFAULT) => cursorController.SetCursor(type);
         public void ShowCursor() => cursorController.ShowCursor();
         public void HideCursor() => cursorController.HideCursor();

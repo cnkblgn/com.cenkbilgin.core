@@ -1,4 +1,3 @@
-using Core.Input;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -24,18 +23,6 @@ namespace Core.UI
             thisCanvas = GetComponent<Canvas>();
             thisCanvas.Hide();
         }
-        private void LateUpdate()
-        {
-            if (Cursor.lockState != CursorLockMode.Confined)
-            {
-                return;
-            }
-
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(thisCanvas.transform as RectTransform, ManagerCoreInput.Instance.PointerPosition, null, out Vector2 pos);
-
-            cursorTransform.localPosition = pos;
-        }
-
         private UICursorData GetCursor(UICursorType type)
         {
             foreach (UICursorData cursor in cursors)
@@ -48,6 +35,17 @@ namespace Core.UI
 
             return null;
         }
+        public void MoveCursor(Vector2 pointerPosition)
+        {
+            if (Cursor.lockState != CursorLockMode.Confined)
+            {
+                return;
+            }
+
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(thisCanvas.transform as RectTransform, pointerPosition, null, out Vector2 position);
+
+            cursorTransform.localPosition = position;
+        }
         public void SetCursor(UICursorType type = UICursorType.DEFAULT)
         {
             UICursorData cursorData = GetCursor(type);
@@ -55,7 +53,6 @@ namespace Core.UI
             if (cursorData != null)
             {
                 cursorImage.sprite = cursorData.Icon;
-                //Cursor.SetCursor(null, cursorData.Hotspot, CursorMode.Auto);
             }
         }
         public void ShowCursor()

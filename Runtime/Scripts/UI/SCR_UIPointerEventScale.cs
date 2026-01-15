@@ -9,14 +9,14 @@ namespace Core.UI
     {
         [Header("_")]
         [SerializeField] private EaseType onClickScaleEasingType = EaseType.LINEAR;
-        [SerializeField, Min(0)] private float onClickScaleDuration = 0.035f;
-        [SerializeField, Min(0)] private float onClickScaleDelay = 0.1f;
+        [SerializeField, Min(0.01f)] private float onClickScaleDuration = 0.035f;
+        [SerializeField, Min(0.01f)] private float onClickScaleDelay = 0.1f;
         [SerializeField, Range(-1.0f, 1.0f)] private float onClickScalePower = 0.125f;
 
         [Header("_")]
         [SerializeField] private EaseType onHoverScaleEasingType = EaseType.LINEAR;
-        [SerializeField, Min(0)] private float onHoverScaleDuration = 0f;
-        [SerializeField, Min(0)] private float onHoverScaleDelay = 0f;
+        [SerializeField, Min(0.01f)] private float onHoverScaleDuration = 0f;
+        [SerializeField, Min(0.01f)] private float onHoverScaleDelay = 0f;
         [SerializeField, Range(-1.0f, 1.0f)] private float onHoverScalePower = 0f;
 
         private RectTransform thisTransform = null;

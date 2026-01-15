@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using Core.Input;
 
 namespace Core.UI
 {
@@ -20,17 +19,6 @@ namespace Core.UI
         private bool isEnabled = true;
 
         private void Awake() => thisCanvas = GetComponent<Canvas>();
-        private void Start()
-        {
-            ManagerCoreInput input = ManagerCoreInput.Instance;
-
-            Insert(UIKeyActionType.DEFAULT, new KeyActionData[]
-            {
-                new("Primary", input.GetIcon(input.KeyPrimary)),
-                new("Secondary", input.GetIcon(input.KeySecondary)),
-            });
-        }
-
         public bool IsActive(UIKeyActionType id) => instanceTable.TryGetValue(id, out var _);
         public void Show(UIKeyActionType id)
         {
@@ -87,7 +75,6 @@ namespace Core.UI
                 thisCanvas.Hide();
             }
         }
-
         public void Insert(UIKeyActionType id, KeyActionData[] data)
         {
             if (data == null)
@@ -119,25 +106,23 @@ namespace Core.UI
 
             dataTable.Remove(id);
         }
-
         public void Clear()
         {
             thisCanvas.Hide();
 
-            foreach (var i in instanceTable)
+            foreach (var table in instanceTable)
             {
-                foreach (var j in i.Value)
+                foreach (var element in table.Value)
                 {
-                    if (j != null)
+                    if (element != null)
                     {
-                        Destroy(j.gameObject);
+                        Destroy(element.gameObject);
                     }
                 }
             }
 
             instanceTable.Clear();
         }
-
         public void Enable()
         {
             isEnabled = true;

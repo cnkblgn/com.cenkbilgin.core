@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 namespace Core.UI
 {
     [RequireComponent(typeof(RectTransform))]
-    public class UIPointerEvent : MonoBehaviour, IDeselectHandler, ISubmitHandler, ISelectHandler, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler, IBeginDragHandler, IEndDragHandler, IDragHandler
+    public class UIPointerEvent : MonoBehaviour, IDeselectHandler, ISubmitHandler, ISelectHandler, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler, IBeginDragHandler, IEndDragHandler, IDragHandler, IPointerMoveHandler
     {
         public event Action<PointerEventData> PointerOnClick = null;
         public event Action<PointerEventData> PointerOnEnter = null;
@@ -32,5 +32,7 @@ namespace Core.UI
         protected virtual void OnEndDragInternal(PointerEventData eventData) { }
         public void OnDrag(PointerEventData eventData) => OnDragInternal(eventData);
         protected virtual void OnDragInternal(PointerEventData eventData) { }
+        public void OnPointerMove(PointerEventData eventData) => OnPointerMoveInternal(eventData);
+        protected virtual void OnPointerMoveInternal(PointerEventData eventData) { }
     }
 }

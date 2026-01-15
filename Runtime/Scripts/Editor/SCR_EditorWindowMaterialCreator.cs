@@ -12,6 +12,10 @@ namespace Core.Editor
 
         private SerializedProperty propertyShader = null;
         private SerializedObject serializedObject = null;
+        private const string TYPE_PREFIX = "TEX";
+        private const string TYPE_ALBEDO = "A";
+        private const string TYPE_NORMAL = "N";
+        private const string TYPE_MASK = "M";
 
         private void OnEnable() { serializedObject = new SerializedObject(this); propertyShader = serializedObject.FindProperty("shader"); }
         [MenuItem("Tools/Material Creator")] public static void ShowTool() => GetWindow<EditorWindowMaterialCreator>("Material Creator");
@@ -80,20 +84,20 @@ namespace Core.Editor
                 return false;
             }
 
-            if (format[0] == "TEX")
+            if (format[0] == TYPE_PREFIX)
             {
                 format.RemoveAt(0);
             }
 
-            if (type == "ColorMap")
+            if (type == TYPE_ALBEDO)
             {
                 format.RemoveAt(format.Count - 1);
             }
-            else if (type == "NormalMap")
+            else if (type == TYPE_NORMAL)
             {
                 format.RemoveAt(format.Count - 1);
             }
-            else if (type == "MaskMap")
+            else if (type == TYPE_MASK)
             {
                 format.RemoveAt(format.Count - 1);
             }
@@ -116,15 +120,15 @@ namespace Core.Editor
                 AssetDatabase.CreateAsset(material, path);
             }
 
-            if (type == "ColorMap")
+            if (type == TYPE_ALBEDO)
             {
                 material.SetTexture("_BaseMap", texture);
             }
-            else if (type == "NormalMap")
+            else if (type == TYPE_NORMAL)
             {
                 material.SetTexture("_NormalMap", texture);
             }
-            else if (type == "MaskMap")
+            else if (type == TYPE_MASK)
             {
                 material.SetTexture("_MaskMap", texture);
             }

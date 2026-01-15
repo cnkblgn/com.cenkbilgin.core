@@ -16,7 +16,7 @@ fi
 sed -i.bak -E "s/\"version\": \"[0-9]+\.[0-9]+\.[0-9]+\"/\"version\": \"$VERSION\"/" package.json
 
 # Değişikliği stage et
-git add package.json
+git add .
 
 # Commit oluştur
 if [ -z "$COMMIT_MSG" ]; then

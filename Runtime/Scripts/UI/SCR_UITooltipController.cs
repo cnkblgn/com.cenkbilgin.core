@@ -1,27 +1,25 @@
 using UnityEngine;
-using TMPro;
-using Core.Input;
 
 namespace Core.UI
 {
     using static CoreUtility;
 
     [DisallowMultipleComponent]
-    [RequireComponent(typeof(CanvasGroup))]
+    [RequireComponent(typeof(Canvas))]
     public class UITooltipController : MonoBehaviour
     {
         [Header("_")]
         [SerializeField, Required] private UITextBox textBox = null;
 
-        private CanvasGroup thisCanvas = null;
+        private Canvas thisCanvas = null;
 
         private void Awake()
         {
-            thisCanvas = GetComponent<CanvasGroup>();
+            thisCanvas = GetComponent<Canvas>();
 
             Hide();
         }
-        private void Update()
+        public void Move(Vector2 screenPosition)
         {
             if (thisCanvas == null)
             {
@@ -33,13 +31,13 @@ namespace Core.UI
                 return;
             }
 
-            textBox.UpdateBounds(ManagerCoreInput.Instance.PointerPosition);
+            textBox.UpdateBounds(screenPosition);
         }
-        public void Show(string text)
+        public void Show(string text, Vector2 screenPosition)
         {
-            thisCanvas.Show(false, false);
+            thisCanvas.Show();
             textBox.Set(text);
-            textBox.UpdateBounds(ManagerCoreInput.Instance.PointerPosition);
+            textBox.UpdateBounds(screenPosition);
         }
         public void Hide() => thisCanvas.Hide();
     }

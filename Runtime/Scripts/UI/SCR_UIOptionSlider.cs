@@ -94,7 +94,7 @@ namespace Core.UI
 
                 if (thisTooltip.IsFocused)
                 {
-                    thisTooltip.Show();
+                    thisTooltip.Show(null);
                 }
             }
 

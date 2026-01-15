@@ -2117,11 +2117,21 @@ namespace Core
                 return;
             }
 
+            if (!canvas.enabled)
+            {
+                return;
+            }
+
             canvas.enabled = false;
         }
         public static void Show(this Canvas canvas)
         {
             if (canvas == null)
+            {
+                return;
+            }
+
+            if (canvas.enabled)
             {
                 return;
             }
