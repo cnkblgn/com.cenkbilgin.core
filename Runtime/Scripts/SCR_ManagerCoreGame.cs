@@ -13,7 +13,13 @@ namespace Core
     [DisallowMultipleComponent]
     public class ManagerCoreGame : Manager<ManagerCoreGame>
     {
-        public interface IContextHandler { public bool HandleExit(); }
+        public interface IContextHandler 
+        { 
+            /// <summary> Called when game wants to resume </summary>
+            public bool OnRequestResume();
+            /// <summary> Called when game wants to pause </summary>
+            public bool OnRequestPause(); 
+        }
 
         public event Action<GameState> OnGameStateChanged = null;
         public event Action<float> OnCurrentSceneLoading = null;
@@ -138,6 +144,14 @@ namespace Core
                 return;
             }
 
+            for (int i = contextHandlers.Count - 1; i >= 0; i--)
+            {
+                if (contextHandlers[i].OnRequestResume())
+                {
+                    return;
+                }
+            }
+
             SetGameState(GameState.RESUME);
         }
         public void PauseGame()
@@ -149,7 +163,7 @@ namespace Core
 
             for (int i = contextHandlers.Count - 1; i >= 0; i--)
             {
-                if (contextHandlers[i].HandleExit())
+                if (contextHandlers[i].OnRequestPause())
                 {
                     return;
                 }
