@@ -50,6 +50,11 @@ namespace Core.UI
             }
         }
         private void OnAfterSceneChanged(string scene) => Hide();
+        public void Show()
+        {
+            thisCanvas.Show();
+            isOpened = true;
+        }
         public void Show(Camera mainCamera, Transform targetTransform, Vector3 targetOffset, Func<bool> destroyUntil, Sprite iconSprite, Color iconColor, string iconText = "", float duration = -1)
         {
             if (mainCamera == null)
@@ -66,7 +71,6 @@ namespace Core.UI
 
             mainCameraController = mainCamera;
             mainCameraTransform = mainCamera.transform;
-            thisCanvas.Show();
 
             UIWaypointElement waypointObject = Instantiate(waypointTemplate, thisTransform);
             waypointObject.Initialize(targetTransform, targetOffset, destroyUntil, iconSprite, iconColor, iconText, duration);
@@ -74,7 +78,7 @@ namespace Core.UI
 
             thisObjects.Add(waypointObject);
 
-            isOpened = true;
+            Show();
         }
         public void Hide()
         {

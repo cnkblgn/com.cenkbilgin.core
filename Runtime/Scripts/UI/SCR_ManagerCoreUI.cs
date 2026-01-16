@@ -40,6 +40,7 @@ namespace Core.UI
         public void ClearNotification() => notificationController.Clear();
 
         public void ShowWaypoint(Camera camera, Transform targetTransform, Vector3 targetOffset, Func<bool> destroyUntil, Sprite iconSprite, Color iconColor, string iconText = "", float duration = -1) => waypointController.Show(camera, targetTransform, targetOffset, destroyUntil, iconSprite, iconColor, iconText, duration);
+        public void ShowWaypoint() => waypointController.Show();
         public void HideWaypoint() => waypointController.Hide();
         public void ClearWaypoint() => waypointController.Clear();
 
@@ -50,7 +51,9 @@ namespace Core.UI
         public void HideTransition() => transitionController.Hide();
 
         public void ShowMessage(string text, float duration = 2.5f) => messageController.Show(text, duration);
+        public void ShowMessage() => messageController.Show();
         public void HideMessage() => messageController.Hide();
+        public void ClearMessage() => messageController.Clear();
 
         public void MoveTooltip(Vector2 screenPosition) => tooltipController.Move(screenPosition);
         public void ShowTooltip(string value, Vector2 screenPosition) => tooltipController.Show(value, screenPosition);
