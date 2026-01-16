@@ -257,11 +257,6 @@ namespace Core.Graphics
                 }
             }
 
-            if (mainCamera == null)
-            {
-                Debug.LogError("ManagerCoreGraphics.GetMainCamera() mainCamera == null");
-            }
-
             defaultCamera = mainCamera;
         }
         public Camera GetMainCamera()
@@ -269,11 +264,6 @@ namespace Core.Graphics
             if (!isCameraInitialized)
             {
                 InitializeMainCamera();
-            }
-
-            if (mainCamera == null)
-            {
-                Debug.LogError("ManagerCoreGraphics.GetMainCamera() mainCamera == null");
             }
 
             return mainCamera;

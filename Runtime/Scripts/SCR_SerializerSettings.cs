@@ -1,9 +1,11 @@
 using System;
-using Newtonsoft.Json;
 using UnityEngine;
+using Newtonsoft.Json;
 
 namespace Core
 {
+    using static CoreUtility;
+
     public class SerializerSettings : MonoBehaviour
     {
         private class JsonConverterGuid : JsonConverter<Guid>
@@ -18,7 +20,7 @@ namespace Core
                 return new Guid(Convert.FromBase64String(base64));
             }
         }
-        public class JsonConverterGuidNull : JsonConverter<Guid?>
+        private class JsonConverterGuidNull : JsonConverter<Guid?>
         {
             public override void WriteJson(JsonWriter writer, Guid? value, JsonSerializer serializer)
             {
@@ -42,6 +44,8 @@ namespace Core
                 return new Guid(Convert.FromBase64String(base64));
             }
         }
+
+
         public static readonly JsonSerializerSettings SETTINGS = new()
         {
             TypeNameHandling = TypeNameHandling.Auto, // See JsonConverter<T>, override ReadJson(), override WriteJson()
