@@ -78,14 +78,19 @@ namespace Core.UI
         }
         public void Hide()
         {
+            thisCanvas.Hide();
+            isOpened = false;
+        }
+        public void Clear()
+        {
             for (int i = 0; i < thisObjects.Count; i++)
             {
                 thisObjects[i].Deinitialize();
             }
 
             thisObjects.Clear();
-            thisCanvas.Hide();
-            isOpened = false;
+
+            Hide();
         }
     }
 }

@@ -89,56 +89,18 @@ namespace Core.UI
 
             temp.Show(text, duration);
         }
-        [Obsolete]
-        public void ShowOld(string text, float duration)
-        {
-            thisCanvas.Show();
-
-            UINotificationElement temp = null;
-
-            foreach (UINotificationElement element in activeElements)
-            {
-                if (!element.IsActive)
-                {
-                    temp = element;
-                    break;
-                }
-            }
-
-            if (temp == null)
-            {
-                temp = activeElements[0];
-                temp.Dispose();
-
-                // Remove from current position and add to end to maintain proper order
-                activeElements.RemoveAt(0);
-                activeElements.Add(temp);
-            }
-            else
-            {
-                // If we found an inactive one, ensure it's at the end of the list
-                activeElements.Remove(temp);
-                activeElements.Add(temp);
-            }
-
-            for (int i = 0; i < activeElements.Count; i++)
-            {
-                if (activeElements[i].IsActive)
-                {
-                    activeElements[i].Offset(-objectOffset - objectPadding);
-                }
-            }
-
-            temp.Show(text, duration);
-        }
         public void Hide()
         {
             thisCanvas.Hide();
-
+        }
+        public void Clear()
+        {
             foreach (UINotificationElement obj in activeElements)
             {
                 obj.Dispose();
             }
+
+            Hide();
         }
     }
 }

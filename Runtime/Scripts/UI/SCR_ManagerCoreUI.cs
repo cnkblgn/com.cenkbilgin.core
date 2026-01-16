@@ -37,9 +37,11 @@ namespace Core.UI
 
         public void ShowNotification(string text, float duration = 5) => notificationController.Show(text, duration);
         public void HideNotification() => notificationController.Hide();
+        public void ClearNotification() => notificationController.Clear();
 
         public void ShowWaypoint(Camera camera, Transform targetTransform, Vector3 targetOffset, Func<bool> destroyUntil, Sprite iconSprite, Color iconColor, string iconText = "", float duration = -1) => waypointController.Show(camera, targetTransform, targetOffset, destroyUntil, iconSprite, iconColor, iconText, duration);
         public void HideWaypoint() => waypointController.Hide();
+        public void ClearWaypoint() => waypointController.Clear();
 
         /// <summary> 0 -> 1, fades to black </summary>
         public void ShowTransitionFadeIn(float fadeTime, float waitTime, Action onStartEvent, Action onFinishEvent) => transitionController.FadeIn(fadeTime, waitTime, onStartEvent, onFinishEvent);
