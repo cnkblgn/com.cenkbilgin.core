@@ -143,12 +143,7 @@ namespace Core.Graphics
                 targetColor = lightColor * defaultIntensity * currentBrightness;
             }
 
-            uint colorData = EncodeData(targetColor);
-
-            colorData &= 0xFFFFFFFE;
-            colorData |= true ? 0x1u : 0x0u;
-
-            thisMesh.SetShaderUserValue(colorData);
+            thisMesh.SetShaderUserValue(EncodeColor(targetColor, true));
         }
     }
 }

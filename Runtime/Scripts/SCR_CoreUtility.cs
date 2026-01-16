@@ -1374,196 +1374,135 @@ namespace Core
 
         #region MATH
         [Serializable]
-        public struct Float3
+        public readonly struct Float3 : IEquatable<Float3>
         {
-            public float x;
-            public float y;
-            public float z;
+            public bool IsZero => x == 0f && y == 0f && z == 0f;
+            public bool IsValid => float.IsFinite(x) && float.IsFinite(y) && float.IsFinite(z);
+
+            public readonly float x;
+            public readonly float y;
+            public readonly float z;
+
+            public static readonly Float3 one = new(1, 1, 1);
+            public static readonly Float3 zero = new(0, 0, 0);
 
             public Float3(float x, float y, float z) => (this.x, this.y, this.z) = (x, y, z);
-            public static Float3 one => new(1, 1, 1);
-            public static Float3 zero => new(0, 0, 0);
+            public static Float3 operator +(Float3 a, Float3 b) => new(a.x + b.x, a.y + b.y, a.z + b.z);
+            public static Float3 operator -(Float3 a, Float3 b) => new(a.x - b.x, a.y - b.y, a.z - b.z);
+            public static Float3 operator *(Float3 a, Float3 b) => new(a.x * b.x, a.y * b.y, a.z * b.z);
+            public static Float3 operator /(Float3 a, Float3 b) => new(a.x / b.x, a.y / b.y, a.z / b.z);
+            public static Float3 operator *(Float3 a, float s) => new(a.x * s, a.y * s, a.z * s);
+            public static Float3 operator /(Float3 a, float s) => new(a.x / s, a.y / s, a.z / s);
 
-            public static Float3 operator +(Float3 a, Float3 b) { a.x += b.x; a.y += b.y; a.z += b.z; return a; }
-            public static Float3 operator -(Float3 a, Float3 b) { a.x -= b.x; a.y -= b.y; a.z -= b.z; return a; }
-            public static Float3 operator *(Float3 a, Float3 b) { a.x *= b.x; a.y *= b.y; a.z *= b.z; return a; }
-            public static Float3 operator /(Float3 a, Float3 b) { a.x /= b.x; a.y /= b.y; a.z /= b.z; return a; }
+            public static bool operator ==(Float3 a, Float3 b) => a.Equals(b);
+            public static bool operator !=(Float3 a, Float3 b) => !a.Equals(b);
 
-            public static implicit operator Float3(Int3 b) { return new(b.x, b.y, b.z); }
-            public static Float3 operator +(Float3 a, Int3 b) { a.x += b.x; a.y += b.y; a.z += b.z; return a; }
-            public static Float3 operator -(Float3 a, Int3 b) { a.x -= b.x; a.y -= b.y; a.z -= b.z; return a; }
-            public static Float3 operator *(Float3 a, Int3 b) { a.x *= b.x; a.y *= b.y; a.z *= b.z; return a; }
-            public static Float3 operator /(Float3 a, Int3 b) { a.x /= b.x; a.y /= b.y; a.z /= b.z; return a; }
+            public static implicit operator Vector3(Float3 b) => new(b.x, b.y, b.z);
+            public static explicit operator Float3(Vector3 b) => new(b.x, b.y, b.z);
+            public static explicit operator Int3(Float3 b) => new((int)b.x, (int)b.y, (int)b.z);
 
-            public static implicit operator Vector3(Float3 b) { return new(b.x, b.y, b.z); }
-            public static implicit operator Float3(Vector3 b) { return new(b.x, b.y, b.z); }
-            public static Float3 operator +(Float3 a, Vector3 b) { a.x += b.x; a.y += b.y; a.z += b.z; return a; }
-            public static Float3 operator -(Float3 a, Vector3 b) { a.x -= b.x; a.y -= b.y; a.z -= b.z; return a; }
-            public static Float3 operator *(Float3 a, Vector3 b) { a.x *= b.x; a.y *= b.y; a.z *= b.z; return a; }
-            public static Float3 operator /(Float3 a, Vector3 b) { a.x /= b.x; a.y /= b.y; a.z /= b.z; return a; }
-
-            public static implicit operator Vector3Int(Float3 b) { return new((int)b.x, (int)b.y, (int)b.z); }
-            public static implicit operator Float3(Vector3Int b) { return new(b.x, b.y, b.z); }
-            public static Float3 operator +(Float3 a, Vector3Int b) { a.x += b.x; a.y += b.y; a.z += b.z; return a; }
-            public static Float3 operator -(Float3 a, Vector3Int b) { a.x -= b.x; a.y -= b.y; a.z -= b.z; return a; }
-            public static Float3 operator *(Float3 a, Vector3Int b) { a.x *= b.x; a.y *= b.y; a.z *= b.z; return a; }
-            public static Float3 operator /(Float3 a, Vector3Int b) { a.x /= b.x; a.y /= b.y; a.z /= b.z; return a; }
-
-            public static Vector3 operator +(Vector3 a, Float3 b) { a.x += b.x; a.y += b.y; a.z += b.z; return a; }
-            public static Vector3 operator -(Vector3 a, Float3 b) { a.x -= b.x; a.y -= b.y; a.z -= b.z; return a; }
-            public static Vector3 operator *(Vector3 a, Float3 b) { a.x *= b.x; a.y *= b.y; a.z *= b.z; return a; }
-            public static Vector3 operator /(Vector3 a, Float3 b) { a.x /= b.x; a.y /= b.y; a.z /= b.z; return a; }
-
-            public static Vector3Int operator +(Vector3Int a, Float3 b) { a.x = (int)(a.x + b.x); a.y = (int)(a.y + b.y); a.z = (int)(a.z + b.z); return a; }
-            public static Vector3Int operator -(Vector3Int a, Float3 b) { a.x = (int)(a.x - b.x); a.y = (int)(a.y - b.y); a.z = (int)(a.z - b.z); return a; }
-            public static Vector3Int operator *(Vector3Int a, Float3 b) { a.x = (int)(a.x * b.x); a.y = (int)(a.y * b.y); a.z = (int)(a.z * b.z); return a; }
-            public static Vector3Int operator /(Vector3Int a, Float3 b) { a.x = (int)(a.x / b.x); a.y = (int)(a.y / b.y); a.z = (int)(a.z / b.z); return a; }
-
-            public readonly override string ToString() => $"X: [{x.ToString().ToYellow()}], Y: [{y.ToString().ToYellow()}], Z: [{z.ToString().ToYellow()}]";
+            public bool Equals(Float3 other) => x == other.x && y == other.y && z == other.z;
+            public override bool Equals(object obj) => obj is Float3 other && Equals(other);
+            public override readonly int GetHashCode() => x.GetHashCode() ^ (y.GetHashCode() << 2) ^ (z.GetHashCode() >> 2);
         }
         [Serializable]
-        public struct Int3
+        public readonly struct Float2 : IEquatable<Float2>
         {
-            public int x;
-            public int y;
-            public int z;
+            public bool IsZero => x == 0f && y == 0f;
+            public bool IsValid => float.IsFinite(x) && float.IsFinite(y);
 
-            public Int3(int x, int y, int z) => (this.x, this.y, this.z) = (x, y, z);
-            public static Int3 one => new(1, 1, 1);
-            public static Int3 zero => new(0, 0, 0);
+            public readonly float x;
+            public readonly float y;
 
-            public static Int3 operator +(Int3 a, Int3 b) { a.x += b.x; a.y += b.y; a.z += b.z; return a; }
-            public static Int3 operator -(Int3 a, Int3 b) { a.x -= b.x; a.y -= b.y; a.z -= b.z; return a; }
-            public static Int3 operator *(Int3 a, Int3 b) { a.x *= b.x; a.y *= b.y; a.z *= b.z; return a; }
-            public static Int3 operator /(Int3 a, Int3 b) { a.x /= b.x; a.y /= b.y; a.z /= b.z; return a; }
-
-            public static implicit operator Int3(Float3 b) { return new((int)b.x, (int)b.y, (int)b.z); }
-            public static Int3 operator +(Int3 a, Float3 b) { a.x = (int)(a.x + b.x); a.y = (int)(a.y + b.y); a.z = (int)(a.z + b.z); return a; }
-            public static Int3 operator -(Int3 a, Float3 b) { a.x = (int)(a.x - b.x); a.y = (int)(a.y - b.y); a.z = (int)(a.z - b.z); return a; }
-            public static Int3 operator *(Int3 a, Float3 b) { a.x = (int)(a.x * b.x); a.y = (int)(a.y * b.y); a.z = (int)(a.z * b.z); return a; }
-            public static Int3 operator /(Int3 a, Float3 b) { a.x = (int)(a.x / b.x); a.y = (int)(a.y / b.y); a.z = (int)(a.z / b.z); return a; }
-
-            public static implicit operator Int3(Vector3 b) { return new((int)b.x, (int)b.y, (int)b.z); }
-            public static implicit operator Vector3(Int3 b) { return new(b.x, b.y, b.z); }
-            public static Int3 operator +(Int3 a, Vector3 b) { a.x = (int)(a.x + b.x); a.y = (int)(a.y + b.y); a.z = (int)(a.z + b.z); return a; }
-            public static Int3 operator -(Int3 a, Vector3 b) { a.x = (int)(a.x - b.x); a.y = (int)(a.y - b.y); a.z = (int)(a.z - b.z); return a; }
-            public static Int3 operator *(Int3 a, Vector3 b) { a.x = (int)(a.x * b.x); a.y = (int)(a.y * b.y); a.z = (int)(a.z * b.z); return a; }
-            public static Int3 operator /(Int3 a, Vector3 b) { a.x = (int)(a.x / b.x); a.y = (int)(a.y / b.y); a.z = (int)(a.z / b.z); return a; }
-
-
-            public static implicit operator Int3(Color col) { return new(Mathf.RoundToInt(col.r * 255), Mathf.RoundToInt(col.g * 255), Mathf.RoundToInt(col.b * 255)); }
-            public static implicit operator Int3(Vector3Int b) { return new(b.x, b.y, b.z); }
-            public static implicit operator Vector3Int(Int3 b) { return new(b.x, b.y, b.z); }
-            public static Int3 operator +(Int3 a, Vector3Int b) { a.x += b.x; a.y += b.y; a.z += b.z; return a; }
-            public static Int3 operator -(Int3 a, Vector3Int b) { a.x -= b.x; a.y -= b.y; a.z -= b.z; return a; }
-            public static Int3 operator *(Int3 a, Vector3Int b) { a.x *= b.x; a.y *= b.y; a.z *= b.z; return a; }
-            public static Int3 operator /(Int3 a, Vector3Int b) { a.x /= b.x; a.y /= b.y; a.z /= b.z; return a; }
-
-            public static Vector3 operator +(Vector3 a, Int3 b) { a.x += b.x; a.y += b.y; a.z += b.z; return a; }
-            public static Vector3 operator -(Vector3 a, Int3 b) { a.x -= b.x; a.y -= b.y; a.z -= b.z; return a; }
-            public static Vector3 operator *(Vector3 a, Int3 b) { a.x *= b.x; a.y *= b.y; a.z *= b.z; return a; }
-            public static Vector3 operator /(Vector3 a, Int3 b) { a.x /= b.x; a.y /= b.y; a.z /= b.z; return a; }
-
-            public static Vector3Int operator +(Vector3Int a, Int3 b) { a.x += b.x; a.y += b.y; a.z += b.z; return a; }
-            public static Vector3Int operator -(Vector3Int a, Int3 b) { a.x -= b.x; a.y -= b.y; a.z -= b.z; return a; }
-            public static Vector3Int operator *(Vector3Int a, Int3 b) { a.x *= b.x; a.y *= b.y; a.z *= b.z; return a; }
-            public static Vector3Int operator /(Vector3Int a, Int3 b) { a.x /= b.x; a.y /= b.y; a.z /= b.z; return a; }
-
-            public readonly override string ToString() => $"X: [{x.ToString().ToYellow()}], Y: [{y.ToString().ToYellow()}], Z: [{z.ToString().ToYellow()}]";
-        }
-        [Serializable]
-        public struct Float2
-        {
-            public float x;
-            public float y;
+            public static readonly Float2 one = new(1, 1);
+            public static readonly Float2 zero = new(0, 0);
 
             public Float2(float x, float y) => (this.x, this.y) = (x, y);
-            public static Float2 one => new(1, 1);
-            public static Float2 zero => new(0, 0);
+            public static Float2 operator +(Float2 a, Float2 b) => new(a.x + b.x, a.y + b.y);
+            public static Float2 operator -(Float2 a, Float2 b) => new(a.x - b.x, a.y - b.y);
+            public static Float2 operator *(Float2 a, Float2 b) => new(a.x * b.x, a.y * b.y);
+            public static Float2 operator /(Float2 a, Float2 b) => new(a.x / b.x, a.y / b.y);
+            public static Float2 operator *(Float2 a, float s) => new(a.x * s, a.y * s);
+            public static Float2 operator /(Float2 a, float s) => new(a.x / s, a.y / s);
 
-            public static Float2 operator +(Float2 a, Float2 b) { a.x += b.x; a.y += b.y; return a; }
-            public static Float2 operator -(Float2 a, Float2 b) { a.x -= b.x; a.y -= b.y; return a; }
-            public static Float2 operator *(Float2 a, Float2 b) { a.x *= b.x; a.y *= b.y; return a; }
-            public static Float2 operator /(Float2 a, Float2 b) { a.x /= b.x; a.y /= b.y; return a; }
+            public static bool operator ==(Float2 a, Float2 b) => a.Equals(b);
+            public static bool operator !=(Float2 a, Float2 b) => !a.Equals(b);
 
-            public static implicit operator Float2(Int2 b) { return new(b.x, b.y); }
-            public static Float2 operator +(Float2 a, Int2 b) { a.x += b.x; a.y += b.y; return a; }
-            public static Float2 operator -(Float2 a, Int2 b) { a.x -= b.x; a.y -= b.y; return a; }
-            public static Float2 operator *(Float2 a, Int2 b) { a.x *= b.x; a.y *= b.y; return a; }
-            public static Float2 operator /(Float2 a, Int2 b) { a.x /= b.x; a.y /= b.y; return a; }
+            public static implicit operator Vector2(Float2 b) => new(b.x, b.y);
+            public static explicit operator Float2(Vector2 b) => new(b.x, b.y);
+            public static explicit operator Int2(Float2 b) => new((int)b.x, (int)b.y);
 
-            public static implicit operator Float2(Vector2 b) { return new(b.x, b.y); }
-            public static implicit operator Vector2(Float2 b) { return new(b.x, b.y); }
-            public static Float2 operator +(Float2 a, Vector2 b) { a.x += b.x; a.y += b.y; return a; }
-            public static Float2 operator -(Float2 a, Vector2 b) { a.x -= b.x; a.y -= b.y; return a; }
-            public static Float2 operator *(Float2 a, Vector2 b) { a.x *= b.x; a.y *= b.y; return a; }
-            public static Float2 operator /(Float2 a, Vector2 b) { a.x /= b.x; a.y /= b.y; return a; }
-
-            public static implicit operator Float2(Vector2Int b) { return new(b.x, b.y); }
-            public static implicit operator Vector2Int(Float2 b) { return new((int)b.x, (int)b.y); }
-            public static Float2 operator +(Float2 a, Vector2Int b) { a.x += b.x; a.y += b.y; return a; }
-            public static Float2 operator -(Float2 a, Vector2Int b) { a.x -= b.x; a.y -= b.y; return a; }
-            public static Float2 operator *(Float2 a, Vector2Int b) { a.x *= b.x; a.y *= b.y; return a; }
-            public static Float2 operator /(Float2 a, Vector2Int b) { a.x /= b.x; a.y /= b.y; return a; }
-
-            public static Vector2 operator +(Vector2 a, Float2 b) { a.x += b.x; a.y += b.y; return a; }
-            public static Vector2 operator -(Vector2 a, Float2 b) { a.x -= b.x; a.y -= b.y; return a; }
-            public static Vector2 operator *(Vector2 a, Float2 b) { a.x *= b.x; a.y *= b.y; return a; }
-            public static Vector2 operator /(Vector2 a, Float2 b) { a.x /= b.x; a.y /= b.y; return a; }
-
-            public static Vector2Int operator +(Vector2Int a, Float2 b) { a.x = (int)(a.x + b.x); a.y = (int)(a.y + b.y); return a; }
-            public static Vector2Int operator -(Vector2Int a, Float2 b) { a.x = (int)(a.x - b.x); a.y = (int)(a.y - b.y); return a; }
-            public static Vector2Int operator *(Vector2Int a, Float2 b) { a.x = (int)(a.x * b.x); a.y = (int)(a.y * b.y); return a; }
-            public static Vector2Int operator /(Vector2Int a, Float2 b) { a.x = (int)(a.x / b.x); a.y = (int)(a.y / b.y); return a; }
-
-            public readonly override string ToString() => $"X: [{x.ToString().ToYellow()}], Y: [{y.ToString().ToYellow()}]";
+            public bool Equals(Float2 other) => x == other.x && y == other.y;
+            public override bool Equals(object obj) => obj is Float2 other && Equals(other);
+            public override readonly int GetHashCode() => x.GetHashCode() ^ (y.GetHashCode() << 2);
         }
         [Serializable]
-        public struct Int2
+        public readonly struct Int3 : IEquatable<Int3>
         {
-            public int x;
-            public int y;
+            public readonly int x;
+            public readonly int y;
+            public readonly int z;
+
+            public static readonly Int3 one = new(1, 1, 1);
+            public static readonly Int3 zero = new(0, 0, 0);
+
+            public Int3(int x, int y, int z) => (this.x, this.y, this.z) = (x, y, z);
+            public static Int3 operator +(Int3 a, Int3 b) => new(a.x + b.x, a.y + b.y, a.z + b.z);
+            public static Int3 operator -(Int3 a, Int3 b) => new(a.x - b.x, a.y - b.y, a.z - b.z);
+            public static Int3 operator *(Int3 a, Int3 b) => new(a.x * b.x, a.y * b.y, a.z * b.z);
+            public static Int3 operator *(Int3 a, int s) => new(a.x * s, a.y * s, a.z * s);
+            public static Int3 operator /(Int3 a, int s) => new(a.x / s, a.y / s, a.z / s);
+
+            public static bool operator ==(Int3 a, Int3 b) => a.Equals(b);
+            public static bool operator !=(Int3 a, Int3 b) => !a.Equals(b);
+
+            public static implicit operator Vector3Int(Int3 b) => new(b.x, b.y, b.z);
+            public static explicit operator Int3(Vector3Int b) => new(b.x, b.y, b.z);
+            public static implicit operator Float3(Int3 b) => new(b.x, b.y, b.z);
+
+            public bool Equals(Int3 other) => x == other.x && y == other.y && z == other.z;
+            public override bool Equals(object obj) => obj is Int3 other && Equals(other);
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    return x ^ (y << 2) ^ (z >> 2);
+                }
+            }
+        }
+        [Serializable]
+        public readonly struct Int2 : IEquatable<Int2>
+        {
+            public readonly int x;
+            public readonly int y;
+
+            public static readonly Int2 one = new(1, 1);
+            public static readonly Int2 zero = new(0, 0);
 
             public Int2(int x, int y) => (this.x, this.y) = (x, y);
-            public static Int2 one => new(1, 1);
-            public static Int2 zero => new(0, 0);
+            public static Int2 operator +(Int2 a, Int2 b) => new(a.x + b.x, a.y + b.y);
+            public static Int2 operator -(Int2 a, Int2 b) => new(a.x - b.x, a.y - b.y);
+            public static Int2 operator *(Int2 a, Int2 b) => new(a.x * b.x, a.y * b.y);
+            public static Int2 operator /(Int2 a, Int2 b) => new(a.x / b.x, a.y / b.y);
+            public static Int2 operator *(Int2 a, int s) => new(a.x * s, a.y * s);
+            public static Int2 operator /(Int2 a, int s) => new(a.x / s, a.y / s);
 
-            public static Int2 operator +(Int2 a, Int2 b) { a.x += b.x; a.y += b.y; return a; }
-            public static Int2 operator -(Int2 a, Int2 b) { a.x -= b.x; a.y -= b.y; return a; }
-            public static Int2 operator *(Int2 a, Int2 b) { a.x *= b.x; a.y *= b.y; return a; }
-            public static Int2 operator /(Int2 a, Int2 b) { a.x /= b.x; a.y /= b.y; return a; }
+            public static bool operator ==(Int2 a, Int2 b) => a.Equals(b);
+            public static bool operator !=(Int2 a, Int2 b) => !a.Equals(b);
 
-            public static implicit operator Int2(Float2 b) { return new((int)b.x, (int)b.y); }
-            public static Int2 operator +(Int2 a, Float2 b) { a.x = (int)(a.x + b.x); a.y = (int)(a.y + b.y); return a; }
-            public static Int2 operator -(Int2 a, Float2 b) { a.x = (int)(a.x - b.x); a.y = (int)(a.y - b.y); return a; }
-            public static Int2 operator *(Int2 a, Float2 b) { a.x = (int)(a.x * b.x); a.y = (int)(a.y * b.y); return a; }
-            public static Int2 operator /(Int2 a, Float2 b) { a.x = (int)(a.x / b.x); a.y = (int)(a.y / b.y); return a; }
+            public static implicit operator Vector2Int(Int2 b) => new(b.x, b.y);
+            public static explicit operator Int2(Vector2Int b) => new(b.x, b.y);
+            public static implicit operator Float2(Int2 b) => new(b.x, b.y);
 
-            public static implicit operator Int2(Vector2 b) { return new((int)b.x, (int)b.y); }
-            public static implicit operator Vector2(Int2 b) { return new(b.x, b.y); }
-            public static Int2 operator +(Int2 a, Vector2 b) { a.x = (int)(a.x + b.x); a.y = (int)(a.y + b.y); return a; }
-            public static Int2 operator -(Int2 a, Vector2 b) { a.x = (int)(a.x - b.x); a.y = (int)(a.y - b.y); return a; }
-            public static Int2 operator *(Int2 a, Vector2 b) { a.x = (int)(a.x * b.x); a.y = (int)(a.y * b.y); return a; }
-            public static Int2 operator /(Int2 a, Vector2 b) { a.x = (int)(a.x / b.x); a.y = (int)(a.y / b.y); return a; }
-
-            public static implicit operator Int2(Vector2Int b) { return new(b.x, b.y); }
-            public static implicit operator Vector2Int(Int2 b) { return new(b.x, b.y); }
-            public static Int2 operator +(Int2 a, Vector2Int b) { a.x += b.x; a.y += b.y; return a; }
-            public static Int2 operator -(Int2 a, Vector2Int b) { a.x -= b.x; a.y -= b.y; return a; }
-            public static Int2 operator *(Int2 a, Vector2Int b) { a.x *= b.x; a.y *= b.y; return a; }
-            public static Int2 operator /(Int2 a, Vector2Int b) { a.x /= b.x; a.y /= b.y; return a; }
-
-            public static Vector2 operator +(Vector2 a, Int2 b) { a.x += b.x; a.y += b.y; return a; }
-            public static Vector2 operator -(Vector2 a, Int2 b) { a.x -= b.x; a.y -= b.y; return a; }
-            public static Vector2 operator *(Vector2 a, Int2 b) { a.x *= b.x; a.y *= b.y; return a; }
-            public static Vector2 operator /(Vector2 a, Int2 b) { a.x /= b.x; a.y /= b.y; return a; }
-
-            public static Vector2Int operator +(Vector2Int a, Int2 b) { a.x += b.x; a.y += b.y; return a; }
-            public static Vector2Int operator -(Vector2Int a, Int2 b) { a.x -= b.x; a.y -= b.y; return a; }
-            public static Vector2Int operator *(Vector2Int a, Int2 b) { a.x *= b.x; a.y *= b.y; return a; }
-            public static Vector2Int operator /(Vector2Int a, Int2 b) { a.x /= b.x; a.y /= b.y; return a; }
-
-            public readonly override string ToString() => $"X: [{x.ToString().ToYellow()}], Y: [{y.ToString().ToYellow()}]";
+            public bool Equals(Int2 other) => x == other.x && y == other.y;
+            public override bool Equals(object obj) => obj is Int2 other && Equals(other);
+            public override readonly int GetHashCode()
+            {
+                unchecked
+                {
+                    return x ^ (y << 16);
+                }
+            }
         }
 
         public static Vector3 Clamp(this Vector3 a, float length)
@@ -1824,6 +1763,7 @@ namespace Core
             return mesh;
         }
 
+
         /// <summary> Set a bit to 0 or 1 at a specific bitIndex in a uint </summary>> /// 
         public static uint SetBit(uint value, int bitIndex, bool b)
         {
@@ -1889,23 +1829,96 @@ namespace Core
 
             return (int)extracted;
         }
-        /// <summary> Encode a Color32 type into the full raw uint </summary>> /// 
-        public static uint EncodeData(Color32 color)
-        {
-            return ((uint)color.r << 16) |
-                   ((uint)color.g << 8) |
-                   ((uint)color.b << 0) |
-                   (uint)color.a << 24;
-        }
-        /// <summary> Encode a Color type into the full raw uint </summary>> /// 
-        public static uint EncodeData(Color color)
+        public static uint EncodeColor(Color color, bool enabled)
         {
             byte r = (byte)(Mathf.Clamp01(color.linear.r) * 255f);
             byte g = (byte)(Mathf.Clamp01(color.linear.g) * 255f);
             byte b = (byte)(Mathf.Clamp01(color.linear.b) * 255f);
             byte a = (byte)(Mathf.Clamp01(color.linear.a) * 255f);
 
-            return EncodeData(new Color32(r, g, b, a));
+            uint data =
+                ((uint)a << 24) |
+                ((uint)r << 16) |
+                ((uint)g << 8) |
+                ((uint)b << 0);
+
+            // bit0 = enable (blue LSB sacrifice)
+            data &= 0xFFFFFFFE;
+            data |= enabled ? 0x1u : 0x0u;
+
+            return data;
+        }
+        public static Color DecodeColor(uint data, out bool enabled)
+        {
+            enabled = (data & 1u) != 0;
+
+            byte a = (byte)((data >> 24) & 0xFF);
+            byte r = (byte)((data >> 16) & 0xFF);
+            byte g = (byte)((data >> 8) & 0xFF);
+            byte b = (byte)(data & 0xFF);
+
+            b = (byte)(b & 0xFE);
+
+            return new Color32(r, g, b, a);
+        }
+        public static uint EncodeColor32(Color32 color, bool enabled)
+        {
+            uint data =
+                ((uint)color.a << 24) |
+                ((uint)color.r << 16) |
+                ((uint)color.g << 8) |
+                ((uint)color.b << 0);
+
+            // bit0 = enable (blue LSB sacrifice)
+            data &= 0xFFFFFFFE;
+            data |= enabled ? 0x1u : 0x0u;
+
+            return data;
+        }
+        public static Color32 DecodeColor32(uint data, out bool enabled)
+        {
+            enabled = (data & 1u) != 0;
+
+            byte a = (byte)((data >> 24) & 0xFF);
+            byte r = (byte)((data >> 16) & 0xFF);
+            byte g = (byte)((data >> 8) & 0xFF);
+            byte b = (byte)(data & 0xFF);
+
+            // mirror shader: blue LSB is not color
+            b = (byte)(b & 0xFE);
+
+            return new Color32(r, g, b, a);
+        }
+        public static uint EncodeUV(Vector2 offset, float scale, bool enabled)
+        {
+            scale = Mathf.Clamp(scale, 0f, 8f);
+            offset = Vector2.ClampMagnitude(offset, 4f);
+
+            uint uScale = (uint)Mathf.RoundToInt(scale / 8f * 1023f);
+            uint uOffX = (uint)Mathf.RoundToInt((offset.x + 4f) / 8f * 1023f);
+            uint uOffY = (uint)Mathf.RoundToInt((offset.y + 4f) / 8f * 1023f);
+
+            uint data = 0;
+
+            if (enabled) data |= 1u; // bit 0      
+            data |= (uScale & 0x3FFu) << 1;  // bit 1–10
+            data |= (uOffX & 0x3FFu) << 11; // bit 11–20
+            data |= (uOffY & 0x3FFu) << 21; // bit 21–30
+
+            return data;
+        }
+        public static void DecodeUV(uint data, out Vector2 offset, out float scale,  out bool enabled)
+        {
+            enabled = (data & 1u) != 0;
+
+            uint uScale = (data >> 1) & 0x3FFu;
+            uint uOffX = (data >> 11) & 0x3FFu;
+            uint uOffY = (data >> 21) & 0x3FFu;
+
+            scale = (uScale / 1023f) * 8f;
+
+            offset.x = (uOffX / 1023f) * 8f - 4f;
+            offset.y = (uOffY / 1023f) * 8f - 4f;
         }
         #endregion
 

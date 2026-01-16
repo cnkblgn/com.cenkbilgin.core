@@ -116,10 +116,10 @@ namespace Core.Input
 
             return action;
         }
-        public bool GetButton(InputActionType type) => GetAction(type)?.IsPressed() == true;
-        public bool GetButtonDown(InputActionType type) => GetAction(type)?.WasPressedThisFrame() == true;
-        public bool GetButtonUp(InputActionType type) => GetAction(type)?.WasReleasedThisFrame() == true;
-        public Vector2 GetVector(InputActionType type) => GetAction(type)?.ReadValue<Vector2>() ?? Vector2.zero;
+        public bool GetKey(InputActionType type) => GetAction(type)?.IsPressed() == true;
+        public bool GetKeyDown(InputActionType type) => GetAction(type)?.WasPressedThisFrame() == true;
+        public bool GetKeyUp(InputActionType type) => GetAction(type)?.WasReleasedThisFrame() == true;
+        public Vector2 GetAxis(InputActionType type) => GetAction(type)?.ReadValue<Vector2>() ?? Vector2.zero;
         public int GetIcon(InputActionType type) => GetIcon(type.Value);
         public int GetIcon(string path)
         {

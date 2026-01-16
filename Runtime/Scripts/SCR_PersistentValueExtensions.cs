@@ -4,14 +4,16 @@ using UnityEngine;
 
 namespace Core
 {
+    using static CoreUtility;
+
     public static class PersistentValueExtensions
     {
         public static void SetInt(this Dictionary<string, PersistentValue> data, string key, int value) => data[key] = new PersistentValue { Int = value };
         public static void SetFloat(this Dictionary<string, PersistentValue> data, string key, float value) => data[key] = new PersistentValue { Float = value };
         public static void SetBool(this Dictionary<string, PersistentValue> data, string key, bool value) => data[key] = new PersistentValue { Bool = value };
         public static void SetString(this Dictionary<string, PersistentValue> data, string key, string value) => data[key] = new PersistentValue { String = value };
-        public static void SetVector3(this Dictionary<string, PersistentValue> data, string key, Vector3 value) => data[key] = new PersistentValue { Vector3 = value };
-        public static void SetVector2(this Dictionary<string, PersistentValue> data, string key, Vector2 value) => data[key] = new PersistentValue { Vector2 = value };
+        public static void SetVector3(this Dictionary<string, PersistentValue> data, string key, Vector3 value) => data[key] = new PersistentValue { Vector3 = (Float3)value };
+        public static void SetVector2(this Dictionary<string, PersistentValue> data, string key, Vector2 value) => data[key] = new PersistentValue { Vector2 = (Float2)value };
         public static void SetGuid(this Dictionary<string, PersistentValue> data, string key, Guid value) => data[key] = new PersistentValue { Guid = value };
         public static void SetData(this Dictionary<string, PersistentValue> data, string key, Dictionary<string, PersistentValue> value) => data[key] = new PersistentValue { Data = value == null ? new() : new Dictionary<string, PersistentValue>(value) };
         public static int GetInt(this Dictionary<string, PersistentValue> data, string key, int def = 0) => data.TryGetValue(key, out var v) && v.Int.HasValue ? v.Int.Value : def;

@@ -5,17 +5,12 @@
 
 void Get_float(out float4 Color)
 {
-    uint data = getData();
+    uint data = getData();  
+    float useRSV = hasData(data) ? 1.0 : 0.0;
     
-    float useRSV = getBit(data, 0) ? 1.0 : 0.0;
-    
-    uint colorData = data & 0xFFFFFFFE;
-    
-    Color = decodeUintToFloat4(colorData);
-    
-    Color = lerp(float4(1, 1, 1, 1), Color, useRSV);
-}
-void Get_half(out half4 Color)
+    Color = lerp(1.0.xxxx, decodeUintToFloat4(data & 0xFFFFFFFE), useRSV);
+} 
+void Get_half(out half4 Color) 
 {
     Get_float(Color);
 }
