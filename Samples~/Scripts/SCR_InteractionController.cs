@@ -58,18 +58,18 @@ namespace Core.Misc
             }
 
             interactTimer += Time.deltaTime;
-            wishHold = ManagerCoreInput.Instance.GetButton(Interact);
-            wishInteract = ManagerCoreInput.Instance.GetButtonDown(Interact);
+            wishHold = Interact.GetKey();
+            wishInteract = Interact.GetKeyDown();
             canInteract = wishInteract && interactTimer > 0.01f;
             canHold = wishHold && !wasInteractHold;
 
-            if (wasInteractHold && ManagerCoreInput.Instance.GetButtonUp(Interact))
+            if (wasInteractHold && Interact.GetKeyUp())
             {
                 wasInteractHold = false;
             }
             if (isHolding)
             {
-                if (ManagerCoreInput.Instance.GetButtonUp(Interact))
+                if (Interact.GetKeyUp())
                 {
                     isHolding = false;
 

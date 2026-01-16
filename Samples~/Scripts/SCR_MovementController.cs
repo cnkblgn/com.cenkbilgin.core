@@ -21,7 +21,7 @@ namespace Core.Misc
         public event Action OnStand = null;
         public event Action<RaycastHit> OnStep = null;
 
-        public bool IsMoving => ManagerCoreInput.Instance.GetVector(Move).x != 0 || ManagerCoreInput.Instance.GetVector(Move).y != 0;
+        public bool IsMoving => Move.GetAxis().x != 0 || Move.GetAxis().y != 0;
         public bool IsCrouching => movementCurrentStance == MovementStance.CROUCH;
         public bool IsWalking => canWalk;
         public bool IsSprinting => canSprint;
@@ -297,17 +297,17 @@ namespace Core.Misc
                 return;
             }
 
-            movementDirection = GetIsInputEnabled() ? characterOrigin.TransformVector(new(ManagerCoreInput.Instance.GetVector(Move).x, 0f, ManagerCoreInput.Instance.GetVector(Move).y)) : Vector3.zero;
+            movementDirection = GetIsInputEnabled() ? characterOrigin.TransformVector(new(Move.GetAxis().x, 0f, Move.GetAxis().y)) : Vector3.zero;
             movementDirection = movementDirection.normalized;
 
-            wishCrouch = ManagerCoreInput.Instance.GetButton(Crouch);
-            wishSprint = ManagerCoreInput.Instance.GetButton(Sprint);
-            wishJump = ManagerCoreInput.Instance.GetButtonDown(Jump);
+            wishCrouch = Crouch.GetKey();
+            wishSprint = Sprint.GetKey();
+            wishJump = Jump.GetKeyDown();
 
             canJump = GetJumpEnabled() && wishJump && !CollisionHead && isOnWalkableSlope && (!wasGrounded || groundTimer > 0f) && (CollisionGround || (!wasJumped && !isJumpedLastFrame && fallTimer <= movementJumpCoyote));
             canCrouch = GetCrouchEnabled() && wishCrouch && movementCurrentStance == MovementStance.STAND;
             canStand = !wishCrouch && movementCurrentStance == MovementStance.CROUCH && !CollisionHead;
-            canSprint = GetSprintEnabled() && wishSprint && movementCurrentStance == MovementStance.STAND && IsMoving && ManagerCoreInput.Instance.GetVector(Move).y > 0;
+            canSprint = GetSprintEnabled() && wishSprint && movementCurrentStance == MovementStance.STAND && IsMoving && Move.GetAxis().y > 0;
             canWalk = wishWalk && movementCurrentStance == MovementStance.STAND && !canSprint && !canCrouch && !canJump;
 
             if (isNoclipActive)
@@ -434,8 +434,8 @@ namespace Core.Misc
 
             if (GetLookEnabled())
             {
-                cameraRotationX -= ManagerCoreInput.Instance.GetVector(Look).y * GetSensitivity() * 0.1f;
-                cameraRotationY += ManagerCoreInput.Instance.GetVector(Look).x * GetSensitivity() * 0.1f;
+                cameraRotationX -= Look.GetAxis().y * GetSensitivity() * 0.1f;
+                cameraRotationY += Look.GetAxis().x * GetSensitivity() * 0.1f;
                 cameraRotationX = Mathf.Clamp(cameraRotationX, -80, 80);
             }
 
@@ -445,7 +445,7 @@ namespace Core.Misc
 
         private void MoveNoclip()
         {
-            movementDirection = cameraOrigin.TransformVector(new(ManagerCoreInput.Instance.GetVector(Move).x, 0f, ManagerCoreInput.Instance.GetVector(Move).y));
+            movementDirection = cameraOrigin.TransformVector(new(Move.GetAxis().x, 0f, Move.GetAxis().y));
             canSprint = GetSprintEnabled() && wishSprint && movementCurrentStance == MovementStance.STAND && IsMoving;
             movementTargetGroundSpeed = movementGroundSpeed;
             movementTargetGroundSpeed *= IsSprinting ? movementSprintSpeedMultiplier : 1;
@@ -485,7 +485,7 @@ namespace Core.Misc
         }
         private void MoveGround()
         {
-            bool movingBackwards = ManagerCoreInput.Instance.GetVector(Move).y < 0;
+            bool movingBackwards = Move.GetAxis().y < 0;
 
             movementTargetGroundSpeed = movementGroundSpeed;
             movementTargetGroundSpeed *= IsSprinting ? movementSprintSpeedMultiplier : 1;

@@ -57,7 +57,12 @@ namespace Core.Misc
         private void Start() => OnSubmit("help");
         private void Update()
         {
-            if (ManagerCoreInput.Instance.GetButtonDown(Console))
+            if (ManagerCoreGame.Instance.IsLoading)
+            {
+                return;
+            }
+
+            if (Console.GetKeyDown())
             {
                 if (!isOpen)
                 {
@@ -80,22 +85,22 @@ namespace Core.Misc
 
                 if (suggestionBuffer.Count > 0)
                 {
-                    if (ManagerCoreInput.Instance.GetButtonDown(UIDown))
+                    if (UIDown.GetKeyDown())
                     {
                         MoveSuggestion(1);
                     }
-                    else if (ManagerCoreInput.Instance.GetButtonDown(UIUp))
+                    else if (UIUp.GetKeyDown())
                     {
                         MoveSuggestion(-1);
                     }
-                    else if (ManagerCoreInput.Instance.GetButtonDown(Tab))
+                    else if (Tab.GetKeyDown())
                     {
                         ApplySuggestion();
                     }
                 }
                 else
                 {
-                    if (ManagerCoreInput.Instance.GetButtonDown(UIUp))
+                    if (UIUp.GetKeyDown())
                     {
                         if (lastCommand != STRING_EMPTY)
                         {
@@ -186,7 +191,7 @@ namespace Core.Misc
                 return;
             }
 
-            if (ManagerCoreInput.Instance.GetButtonDown(Console))
+            if (Console.GetKeyDown())
             {
                 return;
             }

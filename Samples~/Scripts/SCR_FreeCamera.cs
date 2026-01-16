@@ -24,8 +24,8 @@ namespace Core.Misc
         private void Update()
         {
             inputScroll = ManagerCoreInput.Instance.PointerScroll.x;
-            inputLook = ManagerCoreInput.Instance.GetVector(Look);
-            inputMove = ManagerCoreInput.Instance.GetVector(Move);
+            inputLook = Look.GetAxis();
+            inputMove = Move.GetAxis();
             inputSpeed = Mathf.Max(0.1f, inputSpeed + (inputScroll > 0 ? 0.1f : inputScroll < 0 ? -0.1f : 0));
             velocityMove = (inputSpeed * moveSpeed * thisTransform.TransformVector(inputMove.x, 0, inputMove.y));
             transform.position += velocityMove * Time.deltaTime;
