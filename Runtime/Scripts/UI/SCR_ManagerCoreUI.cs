@@ -82,6 +82,8 @@ namespace Core.UI
         public void InsertAction(UIKeyActionType keyActionType, KeyActionData[] data) => keyActionController.Insert(keyActionType, data);
         public void RemoveAction(UIKeyActionType keyActionType) => keyActionController.Remove(keyActionType);
 
+        public void ShowSettings() => settingsController.Show();
+        public void HideSettings() => settingsController.Hide();
         public void InsertSettingEvent(Action onApply, Action onRevert, Action onLoad)
         {
             settingsController.OnApply += onApply;
