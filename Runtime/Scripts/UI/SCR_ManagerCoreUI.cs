@@ -16,7 +16,6 @@ namespace Core.UI
         [SerializeField, Required] private EventSystem mainCanvasEvents = null;
 
         [Header("_")]
-        [SerializeField, Required] private Canvas canvasContainer = null;
         [SerializeField, Required] private UICursorController cursorController = null;
         [SerializeField, Required] private UITooltipController tooltipController = null;
         [SerializeField, Required] private UIWaypointController waypointController = null;
@@ -35,9 +34,6 @@ namespace Core.UI
             SetCursor(UICursorType.DEFAULT);
             HideCursor();
         }
-
-        public void Show() => canvasContainer.Show();
-        public void Hide() => canvasContainer.Hide();
 
         public void ShowNotification(string text, float duration = 5) => notificationController.Show(text, duration);
         public void HideNotification() => notificationController.Hide();
