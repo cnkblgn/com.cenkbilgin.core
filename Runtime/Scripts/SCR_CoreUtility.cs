@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEditor.Experimental.GraphView.Port;
 
 namespace Core
 { 
@@ -2456,12 +2457,19 @@ namespace Core
 
             private float currentValue = 1;
             private readonly float baseValue = 1;
+            private readonly int capacity = 1;
             private readonly SwapBackArray<float> stackCollection = new(8);
 
-            public StackFloat(float baseValue, int capacity) => (this.baseValue, this.stackCollection) = (baseValue, new(capacity));
+            public StackFloat(float baseValue, int capacity) => (this.baseValue, this.stackCollection) = (baseValue, new(this.capacity = capacity));
 
             public void Apply(float multiplier)
             {
+                if (stackCollection.Count >= capacity)
+                {
+                    Debug.LogWarning("StackFloat.Apply() stackCollection.Count >= capacity");
+                    return;
+                }
+
                 stackCollection.Add(multiplier);
                 Recalculate();
             }
@@ -2486,12 +2494,19 @@ namespace Core
 
             private int currentValue = 1;
             private readonly int baseValue = 1;
+            private readonly int capacity = 1;
             private readonly SwapBackArray<int> stackCollection = new(8);
 
-            public StackInt(int baseValue, int capacity) => (this.baseValue, this.stackCollection) = (baseValue, new(capacity));
+            public StackInt(int baseValue, int capacity) => (this.baseValue, this.stackCollection) = (baseValue, new(this.capacity = capacity));
 
             public void Add(int value)
             {
+                if (stackCollection.Count >= capacity)
+                {
+                    Debug.LogWarning("StackInt.Apply() stackCollection.Count >= capacity");
+                    return;
+                }
+
                 stackCollection.Add(value);
                 Recalculate();
             }
