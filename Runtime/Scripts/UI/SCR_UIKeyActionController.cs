@@ -100,7 +100,7 @@ namespace Core.UI
         {
             if (!dataTable.TryGetValue(id, out _))
             {
-                Debug.LogError($"UIKeyActionController.Remove() type not found [{id}]");
+                Debug.LogError($"UIKeyActionController.Revert() type not found [{id}]");
                 return;
             }
 

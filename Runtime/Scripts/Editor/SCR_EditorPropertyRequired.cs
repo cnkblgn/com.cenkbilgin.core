@@ -65,7 +65,7 @@ namespace Core.Editor
         {
             switch (property.propertyType)
             {
-                // Add additional types as necessary
+                // Apply additional types as necessary
                 case SerializedPropertyType.ObjectReference when property.objectReferenceValue:
                 case SerializedPropertyType.ExposedReference when property.exposedReferenceValue:
                 case SerializedPropertyType.AnimationCurve when property.animationCurveValue is { length: > 0 }:

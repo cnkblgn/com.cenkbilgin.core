@@ -14,7 +14,7 @@ namespace Core.Editor
 
         private void OnGUI()
         {
-            GUILayout.Label("Add Prefix to Selected Assets or GameObjects", EditorStyles.boldLabel);
+            GUILayout.Label("Apply Prefix to Selected Assets or GameObjects", EditorStyles.boldLabel);
 
             prefix = EditorGUILayout.TextField("Prefix", prefix);
 

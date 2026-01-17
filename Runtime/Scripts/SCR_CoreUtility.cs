@@ -2329,8 +2329,8 @@ namespace Core
             {
                 if (Count >= items.Length)
                 {
-                    Debug.LogError("SwapBackArray.Add() does not support for each loop!");
-                    throw new InvalidOperationException("SwapBackArray.Add() capacity exceeded.");                    
+                    Debug.LogError("SwapBackArray.Apply() does not support for each loop!");
+                    throw new InvalidOperationException("SwapBackArray.Apply() capacity exceeded.");                    
                 }
 
                 items[Count++] = item;
@@ -2448,6 +2448,84 @@ namespace Core
                 disableRequesters.Clear();
                 OnEnabled = null;
                 OnDisabled = null;
+            }
+        }
+        public class StackFloat
+        {
+            public float CurrentValue => currentValue;
+
+            private float currentValue = 1;
+            private readonly float baseValue = 1;
+            private readonly SwapBackArray<float> stackCollection = new(8);
+
+            public StackFloat(float baseValue, int capacity) => (this.baseValue, this.stackCollection) = (baseValue, new(capacity));
+
+            public void Apply(float multiplier)
+            {
+                stackCollection.Add(multiplier);
+                Recalculate();
+            }
+            public void Revert(float multiplier)
+            {
+                stackCollection.Remove(multiplier);
+                Recalculate();
+            }
+            private void Recalculate()
+            {
+                currentValue = baseValue;
+
+                for (int i = 0; i < stackCollection.Count; i++)
+                {
+                    currentValue *= stackCollection[i];
+                }
+            }
+        }
+        public class StackInt
+        {
+            public int CurrentValue => currentValue;
+
+            private int currentValue = 1;
+            private readonly int baseValue = 1;
+            private readonly SwapBackArray<int> stackCollection = new(8);
+
+            public StackInt(int baseValue, int capacity) => (this.baseValue, this.stackCollection) = (baseValue, new(capacity));
+
+            public void Add(int value)
+            {
+                stackCollection.Add(value);
+                Recalculate();
+            }
+            public void Remove(int value)
+            {
+                stackCollection.Remove(value);
+                Recalculate();
+            }
+            private void Recalculate()
+            {
+                currentValue = baseValue;
+
+                for (int i = 0; i < stackCollection.Count; i++)
+                {
+                    currentValue *= stackCollection[i];
+                }
+            }
+        }
+        public class StackBool
+        {
+            public bool Enabled => disableCount == 0;
+
+            private int disableCount = 0;
+            
+            public void Disable() => disableCount++;
+            public void Enable()
+            {
+                disableCount--;
+
+                if (disableCount < 0)
+                {
+                    Debug.LogError("StackBool.Enable() called too many times");
+                    disableCount = 0;
+                }
             }
         }
         #endregion
