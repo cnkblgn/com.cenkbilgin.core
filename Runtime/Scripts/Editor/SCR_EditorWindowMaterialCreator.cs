@@ -132,6 +132,10 @@ namespace Core.Editor
             {
                 material.SetTexture("_MaskMap", texture);
             }
+            else
+            {
+                material.SetTexture("_BaseMap", texture);
+            }
 
             material.enableInstancing = true;
         }
