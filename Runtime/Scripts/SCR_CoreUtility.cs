@@ -2314,8 +2314,16 @@ namespace Core
                 }
             } private readonly T[] items;
             public int Count { get; set; }
-          
-            public SwapBackArray(int capacity) => (items, Count) = (new T[capacity], 0);
+
+            private readonly EqualityComparer<T> comparer = null;
+
+            public SwapBackArray(int capacity)
+            {
+                items = new T[capacity];
+                Count = 0;
+
+                comparer = EqualityComparer<T>.Default;
+            }
 
             public ref T GetRef(int index)
             {
@@ -2339,8 +2347,6 @@ namespace Core
             public bool Remove(T item)
             {
                 int index = -1;
-
-                EqualityComparer<T> comparer = EqualityComparer<T>.Default;
 
                 for (int i = 0; i < Count; i++)
                 {
