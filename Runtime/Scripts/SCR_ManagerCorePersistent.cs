@@ -48,6 +48,7 @@ namespace Core
             if (sceneController == null)
             {
                 Debug.LogError("ManagerCorePersistent.Export() sceneController == null");
+                return null;
             }
 
             return sceneController.Export();
@@ -57,6 +58,7 @@ namespace Core
             if (sceneController == null)
             {
                 Debug.LogError("ManagerCorePersistent.Import() sceneController == null");
+                return;
             }
 
             sceneController.Import(sceneData);

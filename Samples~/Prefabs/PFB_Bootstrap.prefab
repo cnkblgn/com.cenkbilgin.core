@@ -3359,6 +3359,7 @@ GameObject:
   - component: {fileID: 180583109684459631}
   - component: {fileID: 6804338855132680679}
   - component: {fileID: 9094746470685483690}
+  - component: {fileID: 4844221691134487262}
   - component: {fileID: 1431700621715966676}
   - component: {fileID: 61607267292666552}
   - component: {fileID: 5931266737367869336}
@@ -3459,6 +3460,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ASM_Core::Core.ManagerCorePrefab
   database: {fileID: 11400000, guid: 9f273d063e6aed4479c6c37c4db04c1b, type: 2}
+--- !u!114 &4844221691134487262
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8094654647307156075}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b861d01e039a2a42965a24c4993172b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ASM_Core::Core.ManagerCorePersistent
 --- !u!114 &1431700621715966676
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3601,7 +3614,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mainCanvasController: {fileID: 8859489233020671338}
   mainCanvasEvents: {fileID: 7261386517013875899}
-  canvasContainer: {fileID: 7398746182491109059}
   cursorController: {fileID: 7165737895320360088}
   tooltipController: {fileID: 2870349270134330927}
   waypointController: {fileID: 6361703999343115757}
