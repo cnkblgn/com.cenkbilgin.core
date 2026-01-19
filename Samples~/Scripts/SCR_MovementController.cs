@@ -1,8 +1,11 @@
-﻿using Core.Editor;
-using Core.Input;
-using System;
+﻿using System;
 using Unity.Mathematics;
 using UnityEngine;
+
+#if UNITY_EDITOR
+using Core.Editor;
+#endif
+using Core.Input;
 
 namespace Core.Misc
 {
@@ -26,14 +29,14 @@ namespace Core.Misc
         public bool IsWalking => canWalk;
         public bool IsSprinting => canSprint;
         public bool CollisionGround => collisionGround;
-        public bool CollisionHead => collisionHead;
+        public bool CollisionCeiling => collisionCeiling;
         public bool CollisionSides => collisionSides;
 
         [Header("_")]
         [SerializeField] private LayerMask collisionMask = 0;
-        [SerializeField] private bool collisionGizmosHead = false;
-        [SerializeField] private float collisionHeadRadiusOffset = 0f;
-        [SerializeField] private float collisionHeadOffset = 0f;
+        [SerializeField] private bool collisionGizmosCeiling = false;
+        [SerializeField] private float collisionCeilingRadiusOffset = 0f;
+        [SerializeField] private float collisionCeilingOffset = 0f;
         [SerializeField] private bool collisionGizmosGround = false;
         [SerializeField] private float collisionGroundRadiusOffset = 0f;
         [SerializeField] private float collisionGroundOffset = 0.075f;
@@ -52,9 +55,13 @@ namespace Core.Misc
         [SerializeField] private float stanceCrouchCameraHeight = 0.35f;
 
         [Header("_")]
-        [SerializeField, Required] private Transform cameraOrigin = null;
+        [SerializeField, Required] private Transform cameraPivot = null;
         [SerializeField, Range(45, 90)] private float cameraFieldOfView = 60.0f;
         [SerializeField, Min(0)] private float cameraSensitivity = 1.25f;
+        [SerializeField, Range(0, 90)] private float cameraPitchClampAngle = 75;
+        [SerializeField, Range(0, 90)] private float cameraYawClampAngle = 0;
+        [SerializeField, ReadOnly] private float cameraYawClampCenter = 0;
+        [SerializeField, Range(0, 1), Tooltip("Strafe helper on air")] private float cameraStrafeControl = 0;
 
         [Header("_")]
         [SerializeField, Min(0)] private float movementGravity = 32.0f;
@@ -63,23 +70,32 @@ namespace Core.Misc
         [SerializeField, Min(0)] private float movementCrouchSpeedMultiplier = 0.5f;
         [SerializeField, Min(0)] private float movementSprintSpeedMultiplier = 2.0f;
         [SerializeField, Min(0)] private float movementWalkSpeedMultiplier = 0.5f;
+        [SerializeField, Min(0)] private float movementBackwardsSpeedMultiplier = 0.5f;
         [SerializeField, Min(0)] private float movementGroundSpeed = 2.5f;
         [SerializeField, Min(0)] private float movementGroundAccelerate = 6.0f;
         [SerializeField, Min(1)] private float movementSpeedAccelerate = 1.5f;
         [SerializeField, Min(0)] private float movementGroundFriction = 5.0f;
-        [SerializeField, Min(0)] private float movementAirSpeed = 1.5f;
-        [SerializeField, Min(0)] private float movementAirAccelerate = 1000f;
+        [SerializeField, Min(0)] private float movementAirSpeed = 1.15f;
+        [SerializeField, Min(0)] private float movementAirAccelerate = 8192f;
 
         [Header("_")]
         [SerializeField] private LayerMask stepMask = 0;
-        [SerializeField, Min(0f)] private float stepIntervalMin = 0.35f;
-        [SerializeField, Min(0f)] private float stepIntervalMax = 0.65f;
+        [SerializeField, Min(0f)] private float stepIntervalMin = 0.3125f;
+        [SerializeField, Min(0f)] private float stepIntervalMax = 0.675f;
 
         private CharacterController characterController = null;
         private Transform characterOrigin = null;
         private Camera cameraController = null;
         private Collider collisionLastCollider = null;
         private Collider[] characterColliders = null;
+        private readonly StackBool isInputEnabled = new();
+        private readonly StackBool isMovementEnabled = new();
+        private readonly StackBool isSprintEnabled = new();
+        private readonly StackBool isCrouchEnabled = new();
+        private readonly StackBool isJumpEnabled = new();
+        private readonly StackBool isLookEnabled = new();
+        private readonly StackBool isCollidersEnabled = new();
+        private IMovementControllerProcessor[] movementProcessors = null;
         private Vector3 movementDirection = Vector3.zero;
         private Vector3 movementVelocity = Vector3.zero;
         private Vector3 cameraPosition = Vector3.zero;
@@ -111,7 +127,7 @@ namespace Core.Misc
         private float stepTimer = 0;
         private float stepInterval = 0;
         private bool collisionGround = false;
-        private bool collisionHead = false;
+        private bool collisionCeiling = false;
         private bool collisionSides = false;
         private bool wishJump = false;
         private bool wishCrouch = false;
@@ -126,28 +142,22 @@ namespace Core.Misc
         private bool wasGrounded = false;
         private bool wasVelocityAdded = false;
         private bool isJumpedLastFrame = false;
-        private bool isFallHeightSelected = false;
         private bool isNoclipActive = false;
-        private bool isLookOverrided = false;
+        private bool isFallHeightResolved = false;
         private bool isClipResolved = false;
+        private bool isLookOverrided = false;
+        private bool isStanceOverrided = false;
         private bool isOnSteepSlope = false;
         private bool isOnWalkableSlope = false;
-        private readonly Flag isInputEnabled = new();
-        private readonly Flag isMovementEnabled = new();
-        private readonly Flag isSprintEnabled = new();
-        private readonly Flag isCrouchEnabled = new();
-        private readonly Flag isJumpEnabled = new();
-        private readonly Flag isLookEnabled = new();
-        private readonly Flag isCollidersEnabled = new();
 
         private void Awake()
         {
             collisionDefaultMask = collisionMask;
 
+            movementProcessors = GetComponents<IMovementControllerProcessor>();
+            cameraController = GetComponentInChildren<Camera>();
             characterOrigin = GetComponent<Transform>();
             characterController = GetComponent<CharacterController>();
-            cameraController = GetComponentInChildren<Camera>();
-
             characterColliders = GetComponentsInChildren<Collider>();
             for (int i = 0; i < characterColliders.Length; i++)
             {
@@ -165,6 +175,9 @@ namespace Core.Misc
             characterController.excludeLayers = ~collisionDefaultMask;
             characterController.skinWidth = characterController.radius * 0.1f;
             cameraPosition = Vector3.up * stanceStandCameraHeight;
+            cameraController.fieldOfView = cameraFieldOfView;
+            SetLookPitchClamp(cameraPitchClampAngle);
+            SetLookYawClamp(cameraYawClampAngle);
             this.WaitFrame(null, () => characterController.enabled = true);
         }
         private void Update()
@@ -176,8 +189,15 @@ namespace Core.Misc
 
             UpdateCollision();
             UpdateMovement();
+
+            foreach (IMovementControllerProcessor i in movementProcessors) i.OnAfterMoveTick();
         }
-        private void LateUpdate() => UpdateCamera();
+        private void LateUpdate()
+        {
+            UpdateCamera();
+
+            foreach (IMovementControllerProcessor i in movementProcessors) i.OnAfterCameraTick();
+        }
 #if UNITY_EDITOR
         private void OnDrawGizmos()
         {
@@ -191,9 +211,9 @@ namespace Core.Misc
                 return;
             }
 
-            if (collisionGizmosHead)
+            if (collisionGizmosCeiling)
             {
-                Gizmos.color = CollisionHead ? Color.red : Color.green;
+                Gizmos.color = CollisionCeiling ? Color.red : Color.green;
                 Gizmos.DrawRay(collisionHeadPosition, collisionHeadDirection);
                 Gizmos.DrawWireSphere(collisionHeadPosition + collisionHeadDirection, collisionHeadRadius);
             }
@@ -230,9 +250,9 @@ namespace Core.Misc
         }
         private void OnValidate()
         {
-            if (cameraOrigin != null)
+            if (cameraPivot != null)
             {
-                cameraOrigin.localPosition = Vector3.up * stanceStandCameraHeight;
+                cameraPivot.localPosition = Vector3.up * stanceStandCameraHeight;
             }
 
             if (characterController != null)
@@ -270,7 +290,7 @@ namespace Core.Misc
             characterController.center = movementCurrentStance == MovementStance.CROUCH ? ((stanceCrouchColliderHeight / 2) * Vector3.up) : ((stanceStandColliderHeight / 2) * Vector3.up);
 
             collisionGround = CalculateGroundCollision();
-            collisionHead = CalculateHeadCollision();
+            collisionCeiling = CalculateHeadCollision();
             collisionSides = CalculateSidesCollision();
             collisionAngle = Vector3.Angle(collisionGroundInfo.normal, Vector3.up);
             isOnWalkableSlope = collisionAngle < characterController.slopeLimit;
@@ -297,16 +317,23 @@ namespace Core.Misc
                 return;
             }
 
-            movementDirection = GetIsInputEnabled() ? characterOrigin.TransformVector(new(Move.GetAxis().x, 0f, Move.GetAxis().y)) : Vector3.zero;
+            Vector2 input = GetIsInputEnabled() ? Move.GetAxis() : Vector2.zero;
+
+            if (!CollisionGround && Mathf.Abs(input.x) < 0.01f)
+            {
+                input.x = Mathf.Lerp(input.x, Mathf.Clamp(Look.GetAxis().x * 5f, -1f, 1f), cameraStrafeControl);
+            }
+
+            movementDirection = characterOrigin.TransformVector(new(input.x, 0f, input.y));
             movementDirection = movementDirection.normalized;
 
             wishCrouch = Crouch.GetKey();
             wishSprint = Sprint.GetKey();
-            wishJump = Jump.GetKeyDown();
+            wishJump = Jump.GetKey();
 
-            canJump = GetJumpEnabled() && wishJump && !CollisionHead && isOnWalkableSlope && (!wasGrounded || groundTimer > 0f) && (CollisionGround || (!wasJumped && !isJumpedLastFrame && fallTimer <= movementJumpCoyote));
-            canCrouch = GetCrouchEnabled() && wishCrouch && movementCurrentStance == MovementStance.STAND;
-            canStand = !wishCrouch && movementCurrentStance == MovementStance.CROUCH && !CollisionHead;
+            canJump = GetJumpEnabled() && wishJump && !CollisionCeiling && isOnWalkableSlope && (!wasGrounded || groundTimer > 0f) && (CollisionGround || (!wasJumped && !isJumpedLastFrame && fallTimer <= movementJumpCoyote));
+            canCrouch = !isStanceOverrided && GetCrouchEnabled() && wishCrouch && movementCurrentStance == MovementStance.STAND;
+            canStand = !isStanceOverrided && !wishCrouch && movementCurrentStance == MovementStance.CROUCH && !CollisionCeiling;
             canSprint = GetSprintEnabled() && wishSprint && movementCurrentStance == MovementStance.STAND && IsMoving && Move.GetAxis().y > 0;
             canWalk = wishWalk && movementCurrentStance == MovementStance.STAND && !canSprint && !canCrouch && !canJump;
 
@@ -339,13 +366,19 @@ namespace Core.Misc
             {
                 if (!wasGrounded)
                 {
-                    TryStep();
-
                     fallHeight = fallPosition - characterOrigin.position.y;
                     OnLand?.Invoke(fallTimer, movementVelocity.y, fallHeight);
 
+                    // LAND SNAP
+                    if (movementVelocity.y < 0f && collisionAngle <= 5f)
+                    {
+                        movementVelocity.y = -1f;
+                    }
+
+                    TryStep();
+
                     wasGrounded = true;
-                    isFallHeightSelected = false;
+                    isFallHeightResolved = false;
                 }
 
                 if (wasJumped)
@@ -370,17 +403,17 @@ namespace Core.Misc
             {
                 if (wasGrounded)
                 {
-                    isFallHeightSelected = false;
+                    isFallHeightResolved = false;
                     wasGrounded = false;
                 }
 
-                if (CollisionHead && wasJumped)
+                if (CollisionCeiling && wasJumped)
                 {
                     movementVelocity.y = -1;
                     wasJumped = false;
                 }
 
-                if (CollisionHead && wasVelocityAdded)
+                if (CollisionCeiling && wasVelocityAdded)
                 {
                     movementVelocity.y = -1;
                     wasVelocityAdded = false;
@@ -389,10 +422,10 @@ namespace Core.Misc
                 fallTimer += Time.deltaTime;
                 if (movementVelocity.y <= 0)
                 {
-                    if (!isFallHeightSelected)
+                    if (!isFallHeightResolved)
                     {
                         fallPosition = characterOrigin.position.y;
-                        isFallHeightSelected = true;
+                        isFallHeightResolved = true;
                     }
 
                     fallTimer += Time.deltaTime;
@@ -428,24 +461,28 @@ namespace Core.Misc
 
             float cameraTime = (movementCurrentStance == MovementStance.CROUCH ? stanceCrouchTransitionRoughness : stanceStandTransitionRoughness);
 
-            cameraController.fieldOfView = Mathf.Lerp(cameraController.fieldOfView, GetFieldOfView(), 5.0f * Time.deltaTime);
             cameraPosition = Vector3.Lerp(cameraPosition, cameraCenter, Time.deltaTime * cameraTime);
-            cameraOrigin.localPosition = cameraPosition;
+            cameraPivot.localPosition = cameraPosition;
 
             if (GetLookEnabled())
             {
                 cameraRotationX -= Look.GetAxis().y * GetSensitivity() * 0.1f;
                 cameraRotationY += Look.GetAxis().x * GetSensitivity() * 0.1f;
-                cameraRotationX = Mathf.Clamp(cameraRotationX, -80, 80);
+                cameraRotationX = Mathf.Clamp(cameraRotationX, -cameraPitchClampAngle, cameraPitchClampAngle);
+
+                if (cameraYawClampAngle > 0f)
+                {
+                    cameraRotationY = Mathf.Clamp(cameraRotationY, cameraYawClampCenter - cameraYawClampAngle, cameraYawClampCenter + cameraYawClampAngle);
+                }
             }
 
             characterOrigin.localRotation = Quaternion.Euler(0, cameraRotationY, 0);
-            cameraOrigin.localRotation = Quaternion.Euler(cameraRotationX, 0, 0);
+            cameraPivot.localRotation = Quaternion.Euler(cameraRotationX, 0, 0);
         }
 
         private void MoveNoclip()
         {
-            movementDirection = cameraOrigin.TransformVector(new(Move.GetAxis().x, 0f, Move.GetAxis().y));
+            movementDirection = cameraPivot.TransformVector(new(Move.GetAxis().x, 0f, Move.GetAxis().y));
             canSprint = GetSprintEnabled() && wishSprint && movementCurrentStance == MovementStance.STAND && IsMoving;
             movementTargetGroundSpeed = movementGroundSpeed;
             movementTargetGroundSpeed *= IsSprinting ? movementSprintSpeedMultiplier : 1;
@@ -454,9 +491,6 @@ namespace Core.Misc
         }
         private void MoveAir()
         {
-            /// NOT:
-            /// Collision jitter yüzünden, 'MoveSurf()' ve 'MoveAir()' birlikte çalışıyor ve surf bozuluyor.
-
             movementVelocity.y -= movementGravity * Time.deltaTime;
 
             if (CollisionSides && !isClipResolved)
@@ -465,13 +499,11 @@ namespace Core.Misc
                 isClipResolved = true;
             }
 
-            ApplyAcceleration(movementAirAccelerate, movementAirSpeed);
+            ApplyAirAcceleration(movementAirAccelerate, movementAirSpeed);
         }
         private void MoveSurf()
         {
-            /// NOT:
-            /// Burada jitter var, bunun nedeni 'skinWidth' değerinin küçük olması. 'skinWidth' = 1 yapınca düzeliyor
-            /// Çözüm için daha büyük 'SphereCast()' collision check yapılabilir.
+            // Şimdi bazen rampadan çıkarken hız kesiliyor bunun nedeni groundCheck çok uzun ama işte groundCheck kısaltırsak bu sefer jitter oluşuyor.
 
             movementVelocity.y -= movementGravity * Time.deltaTime;
 
@@ -481,7 +513,7 @@ namespace Core.Misc
                 isClipResolved = true;
             }
 
-            ApplyAcceleration(movementAirAccelerate, movementAirSpeed);
+            ApplyAirAcceleration(movementAirAccelerate, movementAirSpeed * 1.25f);
         }
         private void MoveGround()
         {
@@ -491,7 +523,7 @@ namespace Core.Misc
             movementTargetGroundSpeed *= IsSprinting ? movementSprintSpeedMultiplier : 1;
             movementTargetGroundSpeed *= IsCrouching ? movementCrouchSpeedMultiplier : 1;
             movementTargetGroundSpeed *= IsWalking ? movementWalkSpeedMultiplier : 1;
-            movementTargetGroundSpeed *= movingBackwards ? 0.65f : 1;
+            movementTargetGroundSpeed *= movingBackwards ? movementBackwardsSpeedMultiplier : 1;
 
             movementCurrentGroundSpeed = Mathf.Lerp(movementCurrentGroundSpeed, movementTargetGroundSpeed, movementSpeedAccelerate * Time.deltaTime);
 
@@ -501,7 +533,7 @@ namespace Core.Misc
             movementDirection = Vector3.ProjectOnPlane(movementDirection, collisionGroundInfo.normal).normalized;
 
             ApplyFriction(wishJump || groundTimer < 0.0333f ? 0 : movementGroundFriction);
-            ApplyAcceleration(movementGroundAccelerate, movementCurrentGroundSpeed);
+            ApplyGroundAcceleration(movementGroundAccelerate, movementCurrentGroundSpeed);
 
             if (!CollisionSides)
             {
@@ -524,28 +556,12 @@ namespace Core.Misc
         }
         private void MoveJump()
         {
-            movementVelocity.y += movementJumpForce;
+            // şimdi şu kodda çok komik bir şey var. Jump esnasında velocity.y += jumpForce diyorum ya şimdi bunu ben slope boost için kullanıyorum fakat böyle yapınca bu sefer coyote jump çalışmıyor :D çünkü düşme hızı jumpForce dan fazla oluyor ve jumpForce siliniyo
+            //movementVelocity.y += movementJumpForce;
+
+            movementVelocity.y = Mathf.Max(movementVelocity.y + movementJumpForce, movementJumpForce);
 
             OnJump?.Invoke();
-        }
-        private Vector3 ProjectOnPlane(Vector3 direction, Vector3 normal, Vector3 up, bool isNormalized = true)
-        {
-            Vector3 projection = Vector3.ProjectOnPlane(direction, normal);
-
-            Vector3 axis = Vector3.Cross(direction, up);
-
-            float angle = Vector3.SignedAngle(direction, projection, axis);
-
-            Quaternion rotation = Quaternion.AngleAxis(angle, axis);
-
-            Vector3 final = rotation * direction;
-
-            if (isNormalized)
-            {
-                final = final.normalized;
-            }
-
-            return final;
         }
 
         private void ApplyClipVelocity(Vector3 normal, float overbounce = 1.05f)
@@ -561,18 +577,37 @@ namespace Core.Misc
 
             movementVelocity -= normal * backoff;
         }
-        private void ApplyAcceleration(float factor, float speed)
+        private void ApplyGroundAcceleration(float factor, float maxSpeed)
         {
             float currentSpeed = Vector3.Dot(movementVelocity, movementDirection);
-            float addSpeed = speed - currentSpeed;
+            float addSpeed = maxSpeed - currentSpeed;
 
             if (addSpeed <= 0f)
             {
                 return;
             }
 
-            float accelerationSpeed = factor * Time.deltaTime * speed;
+            float accelerationSpeed = factor * Time.deltaTime * maxSpeed;
             accelerationSpeed = Mathf.Min(accelerationSpeed, addSpeed);
+
+            movementVelocity += movementDirection * accelerationSpeed;
+        }
+        private void ApplyAirAcceleration(float factor, float maxSpeed)
+        {
+            float currentSpeed = Vector3.Dot(movementVelocity, movementDirection);
+            float addSpeed = maxSpeed - currentSpeed;
+
+            if (addSpeed <= 0f)
+            {
+                return;
+            }
+
+            float accelerationSpeed = factor * maxSpeed * Time.deltaTime;
+
+            if (accelerationSpeed > addSpeed)
+            {
+                accelerationSpeed = addSpeed;
+            }
 
             movementVelocity += movementDirection * accelerationSpeed;
         }
@@ -647,20 +682,19 @@ namespace Core.Misc
             collisionGroundDirection = Vector3.down * (rayHeight + collisionGroundOffset);
             collisionGroundPosition = rayOrigin;
 
-            bool isHit = Physics.SphereCast(collisionGroundPosition, collisionGroundRadius, Vector3.down, out collisionGroundInfo, -collisionGroundDirection.y, collisionMask, QueryTriggerInteraction.Ignore);
+            bool isHit = Physics.SphereCast(collisionGroundPosition, collisionGroundRadius, Vector3.down, out _, -collisionGroundDirection.y, collisionMask, QueryTriggerInteraction.Ignore);
 
-            Physics.SphereCast(collisionGroundPosition, collisionGroundRadius, Vector3.down, out collisionGroundInfo, -collisionGroundDirection.y * 1.333f, collisionMask, QueryTriggerInteraction.Ignore);
-
+            Physics.SphereCast(collisionGroundPosition, collisionGroundRadius, Vector3.down, out collisionGroundInfo, -collisionGroundDirection.y * 2.5f, collisionMask, QueryTriggerInteraction.Ignore);
             return isHit;
         }
         private bool CalculateHeadCollision()
         {
-            collisionHeadRadius = characterController.radius + collisionHeadRadiusOffset;
+            collisionHeadRadius = characterController.radius + collisionCeilingRadiusOffset;
 
             Vector3 rayOrigin = characterOrigin.position + ((characterController.height / 2) * Vector3.up);
             float rayHeight = (characterController.height / 2) - (collisionHeadRadius - characterController.skinWidth - 0.01f);
 
-            collisionHeadDirection = Vector3.up * (rayHeight + collisionHeadOffset);
+            collisionHeadDirection = Vector3.up * (rayHeight + collisionCeilingOffset);
             collisionHeadPosition = rayOrigin;
 
             return Physics.CheckSphere(collisionHeadPosition + collisionHeadDirection, collisionHeadRadius, collisionMask, QueryTriggerInteraction.Ignore);
@@ -693,14 +727,19 @@ namespace Core.Misc
             }
         }
 
-        public void OverrideStandUp() => movementCurrentStance = MovementStance.STAND;
-
-        public Transform GetCameraOrigin() => cameraOrigin;
+        public Transform GetCameraOrigin() => cameraPivot;
 
         public Transform GetCharacterOrigin() => characterOrigin;
         public float GetCharacterHeight() => characterController.height;
         public float GetCharacterWidth() => characterController.skinWidth;
         public float GetCharacterRadius() => characterController.radius;
+
+        private MovementStance GetMovementStance() => movementCurrentStance;
+        public void OverrideMovementStance(MovementStance value, bool @override)
+        {
+            movementCurrentStance = value;
+            isStanceOverrided = @override;
+        }
 
         public Vector3 GetMovementDirection() => movementDirection;
         public Vector3 GetMovementVelocity() => movementVelocity;
@@ -737,14 +776,11 @@ namespace Core.Misc
         }
 
         public float GetFieldOfView() => cameraFieldOfView;
-        public void SetFieldOfView(float value, bool force = false)
+        public void SetFieldOfView(float value)
         {
-            if (force)
-            {
-                cameraController.fieldOfView = value;
-            }
-
             cameraFieldOfView = value;
+
+            cameraController.fieldOfView = cameraFieldOfView;
         }
 
         public float GetSensitivity() => cameraSensitivity;
@@ -783,97 +819,67 @@ namespace Core.Misc
         public float GetAirAcceleration() => movementAirAccelerate;
         public void SetAirAcceleration(float value) => movementAirAccelerate = value;
 
-        public void SetSprintEnabled(bool status, object requester)
+        public void SetSprintEnabled(bool status)
         {
-            if (requester == null)
-            {
-                Debug.LogError("Requester is null!", this.gameObject);
-                return;
-            }
-
             if (status)
             {
-                isSprintEnabled.Enable(requester);
+                isSprintEnabled.Enable();
             }
             else
             {
-                isSprintEnabled.Disable(requester);
+                isSprintEnabled.Disable();
             }
         }
-        public bool GetSprintEnabled() => isSprintEnabled.Value;
+        public bool GetSprintEnabled() => isSprintEnabled.IsEnabled;
 
-        public void SetCrouchEnabled(bool status, object requester)
+        public void SetCrouchEnabled(bool status)
         {
-            if (requester == null)
-            {
-                Debug.LogError("Requester is null!", this.gameObject);
-                return;
-            }
-
             if (status)
             {
-                isCrouchEnabled.Enable(requester);
+                isCrouchEnabled.Enable();
             }
             else
             {
-                isCrouchEnabled.Disable(requester);
+                isCrouchEnabled.Disable();
             }
         }
-        public bool GetCrouchEnabled() => isCrouchEnabled.Value;
+        public bool GetCrouchEnabled() => isCrouchEnabled.IsEnabled;
 
-        public void SetJumpEnabled(bool status, object requester)
+        public void SetJumpEnabled(bool status)
         {
-            if (requester == null)
-            {
-                Debug.LogError("Requester is null!", this.gameObject);
-                return;
-            }
-
             if (status)
             {
-                isJumpEnabled.Enable(requester);
+                isJumpEnabled.Enable();
             }
             else
             {
-                isJumpEnabled.Disable(requester);
+                isJumpEnabled.Disable();
             }
         }
-        public bool GetJumpEnabled() => isJumpEnabled.Value;
+        public bool GetJumpEnabled() => isJumpEnabled.IsEnabled;
 
-        public void SetIsInputEnabled(bool status, object requester)
+        public void SetIsInputEnabled(bool status)
         {
-            if (requester == null)
-            {
-                Debug.LogError("Requester is null!", this.gameObject);
-                return;
-            }
-
             if (status)
             {
-                isInputEnabled.Enable(requester);
+                isInputEnabled.Enable();
             }
             else
             {
-                isInputEnabled.Disable(requester);
+                isInputEnabled.Disable();
             }
         }
-        public bool GetIsInputEnabled() => isInputEnabled.Value;
+        public bool GetIsInputEnabled() => isInputEnabled.IsEnabled;
 
-        public void SetMovementEnabled(bool status, object requester)
+        public void SetMovementEnabled(bool status)
         {
-            if (requester == null)
-            {
-                Debug.LogError("Requester is null!", this.gameObject);
-                return;
-            }
-
             if (status)
             {
-                isMovementEnabled.Enable(requester);
+                isMovementEnabled.Enable();
             }
             else
             {
-                isMovementEnabled.Disable(requester);
+                isMovementEnabled.Disable();
                 movementVelocity = Vector3.zero;
                 fallTimer = 0;
                 groundTimer = 0;
@@ -881,45 +887,33 @@ namespace Core.Misc
                 canCrouch = false;
                 canStand = false;
                 canSprint = false;
-                movementCurrentStance = MovementStance.STAND;
             }
         }
-        public bool GetMovementEnabled() => isMovementEnabled.Value;
+        public bool GetMovementEnabled() => isMovementEnabled.IsEnabled;
 
-        public void SetLookEnabled(bool status, object requester)
+        public void SetLookEnabled(bool status)
         {
-            if (requester == null)
-            {
-                Debug.LogError("Requester is null!", this.gameObject);
-                return;
-            }
-
             if (status)
             {
-                isLookEnabled.Enable(requester);
+                isLookEnabled.Enable();
             }
             else
             {
-                isLookEnabled.Disable(requester);
+                isLookEnabled.Disable();
             }
         }
-        public bool GetLookEnabled() => isLookEnabled.Value;
+        public bool GetLookEnabled() => isLookEnabled.IsEnabled;
+        public void OverrideLookSystem(bool value) => isLookOverrided = value;
 
-        public void SetCollidersEnabled(bool status, object requester)
+        public void SetCollidersEnabled(bool status)
         {
-            if (requester == null)
-            {
-                Debug.LogError("Requester is null!", this.gameObject);
-                return;
-            }
-
             if (status)
             {
-                isCollidersEnabled.Enable(requester);
+                isCollidersEnabled.Enable();
             }
             else
             {
-                isCollidersEnabled.Disable(requester);
+                isCollidersEnabled.Disable();
             }
 
             for (int i = 0; i < characterColliders.Length; i++)
@@ -936,14 +930,22 @@ namespace Core.Misc
                 }
             }
         }
-        public bool GetCollidersEnabled() => isCollidersEnabled.Value;
-
-        public void OverrideLookSystem(bool value) => isLookOverrided = value;
+        public bool GetCollidersEnabled() => isCollidersEnabled.IsEnabled;
 
         public float GetLookPitch() => cameraRotationX;
         public void SetLookPitch(float value) => cameraRotationX = value;
+        public void SetLookPitchClamp(float value) => cameraPitchClampAngle = value;
 
         public float GetLookYaw() => cameraRotationY;
         public void SetLookYaw(float value) => cameraRotationY = value;
+        public void SetLookYawClamp(float value)
+        {
+            cameraYawClampAngle = Mathf.Max(0f, value);
+
+            if (cameraYawClampAngle > 0f)
+            {
+                cameraYawClampCenter = cameraRotationY;
+            }
+        }
     }
 }

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEditor.Experimental.GraphView.Port;
 
 namespace Core
 { 
@@ -2397,66 +2396,6 @@ namespace Core
             }
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
-        public class Flag
-        {
-            public event Action OnEnabled = null;
-            public event Action OnDisabled = null;
-
-            private const int ERROR_STEP = 256;
-            private readonly HashSet<object> disableRequesters = new();
-
-            /// <summary>
-            /// True = Enabled, False = Disabled
-            /// </summary>
-            public bool Value => disableRequesters.Count <= 0;
-
-            public void Disable(object requester)
-            {
-                bool wasEnabled = !Value;
-
-                if (disableRequesters.Add(requester))
-                {
-                    bool isEnabledNow = Value;
-
-                    if (wasEnabled && !isEnabledNow)
-                    {
-                        if (disableRequesters.Count > ERROR_STEP)
-                        {
-                            Debug.LogError("Flag.Disable() called too frequently! << requrester: " + requester.GetType());
-                            return;
-                        }
-
-                        OnDisabled?.Invoke();
-                    }
-                }
-            }
-            public void Enable(object requester)
-            {
-                bool wasDisabled = !Value;
-
-                if (disableRequesters.Remove(requester))
-                {
-                    bool isDisabledNow = !Value;
-
-                    if (wasDisabled && !isDisabledNow)
-                    {            
-                        if (disableRequesters.Count > ERROR_STEP)
-                        {
-                            Debug.LogError("Flag.Disable() called too frequently! << requrester: " + requester.GetType());
-                            return;
-                        }
-
-                        OnEnabled?.Invoke();
-                    }
-                }
-            }
-            public void Clear()
-            {
-                disableRequesters.Clear();
-                OnEnabled = null;
-                OnDisabled = null;
-            }
-        }
         public class StackFloat
         {
             public float CurrentValue => currentValue;
@@ -2533,7 +2472,7 @@ namespace Core
         }
         public class StackBool
         {
-            public bool Enabled => disableCount == 0;
+            public bool IsEnabled => disableCount == 0;
 
             private int disableCount = 0;
             

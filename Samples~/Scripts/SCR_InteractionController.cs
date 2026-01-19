@@ -30,7 +30,7 @@ namespace Core.Misc
 
         private GameEntity entityObject = null;
         private Interactable interactableObject = null;
-        private readonly Flag isEnabled = new();
+        private readonly StackBool isEnabled = new();
         private float interactTimer = 0f;
         private float interactProgress = 0f;
         private bool wasInteracted = false;
@@ -52,7 +52,7 @@ namespace Core.Misc
                 return;
             }
 
-            if (!isEnabled.Value)
+            if (!isEnabled.IsEnabled)
             {
                 return;
             }
@@ -223,11 +223,11 @@ namespace Core.Misc
 
             if (status)
             {
-                isEnabled.Enable(requester);
+                isEnabled.Enable();
             }
             else
             {
-                isEnabled.Disable(requester);
+                isEnabled.Disable();
 
                 if (interactableObject != null)
                 {
@@ -237,6 +237,6 @@ namespace Core.Misc
                 }
             }
         }
-        public bool GetInteractionEnabled() => isEnabled.Value;
+        public bool GetInteractionEnabled() => isEnabled.IsEnabled;
     }
 }
