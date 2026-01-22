@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using UnityEngine;
 
 namespace Core
@@ -28,7 +27,7 @@ namespace Core
 
             return false;
         }
-        public static bool Save<T>(string path, T Data, bool useInEditor = false, bool useOptimization = true, ISerializationBinder serializationBinder = null)
+        public static bool Save<T>(string path, T Data, bool useInEditor = false, bool useOptimization = true)
         {
             if (!useInEditor)
             {
@@ -46,11 +45,6 @@ namespace Core
                     File.Delete(path);
                 }
 
-                // For custom assembly names: ("$type": "Game.Logic.Runtime.SCR_SectorPersistentDataDefault, ASM_LogicRuntime") -> "$type": "SectorData"
-                SerializerSettings.SETTINGS.SerializationBinder = serializationBinder;
-
-                using FileStream fileStream = File.Create(path);
-                fileStream.Close();
                 File.WriteAllText(path, JsonConvert.SerializeObject(Data, useOptimization ? Formatting.None : Formatting.Indented, SerializerSettings.SETTINGS));
                 return true;
             }
@@ -60,7 +54,7 @@ namespace Core
                 return false;
             }
         }
-        public static T Load<T>(string path, bool useInEditor = false, ISerializationBinder serializationBinder = null)
+        public static T Load<T>(string path, bool useInEditor = false)
         {
             if (!useInEditor)
             {
@@ -78,9 +72,6 @@ namespace Core
 
             try
             {
-                // For custom assembly names: ("$type": "Game.Logic.Runtime.SCR_SectorPersistentDataDefault, ASM_LogicRuntime") -> "$type": "SectorData"
-                SerializerSettings.SETTINGS.SerializationBinder = serializationBinder;
-
                 T data = JsonConvert.DeserializeObject<T>(File.ReadAllText(path), SerializerSettings.SETTINGS);
                 return data;
             }

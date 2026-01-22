@@ -4,7 +4,7 @@ namespace Core.Input
 {
     public readonly struct InputActionType : IEquatable<InputActionType>
     {
-        public readonly string Value;
+        internal readonly string Value;
 
         public InputActionType(string value) => Value = value;
         public static implicit operator string(InputActionType id) => id.Value;

@@ -17,11 +17,23 @@ namespace Core
 
             if (sceneController == null)
             {
-                Debug.LogError("ManagerCorePersistent.TrySpawnObject() sceneController == null");
+                Debug.LogError("ManagerCorePersistent.TryRegisterObject() sceneController == null");
                 return false;
             }
 
             return sceneController.TryRegister(gameObject, out persistentObject);
+        }
+        public bool TryUnregisterObject(PersistentInstanceEntity persistentObject)
+        {
+            if (sceneController == null)
+            {
+                Debug.LogError("ManagerCorePersistent.TryUnregisterObject() sceneController == null");
+                return false;
+            }
+
+            Debug.LogWarning("ManagerCorePersistent.TryUnregisterObject() warning you are unregistering illegally! are you sure! this should handeld by 'PersistentSceneController'");
+
+            return sceneController.TryUnregister(persistentObject);
         }
         public void RegisterController(PersistentSceneController sceneController)
         {

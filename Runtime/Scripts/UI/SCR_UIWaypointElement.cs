@@ -99,7 +99,7 @@ namespace Core.UI
         public void Deinitialize()
         {
             isFinished = true;
-            thisTransform.Scale(Vector3.zero, 0.25f, 0.25f, UpdateType.SCALED, EaseType.LINEAR, () => Destroy(this.gameObject));
+            thisTransform.Scale(Vector3.zero, 0.25f, 0.25f, TweenType.SCALED, EaseType.LINEAR, () => Destroy(this.gameObject));
         }
     }
 }

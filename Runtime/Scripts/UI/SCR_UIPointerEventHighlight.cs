@@ -21,8 +21,8 @@ namespace Core.UI
 
         private Image thisImage = null;
         private Image[] childImages = null;
-        private TweenFadeImage thisTween = null;
-        private TweenFadeImage[] childTweens = null;
+        private TweenInstanceFadeImage thisTween = null;
+        private TweenInstanceFadeImage[] childTweens = null;
         private Color defaultColor = COLOR_WHITE;
 
         private void Awake()
@@ -33,7 +33,7 @@ namespace Core.UI
             if (influenceChild)
             {
                 childImages = GetComponentsInChildren<Image>();
-                childTweens = new TweenFadeImage[childImages.Length];
+                childTweens = new TweenInstanceFadeImage[childImages.Length];
             }
         }
 
@@ -76,14 +76,14 @@ namespace Core.UI
             }
 
             thisTween?.Kill();
-            thisTween = thisImage.Fade(defaultColor, fadeDuration, 0, UpdateType.UNSCALED, fadeEasingType);
+            thisTween = thisImage.Fade(defaultColor, fadeDuration, 0, TweenType.UNSCALED, fadeEasingType);
 
             if (influenceChild)
             {
                 for (int i = 0; i < childImages.Length; i++)
                 {
                     childTweens[i]?.Kill();
-                    childTweens[i] = childImages[i].Fade(defaultColor, fadeDuration, 0, UpdateType.UNSCALED, fadeEasingType);
+                    childTweens[i] = childImages[i].Fade(defaultColor, fadeDuration, 0, TweenType.UNSCALED, fadeEasingType);
                 }
             }
         }
@@ -113,14 +113,14 @@ namespace Core.UI
             }
 
             thisTween?.Kill();
-            thisTween = thisImage.Fade(highlightColor, fadeDuration, 0, UpdateType.UNSCALED, fadeEasingType);
+            thisTween = thisImage.Fade(highlightColor, fadeDuration, 0, TweenType.UNSCALED, fadeEasingType);
 
             if (influenceChild)
             {
                 for (int i = 0; i < childImages.Length; i++)
                 {
                     childTweens[i]?.Kill();
-                    childTweens[i] = childImages[i].Fade(highlightColor, fadeDuration, 0, UpdateType.UNSCALED, fadeEasingType);
+                    childTweens[i] = childImages[i].Fade(highlightColor, fadeDuration, 0, TweenType.UNSCALED, fadeEasingType);
                 }
             }
         }

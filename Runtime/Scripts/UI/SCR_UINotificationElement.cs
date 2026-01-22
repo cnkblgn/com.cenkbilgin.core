@@ -26,7 +26,7 @@ namespace Core.UI
         [SerializeField] private EaseType offsetOutEaseType = EaseType.LINEAR;
 
         private RectTransform thisTransform = null;
-        private TweenOffsetXRect thisTween = null;
+        private TweenInstanceOffsetRectX thisTween = null;
         private Vector2 defaultPosition = Vector2.zero;
         private Vector2 defaultSize = Vector2.zero;
         private bool isInitialized = false;
@@ -78,12 +78,12 @@ namespace Core.UI
             float startEndX = thisTransform.anchoredPosition.x;
             float startStartX = startEndX - (thisTransform.sizeDelta.x + 128);
 
-            thisTween = thisTransform.OffsetX(startStartX, startEndX, offsetInDuration, duration, UpdateType.SCALED, offsetInEaseType, () =>
+            thisTween = thisTransform.OffsetX(startStartX, startEndX, offsetInDuration, duration, TweenType.SCALED, offsetInEaseType, () =>
             {
                 float exitStartX = thisTransform.anchoredPosition.x;
                 float exitEndX = startStartX;
 
-                thisTween = thisTransform.OffsetX(exitStartX, exitEndX, offsetOutDuration, 0, UpdateType.SCALED, offsetOutEaseType, Dispose);
+                thisTween = thisTransform.OffsetX(exitStartX, exitEndX, offsetOutDuration, 0, TweenType.SCALED, offsetOutEaseType, Dispose);
             });
         }
         public void Offset(Vector2 offset) => thisTransform.anchoredPosition += offset;       

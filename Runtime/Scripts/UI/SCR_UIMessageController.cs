@@ -13,7 +13,7 @@ namespace Core.UI
         [SerializeField, Required] private UITextBox textBox = null;
 
         private Canvas thisCanvas = null;
-        private TweenFadeCanvas thisTween = null;
+        private TweenInstanceFadeCanvas thisTween = null;
 
         private void Awake() => thisCanvas = GetComponent<Canvas>();
         private void Start() { thisCanvas.Hide(); textCanvas.Hide(); }

@@ -48,9 +48,9 @@ namespace Core
 
         public static readonly JsonSerializerSettings SETTINGS = new()
         {
-            TypeNameHandling = TypeNameHandling.Auto, // See JsonConverter<T>, override ReadJson(), override WriteJson()
+            TypeNameHandling = TypeNameHandling.None, // See JsonConverter<T>, override ReadJson(), override WriteJson()
             NullValueHandling = NullValueHandling.Ignore,
-            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+            ReferenceLoopHandling = ReferenceLoopHandling.Error,
             MissingMemberHandling = MissingMemberHandling.Ignore,
             DefaultValueHandling = DefaultValueHandling.Include,
             Converters = new JsonConverter[] { new JsonConverterGuid(), new JsonConverterGuidNull() },
