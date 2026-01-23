@@ -29,7 +29,7 @@ namespace Core
                 [Min(0)] public float Frequency;
                 [Range(0, 1)]public float Damping;
 
-                public readonly static Config New = new(Vector3.zero, 6, 0.5f);
+                public readonly static Config New = new(Vector3.zero, 8, 0.33f);
                 public Config(Vector3 amplitude, float frequency, float damping) => (Amplitude, Frequency, Damping) = (amplitude, Mathf.Max(0, frequency), Mathf.Clamp01(damping));
                 public Config(Config config) => (Amplitude, Frequency, Damping) = (config.Amplitude, Mathf.Max(0, config.Frequency), Mathf.Clamp01(config.Damping));
             }
@@ -81,10 +81,15 @@ namespace Core
                 private Vector3 currentVelocity;
                 private float frequency;
                 private float damping;
-                private const float EPS = 0.001f;
+                private const float EPS = 0.0001f;
 
                 public void Start(Config config)
                 {
+                    if (config.Amplitude.sqrMagnitude < EPS)
+                    {
+                        return;
+                    }
+
                     currentVelocity += config.Amplitude;
                     frequency = Mathf.Max(0, config.Frequency);
                     damping = Mathf.Clamp01(config.Damping);
@@ -97,13 +102,9 @@ namespace Core
                         return currentValue;
                     }
 
-                    float o = frequency * 2f * Mathf.PI;
-                    float x = o * deltaTime;
-                    float e = Mathf.Exp(-damping * x);
-                    Vector3 v = (currentVelocity + o * currentValue) * deltaTime;
-
-                    currentVelocity = (currentVelocity - o * v) * e;
-                    currentValue = (currentValue + v) * e;
+                    Vector3 acceleration = -frequency * frequency * currentValue - 2f * damping * frequency * currentVelocity;
+                    currentVelocity += acceleration * deltaTime;
+                    currentValue += currentVelocity * deltaTime;
 
                     if (currentValue.sqrMagnitude < EPS && currentVelocity.sqrMagnitude < EPS)
                     {
