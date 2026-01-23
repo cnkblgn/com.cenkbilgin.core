@@ -18,7 +18,7 @@ namespace Core.Misc
                 return;
             }
 
-            this.WaitSeconds(null, EmitInternal, actionDelay, false);
+            this.WaitSeconds(actionDelay, false, null, EmitInternal);
         }
         private void EmitInternal() => actionEvent?.Invoke();
     }

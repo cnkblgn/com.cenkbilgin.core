@@ -20,418 +20,98 @@ namespace Core
         #endregion
 
         #region MOTION
-        public class SpringVector
+        public class Spring
         {
             [Serializable]
             public struct Config
             {
-                public Vector3 amplitude;
-                public float stiffness;
-                public float damping;
+                public Vector3 Amplitude;
+                [Min(0)] public float Frequency;
+                [Range(0, 1)]public float Damping;
 
-                public Config(Vector3 amplitude, float stiffness, float damping)
-                {
-                    this.amplitude = amplitude;
-                    this.stiffness = Mathf.Max(0, stiffness);
-                    this.damping = Mathf.Max(0, damping);
-                }
+                public readonly static Config New = new(Vector3.zero, 6, 0.5f);
+                public Config(Vector3 amplitude, float frequency, float damping) => (Amplitude, Frequency, Damping) = (amplitude, Mathf.Max(0, frequency), Mathf.Clamp01(damping));
+                public Config(Config config) => (Amplitude, Frequency, Damping) = (config.Amplitude, Mathf.Max(0, config.Frequency), Mathf.Clamp01(config.Damping));
             }
             public class Instance
             {
-                private Vector3 amplitude = Vector3.zero;
-                private Vector3 startValue = Vector3.zero;
-                private Vector3 currentValue = Vector3.zero;
-                private Vector3 currentVelocity = Vector3.zero;
-                private float stiffness = 100f;
-                private float damping = 10f;
-                private bool isAnimating = false;
+                private readonly SwapBackArray<State> collection = default;
+                public Instance(uint capacity) => collection = new(capacity);
 
                 public void Start(Config config)
                 {
-                    startValue = Vector3.zero;
-
-                    stiffness = Mathf.Max(0, config.stiffness);
-                    damping = Mathf.Max(0, config.damping);
-                    amplitude = config.amplitude;
-
-                    currentVelocity += amplitude;
-
-                    isAnimating = true;
-                }
-                public Vector3 Update(float deltaTime)
-                {
-                    bool x = Mathf.Abs(currentValue.x - startValue.x) < 0.001f && Mathf.Abs(currentVelocity.x) < 0.001f;
-                    bool y = Mathf.Abs(currentValue.y - startValue.y) < 0.001f && Mathf.Abs(currentVelocity.y) < 0.001f;
-                    bool z = Mathf.Abs(currentValue.z - startValue.z) < 0.001f && Mathf.Abs(currentVelocity.z) < 0.001f;
-
-                    bool isResting = x && y && z;
-
-                    if (isAnimating)
+                    if (collection.Count == collection.Capacity)
                     {
-                        Vector3 displacement = currentValue - startValue;
-                        Vector3 acceleration = -stiffness * displacement - damping * currentVelocity;
-
-                        currentVelocity += acceleration * deltaTime;
-                        currentValue += currentVelocity * deltaTime;
-                    }
-
-                    if (isResting)
-                    {
-                        isAnimating = false;
-                        currentValue = startValue;
-                        currentVelocity = Vector3.zero;
-                    }
-
-                    return currentValue;
-                }
-            }
-        }
-        public class SpringFloat
-        {
-            [Serializable]
-            public struct Config
-            {
-                public float amplitude;
-                public float stiffness;
-                public float damping;
-
-                public Config(float amplitude = -5f, float stiffness = 100f, float damping = 10f)
-                {
-                    this.amplitude = amplitude;
-                    this.stiffness = Mathf.Max(0, stiffness);
-                    this.damping = Mathf.Max(0, damping);
-                }
-            }
-            public class Instance
-            {
-                private float amplitude = 0f;
-                private float startValue = 0f;
-                private float currentValue = 0f;
-                private float currentVelocity = 0f;
-                private float stiffness = 100f;
-                private float damping = 10f;
-                private bool isAnimating = false;
-
-                public void Start(Config config)
-                {
-                    startValue = 0;
-
-                    stiffness = config.stiffness;
-                    damping = config.damping;
-                    amplitude = config.amplitude;
-
-                    currentVelocity += amplitude;
-
-                    isAnimating = true;
-                }
-                public float Update(float deltaTime)
-                {
-                    bool isResting = Mathf.Abs(currentValue - startValue) < 0.001f && Mathf.Abs(currentVelocity) < 0.001f;
-
-                    if (isAnimating)
-                    {
-                        float displacement = currentValue - startValue;
-                        float acceleration = -stiffness * displacement - damping * currentVelocity;
-
-                        currentVelocity += acceleration * deltaTime;
-                        currentValue += currentVelocity * deltaTime;
-                    }
-
-                    if (isResting)
-                    {
-                        isAnimating = false;
-                        currentValue = startValue;
-                        currentVelocity = 0f;
-                    }
-
-                    return currentValue;
-                }
-            }
-        }
-        public class SpringAdvancedFast
-        {
-            public class Instance
-            {
-                private readonly Float currentSpringX = new();
-                private readonly Float currentSpringY = new();
-                private readonly Float currentSpringZ = new();
-                private SpringAdvancedList.Config currentConfig = SpringAdvancedList.Config.New;
-                public Vector3 currentValue = Vector3.zero;
-
-                public void Start(SpringAdvancedList.Config config, float strength = 1)
-                {
-                    if (config == null)
-                    {
+                        ref State s = ref collection.GetRef(collection.Count - 1);
+                        s.Start(config);
                         return;
                     }
 
-                    currentConfig = config;
-                    currentSpringX.Start(currentConfig.Amplitude.x * strength * (currentConfig.IsRandomized.x && UnityEngine.Random.value < 0.5f ? -1 : 1));
-                    currentSpringY.Start(currentConfig.Amplitude.y * strength * (currentConfig.IsRandomized.y && UnityEngine.Random.value < 0.5f ? -1 : 1));
-                    currentSpringZ.Start(currentConfig.Amplitude.z * strength * (currentConfig.IsRandomized.z && UnityEngine.Random.value < 0.5f ? -1 : 1));
+                    State state = new();
+                    state.Start(config);
+                    collection.Add(state);
                 }
                 public Vector3 Update(float deltaTime)
                 {
-                    currentValue.x = currentSpringX.Update(deltaTime * currentConfig.Roughness, currentConfig.Damping, currentConfig.Mass, currentConfig.Stiffness);
-                    currentValue.y = currentSpringY.Update(deltaTime * currentConfig.Roughness, currentConfig.Damping, currentConfig.Mass, currentConfig.Stiffness);
-                    currentValue.z = currentSpringZ.Update(deltaTime * currentConfig.Roughness, currentConfig.Damping, currentConfig.Mass, currentConfig.Stiffness);
+                    Vector3 value = Vector3.zero;
 
-                    return currentValue;
-                }
-                public void Clear() => currentValue = Vector3.zero;
-
-            }
-            private class Float
-            {
-                private float springTime;
-                private float currentValue;
-                private float startValue;
-                private float endValue;
-                private float initialVelocity;
-                private float currentVelocity;
-
-                public void Start(float startValue)
-                {
-                    this.startValue = startValue;
-                    initialVelocity = currentVelocity;
-                    endValue = 0.0f;
-                    springTime = 0.0f;
-                }
-                public float Update(float deltaTime, float damping, float mass, float stiffness)
-                {
-                    springTime += deltaTime;
-
-                    float c = damping;
-                    float m = mass;
-                    float k = stiffness;
-                    float v0 = -initialVelocity;
-                    float t = springTime;
-
-                    float zeta = c / (2 * Mathf.Sqrt(k * m));
-                    float omega0 = Mathf.Sqrt(k / m);
-                    float x0 = endValue - startValue;
-
-                    float omegaZeta = omega0 * zeta;
-                    float x;
-                    float v;
-
-                    if (zeta < 1)
+                    for (int i = collection.Count - 1; i >= 0; i--)
                     {
-                        float omega1 = omega0 * Mathf.Sqrt(1.0f - zeta * zeta);
-                        float e = Mathf.Exp(-omegaZeta * t);
-                        float c1 = x0;
-                        float c2 = (v0 + omegaZeta * x0) / omega1;
-                        float cos = Mathf.Cos(omega1 * t);
-                        float sin = Mathf.Sin(omega1 * t);
-                        x = e * (c1 * cos + c2 * sin);
-                        v = -e * ((x0 * omegaZeta - c2 * omega1) * cos + (x0 * omega1 + c2 * omegaZeta) * sin);
-                    }
-                    else if (zeta > 1)
-                    {
-                        float omega2 = omega0 * Mathf.Sqrt(zeta * zeta - 1.0f);
-                        float z1 = -omegaZeta - omega2;
-                        float z2 = -omegaZeta + omega2;
-                        float e1 = Mathf.Exp(z1 * t);
-                        float e2 = Mathf.Exp(z2 * t);
-                        float c1 = (v0 - x0 * z2) / (-2 * omega2);
-                        float c2 = x0 - c1;
-                        x = c1 * e1 + c2 * e2;
-                        v = c1 * z1 * e1 + c2 * z2 * e2;
-                    }
-                    else
-                    {
-                        float e = Mathf.Exp(-omega0 * t);
-                        x = e * (x0 + (v0 + omega0 * x0) * t);
-                        v = e * (v0 * (1 - t * omega0) + t * x0 * (omega0 * omega0));
-                    }
+                        ref State state = ref collection.GetRef(i);
 
-                    currentValue = Mathf.Lerp(currentValue, endValue - x, deltaTime);
-                    currentVelocity = v;
-
-                    return currentValue;
-                }
-            }
-        }
-        public class SpringAdvancedList
-        {
-            [Serializable]
-            public class Config
-            {
-                [SerializeField] public string Name;
-                [SerializeField, Min(1)] public float Roughness;
-                [SerializeField, Min(1)] public float Mass;
-                [SerializeField, Min(0.1f)] public float Damping;
-                [SerializeField, Min(0.1f)] public float Stiffness;
-                [SerializeField] public Vector3 Amplitude;
-                [SerializeField] public bool3 IsRandomized;
-
-                public static Config New => new(5, 1, 1.5f, 4.0f, Vector3.zero, new(false, false, false));
-
-                public Config(Config config) => (Name, Roughness, Mass, Damping, Stiffness, Amplitude, IsRandomized) = (STRING_EMPTY, config.Roughness, config.Mass, config.Damping, config.Stiffness, config.Amplitude, config.IsRandomized);
-                public Config(float roughness, float mass, float damping, float stiffness, Vector3 amplitude, bool3 isRandomized) => (Name, Roughness, Mass, Damping, Stiffness, Amplitude, IsRandomized) = (STRING_EMPTY, roughness, mass, damping, stiffness, amplitude, isRandomized);
-            }
-            public class Instance
-            {
-                private readonly List<Vector> currentValues = new();
-                private Vector3 currentValue = Vector3.zero;
-
-                public void Start(Config config)
-                {
-                    if (config == null)
-                    {
-                        return;
-                    }
-
-                    currentValues.Add(new(config));
-                }
-                public Vector3 Update(float deltaTime)
-                {
-                    currentValue = Vector3.zero;
-
-                    for (int i = 0; i < currentValues.Count; i++)
-                    {
-                        if (i >= currentValues.Count)
+                        if (!state.IsActive)
                         {
-                            break;
-                        }
-
-                        Vector springInstance = currentValues[i];
-
-                        if (!springInstance.IsStarted)
-                        {
-                            springInstance.Start();
-                        }
-
-                        if (springInstance.IsActive)
-                        {
-                            currentValue += springInstance.Update(deltaTime);
+                            collection.RemoveAt(i);
                         }
                         else
                         {
-                            currentValues.RemoveAt(i);
-                            i--;
+                            value += state.Update(deltaTime);
                         }
                     }
 
-                    return currentValue;
+                    return value;
                 }
-                public void Clear() => currentValues.Clear();
+                public void Clear() => collection.Clear();
             }
-            private class Vector
+            public struct State
             {
-                public bool IsActive => currentSpringX.IsActive || currentSpringY.IsActive || currentSpringZ.IsActive;
-                public bool IsStarted { get; private set; } = false;
+                public bool IsActive { get; private set; }
 
-                private readonly Float currentSpringX = new();
-                private readonly Float currentSpringY = new();
-                private readonly Float currentSpringZ = new();
-                private readonly Config currentConfig = Config.New;
-                public Vector3 currentValue = Vector3.zero;
+                private Vector3 currentValue;
+                private Vector3 currentVelocity;
+                private float frequency;
+                private float damping;
+                private const float EPS = 0.001f;
 
-                public Vector(Config config) => currentConfig = config;
-                public void Start()
+                public void Start(Config config)
                 {
-                    currentSpringX.Start(currentConfig.Amplitude.x * (currentConfig.IsRandomized.x && UnityEngine.Random.value < 0.5f ? -1 : 1));
-                    currentSpringY.Start(currentConfig.Amplitude.y * (currentConfig.IsRandomized.y && UnityEngine.Random.value < 0.5f ? -1 : 1));
-                    currentSpringZ.Start(currentConfig.Amplitude.z * (currentConfig.IsRandomized.z && UnityEngine.Random.value < 0.5f ? -1 : 1));
-                    IsStarted = true;
+                    currentVelocity += config.Amplitude;
+                    frequency = Mathf.Max(0, config.Frequency);
+                    damping = Mathf.Clamp01(config.Damping);
+                    IsActive = true;
                 }
                 public Vector3 Update(float deltaTime)
                 {
-                    currentValue.x = currentSpringX.Update(deltaTime * currentConfig.Roughness, currentConfig.Damping, currentConfig.Mass, currentConfig.Stiffness);
-                    currentValue.y = currentSpringY.Update(deltaTime * currentConfig.Roughness, currentConfig.Damping, currentConfig.Mass, currentConfig.Stiffness);
-                    currentValue.z = currentSpringZ.Update(deltaTime * currentConfig.Roughness, currentConfig.Damping, currentConfig.Mass, currentConfig.Stiffness);
-
-                    return currentValue;
-                }
-
-            }
-            private class Float
-            {
-                public bool IsActive = true;
-
-                private float springTime;
-                private float currentValue;
-                private float startValue;
-                private float endValue;
-                private float initialVelocity;
-                private float currentVelocity;
-                private float lastVelocity;
-
-                public void Start(float startValue)
-                {
-                    this.startValue = startValue;
-                    initialVelocity = currentVelocity;
-                    endValue = 0.0f;
-                    springTime = 0.0f;
-                    lastVelocity = 0.0f;
-
-                    IsActive = true;
-                }
-                public float Update(float deltaTime, float damping, float mass, float stiffness)
-                {
-                    if (Time.timeScale <= 0)
+                    if (!IsActive)
                     {
-                        IsActive = true;
-                        lastVelocity = 0;
                         return currentValue;
                     }
 
-                    springTime += deltaTime;
+                    float o = frequency * 2f * Mathf.PI;
+                    float x = o * deltaTime;
+                    float e = Mathf.Exp(-damping * x);
+                    Vector3 v = (currentVelocity + o * currentValue) * deltaTime;
 
-                    float c = damping;
-                    float m = mass;
-                    float k = stiffness;
-                    float v0 = -initialVelocity;
-                    float t = springTime;
+                    currentVelocity = (currentVelocity - o * v) * e;
+                    currentValue = (currentValue + v) * e;
 
-                    float zeta = c / (2 * Mathf.Sqrt(k * m));
-                    float omega0 = Mathf.Sqrt(k / m);
-                    float x0 = endValue - startValue;
-
-                    float omegaZeta = omega0 * zeta;
-                    float x;
-                    float v;
-
-                    if (zeta < 1)
+                    if (currentValue.sqrMagnitude < EPS && currentVelocity.sqrMagnitude < EPS)
                     {
-                        float omega1 = omega0 * Mathf.Sqrt(1.0f - zeta * zeta);
-                        float e = Mathf.Exp(-omegaZeta * t);
-                        float c1 = x0;
-                        float c2 = (v0 + omegaZeta * x0) / omega1;
-                        float cos = Mathf.Cos(omega1 * t);
-                        float sin = Mathf.Sin(omega1 * t);
-                        x = e * (c1 * cos + c2 * sin);
-                        v = -e * ((x0 * omegaZeta - c2 * omega1) * cos + (x0 * omega1 + c2 * omegaZeta) * sin);
-                    }
-                    else if (zeta > 1)
-                    {
-                        float omega2 = omega0 * Mathf.Sqrt(zeta * zeta - 1.0f);
-                        float z1 = -omegaZeta - omega2;
-                        float z2 = -omegaZeta + omega2;
-                        float e1 = Mathf.Exp(z1 * t);
-                        float e2 = Mathf.Exp(z2 * t);
-                        float c1 = (v0 - x0 * z2) / (-2 * omega2);
-                        float c2 = x0 - c1;
-                        x = c1 * e1 + c2 * e2;
-                        v = c1 * z1 * e1 + c2 * z2 * e2;
-                    }
-                    else
-                    {
-                        float e = Mathf.Exp(-omega0 * t);
-                        x = e * (x0 + (v0 + omega0 * x0) * t);
-                        v = e * (v0 * (1 - t * omega0) + t * x0 * (omega0 * omega0));
-                    }
-
-                    currentValue = Mathf.Lerp(currentValue, endValue - x, deltaTime);
-                    currentVelocity = v;
-
-                    if (Mathf.Abs(lastVelocity - currentVelocity) <= 0.00001f)
-                    {
+                        currentValue = Vector3.zero;
+                        currentVelocity = Vector3.zero;
                         IsActive = false;
                     }
 
-                    lastVelocity = currentVelocity;
                     return currentValue;
                 }
             }
@@ -439,158 +119,128 @@ namespace Core
         public class Shake
         {
             [Serializable]
-            public class Config
+            public struct Config
             {
-                [SerializeField] public string Name;
-                [SerializeField, Min(0)] public float Magnitude;
-                [SerializeField, Min(0)] public float Roughness;
-                [SerializeField, Min(0)] public float FadeInTime;
-                [SerializeField, Min(0)] public float FadeOutTime;
-                [SerializeField] public Vector3 Influence;
+                public Vector3 Influence;
+                [Min(0)] public float Magnitude;
+                [Min(0)] public float Roughness;
+                [Min(0)] public float FadeInTime;
+                [Min(0)] public float FadeOutTime;
 
-                public static Config New => new(1, 1, 0, 1, Vector3.zero);
-                public Config(Config config) => (Name, Magnitude, Roughness, FadeInTime, FadeOutTime, Influence) = (STRING_EMPTY, config.Magnitude, config.Roughness, config.FadeInTime, config.FadeOutTime, config.Influence);
-                public Config(float magnitude, float roughness, float fadeInTime, float fadeOutTime, Vector3 influence) => (Name, Magnitude, Roughness, FadeInTime, FadeOutTime, Influence) = (STRING_EMPTY, magnitude, roughness, fadeInTime, fadeOutTime, influence);
+                public readonly static Config New = new(1, 1, 0, 1, Vector3.zero);
+                public Config(Config config) => (Magnitude, Roughness, FadeInTime, FadeOutTime, Influence) = (config.Magnitude, config.Roughness, config.FadeInTime, config.FadeOutTime, config.Influence);
+                public Config(float magnitude, float roughness, float fadeInTime, float fadeOutTime, Vector3 influence) => (Magnitude, Roughness, FadeInTime, FadeOutTime, Influence) = (magnitude, roughness, fadeInTime, fadeOutTime, influence);
             }
             public class Instance
             {
-                private readonly List<Updater> currentValues = new();
-                private Vector3 currentValue = Vector3.zero;
+                private readonly SwapBackArray<State> collection;
+                public Instance(uint capacity) => collection = new(capacity);
 
-                public Instance() => currentValues = new();
-                public void Start(Config config, float strength = 1)
+                public void Start(Config config, float strength = 1f)
                 {
-                    if (config == null)
+                    if (collection.Count == collection.Capacity)
                     {
+                        ref State s = ref collection.GetRef(collection.Count - 1);
+                        s.Start(config, strength);
                         return;
                     }
 
-                    currentValues.Add(new(config.Magnitude, config.Roughness, config.FadeInTime, config.FadeOutTime, config.Influence * strength));
+                    State state = new();
+                    state.Start(config, strength);
+                    collection.Add(state);
                 }
                 public Vector3 Update(float deltaTime)
                 {
-                    currentValue = Vector3.zero;
+                    Vector3 value = Vector3.zero;
 
-                    for (int i = 0; i < currentValues.Count; i++)
+                    for (int i = collection.Count - 1; i >= 0; i--)
                     {
-                        if (i >= currentValues.Count)
-                        {
-                            break;
-                        }
+                        ref State s = ref collection.GetRef(i);
 
-                        Updater instance = currentValues[i];
-
-                        if (instance.CurrentState == Updater.State.Inactive)
+                        if (!s.IsActive)
                         {
-                            currentValues.RemoveAt(i);
-                            i--;
-                        }
-                        else if (instance.CurrentState != Updater.State.Inactive)
-                        {
-                            currentValue += instance.Update(deltaTime);
-                        }
-                    }
-
-                    return currentValue;
-                }
-                public void Clear() => currentValues.Clear();
-            }
-            private class Updater
-            {
-                public enum State { FadingIn, FadingOut, Sustained, Inactive }
-                public State CurrentState
-                {
-                    get
-                    {
-                        if (IsFadingIn)
-                        {
-                            return State.FadingIn;
-                        }
-                        else if (IsFadingOut)
-                        {
-                            return State.FadingOut;
-                        }
-                        else if (IsShaking)
-                        {
-                            return State.Sustained;
+                            collection.RemoveAt(i);
                         }
                         else
                         {
-                            return State.Inactive;
+                            value += s.Update(deltaTime);
                         }
                     }
+
+                    return value;
                 }
-                private bool IsShaking => currentFadeTime > 0 || sustain;
-                private bool IsFadingOut => !sustain && currentFadeTime > 0;
-                private bool IsFadingIn => currentFadeTime < 1 && sustain && fadeInTime > 0;
+                public void Clear() => collection.Clear();
+            }
+            public struct State
+            {
+                public bool IsActive { get; private set; }
 
-                private Vector3 influence = Vector3.zero;
-                private Vector3 amplitude = Vector3.zero;
-                private Vector3 currentValue = Vector3.zero;
-                private readonly float magnitude;
-                private readonly float roughness;
-                private readonly float fadeOutTime = 0;
-                private readonly float fadeInTime = 0;
-                private float currentFadeTime = 0;
-                private float currentTick = 0;
-                private bool sustain = false;
+                private Vector3 influence;
+                private Vector3 currentValue;
+                private float magnitude;
+                private float roughness;
+                private float fadeInTime;
+                private float fadeOutTime;
+                private float fadeTimer;
+                private float tickTimer;
+                private bool isSustaining;
 
-                public Updater(float magnitude, float roughness, float fadeInTime, float fadeOutTime, Vector3 influence)
+                public void Start(Config config, float strength)
                 {
-                    this.magnitude = magnitude;
-                    this.fadeOutTime = fadeOutTime;
-                    this.fadeInTime = fadeInTime;
-                    this.roughness = roughness;
-                    this.influence = influence;
+                    magnitude = config.Magnitude * strength;
+                    roughness = config.Roughness;
+                    fadeInTime = config.FadeInTime;
+                    fadeOutTime = Mathf.Max(0.0001f, config.FadeOutTime);
+                    influence = config.Influence;
 
-                    if (fadeInTime > 0)
-                    {
-                        sustain = true;
-                        currentFadeTime = 0;
-                    }
-                    else
-                    {
-                        sustain = false;
-                        currentFadeTime = 1;
-                    }
+                    fadeTimer = fadeInTime > 0 ? 0f : 1f;
+                    tickTimer = UnityEngine.Random.value * 1000f;
 
-                    currentTick = UnityEngine.Random.Range(-100, 100);
+                    isSustaining = fadeInTime > 0;
+                    IsActive = true;
                 }
                 public Vector3 Update(float deltaTime)
                 {
-                    amplitude.x = Mathf.PerlinNoise(currentTick, 0) - 0.5f;
-                    amplitude.y = Mathf.PerlinNoise(0, currentTick) - 0.5f;
-                    amplitude.z = Mathf.PerlinNoise(currentTick, currentTick) - 0.5f;
-
-                    if (fadeInTime > 0 && sustain)
+                    if (!IsActive)
                     {
-                        if (currentFadeTime < 1)
-                        {
-                            currentFadeTime += deltaTime / fadeInTime;
-                        }
-                        else if (fadeOutTime > 0)
-                        {
-                            sustain = false;
-                        }
+                        return currentValue;
                     }
 
-                    if (!sustain)
-                    {
-                        currentFadeTime -= deltaTime / fadeOutTime;
-                    }
+                    // Noise
+                    float nx = Mathf.PerlinNoise(tickTimer, 0f) - 0.5f;
+                    float ny = Mathf.PerlinNoise(0f, tickTimer) - 0.5f;
+                    float nz = Mathf.PerlinNoise(tickTimer, tickTimer) - 0.5f;
 
-                    if (sustain)
+                    // Fade in / out
+                    if (isSustaining)
                     {
-                        currentTick += deltaTime * roughness;
+                        if (fadeInTime > 0)
+                        {
+                            fadeTimer += deltaTime / fadeInTime;
+                            if (fadeTimer >= 1f)
+                            {
+                                fadeTimer = 1f;
+                                isSustaining = false;
+                            }
+                        }
                     }
                     else
                     {
-                        currentTick += deltaTime * roughness * currentFadeTime;
+                        fadeTimer -= deltaTime / fadeOutTime;
                     }
 
-                    currentValue.x = currentFadeTime * magnitude * amplitude.x * influence.x;
-                    currentValue.y = currentFadeTime * magnitude * amplitude.y * influence.y;
-                    currentValue.z = currentFadeTime * magnitude * amplitude.z * influence.z;
+                    if (fadeTimer <= 0f)
+                    {
+                        IsActive = false;
+                        currentValue = Vector3.zero;
+                        return currentValue;
+                    }
+
+                    tickTimer += deltaTime * roughness * fadeTimer;
+
+                    currentValue.x = nx * magnitude * fadeTimer * influence.x;
+                    currentValue.y = ny * magnitude * fadeTimer * influence.y;
+                    currentValue.z = nz * magnitude * fadeTimer * influence.z;
 
                     return currentValue;
                 }
@@ -601,14 +251,13 @@ namespace Core
             [Serializable]
             public class Config
             {
-                [SerializeField] public string Name;
-                [SerializeField, Min(0.01f)] public float Smoothness;
-                [SerializeField] public Vector3 Amplitude;
-                [SerializeField] public Vector3 Clamp;
-                [SerializeField] public bool3 IsOffset;
+                [Min(0.01f)] public float Smoothness;
+                public Vector3 Amplitude;
+                public Vector3 Clamp;
+                public bool3 IsOffset;
 
-                public static Config New => new(0.15f, Vector3.one, Vector3.zero, new(false, false, false));
-                public Config(float smoothness, Vector3 amplitude, Vector3 clamp, bool3 offset) => (Name, Smoothness, Amplitude, Clamp, IsOffset) = (STRING_EMPTY, smoothness, amplitude, clamp, offset);
+                public static readonly Config New = new(0.15f, Vector3.one, Vector3.zero, new(false, false, false));
+                public Config(float smoothness, Vector3 amplitude, Vector3 clamp, bool3 offset) => (Smoothness, Amplitude, Clamp, IsOffset) = (smoothness, amplitude, clamp, offset);
             }
             public class Instance
             {
@@ -640,14 +289,13 @@ namespace Core
             [Serializable]
             public class Config
             {
-                [SerializeField] public string Name;
-                [SerializeField, Min(0.01f)] public float Roughness;
-                [SerializeField] public Vector3 Amplitude;
-                [SerializeField] public Vector3 Frequency;
-                [SerializeField] public Vector3 Clamp;
+                [Min(0.01f)] public float Roughness;
+                public Vector3 Amplitude;
+                public Vector3 Frequency;
+                public Vector3 Clamp;
 
-                public static Config New => new(5, Vector3.one * 0.1f, Vector3.one * 15.0f, Vector3.zero);
-                public Config(float roughness, Vector3 amplitude, Vector3 frequency, Vector3 clamp) => (Name, Roughness, Amplitude, Frequency, Clamp) = (STRING_EMPTY, roughness, amplitude, frequency, clamp);
+                public static readonly Config New = new(5, Vector3.one * 0.1f, Vector3.one * 15.0f, Vector3.zero);
+                public Config(float roughness, Vector3 amplitude, Vector3 frequency, Vector3 clamp) => (Roughness, Amplitude, Frequency, Clamp) = (roughness, amplitude, frequency, clamp);
             }
             public class Instance
             {
@@ -682,12 +330,11 @@ namespace Core
             [Serializable]
             public class Config
             {
-                [SerializeField] public string Name;
-                [SerializeField, Min(0.01f)] public float Smoothness;
-                [SerializeField] public Vector3 Target;
+                [Min(0.01f)] public float Smoothness;
+                public Vector3 Target;
 
-                public static Config New => new(5, Vector3.zero);
-                public Config(float smoothness, Vector3 target) => (Name, Smoothness, Target) = (STRING_EMPTY, smoothness, target);
+                public static readonly Config New = new(5, Vector3.zero);
+                public Config(float smoothness, Vector3 target) => (Smoothness, Target) = (smoothness, target);
             }
             public class Instance
             {
@@ -1097,7 +744,7 @@ namespace Core
         }
 
 
-        /// <summary> Set a bit to 0 or 1 at a specific bitIndex in a uint </summary>> /// 
+        /// <summary> Set s bit to 0 or 1 at s specific bitIndex in s uint </summary>> /// 
         public static uint SetBit(uint value, int bitIndex, bool b)
         {
             if (bitIndex < 0 || bitIndex > 31)
@@ -1588,60 +1235,33 @@ namespace Core
                     items[index] = value;
                 }
             } private readonly T[] items;
-            public int Count { get; set; }
+            public int Count { get; private set; } = 0;
+            public int Capacity => items.Length;
 
-            private readonly EqualityComparer<T> comparer = null;
-
-            public SwapBackArray(int capacity)
+            public SwapBackArray(uint capacity) => items = new T[capacity];
+            public ref T GetRef(int index) => ref items[index];
+            public void Truncate(int newCount)
             {
-                items = new T[capacity];
-                Count = 0;
-
-                comparer = EqualityComparer<T>.Default;
-            }
-
-            public ref T GetRef(int index)
-            {
-                if (index < 0 || index >= Count)
+                if (newCount < 0 || newCount > Count)
                 {
-                    throw new IndexOutOfRangeException();
+                    throw new ArgumentOutOfRangeException();
                 }
 
-                return ref items[index]; // Critical ref return
+                Count = newCount;
             }
             public void Add(T item)
             {
                 if (Count >= items.Length)
                 {
-                    Debug.LogError("SwapBackArray.Apply() does not support for each loop!");
-                    throw new InvalidOperationException("SwapBackArray.Apply() capacity exceeded.");                    
+                    Debug.LogError("SwapBackArray.Add() capacity exceeded!");
+                    return;
                 }
 
                 items[Count++] = item;
             }
-            public bool Remove(T item)
-            {
-                int index = -1;
-
-                for (int i = 0; i < Count; i++)
-                {
-                    if (comparer.Equals(items[i], item))
-                    {
-                        index = i;
-                    }
-                }
-
-                if (index == -1)
-                {
-                    return false;
-                }
-
-                RemoveAt(index);
-                return true;
-            }
             public void RemoveAt(int index)
             {
-                if (index < 0 || index >= Count)
+                if (index >= Count)
                 {
                     throw new IndexOutOfRangeException();
                 }
@@ -1651,7 +1271,7 @@ namespace Core
             }
             public void RemoveAll(Predicate<T> match)
             {
-                for (int i = 0; i < Count;)
+                for (int i = 0; i < Count; i++)
                 {
                     if (match(items[i]))
                     {
@@ -1678,34 +1298,54 @@ namespace Core
 
             private float currentValue = 1;
             private readonly float baseValue = 1;
-            private readonly int capacity = 1;
-            private readonly SwapBackArray<float> stackCollection = new(8);
+            private readonly float[] multipliers = null;
+            private readonly bool[] used = null;
 
-            public StackFloat(float baseValue, int capacity) => (this.baseValue, this.stackCollection) = (baseValue, new(this.capacity = capacity));
-
-            public void Apply(float multiplier)
+            public StackFloat(float baseValue, uint capacity)
             {
-                if (stackCollection.Count >= capacity)
+                this.baseValue = baseValue;
+                this.currentValue = baseValue;
+                this.multipliers = new float[capacity];
+                this.used = new bool[capacity];
+            }
+            public int Apply(float multiplier)
+            {
+                for (int i = 0; i < used.Length; i++)
                 {
-                    Debug.LogWarning("StackFloat.Apply() stackCollection.Count >= capacity");
+                    if (!used[i])
+                    {
+                        multipliers[i] = multiplier;
+                        used[i] = true;
+                        Recalculate();
+                        return i;
+                    }
+                }
+
+                Debug.LogWarning("StackFloat.Apply() not enough space!");
+                return -1;
+            }
+            public void Revert(uint index)
+            {
+                if (index >= used.Length)
+                {
+                    Debug.LogWarning("StackFloat.Revert() index out of range");
                     return;
                 }
 
-                stackCollection.Add(multiplier);
-                Recalculate();
-            }
-            public void Revert(float multiplier)
-            {
-                stackCollection.Remove(multiplier);
+                multipliers[index] = 0;
+                used[index] = false;
                 Recalculate();
             }
             private void Recalculate()
             {
                 currentValue = baseValue;
 
-                for (int i = 0; i < stackCollection.Count; i++)
+                for (int i = 0; i < used.Length; i++)
                 {
-                    currentValue *= stackCollection[i];
+                    if (used[i])
+                    {
+                        currentValue *= multipliers[i];
+                    }
                 }
             }
         }
@@ -1715,34 +1355,54 @@ namespace Core
 
             private int currentValue = 1;
             private readonly int baseValue = 1;
-            private readonly int capacity = 1;
-            private readonly SwapBackArray<int> stackCollection = new(8);
+            private readonly int[] values = null;
+            private readonly bool[] used = null;
 
-            public StackInt(int baseValue, int capacity) => (this.baseValue, this.stackCollection) = (baseValue, new(this.capacity = capacity));
-
-            public void Add(int value)
+            public StackInt(int baseValue, uint capacity)
             {
-                if (stackCollection.Count >= capacity)
+                this.baseValue = baseValue;
+                this.currentValue = baseValue;
+                this.values = new int[capacity];
+                this.used = new bool[capacity];
+            }
+            public int Add(int value)
+            {
+                for (int i = 0; i < used.Length; i++)
                 {
-                    Debug.LogWarning("StackInt.Apply() stackCollection.Count >= capacity");
+                    if (!used[i])
+                    {
+                        values[i] = value;
+                        used[i] = true;
+                        Recalculate();
+                        return i;
+                    }
+                }
+
+                Debug.LogWarning("StackInt.Add() not enough space!");
+                return -1;
+            }
+            public void Remove(uint index)
+            {
+                if ((uint)index < 0 || (uint)index >= used.Length)
+                {
+                    Debug.LogWarning("StackInt.Remove() index out of range");
                     return;
                 }
 
-                stackCollection.Add(value);
-                Recalculate();
-            }
-            public void Remove(int value)
-            {
-                stackCollection.Remove(value);
+                values[index] = 0;
+                used[index] = false;
                 Recalculate();
             }
             private void Recalculate()
             {
                 currentValue = baseValue;
 
-                for (int i = 0; i < stackCollection.Count; i++)
+                for (int i = 0; i < used.Length; i++)
                 {
-                    currentValue *= stackCollection[i];
+                    if (used[i])
+                    {
+                        currentValue += values[i];
+                    }
                 }
             }
         }

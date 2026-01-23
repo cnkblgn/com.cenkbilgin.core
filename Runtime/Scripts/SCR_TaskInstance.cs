@@ -5,6 +5,8 @@ namespace Core
 {
     public class TaskInstance
     {
+        public bool IsCompleted { get; private set; } = false;
+
         private readonly MonoBehaviour host = null;
         private readonly Func<bool> predicate = null;
         private readonly Action onComplete = null;
@@ -13,51 +15,51 @@ namespace Core
         private readonly bool isRealtime = false;
         private readonly bool isFrametime = false;
         private readonly bool isPredicate = false;
-        public bool isFinished = false;
 
         public TaskInstance(MonoBehaviour host, Func<bool> predicate, Action onComplete)
         {
             this.host = host;
             this.predicate = predicate;
             this.onComplete = onComplete;
+            this.targetFrame = Time.frameCount + 1;
+            this.currentTime = 0;
+
             this.isRealtime = false;
             this.isFrametime = false;
-            targetFrame = Time.frameCount + 1;
-            currentTime = 0;
-
-            isFinished = false;
-            isPredicate = predicate != null;
+            this.IsCompleted = false;
+            this.isPredicate = predicate != null;
         }
         public TaskInstance(MonoBehaviour host, Action onComplete, float waitSeconds, bool isRealtime, bool isFrametime)
         {
             this.host = host;
             this.predicate = null;
             this.onComplete = onComplete;
+
+            this.targetFrame = Time.frameCount + 1;
+            this.currentTime = waitSeconds;
+
             this.isRealtime = isRealtime;
             this.isFrametime = isFrametime;
-            targetFrame = Time.frameCount + 1;
-            currentTime = waitSeconds;
-
-            isFinished = false;
-            isPredicate = false;
+            this.IsCompleted = false;
+            this.isPredicate = false;
         }
         public void Update()
         {
-            if (isFinished)
+            if (IsCompleted)
             {
                 return;
             }
 
             if (host == null)
             {
-                isFinished = true;
+                IsCompleted = true;
                 return;
             }
 
             if (isFrametime && Time.frameCount > targetFrame)
             {
                 onComplete?.Invoke();
-                isFinished = true;
+                IsCompleted = true;
                 return;
             }
 
@@ -66,7 +68,7 @@ namespace Core
                 if (predicate.Invoke())
                 {
                     onComplete?.Invoke();
-                    isFinished = true;
+                    IsCompleted = true;
                     return;
                 }
 
@@ -76,11 +78,11 @@ namespace Core
             if (currentTime <= 0)
             {
                 onComplete?.Invoke();
-                isFinished = true;
+                IsCompleted = true;
             }
 
             currentTime -= isRealtime ? Time.unscaledDeltaTime : Time.deltaTime;
         }
-        public void Stop() => isFinished = true;
+        public void Stop() => IsCompleted = true;
     }
 }

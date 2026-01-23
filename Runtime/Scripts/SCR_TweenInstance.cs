@@ -9,8 +9,8 @@ namespace Core
         protected abstract bool CanUpdate { get; }
 
         private readonly Action onComplete = null;
-        private readonly EaseType easeType;
-        private readonly TweenType tweenType;
+        private readonly EaseType easeType = EaseType.LINEAR;
+        private readonly TweenType tweenType = TweenType.SCALED;
         private readonly float fadeSeconds = 0;
         private readonly float waitSeconds = 0;
         private float fadeTimer = 0;
@@ -22,9 +22,14 @@ namespace Core
         {
             this.fadeSeconds = fadeSeconds;
             this.waitSeconds = waitSeconds;
-            this.onComplete = onComplete;
             this.tweenType = tweenType;
             this.easeType = easeType;
+            this.onComplete = onComplete;
+
+            this.fadeTimer = 0;
+            this.waitTimer = 0;
+            this.isFadeCompleted = false;
+            this.isBaseCompleted = false;
         }
         public void Update()
         {
@@ -61,8 +66,15 @@ namespace Core
                 }
             }
         }
-        public void Complete() { onComplete?.Invoke(); Kill(); }
-        public void Kill() => isBaseCompleted = true;
+        public void Complete()
+        { 
+            onComplete?.Invoke(); 
+            Kill(); 
+        }
+        public void Kill()
+        {
+            isBaseCompleted = true;
+        }
         protected abstract void OnFadeUpdate(float time);
         protected abstract void OnFadeComplete();
     }

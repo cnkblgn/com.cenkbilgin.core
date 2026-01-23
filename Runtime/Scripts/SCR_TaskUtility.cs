@@ -18,7 +18,7 @@ namespace Core
 
             return taskInstance;
         }
-        public static void WaitSeconds(this MonoBehaviour _, Action onStart, Action onComplete, float seconds, bool isRealtime)
+        public static void WaitSeconds(this MonoBehaviour _, float seconds, bool isRealtime, Action onStart, Action onComplete)
         {
             if (seconds <= 0)
             {
@@ -31,7 +31,7 @@ namespace Core
             onStart?.Invoke();
             TaskSystem.TryCreate(new(_, onComplete, seconds, isRealtime, false));
         }
-        public static TaskInstance WaitSecondsExt(this MonoBehaviour _, Action onStart, Action onComplete, float seconds, bool isRealtime)
+        public static TaskInstance WaitSecondsExt(this MonoBehaviour _, float seconds, bool isRealtime, Action onStart, Action onComplete)
         {
             if (seconds <= 0)
             {
@@ -49,7 +49,7 @@ namespace Core
         public static void WaitFrame(this MonoBehaviour _, Action onStart, Action onComplete)
         {
             onStart?.Invoke();
-            TaskSystem.TryCreate(new(_, onComplete, -1, false, true));
+            TaskSystem.TryCreate(new(_, onComplete, - 1, false, true));
         }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Core
@@ -44,24 +45,19 @@ namespace Core
         }
         private static void Update()
         {
-            for (int i = ACTIVE_TWEENS.Count - 1; i >= 0; i--)
-            {
-                ACTIVE_TWEENS[i].Update();
-            }
-
             int write = 0;
             for (int read = 0; read < ACTIVE_TWEENS.Count; read++)
             {
                 TweenInstance tween = ACTIVE_TWEENS[read];
 
-                if (tween != null && !tween.IsCompleted)
+                if (!tween.IsCompleted)
                 {
-                    ACTIVE_TWEENS[write] = tween;
-                    write++;
+                    tween.Update();
+                    ACTIVE_TWEENS[write++] = tween;
                 }
             }
 
-            ACTIVE_TWEENS.Count = write;
+            ACTIVE_TWEENS.Truncate(write);
         }
         private static void Clear()
         {

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Core
@@ -44,21 +45,19 @@ namespace Core
         }
         private static void Update()
         {
-            for (int i = ACTIVE_TASKS.Count - 1; i >= 0; i--)
-            {
-                ACTIVE_TASKS[i].Update();
-            }
-
             int write = 0;
             for (int read = 0; read < ACTIVE_TASKS.Count; read++)
             {
-                if (!ACTIVE_TASKS[read].isFinished)
+                TaskInstance task = ACTIVE_TASKS[read];
+
+                if (!task.IsCompleted)
                 {
-                    ACTIVE_TASKS[write] = ACTIVE_TASKS[read];
-                    write++;
+                    task.Update();
+                    ACTIVE_TASKS[write++] = task;
                 }
             }
-            ACTIVE_TASKS.Count = write;
+
+            ACTIVE_TASKS.Truncate(write);
         }
         private static void Clear()
         {
