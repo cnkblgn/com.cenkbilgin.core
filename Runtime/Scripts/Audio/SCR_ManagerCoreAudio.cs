@@ -461,7 +461,6 @@ namespace Core.Audio
 
             if (clip.Length <= 0)
             {
-                Debug.LogError("ManagerCoreAudio.PlaySound() clip.Length <= 0");
                 return null;
             }
 
