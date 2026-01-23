@@ -256,7 +256,7 @@ namespace Core
                 public Vector3 Clamp;
                 public bool3 IsOffset;
 
-                public static readonly Config New = new(0.15f, Vector3.one, Vector3.zero, new(false, false, false));
+                public static Config New => new(0.15f, Vector3.one, Vector3.zero, new(false, false, false));
                 public Config(float smoothness, Vector3 amplitude, Vector3 clamp, bool3 offset) => (Smoothness, Amplitude, Clamp, IsOffset) = (smoothness, amplitude, clamp, offset);
             }
             public class Instance
@@ -294,7 +294,7 @@ namespace Core
                 public Vector3 Frequency;
                 public Vector3 Clamp;
 
-                public static readonly Config New = new(5, Vector3.one * 0.1f, Vector3.one * 15.0f, Vector3.zero);
+                public static Config New => new(5, Vector3.one * 0.1f, Vector3.one * 15.0f, Vector3.zero);
                 public Config(float roughness, Vector3 amplitude, Vector3 frequency, Vector3 clamp) => (Roughness, Amplitude, Frequency, Clamp) = (roughness, amplitude, frequency, clamp);
             }
             public class Instance
@@ -333,7 +333,7 @@ namespace Core
                 [Min(0.01f)] public float Smoothness;
                 public Vector3 Target;
 
-                public static readonly Config New = new(5, Vector3.zero);
+                public static Config New => new(5, Vector3.zero);
                 public Config(float smoothness, Vector3 target) => (Smoothness, Target) = (smoothness, target);
             }
             public class Instance
