@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEngine.GraphicsBuffer;
 
 namespace Core
 { 
@@ -357,21 +356,25 @@ namespace Core
             [Serializable]
             public class Config
             {
+                [Min(0)] public float MinThreshold = 1f;
+                [Min(0)] public float MaxThreshold = 25f;
                 [Min(0)] public float BaseMagnitude = 1f;
                 [Min(0)] public float MaxMagnitude = 10f;
                 [Min(0)] public float Smoothness = 0.25f;
                 [Min(1)] public float Speed = 7.5f;
 
-                public static Config New => new(1f, 10f, 0.25f, 7.5f);
-                public Config(float baseMagnitude, float maxMagnitude, float smoothness, float speed) => (BaseMagnitude, MaxMagnitude, Smoothness, Speed) = (baseMagnitude, maxMagnitude, smoothness, speed);
+                public static Config New => new(1, 25, 1f, 10f, 0.25f, 7.5f);
+                public Config(float minThreshold, float maxThreshold, float baseMagnitude, float maxMagnitude, float smoothness, float speed) => (MinThreshold, MaxThreshold, BaseMagnitude, MaxMagnitude, Smoothness, Speed) = (minThreshold, maxThreshold, baseMagnitude, maxMagnitude, smoothness, speed);
             }
             public class Instance
             {
                 private float time = 0f;
                 private float velocity = 0f;
 
-                public Vector3 Update(Config config, float t)
+                public Vector3 Update(Config config, float value)
                 {
+                    float t = Mathf.Clamp01(Mathf.InverseLerp(config.MinThreshold, config.MaxThreshold, value));
+
                     time = Mathf.SmoothDamp(time, t, ref velocity, config.Smoothness);
 
                     float magnitude = Mathf.Clamp(config.BaseMagnitude * time, 0f, config.MaxMagnitude);
