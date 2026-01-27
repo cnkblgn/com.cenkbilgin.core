@@ -6,9 +6,9 @@ namespace Core
 {
     public static class TaskUtility
     {
-        public static Func<bool> WaitGame = WaitGameInternal;
-        public static Func<bool> WaitResume = WaitResumeInternal;
-        public static Func<bool> WaitPause = WaitPauseInternal;
+        public readonly static Func<bool> WaitGame = WaitGameInternal;
+        public readonly static Func<bool> WaitResume = WaitResumeInternal;
+        public readonly static Func<bool> WaitPause = WaitPauseInternal;
 
         private static bool WaitGameInternal() => ManagerCoreGame.Instance != null;
         private static bool WaitResumeInternal() => ManagerCoreGame.Instance != null && ManagerCoreGame.Instance.GetGameState() == GameState.RESUME;

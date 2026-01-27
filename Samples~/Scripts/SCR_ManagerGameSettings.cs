@@ -230,7 +230,7 @@ namespace Core.Misc
         {
             Resolution[] availableResolutions = Screen.resolutions;
 
-            Resolution currentResolution = availableResolutions[Mathf.Clamp(index, 0, availableResolutions.Length)];
+            Resolution currentResolution = availableResolutions[Mathf.Clamp(index, 0, availableResolutions.Length - 1)];
 
             return new(currentResolution.width, currentResolution.height);
         }
