@@ -45,8 +45,11 @@ namespace Core.UI
         public void Clear()
         {
             thisTween?.Stop();
-            thisTween = textCanvas.Fade(1, 0);
+            thisTween = null;
+
+            textCanvas.Hide();
             textBox.Set(STRING_EMPTY);
+
             Hide();
         }
     }
