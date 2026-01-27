@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEngine.GraphicsBuffer;
 
 namespace Core
 { 
@@ -348,6 +349,37 @@ namespace Core
                     }
 
                     return Vector3.SmoothDamp(from, target.Target, ref currentVelocity, target.Smoothness, 100, deltaTime * 10);
+                }
+            }
+        }
+        public class Momentum
+        {
+            [Serializable]
+            public class Config
+            {
+                [Min(0)] public float BaseMagnitude = 1f;
+                [Min(0)] public float MaxMagnitude = 10f;
+                [Min(0)] public float Smoothness = 0.25f;
+                [Min(1)] public float Speed = 7.5f;
+
+                public static Config New => new(1f, 10f, 0.25f, 7.5f);
+                public Config(float baseMagnitude, float maxMagnitude, float smoothness, float speed) => (BaseMagnitude, MaxMagnitude, Smoothness, Speed) = (baseMagnitude, maxMagnitude, smoothness, speed);
+            }
+            public class Instance
+            {
+                private float time = 0f;
+                private float velocity = 0f;
+
+                public Vector3 Update(Config config, float t)
+                {
+                    time = Mathf.SmoothDamp(time, t, ref velocity, config.Smoothness);
+
+                    float magnitude = Mathf.Clamp(config.BaseMagnitude * time, 0f, config.MaxMagnitude);
+                    float x = (Mathf.PerlinNoise(Time.time * config.Speed, 0f) - 0.5f) * 2f * magnitude;
+                    float y = (Mathf.PerlinNoise(0f, Time.time * config.Speed) - 0.5f) * 2f * magnitude;
+                    float z = (Mathf.PerlinNoise(Time.time * config.Speed, Time.time * config.Speed) - 0.5f) * 2f * magnitude;
+
+                    return new(x, y, z);
                 }
             }
         }
