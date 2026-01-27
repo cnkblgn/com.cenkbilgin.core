@@ -1,0 +1,1 @@
+Spring vs. frame rate bağımsız hale getir! yada Mathf.Min(Time.deltaTime, 0.05f)

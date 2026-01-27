@@ -39,21 +39,6 @@ namespace Core.UI
                 activeElements.Add(obj);
             }
         }
-        private void OnEnable()
-        {
-            this.WaitUntil(() => ManagerCoreGame.Instance != null, null, () =>
-            {
-                ManagerCoreGame.Instance.OnBeforeSceneChanged += OnBeforeSceneChanged;
-            });
-        }
-        private void OnDisable()
-        {
-            if (ManagerCoreGame.Instance != null)
-            {
-                ManagerCoreGame.Instance.OnBeforeSceneChanged -= OnBeforeSceneChanged;
-            }
-        }
-        private void OnBeforeSceneChanged(string scene) => Hide();
 
         public void Show(string text, float duration)
         {

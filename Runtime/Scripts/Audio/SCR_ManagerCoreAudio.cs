@@ -128,23 +128,17 @@ namespace Core.Audio
         }
         private void OnEnable()
         {
-            this.WaitUntil(() => ManagerCoreGame.Instance != null, null, () =>
-            {
-                ManagerCoreGame.Instance.OnGameStateChanged += OnGameStateChanged;
-                ManagerCoreGame.Instance.OnBeforeSceneChanged += OnBeforeSceneChanged;
-                ManagerCoreGame.Instance.OnAfterSceneChanged += OnAfterSceneChanged;
-                ManagerCoreGame.Instance.OnTimeScaleChanged += OnTimeScaleChanged;
-            });
+            ManagerCoreGame.OnGameStateChanged += OnGameStateChanged;
+            ManagerCoreGame.OnBeforeSceneChanged += OnBeforeSceneChanged;
+            ManagerCoreGame.OnAfterSceneChanged += OnAfterSceneChanged;
+            ManagerCoreGame.OnTimeScaleChanged += OnTimeScaleChanged;
         }
         private void OnDisable()
         {
-            if (ManagerCoreGame.Instance != null)
-            {
-                ManagerCoreGame.Instance.OnGameStateChanged -= OnGameStateChanged;
-                ManagerCoreGame.Instance.OnBeforeSceneChanged -= OnBeforeSceneChanged;
-                ManagerCoreGame.Instance.OnAfterSceneChanged -= OnAfterSceneChanged;
-                ManagerCoreGame.Instance.OnTimeScaleChanged -= OnTimeScaleChanged;
-            }
+            ManagerCoreGame.OnGameStateChanged -= OnGameStateChanged;
+            ManagerCoreGame.OnBeforeSceneChanged -= OnBeforeSceneChanged;
+            ManagerCoreGame.OnAfterSceneChanged -= OnAfterSceneChanged;
+            ManagerCoreGame.OnTimeScaleChanged -= OnTimeScaleChanged;
         }
 
         private void OnBeforeSceneChanged(string scene)

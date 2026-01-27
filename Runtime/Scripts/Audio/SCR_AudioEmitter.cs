@@ -168,20 +168,8 @@ namespace Core.Audio
             Gizmos.DrawRay(ThisTransform.position, directionToRight * distanceToListener);
         }
 #endif
-        private void OnEnable()
-        {
-            if (ManagerCoreGame.Instance != null)
-            {
-                ManagerCoreGame.Instance.OnGameStateChanged += OnGameStateChanged;
-            }
-        }
-        private void OnDisable()
-        {
-            if (ManagerCoreGame.Instance != null)
-            {
-                ManagerCoreGame.Instance.OnGameStateChanged -= OnGameStateChanged;
-            }
-        }
+        private void OnEnable() => ManagerCoreGame.OnGameStateChanged += OnGameStateChanged;
+        private void OnDisable() => ManagerCoreGame.OnGameStateChanged -= OnGameStateChanged;
         private void OnApplicationFocus(bool focus) => hasFocus = focus;
 
         private void OnGameStateChanged(GameState gameState)

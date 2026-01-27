@@ -9,6 +9,7 @@ using Core.Input;
 namespace Core.Misc
 {
     using static CoreUtility;
+    using static TaskUtility;
     using static InputActionDatabase;
 
     [DisallowMultipleComponent]
@@ -39,6 +40,7 @@ namespace Core.Misc
         private readonly List<DebugCommandInstanceBase> suggestionBuffer = new();
         private readonly StringBuilder logBuilder = new(8192);
         private readonly StringBuilder suggestionBuilder = new(1024);
+        private InvokeAction resetHistoryPosition = default;
         private Canvas thisCanvas = null;
         private string lastCommand = STRING_EMPTY;
         private string lastLog = STRING_EMPTY;
@@ -51,6 +53,9 @@ namespace Core.Misc
         private void Awake()
         {
             thisCanvas = GetComponent<Canvas>();
+
+            void Invoke() => consoleHistoryRect.verticalNormalizedPosition = 0;
+            resetHistoryPosition = new(Invoke);
 
             Hide();
         }
@@ -131,22 +136,17 @@ namespace Core.Misc
             Application.logMessageReceived += OnUnityLogReceived;
             DebugCommandLogger.OnLogReceived += OnCommandLogReceived;
             DebugCommandLogger.OnLogCleared += OnCommandLogCleared;
+            ManagerCoreGame.OnBeforeSceneChanged += OnBeforeSceneChanged;
 
             consoleInputField.onSubmit.AddListener(OnSubmit);
             consoleInputField.onValueChanged.AddListener(OnInput);
-
-            this.WaitUntil(() => ManagerCoreGame.Instance != null, null, () => ManagerCoreGame.Instance.OnBeforeSceneChanged += OnBeforeSceneChanged);
         }
         private void OnDisable()
         {
             Application.logMessageReceived -= OnUnityLogReceived;
             DebugCommandLogger.OnLogReceived -= OnCommandLogReceived;
             DebugCommandLogger.OnLogCleared -= OnCommandLogCleared;
-
-            if (ManagerCoreGame.Instance != null)
-            {
-                ManagerCoreGame.Instance.OnBeforeSceneChanged -= OnBeforeSceneChanged;
-            }
+            ManagerCoreGame.OnBeforeSceneChanged -= OnBeforeSceneChanged;
 
             consoleInputField.onSubmit.RemoveListener(OnSubmit);
             consoleInputField.onValueChanged.RemoveListener(OnInput);
@@ -214,7 +214,7 @@ namespace Core.Misc
             consoleInputField.ActivateInputField();
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(consoleHistoryRect.content);
-            this.WaitFrame(null, () => consoleHistoryRect.verticalNormalizedPosition = 0);
+            this.WaitFrame(resetHistoryPosition);
         }
 
         public void Show()

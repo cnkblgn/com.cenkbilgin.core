@@ -1,11 +1,10 @@
-using System;
 using UnityEngine;
 
 namespace Core
 {
     using static CoreUtility;
 
-    public static class TaskSystem
+    internal static class TaskSystem
     {
         private const int MAX_TASKS = 1024;
         private static readonly SwapBackArray<TaskInstance> ACTIVE_TASKS = new(MAX_TASKS);

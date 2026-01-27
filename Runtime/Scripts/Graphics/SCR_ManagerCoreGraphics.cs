@@ -11,7 +11,7 @@ namespace Core.Graphics
     [DisallowMultipleComponent]
     public class ManagerCoreGraphics : Manager<ManagerCoreGraphics>
     {
-        public event Action<Int2> OnResolutionChanged = null;
+        public static event Action<Int2> OnResolutionChanged = null;
 
         [Header("_")]
         [SerializeField, Required] private UniversalRenderPipelineAsset urpPipelineSettings = null;
@@ -33,6 +33,12 @@ namespace Core.Graphics
         private Camera defaultCamera = null;
         private bool isCameraInitialized = false;
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void RESET()
+        {
+            OnResolutionChanged = null;
+        }
+
         protected override void Awake()
         {
             base.Awake();
@@ -49,19 +55,13 @@ namespace Core.Graphics
         }
         private void OnEnable()
         {
-            this.WaitUntil(() => ManagerCoreGame.Instance != null, null, () =>
-            {
-                ManagerCoreGame.Instance.OnBeforeSceneChanged += OnBeforeSceneChanged;
-                ManagerCoreGame.Instance.OnAfterSceneChanged += OnAfterSceneChanged;
-            });
+            ManagerCoreGame.OnBeforeSceneChanged += OnBeforeSceneChanged;
+            ManagerCoreGame.OnAfterSceneChanged += OnAfterSceneChanged;
         }
         private void OnDisable()
         {
-            if (ManagerCoreGame.Instance != null)
-            {
-                ManagerCoreGame.Instance.OnBeforeSceneChanged -= OnBeforeSceneChanged;
-                ManagerCoreGame.Instance.OnAfterSceneChanged -= OnAfterSceneChanged;
-            }
+            ManagerCoreGame.OnBeforeSceneChanged -= OnBeforeSceneChanged;
+            ManagerCoreGame.OnAfterSceneChanged -= OnAfterSceneChanged;
         }
         private void OnApplicationQuit() => urpPipelineSettings.renderScale = 1;
 

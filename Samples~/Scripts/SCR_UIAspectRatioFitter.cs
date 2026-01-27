@@ -15,18 +15,11 @@ namespace Core.Misc
         private void OnEnable()
         {
             thisTransform = GetComponent<RectTransform>();
-
-            this.WaitUntil(() => ManagerCoreGraphics.Instance != null, null, () =>
-            {
-                ManagerCoreGraphics.Instance.OnResolutionChanged += OnResolutionChanged;
-            });
+            ManagerCoreGraphics.OnResolutionChanged += OnResolutionChanged;
         }
         private void OnDisable()
         {
-            if (ManagerCoreGraphics.Instance != null)
-            {
-                ManagerCoreGraphics.Instance.OnResolutionChanged -= OnResolutionChanged;
-            }
+            ManagerCoreGraphics.OnResolutionChanged -= OnResolutionChanged;
         }
         private void OnResolutionChanged(Int2 resolution)
         {

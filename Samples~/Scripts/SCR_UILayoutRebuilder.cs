@@ -14,20 +14,8 @@ namespace Core.Misc
 
         private void Awake() => thisLayout = GetComponent<LayoutGroup>();
         private void Start() => thisLayout.enabled = false;
-        private void OnEnable()
-        {
-            this.WaitUntil(() => ManagerCoreGraphics.Instance != null, null, () =>
-            {
-                ManagerCoreGraphics.Instance.OnResolutionChanged += OnResolutionChanged;
-            });
-        }
-        private void OnDisable()
-        {
-            if (ManagerCoreGraphics.Instance != null)
-            {
-                ManagerCoreGraphics.Instance.OnResolutionChanged -= OnResolutionChanged;
-            }
-        }
+        private void OnEnable() => ManagerCoreGraphics.OnResolutionChanged += OnResolutionChanged;
+        private void OnDisable() => ManagerCoreGraphics.OnResolutionChanged -= OnResolutionChanged;
         private void OnResolutionChanged(Int2 resolution)
         {
             thisLayout.enabled = true;

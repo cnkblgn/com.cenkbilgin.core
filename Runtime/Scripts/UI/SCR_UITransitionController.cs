@@ -4,6 +4,7 @@ using UnityEngine;
 namespace Core.UI
 {
     using static CoreUtility;
+    using static TaskUtility;
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(CanvasGroup))]
@@ -19,18 +20,19 @@ namespace Core.UI
             Hide();
         }
         /// <summary> 0 -> 1, fades to black </summary>
-        public void FadeIn(float fadeTime, float waitTime, Action onStartAction, Action onFinishAction)
+        public void FadeIn(float fadeTime, float waitTime, InvokeAction onStartAction, InvokeAction onFinishAction)
         {
             if (thisTween != null)
             {
                 if (!thisTween.IsCompleted)
                 {
-                    this.WaitFrame(onStartAction, onFinishAction);
+                    onStartAction.Invoke();
+                    this.WaitFrame(onFinishAction);
                     return;
                 }
             }
 
-            onStartAction?.Invoke();
+            onStartAction.Invoke();
             thisCanvas.Show();
             thisCanvas.alpha = 0;
 
@@ -38,31 +40,30 @@ namespace Core.UI
             {
                 thisTween.Kill();
                 thisTween = null;
-
-                onFinishAction?.Invoke();
+                onFinishAction.Invoke();
             });
         }
         /// <summary> 1 -> 0, fades to white </summary>
-        public void FadeOut(float fadeTime, float waitTime, Action onStartAction, Action onFinishAction)
+        public void FadeOut(float fadeTime, float waitTime, InvokeAction onStartAction, InvokeAction onFinishAction)
         {
             if (thisTween != null)
             {
                 if (!thisTween.IsCompleted)
                 {
-                    this.WaitFrame(onStartAction, onFinishAction);
+                    onStartAction.Invoke();
+                    this.WaitFrame(onFinishAction);
                     return;
                 }
             }
 
-            onStartAction?.Invoke();
+            onStartAction.Invoke();
             thisCanvas.Show();
             thisCanvas.alpha = 1;
 
             thisTween = thisCanvas.Fade(0, fadeTime, waitTime, TweenType.UNSCALED, EaseType.EASE_IN_SINE, () =>
             {
                 Hide();
-
-                onFinishAction?.Invoke();
+                onFinishAction.Invoke();
             });
         }
         public void Hide()

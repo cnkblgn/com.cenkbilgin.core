@@ -4,6 +4,7 @@ using System.Collections.Generic;
 namespace Core
 {
     using static CoreUtility;
+    using static TaskUtility;
 
     public static class DebugCommandData
     {
@@ -178,8 +179,7 @@ namespace Core
         }
         private static void CMDTimescale(float scale, float duration)
         {
-            ManagerCoreGame.Instance.WaitUntil(() => ManagerCoreGame.Instance.GetGameState() == GameState.RESUME, null, () => ManagerCoreGame.Instance.SetTimeScale(scale, duration));
-
+            ManagerCoreGame.Instance.WaitUntil(_WaitResume, new SetTimescale(scale, duration));
             DebugCommandLogger.Log($"Current Timescale: {scale.ToString().ToYellow()}");
         }
     }

@@ -36,41 +36,15 @@ namespace Core.UI
         private void Awake() => thisCanvas = GetComponent<Canvas>();
         private void OnEnable()
         {
-            this.WaitUntil(() => ManagerCoreGame.Instance != null, null, () =>
-            {
-                ManagerCoreGame.Instance.OnGameStateChanged += OnGameStateChanged;
-            });
-
             applyButton.onClick.AddListener(OnApplyButtonClicked);
             closeButton.onClick.AddListener(OnCloseButtonClicked);
         }
         private void OnDisable()
         {
-            if (ManagerCoreGame.Instance != null)
-            {
-                ManagerCoreGame.Instance.OnGameStateChanged -= OnGameStateChanged;
-            }
-
             applyButton.onClick.RemoveListener(OnApplyButtonClicked);
             closeButton.onClick.RemoveListener(OnCloseButtonClicked);
         }
 
-        private void OnGameStateChanged(GameState gameState)
-        {
-            switch (gameState)
-            {
-                case GameState.NULL:
-                    Hide();
-                    break;
-                case GameState.RESUME:
-                    Hide();
-                    break;
-                case GameState.PAUSE:
-                    break;
-                default:
-                    break;
-            }
-        }
         private void OnApplyButtonClicked()
         {
             ApplyAll();

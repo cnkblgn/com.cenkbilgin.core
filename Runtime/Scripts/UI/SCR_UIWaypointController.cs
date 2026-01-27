@@ -41,15 +41,6 @@ namespace Core.UI
 
             thisObjects.RemoveAll(e => e.IsFinished);
         }
-        private void OnEnable() => this.WaitUntil(() => ManagerCoreGame.Instance != null, null, () => ManagerCoreGame.Instance.OnAfterSceneChanged += OnAfterSceneChanged);
-        private void OnDisable()
-        {
-            if (ManagerCoreGame.Instance != null)
-            {
-                ManagerCoreGame.Instance.OnAfterSceneChanged -= OnAfterSceneChanged;
-            }
-        }
-        private void OnAfterSceneChanged(string scene) => Hide();
         public void Show()
         {
             thisCanvas.Show();

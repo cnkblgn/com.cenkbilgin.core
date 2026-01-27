@@ -11,7 +11,8 @@ using Core.Audio;
 
 namespace Core.Misc
 {
-    using static Core.CoreUtility;
+    using static CoreUtility;
+    using static TaskUtility;
 
     [DisallowMultipleComponent]
     public class ManagerGameSettings : Manager<ManagerGameSettings>
@@ -26,32 +27,24 @@ namespace Core.Misc
         private readonly List<UIOptionBase> optionElements = new();
         private bool isInitialized = false;
 
-        protected override void Awake()
+        private void Start()
         {
-            base.Awake();
-
             InitializeSettings();
         }
         private void OnEnable()
         {
-            this.WaitUntil(() => ManagerCoreGame.Instance != null, null, () =>
-            {
-                ManagerCoreGame.Instance.OnAfterSceneChanged += OnAfterSceneChanged;
-            });
+            ManagerCoreGame.OnAfterSceneChanged += OnAfterSceneChanged;
 
-            this.WaitUntil(() => ManagerCoreUI.Instance != null, null, () =>
+            this.WaitUntil(_WaitGame, new InvokeAction(() =>
             {
-                ManagerCoreUI.Instance.InsertSettingEvent(OnSettingsApply, OnSettingsChanged, OnSettingsChanged);
-            });
+                ManagerCoreUI.Instance.InsertSettingEvent(Instance.OnSettingsApply, Instance.OnSettingsChanged, Instance.OnSettingsChanged);
+            }));
         }
         private void OnDisable()
         {
             settingsFile.Save(true);
 
-            if (ManagerCoreGame.Instance != null)
-            {
-                ManagerCoreGame.Instance.OnAfterSceneChanged -= OnAfterSceneChanged;
-            }
+            ManagerCoreGame.OnAfterSceneChanged -= OnAfterSceneChanged;
 
             if (ManagerCoreUI.Instance != null)
             {

@@ -21,11 +21,11 @@ namespace Core
             public bool OnRequestPause(); 
         }
 
-        public event Action<GameState> OnGameStateChanged = null;
-        public event Action<float> OnCurrentSceneLoading = null;
-        public event Action<string> OnBeforeSceneChanged = null;
-        public event Action<string> OnAfterSceneChanged = null;
-        public event Action<float> OnTimeScaleChanged = null;
+        public static event Action<GameState> OnGameStateChanged = null;
+        public static event Action<float> OnCurrentSceneLoading = null;
+        public static event Action<string> OnBeforeSceneChanged = null;
+        public static event Action<string> OnAfterSceneChanged = null;
+        public static event Action<float> OnTimeScaleChanged = null;
 
         public bool IsLoading => isLoading;
         public string Version => currentVersion;
@@ -46,6 +46,16 @@ namespace Core
         private bool isLoading = false;
         private string activeScene = STRING_EMPTY;
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void RESET()
+        {
+            OnGameStateChanged = null;
+            OnCurrentSceneLoading = null;
+            OnBeforeSceneChanged = null;
+            OnAfterSceneChanged = null;
+            OnTimeScaleChanged = null;
+        }
+
         protected override void Awake()
         {
             base.Awake();
@@ -61,13 +71,8 @@ namespace Core
         private void OnDisable()
         {
             SceneManager.activeSceneChanged -= InitializeActiveScene;
-
             OnAfterSceneChanged -= OnAfterSceneChangedInternal;
             OnGameStateChanged -= OnGameStateChangedInternal;
-            OnBeforeSceneChanged = null;
-            OnAfterSceneChanged = null;
-            OnTimeScaleChanged = null;
-            OnGameStateChanged = null;
         }
 
 #if UNITY_EDITOR
