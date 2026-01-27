@@ -46,6 +46,8 @@ namespace Core.UI
         {
             thisTween?.Stop();
             thisTween = textCanvas.Fade(1, 0);
+            textBox.Set(STRING_EMPTY);
+            Hide();
         }
     }
 }
