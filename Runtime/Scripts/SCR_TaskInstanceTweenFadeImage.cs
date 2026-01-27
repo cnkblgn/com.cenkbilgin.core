@@ -6,21 +6,14 @@ namespace Core
 {
     using static CoreUtility;
 
-    public class TweenInstanceFadeImage : TweenInstance
+    public class TaskInstanceTweenFadeImage : TaskInstanceTween
     {
-        protected override bool CanUpdate => thisImage != null;
-
         private readonly Image thisImage = null;
         private readonly Color startValue = COLOR_WHITE;
         private readonly Color targetValue = COLOR_WHITE;
 
-        public TweenInstanceFadeImage(Image image, Color targetValue, float fadeSeconds, float waitSeconds, TweenType tweenType, EaseType easeType, Action onComplete) : base(fadeSeconds, waitSeconds, tweenType, easeType, onComplete)
+        public TaskInstanceTweenFadeImage(Image image, Color targetValue, float fadeSeconds, float waitSeconds, TweenType tweenType, EaseType easeType, Action onComplete) : base(image, fadeSeconds, waitSeconds, tweenType, easeType, onComplete)
         {
-            if (image == null)
-            {
-                throw new ArgumentNullException("TweenInstanceFadeImage() << " + nameof(image));
-            }
-
             this.thisImage = image;
             this.targetValue = targetValue;
             this.startValue = this.thisImage.color;

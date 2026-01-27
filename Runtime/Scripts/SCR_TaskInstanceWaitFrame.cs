@@ -1,16 +1,16 @@
+using System;
 using UnityEngine;
 
 namespace Core
 {
-
-    internal class TaskInstanceWaitFrame<T> : TaskInstance where T : struct, ITaskCallback
+    internal class TaskInstanceWaitFrame : TaskInstance
     {
-        private readonly T callback = default;
+        private readonly Action callback = default;
         private readonly int frame = 0;
 
-        public TaskInstanceWaitFrame(MonoBehaviour host, T callback) : base(host)
+        public TaskInstanceWaitFrame(MonoBehaviour host, Action callback) : base(host)
         {
-            this.callback = callback;
+            this.callback = callback ?? throw new NullReferenceException("TaskInstanceWaitFrame() callback == null");
             this.frame = Time.frameCount + 1;
         }
         protected override void OnUpdate()

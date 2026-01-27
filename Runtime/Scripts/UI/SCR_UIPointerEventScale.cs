@@ -20,7 +20,7 @@ namespace Core.UI
         [SerializeField, Range(-1.0f, 1.0f)] private float onHoverScalePower = 0f;
 
         private RectTransform thisTransform = null;
-        private TweenInstanceScaleTransform thisTween = null;
+        private TaskInstanceTweenScaleTransform thisTween = null;
         private Vector3 defaultScale = Vector3.one;
 
         private void Awake()
@@ -67,7 +67,7 @@ namespace Core.UI
                 return;
             }
 
-            thisTween?.Kill();
+            thisTween?.Stop();
 
             Vector3 startValue = defaultScale;
             Vector3 endValue = startValue - (startValue * scalePower);

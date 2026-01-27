@@ -17,7 +17,7 @@ namespace Core.Misc
     [DisallowMultipleComponent]
     public class ManagerGameSettings : Manager<ManagerGameSettings>
     {
-        public event Action<GameSettings> OnSettingsUpdated = null;
+        public static event Action<GameSettings> OnSettingsUpdated = null;
         public GameSettings Settings => settings;
 
         [Header("_")]
@@ -35,10 +35,10 @@ namespace Core.Misc
         {
             ManagerCoreGame.OnAfterSceneChanged += OnAfterSceneChanged;
 
-            this.WaitUntil(_WaitGame, new InvokeAction(() =>
+            this.WaitUntil(WaitGame, () =>
             {
                 ManagerCoreUI.Instance.InsertSettingEvent(Instance.OnSettingsApply, Instance.OnSettingsChanged, Instance.OnSettingsChanged);
-            }));
+            });
         }
         private void OnDisable()
         {

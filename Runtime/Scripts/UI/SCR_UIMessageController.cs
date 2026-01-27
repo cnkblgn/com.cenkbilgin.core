@@ -13,7 +13,7 @@ namespace Core.UI
         [SerializeField, Required] private UITextBox textBox = null;
 
         private Canvas thisCanvas = null;
-        private TweenInstanceFadeCanvas thisTween = null;
+        private TaskInstanceTweenFadeCanvas thisTween = null;
 
         private void Awake() => thisCanvas = GetComponent<Canvas>();
         private void Start() { thisCanvas.Hide(); textCanvas.Hide(); }
@@ -25,7 +25,7 @@ namespace Core.UI
         {
             Show();
 
-            thisTween?.Kill();
+            thisTween?.Stop();
 
             if (duration > 0)
             {
@@ -44,7 +44,7 @@ namespace Core.UI
         }
         public void Clear()
         {
-            thisTween?.Kill();
+            thisTween?.Stop();
             thisTween = textCanvas.Fade(1, 0);
         }
     }

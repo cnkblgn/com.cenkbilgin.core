@@ -1,15 +1,16 @@
+using System;
 using UnityEngine;
 
 namespace Core
 {
-    internal class TaskInstanceWaitSecondsRealtime<T> : TaskInstance where T : struct, ITaskCallback
+    internal class TaskInstanceWaitSecondsRealtime : TaskInstance
     {
-        private readonly T callback = default;
+        private readonly Action callback = default;
         private float time = 0;
 
-        public TaskInstanceWaitSecondsRealtime(MonoBehaviour host, T callback, float duration) : base(host)
+        public TaskInstanceWaitSecondsRealtime(MonoBehaviour host, float duration, Action callback) : base(host)
         {
-            this.callback = callback;
+            this.callback = callback ?? throw new NullReferenceException("TaskInstanceWaitSecondsRealtime() callback == null");
             this.time = duration;
         }
         protected override void OnUpdate()

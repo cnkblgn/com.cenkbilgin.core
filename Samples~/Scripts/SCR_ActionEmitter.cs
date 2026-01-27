@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -12,18 +13,19 @@ namespace Core.Misc
         [SerializeField] private UnityEvent actionEvent = null;
         [SerializeField, Min(0)] private float actionDelay = 0;
 
-        private InvokeEvent callback = default;
+        private Action callback = default;
 
-        private void Awake() => callback = new(actionEvent);
+        private void Awake() => callback = EmitInternal;
         public void Emit()
         {
             if (actionDelay <= 0)
             {
-                callback.Invoke();
+                actionEvent?.Invoke();
                 return;
             }
 
             this.WaitSeconds(actionDelay, callback);
         }
+        private void EmitInternal() => actionEvent?.Invoke();
     }
 }

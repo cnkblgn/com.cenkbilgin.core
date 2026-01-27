@@ -6,7 +6,7 @@ namespace Core
 
     internal static class TaskSystem
     {
-        private const int MAX_TASKS = 1024;
+        private const int MAX_TASKS = 2048;
         private static readonly SwapBackArray<TaskInstance> ACTIVE_TASKS = new(MAX_TASKS);
         private static GameObject ACTIVE_TASK_OBJECT = null;
         private static Updater ACTIVE_TASK_UPDATER = null;
@@ -76,8 +76,10 @@ namespace Core
         private class Updater : MonoBehaviour
         {
             [Header("_")]
+#pragma warning disable CS0414
             [SerializeField, ReadOnly] private int currentActiveTasks = -1;
             [SerializeField, ReadOnly] private int maximumActiveTasks = -1;
+#pragma warning restore CS0414
 
             private void Update()
             {

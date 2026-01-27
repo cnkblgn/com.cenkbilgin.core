@@ -11,7 +11,7 @@ namespace Core.UI
     public class UITransitionController : MonoBehaviour
     {
         private CanvasGroup thisCanvas = null;
-        private TweenInstanceFadeCanvas thisTween = null;
+        private TaskInstanceTweenFadeCanvas thisTween = null;
 
         private void Awake()
         {
@@ -20,7 +20,7 @@ namespace Core.UI
             Hide();
         }
         /// <summary> 0 -> 1, fades to black </summary>
-        public void FadeIn(float fadeTime, float waitTime, InvokeAction onStartAction, InvokeAction onFinishAction)
+        public void FadeIn(float fadeTime, float waitTime, Action onStartAction, Action onFinishAction)
         {
             if (thisTween != null)
             {
@@ -38,13 +38,13 @@ namespace Core.UI
 
             thisTween = thisCanvas.Fade(1, fadeTime, waitTime, TweenType.UNSCALED, EaseType.EASE_OUT_SINE, () =>
             {
-                thisTween.Kill();
+                thisTween.Stop();
                 thisTween = null;
                 onFinishAction.Invoke();
             });
         }
         /// <summary> 1 -> 0, fades to white </summary>
-        public void FadeOut(float fadeTime, float waitTime, InvokeAction onStartAction, InvokeAction onFinishAction)
+        public void FadeOut(float fadeTime, float waitTime, Action onStartAction, Action onFinishAction)
         {
             if (thisTween != null)
             {
@@ -69,7 +69,7 @@ namespace Core.UI
         public void Hide()
         {
             thisCanvas.Hide();
-            thisTween?.Kill();
+            thisTween?.Stop();
             thisTween = null;
         }
     }

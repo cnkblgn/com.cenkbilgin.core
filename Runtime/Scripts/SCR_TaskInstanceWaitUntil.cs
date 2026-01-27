@@ -1,20 +1,21 @@
+using System;
 using UnityEngine;
 
 namespace Core
 {
-    internal class TaskInstanceWaitUntil<T1, T2> : TaskInstance where T1 : struct, ITaskPredicate where T2 : struct, ITaskCallback
+    internal class TaskInstanceWaitUntil: TaskInstance
     {
-        private readonly T1 predicate = default;
-        private readonly T2 callback = default;
+        private readonly Func<bool> predicate = default;
+        private readonly Action callback = default;
 
-        public TaskInstanceWaitUntil(MonoBehaviour host, T1 predicate, T2 callback) : base(host)
+        public TaskInstanceWaitUntil(MonoBehaviour host, Func<bool> predicate, Action callback) : base(host)
         {
-            this.predicate = predicate;
-            this.callback = callback;
+            this.predicate = predicate ?? throw new NullReferenceException("TaskInstanceWaitUntil() predicate == null");
+            this.callback = callback ?? throw new NullReferenceException("TaskInstanceWaitUntil() callback == null");
         }
         protected override void OnUpdate()
         {
-            if (predicate.Evaluate())
+            if (predicate.Invoke())
             {
                 callback.Invoke();
                 IsCompleted = true;

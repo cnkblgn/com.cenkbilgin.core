@@ -3,21 +3,14 @@ using UnityEngine;
 
 namespace Core
 {
-    public class TweenInstanceOffsetRectY : TweenInstance
+    public class TaskInstanceTweenOffsetRectY : TaskInstanceTween
     {
-        protected override bool CanUpdate => thisTransform != null;
-
         private readonly RectTransform thisTransform = null;
         private Vector2 startValue = Vector2.zero;
         private Vector2 targetValue = Vector2.zero;
 
-        public TweenInstanceOffsetRectY(RectTransform rectTransform, float startValue, float targetValue, float fadeSeconds, float waitSeconds, TweenType tweenType, EaseType easeType, Action onComplete) : base(fadeSeconds, waitSeconds, tweenType, easeType, onComplete)
+        public TaskInstanceTweenOffsetRectY(RectTransform rectTransform, float startValue, float targetValue, float fadeSeconds, float waitSeconds, TweenType tweenType, EaseType easeType, Action onComplete) : base(rectTransform, fadeSeconds, waitSeconds, tweenType, easeType, onComplete)
         {
-            if (rectTransform == null)
-            {
-                throw new ArgumentNullException("TweenInstanceOffsetRectY() << " + nameof(rectTransform));
-            }
-
             thisTransform = rectTransform;
             this.startValue = new(thisTransform.anchoredPosition.x, startValue);
             this.targetValue = new(thisTransform.anchoredPosition.x, targetValue);

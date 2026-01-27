@@ -1,18 +1,24 @@
+using System;
 using UnityEngine;
 
 namespace Core
 {
-    public interface ITaskPredicate { public bool Evaluate(); }
-    public interface ITaskCallback { public void Invoke(); }
-
     public abstract class TaskInstance
     {
         public bool IsCompleted { get; protected set; }
 
-        private readonly MonoBehaviour host = null;
-        public TaskInstance(MonoBehaviour host) => this.host = host;
+        private readonly Component host = null;
+        public TaskInstance(Component host)
+        {
+            if (host == null)
+            {
+                throw new ArgumentNullException("TaskInstance() host == null"); 
+            }
 
-        public void Update()
+            this.host = host;
+        }
+
+        internal void Update()
         {
             if (IsCompleted)
             {

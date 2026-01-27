@@ -4,22 +4,15 @@ using UnityEngine.UI;
 
 namespace Core
 {
-    public class TweenInstanceOffsetLayout : TweenInstance
+    public class TaskInstanceTweenOffsetLayout : TaskInstanceTween
     {
-        protected override bool CanUpdate => thisLayout != null;
-
         private readonly LayoutGroup thisLayout = null;
         private readonly RectTransform thisRoot = null;
         private readonly RectOffset startValue = null;
         private readonly RectOffset targetValue = null;
 
-        public TweenInstanceOffsetLayout(LayoutGroup layoutGroup, RectOffset startValue, RectOffset targetValue, float fadeSeconds, float waitSeconds, TweenType tweenType, EaseType easeType, Action onComplete) : base(fadeSeconds, waitSeconds, tweenType, easeType, onComplete)
+        public TaskInstanceTweenOffsetLayout(LayoutGroup layoutGroup, RectOffset startValue, RectOffset targetValue, float fadeSeconds, float waitSeconds, TweenType tweenType, EaseType easeType, Action onComplete) : base(layoutGroup, fadeSeconds, waitSeconds, tweenType, easeType, onComplete)
         {
-            if (layoutGroup == null)
-            {
-                throw new ArgumentNullException("TweenInstanceOffsetLayout() << " + nameof(layoutGroup));
-            }
-
             thisLayout = layoutGroup;
             this.startValue = startValue;
             this.targetValue = targetValue;

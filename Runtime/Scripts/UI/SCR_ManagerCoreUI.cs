@@ -83,9 +83,9 @@ namespace Core.UI
         public void ClearWaypoint() => waypointController.Clear();
 
         /// <summary> 0 -> 1, fades to black </summary>
-        public void ShowTransitionFadeIn(float fadeTime, float waitTime, InvokeAction onStartEvent, InvokeAction onFinishEvent) => transitionController.FadeIn(fadeTime, waitTime, onStartEvent, onFinishEvent);
+        public void ShowTransitionFadeIn(float fadeTime, float waitTime, Action onStartEvent, Action onFinishEvent) => transitionController.FadeIn(fadeTime, waitTime, onStartEvent, onFinishEvent);
         /// <summary> 1 -> 0, fades to white </summary>
-        public void ShowTransitionFadeOut(float fadeTime, float waitTime, InvokeAction onStartEvent, InvokeAction onFinishEvent) => transitionController.FadeOut(fadeTime, waitTime, onStartEvent, onFinishEvent);
+        public void ShowTransitionFadeOut(float fadeTime, float waitTime, Action onStartEvent, Action onFinishEvent) => transitionController.FadeOut(fadeTime, waitTime, onStartEvent, onFinishEvent);
         public void HideTransition() => transitionController.Hide();
 
         public void ShowMessage(string text, float duration = 2.5f) => messageController.Show(text, duration);

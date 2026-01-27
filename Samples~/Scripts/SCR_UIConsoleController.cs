@@ -40,7 +40,6 @@ namespace Core.Misc
         private readonly List<DebugCommandInstanceBase> suggestionBuffer = new();
         private readonly StringBuilder logBuilder = new(8192);
         private readonly StringBuilder suggestionBuilder = new(1024);
-        private InvokeAction resetHistoryPosition = default;
         private Canvas thisCanvas = null;
         private string lastCommand = STRING_EMPTY;
         private string lastLog = STRING_EMPTY;
@@ -53,9 +52,6 @@ namespace Core.Misc
         private void Awake()
         {
             thisCanvas = GetComponent<Canvas>();
-
-            void Invoke() => consoleHistoryRect.verticalNormalizedPosition = 0;
-            resetHistoryPosition = new(Invoke);
 
             Hide();
         }
@@ -214,7 +210,7 @@ namespace Core.Misc
             consoleInputField.ActivateInputField();
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(consoleHistoryRect.content);
-            this.WaitFrame(resetHistoryPosition);
+            this.WaitFrame(() => consoleHistoryRect.verticalNormalizedPosition = 0);
         }
 
         public void Show()

@@ -26,7 +26,7 @@ namespace Core.UI
         [SerializeField] private EaseType offsetOutEaseType = EaseType.LINEAR;
 
         private RectTransform thisTransform = null;
-        private TweenInstanceOffsetRectX thisTween = null;
+        private TaskInstanceTweenOffsetRectX thisTween = null;
         private Vector2 defaultPosition = Vector2.zero;
         private Vector2 defaultSize = Vector2.zero;
         private bool isInitialized = false;
@@ -48,7 +48,7 @@ namespace Core.UI
         }
         public void Dispose()
         {
-            thisTween?.Kill();
+            thisTween?.Stop();
             isActive = false;
 
             thisTransform.anchoredPosition = defaultPosition;
@@ -61,7 +61,7 @@ namespace Core.UI
             gameObject.SetActive(true);
 
             isActive = true;
-            thisTween?.Kill();
+            thisTween?.Stop();
 
             notificationText.alignment = TextAlignmentOptions.MidlineLeft;
             notificationText.textWrappingMode = TextWrappingModes.NoWrap;

@@ -21,8 +21,8 @@ namespace Core.UI
 
         private Image thisImage = null;
         private Image[] childImages = null;
-        private TweenInstanceFadeImage thisTween = null;
-        private TweenInstanceFadeImage[] childTweens = null;
+        private TaskInstanceTweenFadeImage thisTween = null;
+        private TaskInstanceTweenFadeImage[] childTweens = null;
         private Color defaultColor = COLOR_WHITE;
 
         private void Awake()
@@ -33,7 +33,7 @@ namespace Core.UI
             if (influenceChild)
             {
                 childImages = GetComponentsInChildren<Image>();
-                childTweens = new TweenInstanceFadeImage[childImages.Length];
+                childTweens = new TaskInstanceTweenFadeImage[childImages.Length];
             }
         }
 
@@ -75,14 +75,14 @@ namespace Core.UI
                 return;
             }
 
-            thisTween?.Kill();
+            thisTween?.Stop();
             thisTween = thisImage.Fade(defaultColor, fadeDuration, 0, TweenType.UNSCALED, fadeEasingType);
 
             if (influenceChild)
             {
                 for (int i = 0; i < childImages.Length; i++)
                 {
-                    childTweens[i]?.Kill();
+                    childTweens[i]?.Stop();
                     childTweens[i] = childImages[i].Fade(defaultColor, fadeDuration, 0, TweenType.UNSCALED, fadeEasingType);
                 }
             }
@@ -112,14 +112,14 @@ namespace Core.UI
                 return;
             }
 
-            thisTween?.Kill();
+            thisTween?.Stop();
             thisTween = thisImage.Fade(highlightColor, fadeDuration, 0, TweenType.UNSCALED, fadeEasingType);
 
             if (influenceChild)
             {
                 for (int i = 0; i < childImages.Length; i++)
                 {
-                    childTweens[i]?.Kill();
+                    childTweens[i]?.Stop();
                     childTweens[i] = childImages[i].Fade(highlightColor, fadeDuration, 0, TweenType.UNSCALED, fadeEasingType);
                 }
             }
