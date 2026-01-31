@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
-using System.Collections.Generic;
 
 #if UNITY_EDITOR
 using Core.Editor;
@@ -17,8 +17,8 @@ namespace Core.Misc
     [RequireComponent(typeof(CharacterController))]
     public class MovementController : MonoBehaviour
     {
-        public event Action<Collider> OnColliderEnter = null;
-        public event Action<Collider> OnColliderExit = null;
+        public event Action<MovememntCollisionData> OnColliderEnter = null;
+        public event Action<MovememntCollisionData> OnColliderExit = null;
         public event Action<RaycastHit> OnStep = null;
         public event Action<float, float, float> OnLand = null; // fallTimer, fallVelocity.y, fallHeight
         public event Action OnJump = null;
@@ -146,9 +146,9 @@ namespace Core.Misc
         private bool canWalk = false;
         private bool wasJumped = false;
         private bool wasGrounded = false;
+        private bool isStanceOverrided = false;
         private bool isFallHeightResolved = false;
         private bool isClipResolved = false;
-        private bool isStanceOverrided = false;
         private bool isOnSteepSlope = false;
         private bool isOnWalkableSlope = false;
 
@@ -305,22 +305,27 @@ namespace Core.Misc
             characterController.radius = movementCurrentStance == MovementStance.CROUCH ? stanceCrouchColliderRadius : stanceStandColliderRadius;
             characterController.center = movementCurrentStance == MovementStance.CROUCH ? ((stanceCrouchColliderHeight / 2) * Vector3.up) : ((stanceStandColliderHeight / 2) * Vector3.up);
 
+            RaycastHit bestHit = new();
+
             collisionGround = CalculateGroundCollision();
             if (collisionGround && collisionGroundInfo.collider != null)
             {
                 collisionCurrentColliders.Add(collisionGroundInfo.collider);
+                bestHit = collisionGroundInfo;
             }
 
             collisionCeiling = CalculateCeilingCollision();
             if (collisionCeiling && collisionCeilingInfo.collider != null)
             {
                 collisionCurrentColliders.Add(collisionCeilingInfo.collider);
+                bestHit = collisionGroundInfo;
             }
 
             collisionSides = CalculateSidesCollision();
             if (collisionSides && collisionSidesInfo.collider != null)
             {
                 collisionCurrentColliders.Add(collisionSidesInfo.collider);
+                bestHit = collisionGroundInfo;
             }
 
             collisionAngle = Vector3.Angle(collisionGroundInfo.normal, Vector3.up);
@@ -331,7 +336,7 @@ namespace Core.Misc
             {
                 if (!collisionLastColliders.Contains(collider))
                 {
-                    OnColliderEnter?.Invoke(collider);
+                    OnColliderEnter?.Invoke(new(collider, movementVelocity));
                 }
             }
 
@@ -339,7 +344,7 @@ namespace Core.Misc
             {
                 if (!collisionCurrentColliders.Contains(collider))
                 {
-                    OnColliderExit?.Invoke(collider);
+                    OnColliderExit?.Invoke(new(collider, movementVelocity));
                 }
             }
 
@@ -434,7 +439,6 @@ namespace Core.Misc
                     fallHeight = fallPosition - characterOrigin.position.y;
                     OnLand?.Invoke(fallTimer, movementVelocity.y, fallHeight);
 
-                    // LAND SNAP
                     if (movementVelocity.y < 0f && collisionAngle <= 5f)
                     {
                         movementVelocity.y = -1f;
