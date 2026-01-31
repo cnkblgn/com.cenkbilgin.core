@@ -39,12 +39,10 @@ namespace Core.Misc
         private bool isWallRunning = false;
         private bool hasWallLeft = false;
         private bool hasWallRight = false;
-        private bool canWallRun = true;
         private float wallRunTimer = 0;
         private float wallLastTime = 0;
         private float wallStepTimer = 0;
         private float wallStepInterval = 0;
-        private readonly float wallRunCooldown = 1.5f;
 
         private void Awake() => movementController = GetComponent<MovementController>();
         private void OnDrawGizmos()
@@ -109,11 +107,6 @@ namespace Core.Misc
                 return;
             }
 
-            if (!canWallRun)
-            {
-                return;
-            }
-
             if (isWallRunning)
             {
                 return;
@@ -128,6 +121,8 @@ namespace Core.Misc
             wallRunTimer = 0f;
 
             wallVelocity = movementController.GetVelocity();
+            wallVelocity.y = Mathf.Max(0, wallVelocity.y);
+
             movementController.SetIsMovementEnabled(false);
             
             wallSmoothNormal = wallNormal;
@@ -179,9 +174,11 @@ namespace Core.Misc
             {
                 EndWallRun();
 
-                Vector3 lookVelocity = movementController.GetCharacterOrigin().forward.ClearY().normalized * 7.5f;
-                Vector3 wallVelocity = wallSmoothNormal * 2.5f;
-                Vector3 upVelocity = Vector3.up * 7.5f;
+                float magnitude = this.wallVelocity.magnitude;
+
+                Vector3 lookVelocity = movementController.GetCharacterOrigin().forward.ClearY().normalized * magnitude;
+                Vector3 wallVelocity = 0.5f * magnitude * wallSmoothNormal;
+                Vector3 upVelocity = Vector3.up * magnitude;
 
                 movementController.TriggerJumpEvent();
                 movementController.SetVelocity(lookVelocity + wallVelocity + upVelocity);
@@ -241,7 +238,6 @@ namespace Core.Misc
             movementController.SetIsMovementEnabled(true);
             movementController.SetVelocity(wallVelocity);
 
-            this.WaitSeconds(wallRunCooldown, () => canWallRun = false, () => canWallRun = true);
             OnEnd?.Invoke();
         }
 
