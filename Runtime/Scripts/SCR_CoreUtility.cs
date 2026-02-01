@@ -38,17 +38,17 @@ namespace Core
                 private readonly SwapBackArray<State> collection = default;
                 public Instance(uint capacity) => collection = new(capacity);
 
-                public void Start(Config config)
+                public void Start(Config config, float strength = 1f)
                 {
                     if (collection.Count == collection.Capacity)
                     {
                         ref State s = ref collection.GetRef(collection.Count - 1);
-                        s.Start(config);
+                        s.Start(config, strength);
                         return;
                     }
 
                     State state = new();
-                    state.Start(config);
+                    state.Start(config, strength);
                     collection.Add(state);
                 }
                 public Vector3 Update(float deltaTime)
@@ -83,14 +83,16 @@ namespace Core
                 private float damping;
                 private const float EPS = 0.0001f;
 
-                public void Start(Config config)
+                public void Start(Config config, float strength)
                 {
-                    if (config.Amplitude.sqrMagnitude < EPS)
+                    Vector3 amplitude = config.Amplitude * strength;
+
+                    if (amplitude.sqrMagnitude < EPS)
                     {
                         return;
                     }
 
-                    currentVelocity += config.Amplitude;
+                    currentVelocity += amplitude;
                     frequency = Mathf.Max(0, config.Frequency);
                     damping = Mathf.Clamp01(config.Damping);
                     IsActive = true;
