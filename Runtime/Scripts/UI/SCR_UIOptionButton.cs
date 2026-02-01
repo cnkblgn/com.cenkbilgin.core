@@ -17,9 +17,6 @@ namespace Core.UI
         [SerializeField] private TextMeshProUGUI descriptionText = null;
         [SerializeField] private TextMeshProUGUI valueText = null;
 
-        [Header("_")]
-        [SerializeField] private UIPointerEventTooltip thisTooltip = null;
-
         private string[] valueTexts = null;
         private int maximumIndex = 0;
         private int currentIndex = 0;
@@ -29,30 +26,6 @@ namespace Core.UI
         {
             nextButton.onClick.RemoveAllListeners();
             previousButton.onClick.RemoveAllListeners();
-        }
-        public UIOptionButton Initialize(int initial, int @default, string description, string[] values, Action<int> onApply, Action<int> onChanged, bool wrapAround = false)
-        {
-            if (this.descriptionText != null)
-            {
-                this.descriptionText.text = description;
-            }
-
-            this.currentIndex = 0;
-            this.valueTexts = values;
-            this.maximumIndex = values.Length - 1;
-            this.wrapAround = wrapAround;
-
-            if (thisTooltip != null)
-            {
-                thisTooltip.Initialize(values[currentIndex], true);
-            }
-
-            nextButton.onClick.AddListener(SetForward);
-            previousButton.onClick.AddListener(SetPrevious);
-
-            base.Initialize(initial, @default, onApply, onChanged);
-
-            return this;
         }
         public UIOptionButton Initialize(int initial, int @default, string description, int maximumIndex, Action<int> onApply, Action<int> onChanged, bool wrapAround = false)
         {
@@ -65,17 +38,17 @@ namespace Core.UI
             this.maximumIndex = maximumIndex;
             this.wrapAround = wrapAround;
 
-            if (thisTooltip != null)
-            {
-                thisTooltip.Initialize(currentIndex.ToString(), true);
-            }
-
             nextButton.onClick.AddListener(SetForward);
             previousButton.onClick.AddListener(SetPrevious);
 
             base.Initialize(initial, @default, onApply, onChanged);
 
             return this;
+        }
+        public UIOptionButton Initialize(int initial, int @default, string description, string[] values, Action<int> onApply, Action<int> onChanged, bool wrapAround = false)
+        {
+            valueTexts = values;
+            return Initialize(initial, @default, description, values.Length - 1, onApply, onChanged, wrapAround);
         }
         private void SetForward() => Set(currentIndex + 1);
         private void SetPrevious() => Set(currentIndex - 1);
@@ -97,23 +70,6 @@ namespace Core.UI
                 else
                 {
                     valueText.text = currentIndex.ToString();
-                }
-            }
-
-            if (thisTooltip != null)
-            {
-                if (valueTexts != null)
-                {
-                    thisTooltip.Initialize(valueTexts[currentIndex], true);
-                }
-                else
-                {
-                    thisTooltip.Initialize(currentIndex.ToString(), true);
-                }
-
-                if (thisTooltip.IsFocused)
-                {
-                    thisTooltip.Show(null);
                 }
             }
 

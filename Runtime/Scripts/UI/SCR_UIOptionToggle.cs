@@ -16,7 +16,6 @@ namespace Core.UI
         [SerializeField] private TextMeshProUGUI descriptionText = null;
 
         private void OnDisable() => toggleObject.onValueChanged.RemoveAllListeners();
-
         public UIOptionToggle Initialize(bool initial, bool @default, string description, Action<bool> onApply, Action<bool> onChanged)
         {
             if (this.descriptionText != null)
