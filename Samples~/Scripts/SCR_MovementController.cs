@@ -942,7 +942,6 @@ namespace Core.Misc
             else
             {
                 isMovementEnabled.Disable();
-                movementVelocity = Vector3.zero;
                 fallTimer = 0;
                 groundTimer = 0;
                 canJump = false;

@@ -74,29 +74,6 @@ namespace Core.Misc
 
             StartSlide();
         }
-        private void StartSlide()
-        {
-            if (isSliding)
-            {
-                return;
-            }
-
-            if (!GetIsEnabled())
-            {
-                return;
-            }
-
-            isSliding = true;
-            slideTimer = 0f;
-
-            slideDirection = movementController.GetCharacterOrigin().forward.ClearY().normalized;
-            slideVelocity = movementController.GetCurrentSpeed() * slideDirection;
-
-            movementController.SetIsMovementEnabled(false);
-            movementController.OverrideMovementStance(MovementStance.CROUCH, true);
-
-            OnStart?.Invoke();
-        }
         private void UpdateSlide()
         {
             if (!isSliding)
@@ -111,6 +88,7 @@ namespace Core.Misc
                 return;
             }
 
+            slideVelocity = movementController.GetVelocity();
             RaycastHit ground = movementController.GetGroundCollisionInfo();
             RaycastHit sides = movementController.GetSidesCollisionInfo();
             Vector3 slopeDirection = Vector3.ProjectOnPlane(Vector3.down, ground.normal).normalized;
@@ -118,12 +96,7 @@ namespace Core.Misc
 
             if (Jump.GetKeyDown())
             {
-                slideVelocity += (ground.normal * Mathf.Lerp(1, 5, Mathf.Max(slopeAngle, 50) / 50));
-                slideVelocity.y = movementController.GetJumpForce();
-
-                EndSlide();
-
-                movementController.RegisterJump();
+                EjectSlide();
                 return;
             }
 
@@ -163,6 +136,30 @@ namespace Core.Misc
 
             movementController.SetVelocity(slideVelocity);
         }
+        private void StartSlide()
+        {
+            if (isSliding)
+            {
+                return;
+            }
+
+            if (!GetIsEnabled())
+            {
+                return;
+            }
+
+            isSliding = true;
+            slideTimer = 0f;
+
+            slideDirection = movementController.GetCharacterOrigin().forward.ClearY().normalized;
+            slideVelocity = movementController.GetCurrentSpeed() * slideDirection;
+
+            movementController.SetVelocity(slideVelocity);
+            movementController.SetIsMovementEnabled(false);
+            movementController.OverrideMovementStance(MovementStance.CROUCH, true);
+
+            OnStart?.Invoke();
+        }
         private void EndSlide()
         {
             if (!isSliding)
@@ -179,6 +176,18 @@ namespace Core.Misc
 
             this.WaitSeconds(cooldown, () => canSlide = false, () => canSlide = true);
             OnEnd?.Invoke();
+        }
+        private void EjectSlide()
+        {
+            Vector3 groundNormal = movementController.GetGroundCollisionInfo().normal;
+            float slopeAngle = Vector3.Angle(groundNormal, Vector3.up);
+
+            slideVelocity += (groundNormal * Mathf.Lerp(1, 5, Mathf.Max(slopeAngle, 50) / 50));
+            slideVelocity.y = movementController.GetJumpForce();
+
+            EndSlide();
+
+            movementController.RegisterJump();
         }
 
         public bool GetIsEnabled() => isEnabled.IsEnabled;

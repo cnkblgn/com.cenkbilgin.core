@@ -153,6 +153,8 @@ namespace Core.Misc
             }
 
             wallSmoothNormal = Vector3.Slerp(wallSmoothNormal, wallNormal, 7.5f * Time.deltaTime);
+            wallVelocity = movementController.GetVelocity();
+
             Transform origin = movementController.GetCharacterOrigin();
             Vector3 currentForward = wallVelocity.ClearY().normalized;
             Vector3 targetForward = Vector3.Cross(wallSmoothNormal, Vector3.up);
@@ -161,14 +163,6 @@ namespace Core.Misc
             {
                 targetForward = -targetForward;
             }
-
-            //float cornerAngle = Vector3.Angle(currentForward, targetForward);
-
-            //if (cornerAngle > 60)
-            //{
-            //    EndWallRun();
-            //    return;
-            //}
 
             Vector3 forward = Vector3.Slerp(currentForward, targetForward, 7.5f * Time.deltaTime);
             Vector3 horizontal = wallVelocity.ClearY();
@@ -179,7 +173,7 @@ namespace Core.Misc
             wallVelocity.y -= gravity * Time.deltaTime;
 
             movementController.SetVelocity(wallVelocity);
-
+      
             wallStepInterval = Mathf.Lerp(0.666f, 0.333f, horizontal.magnitude / 10);
             wallStepTimer -= Time.deltaTime;
             if (wallStepTimer <= 0)
@@ -211,8 +205,9 @@ namespace Core.Misc
             wallSmoothNormal = wallNormal;
             wallVelocity = movementController.GetVelocity();
             wallVelocity.y = Mathf.Max(0, wallVelocity.y);
-
+            movementController.SetVelocity(wallVelocity);
             movementController.SetIsMovementEnabled(false);
+
             OnStart?.Invoke();
         }
         private void EndWallRun()

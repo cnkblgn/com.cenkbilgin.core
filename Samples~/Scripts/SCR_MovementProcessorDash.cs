@@ -23,7 +23,6 @@ namespace Core.Misc
         private float dashTime = 0;
 
         private void Awake() => movementController = GetComponent<MovementController>();
-
         public void OnBeforeMove(MovementController controller) 
         {
             if (dashInput.GetKeyDown())
