@@ -207,16 +207,24 @@ namespace Core.Graphics
         {
             int value = urpPipelineSettings.mainLightShadowmapResolution;
 
-            return urpPipelineSettings.mainLightShadowmapResolution = value == 4096 ? 3 : value == 2048 ? 2 : value == 1024 ? 1 : 0;      
+            return value == 4096 ? 3 : value == 2048 ? 2 : value == 1024 ? 1 : 0;      
         }
         public void SetShadowQuality(int value)
         {
             if (GetMainCamera() != null)
             {
+                Debug.Log("Test SetShadowQuality: " + value);
+
                 if (mainCamera.TryGetComponent(out UniversalAdditionalCameraData cameraData))
                 {
                     cameraData.renderShadows = value > 0;
+
+                    Debug.Log("Test SetShadowQuality Success!: " + value);
                 }
+            }
+            else
+            {
+                Debug.Log("Test SetShadowQuality Camera Not Found!");
             }
 
             urpPipelineSettings.mainLightShadowmapResolution = value == 3 ? 4096 : value == 2 ? 2048 : value == 1 ? 1024 : 512;
