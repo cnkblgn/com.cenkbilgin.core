@@ -213,18 +213,10 @@ namespace Core.Graphics
         {
             if (GetMainCamera() != null)
             {
-                Debug.Log("Test SetShadowQuality: " + value);
-
                 if (mainCamera.TryGetComponent(out UniversalAdditionalCameraData cameraData))
                 {
                     cameraData.renderShadows = value > 0;
-
-                    Debug.Log("Test SetShadowQuality Success!: " + value);
                 }
-            }
-            else
-            {
-                Debug.Log("Test SetShadowQuality Camera Not Found!");
             }
 
             urpPipelineSettings.mainLightShadowmapResolution = value == 3 ? 4096 : value == 2 ? 2048 : value == 1 ? 1024 : 512;
@@ -281,11 +273,6 @@ namespace Core.Graphics
             if (!isCameraInitialized)
             {
                 InitializeMainCamera();
-            }
-
-            if (mainCamera == null || defaultCamera == null)
-            {
-                return;
             }
 
             if (targetCamera == mainCamera)
