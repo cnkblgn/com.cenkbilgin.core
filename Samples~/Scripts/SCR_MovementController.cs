@@ -80,7 +80,6 @@ namespace Core.Misc
         [SerializeField, Min(0)] private float movementBackwardSpeedTransition = 1.5f;
         [SerializeField, Min(0)] private float movementGroundSpeed = 2.5f;
         [SerializeField, Min(0)] private float movementGroundAccelerate = 6.0f;
-        [SerializeField, Min(0)] private float movementGroundDecelerate = 3.0f;
         [SerializeField, Min(0)] private float movementGroundFriction = 5.0f;
         [SerializeField, Min(0)] private float movementAirSpeed = 1.15f;
         [SerializeField, Min(0)] private float movementAirAccelerate = 8192f;
@@ -580,7 +579,7 @@ namespace Core.Misc
             movementDirection = Vector3.ProjectOnPlane(movementDirection, collisionGroundInfo.normal).normalized;
 
             ApplyFriction(wishJump || groundTimer < 0.0333f ? 0 : movementGroundFriction);
-            ApplyGroundAcceleration(IsMoving ? movementGroundAccelerate : movementGroundDecelerate, movementCurrentSpeed);
+            if (IsMoving) ApplyGroundAcceleration(movementGroundAccelerate, movementCurrentSpeed);
 
             if (!CollisionSides)
             {
