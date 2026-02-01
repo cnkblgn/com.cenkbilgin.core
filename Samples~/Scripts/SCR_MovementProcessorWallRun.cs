@@ -180,7 +180,6 @@ namespace Core.Misc
                 Vector3 wallVelocity = 0.5f * magnitude * wallSmoothNormal;
                 Vector3 upVelocity = Vector3.up * magnitude;
 
-                movementController.TriggerJumpEvent();
                 movementController.SetVelocity(lookVelocity + wallVelocity + upVelocity);
                 return;
             }

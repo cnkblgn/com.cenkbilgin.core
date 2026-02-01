@@ -27,8 +27,8 @@ namespace Core.Misc
 
         public bool IsMoving => Move.GetAxis().x != 0 || Move.GetAxis().y != 0;
         public bool IsCrouching => movementCurrentStance == MovementStance.CROUCH;
-        public bool IsWalking => canWalk;
-        public bool IsSprinting => canSprint;
+        public bool IsWalking => isWalking;
+        public bool IsSprinting => isSprinting;
         public bool CollisionGround => collisionGround;
         public bool CollisionCeiling => collisionCeiling;
         public bool CollisionSides => collisionSides;
@@ -145,6 +145,8 @@ namespace Core.Misc
         private bool collisionGround = false;
         private bool collisionCeiling = false;
         private bool collisionSides = false;
+        private bool wasJumped = false;
+        private bool wasGrounded = false;
         private bool wishJump = false;
         private bool wishCrouch = false;
         private bool wishSprint = false;
@@ -152,18 +154,13 @@ namespace Core.Misc
         private bool canJump = false;
         private bool canCrouch = false;
         private bool canStand = false;
-        private bool canSprint = false;
-        private bool canWalk = false;
-        private bool wasJumped = false;
-        private bool wasGrounded = false;
+        private bool isSprinting = false;
+        private bool isWalking = false;
         private bool isStanceOverrided = false;
         private bool isFallHeightResolved = false;
-        private bool isClipResolved = false;
+        private bool isCollisionClipResolved = false;
         private bool isOnSteepSlope = false;
         private bool isOnWalkableSlope = false;
-        private bool toggleCrouchState = false;
-        private bool toggleSprintState = false;
-        private bool toggleWalkState = false;
 
         private void Awake()
         {
@@ -312,7 +309,7 @@ namespace Core.Misc
         private void UpdateCollision()
         {
             collisionCurrentColliders.Clear();
-            isClipResolved = false;
+            isCollisionClipResolved = false;
 
             characterController.height = movementCurrentStance == MovementStance.CROUCH ? stanceCrouchColliderHeight : stanceStandColliderHeight;
             characterController.radius = movementCurrentStance == MovementStance.CROUCH ? stanceCrouchColliderRadius : stanceStandColliderRadius;
@@ -384,16 +381,9 @@ namespace Core.Misc
             movementDirection = characterOrigin.TransformVector(new(input.x, 0f, input.y));
             movementDirection = movementDirection.normalized;
 
-            wishCrouch = toggleCrouch ? 
-                Crouch.GetKeyDown() ? toggleCrouchState = !toggleCrouchState : toggleCrouchState : 
-                Crouch.GetKey();
-            wishSprint = toggleSprint ?
-                Sprint.GetKeyDown() ? toggleSprintState = !toggleSprintState : toggleSprintState :
-                autoSprint || Sprint.GetKey();
-            wishWalk = toggleWalk ?
-                Walk.GetKeyDown() ? toggleWalkState = !toggleWalkState : toggleWalkState :
-                Walk.GetKey();
-
+            wishCrouch = toggleCrouch ? Crouch.GetKeyDown() ? wishCrouch = !wishCrouch : wishCrouch : Crouch.GetKey();
+            wishSprint = toggleSprint ? Sprint.GetKeyDown() ? wishSprint = !wishSprint : wishSprint : autoSprint || Sprint.GetKey();
+            wishWalk = toggleWalk ? Walk.GetKeyDown() ? wishWalk = !wishWalk : wishWalk : Walk.GetKey();
             wishJump = Jump.GetKeyDown();
 
             canJump = 
@@ -416,18 +406,18 @@ namespace Core.Misc
                 !isStanceOverrided && 
                 !CollisionCeiling;
 
-            canSprint = 
+            isSprinting = 
                 GetIsSprintEnabled() &&
                 movementCurrentStance == MovementStance.STAND &&
                 wishSprint && 
                 IsMoving && 
                 Move.GetAxis().y > 0;
 
-            canWalk =
+            isWalking =
                 GetIsWalkEnabled() &&
                 movementCurrentStance == MovementStance.STAND &&
                 wishWalk && 
-                !canSprint && 
+                !isSprinting && 
                 !canCrouch && 
                 !canJump;
 
@@ -546,10 +536,10 @@ namespace Core.Misc
         {
             movementVelocity.y -= GetIsGravityEnabled() ? movementGravity * Time.deltaTime : 0;
 
-            if (CollisionSides && !isClipResolved)
+            if (CollisionSides && !isCollisionClipResolved)
             {
                 ApplyClipVelocity(collisionSidesInfo.normal);
-                isClipResolved = true;
+                isCollisionClipResolved = true;
             }
 
             ApplyAirAcceleration(movementAirAccelerate, movementAirSpeed);
@@ -558,10 +548,10 @@ namespace Core.Misc
         {
             movementVelocity.y -= movementGravity * Time.deltaTime;
 
-            if (!isClipResolved)
+            if (!isCollisionClipResolved)
             {
                 ApplyClipVelocity(collisionGroundInfo.normal);
-                isClipResolved = true;
+                isCollisionClipResolved = true;
             }
 
             ApplyAirAcceleration(movementAirAccelerate, movementAirSpeed * 1.25f);
@@ -596,10 +586,10 @@ namespace Core.Misc
             {
                 movementVelocity = Vector3.ProjectOnPlane(movementVelocity, collisionGroundInfo.normal);
             }
-            else if (CollisionSides && !isClipResolved)
+            else if (CollisionSides && !isCollisionClipResolved)
             {
                 ApplyClipVelocity(collisionSidesInfo.normal);
-                isClipResolved = true;
+                isCollisionClipResolved = true;
             }
 
             stepInterval = Mathf.Lerp(stepIntervalMax, stepIntervalMin, movementNormalizedSpeed);
@@ -615,13 +605,10 @@ namespace Core.Misc
         {
             movementVelocity.y = Mathf.Max(movementVelocity.y + movementJumpForce, movementJumpForce);
 
-            wishJump = false;
             wasJumped = true;
 
-            TriggerJumpEvent();
+            OnJump?.Invoke();
         }
-
-        public void TriggerJumpEvent() => OnJump?.Invoke();
         private void TryStep()
         {
             if (Physics.Raycast(characterOrigin.position, Vector3.down, out RaycastHit hit, (GetCharacterHeight() / 2) + 0.125f, stepMask, QueryTriggerInteraction.Collide))
@@ -958,7 +945,7 @@ namespace Core.Misc
                 canJump = false;
                 canCrouch = false;
                 canStand = false;
-                canSprint = false;
+                isSprinting = false;
             }
         }
         public bool GetIsMovementEnabled() => isMovementEnabled.IsEnabled;
@@ -978,7 +965,7 @@ namespace Core.Misc
                 canJump = false;
                 canCrouch = false;
                 canStand = false;
-                canSprint = false;
+                isSprinting = false;
             }
         }
         public bool GetIsGravityEnabled() => isGravityEnabled.IsEnabled;
