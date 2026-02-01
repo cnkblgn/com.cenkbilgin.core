@@ -90,7 +90,7 @@ namespace Core.Misc
                 return false;
             }
 
-            if (Vector3.Angle(hit.normal, Vector3.up) < 85f)
+            if (Mathf.Abs(Vector3.Dot(hit.normal, Vector3.up)) > 0.05f)
             {
                 return false;
             }
@@ -162,13 +162,13 @@ namespace Core.Misc
                 targetForward = -targetForward;
             }
 
-            float cornerAngle = Vector3.Angle(currentForward, targetForward);
+            //float cornerAngle = Vector3.Angle(currentForward, targetForward);
 
-            if (cornerAngle > 60)
-            {
-                EndWallRun();
-                return;
-            }
+            //if (cornerAngle > 60)
+            //{
+            //    EndWallRun();
+            //    return;
+            //}
 
             Vector3 forward = Vector3.Slerp(currentForward, targetForward, 7.5f * Time.deltaTime);
             Vector3 horizontal = wallVelocity.ClearY();
