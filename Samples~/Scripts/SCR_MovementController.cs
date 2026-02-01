@@ -604,9 +604,7 @@ namespace Core.Misc
         {
             movementVelocity.y = Mathf.Max(movementVelocity.y + movementJumpForce, movementJumpForce);
 
-            wasJumped = true;
-
-            OnJump?.Invoke();
+            RegisterJump();
         }
         private void TryStep()
         {
@@ -614,6 +612,12 @@ namespace Core.Misc
             {
                 OnStep?.Invoke(hit);
             }
+        }
+
+        public void RegisterJump()
+        {
+            wasJumped = true;
+            OnJump?.Invoke();
         }
 
         private void ApplyClipVelocity(Vector3 normal, float overbounce = 1.05f) => movementVelocity = CalculateClipVelocity(movementVelocity, normal, overbounce); 

@@ -181,6 +181,7 @@ namespace Core.Misc
                 Vector3 upVelocity = Vector3.up * magnitude;
 
                 movementController.SetVelocity(lookVelocity + wallVelocity + upVelocity);
+                movementController.RegisterJump();
                 return;
             }
 

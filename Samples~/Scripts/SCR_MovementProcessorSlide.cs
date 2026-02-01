@@ -122,6 +122,8 @@ namespace Core.Misc
                 slideVelocity.y = movementController.GetJumpForce();
 
                 EndSlide();
+
+                movementController.RegisterJump();
                 return;
             }
 
