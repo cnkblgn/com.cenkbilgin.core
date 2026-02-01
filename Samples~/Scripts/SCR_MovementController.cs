@@ -71,15 +71,25 @@ namespace Core.Misc
         [SerializeField, Min(0)] private float movementJumpCoyote = 0.5f;
         [SerializeField, Min(0)] private float movementJumpForce = 10.0f;
         [SerializeField, Min(0)] private float movementCrouchSpeedMultiplier = 0.5f;
+        [SerializeField, Min(0)] private float movementCrouchSpeedTransition = 1.5f;
         [SerializeField, Min(0)] private float movementSprintSpeedMultiplier = 2.0f;
+        [SerializeField, Min(0)] private float movementSprintSpeedTransition = 1.5f;
         [SerializeField, Min(0)] private float movementWalkSpeedMultiplier = 0.5f;
-        [SerializeField, Min(0)] private float movementBackwardsSpeedMultiplier = 0.5f;
+        [SerializeField, Min(0)] private float movementWalkSpeedTransition = 1.5f;
+        [SerializeField, Min(0)] private float movementBackwardSpeedMultiplier = 0.5f;
+        [SerializeField, Min(0)] private float movementBackwardSpeedTransition = 1.5f;
         [SerializeField, Min(0)] private float movementGroundSpeed = 2.5f;
         [SerializeField, Min(0)] private float movementGroundAccelerate = 6.0f;
-        [SerializeField, Min(1)] private float movementSpeedAccelerate = 1.5f;
+        [SerializeField, Min(0)] private float movementGroundDecelerate = 3.0f;
         [SerializeField, Min(0)] private float movementGroundFriction = 5.0f;
         [SerializeField, Min(0)] private float movementAirSpeed = 1.15f;
         [SerializeField, Min(0)] private float movementAirAccelerate = 8192f;
+
+        [Header("_")]
+        [SerializeField] private bool autoSprint = false;
+        [SerializeField] private bool toggleSprint = false;
+        [SerializeField] private bool toggleCrouch = false;
+        [SerializeField] private bool toggleWalk = false;
 
         [Header("_")]
         [SerializeField] private LayerMask stepMask = 0;
@@ -123,9 +133,9 @@ namespace Core.Misc
         private float cameraRotationX = 0;
         private float cameraRotationY = 0;
         private float cameraRotationZ = 0;
-        private float movementTargetGroundSpeed = 1;
-        private float movementCurrentGroundSpeed = 1;
-        private float movementNormalizedGroundSpeed = 1;
+        private float movementTargetSpeed = 1;
+        private float movementCurrentSpeed = 1;
+        private float movementNormalizedSpeed = 1;
         private float groundTimer = 0;
         private float fallTimer = 0;
         private float fallHeight = 0;
@@ -151,6 +161,9 @@ namespace Core.Misc
         private bool isClipResolved = false;
         private bool isOnSteepSlope = false;
         private bool isOnWalkableSlope = false;
+        private bool toggleCrouchState = false;
+        private bool toggleSprintState = false;
+        private bool toggleWalkState = false;
 
         private void Awake()
         {
@@ -371,10 +384,17 @@ namespace Core.Misc
             movementDirection = characterOrigin.TransformVector(new(input.x, 0f, input.y));
             movementDirection = movementDirection.normalized;
 
-            wishCrouch = Crouch.GetKey();
-            wishSprint = Sprint.GetKey();
+            wishCrouch = toggleCrouch ? 
+                Crouch.GetKeyDown() ? toggleCrouchState = !toggleCrouchState : toggleCrouchState : 
+                Crouch.GetKey();
+            wishSprint = toggleSprint ?
+                Sprint.GetKeyDown() ? toggleSprintState = !toggleSprintState : toggleSprintState :
+                autoSprint || Sprint.GetKey();
+            wishWalk = toggleWalk ?
+                Walk.GetKeyDown() ? toggleWalkState = !toggleWalkState : toggleWalkState :
+                Walk.GetKey();
+
             wishJump = Jump.GetKeyDown();
-            wishWalk = false;
 
             canJump = 
                 GetIsJumpEnabled() && 
@@ -550,21 +570,27 @@ namespace Core.Misc
         {
             bool movingBackwards = Move.GetAxis().y < 0;
 
-            movementTargetGroundSpeed = movementGroundSpeed;
-            movementTargetGroundSpeed *= IsSprinting ? movementSprintSpeedMultiplier : 1;
-            movementTargetGroundSpeed *= IsCrouching ? movementCrouchSpeedMultiplier : 1;
-            movementTargetGroundSpeed *= IsWalking ? movementWalkSpeedMultiplier : 1;
-            movementTargetGroundSpeed *= movingBackwards ? movementBackwardsSpeedMultiplier : 1;
+            movementTargetSpeed = movementGroundSpeed;
+            movementTargetSpeed *= IsSprinting ? movementSprintSpeedMultiplier : 1;
+            movementTargetSpeed *= IsCrouching ? movementCrouchSpeedMultiplier : 1;
+            movementTargetSpeed *= IsWalking ? movementWalkSpeedMultiplier : 1;
+            movementTargetSpeed *= movingBackwards ? movementBackwardSpeedMultiplier : 1;
 
-            movementCurrentGroundSpeed = Mathf.Lerp(movementCurrentGroundSpeed, movementTargetGroundSpeed, movementSpeedAccelerate * Time.deltaTime);
+            float t = 1f;
+            t = IsSprinting ? movementSprintSpeedTransition : t;
+            t = IsCrouching ? movementCrouchSpeedTransition : t;
+            t = IsWalking ? movementWalkSpeedTransition : t;
+            t = movingBackwards ? movementBackwardSpeedTransition : t;
 
-            float d = movementGroundSpeed * movementSprintSpeedMultiplier;
-            movementNormalizedGroundSpeed = Mathf.Clamp(movementTargetGroundSpeed, 0, d) / d;
+            movementCurrentSpeed = Mathf.Lerp(movementCurrentSpeed, movementTargetSpeed, t * Time.deltaTime);
+
+            float maxPossibleSpeed = movementGroundSpeed * movementSprintSpeedMultiplier;
+            movementNormalizedSpeed = Mathf.Clamp(movementTargetSpeed, 0, maxPossibleSpeed) / maxPossibleSpeed;
           
             movementDirection = Vector3.ProjectOnPlane(movementDirection, collisionGroundInfo.normal).normalized;
 
             ApplyFriction(wishJump || groundTimer < 0.0333f ? 0 : movementGroundFriction);
-            ApplyGroundAcceleration(movementGroundAccelerate, movementCurrentGroundSpeed);
+            ApplyGroundAcceleration(IsMoving ? movementGroundAccelerate : movementGroundDecelerate, movementCurrentSpeed);
 
             if (!CollisionSides)
             {
@@ -576,7 +602,7 @@ namespace Core.Misc
                 isClipResolved = true;
             }
 
-            stepInterval = Mathf.Lerp(stepIntervalMax, stepIntervalMin, movementNormalizedGroundSpeed);
+            stepInterval = Mathf.Lerp(stepIntervalMax, stepIntervalMin, movementNormalizedSpeed);
             stepTimer -= Time.deltaTime;
 
             if (stepTimer <= 0 && Time.timeScale != 0 && IsMoving)
@@ -816,17 +842,25 @@ namespace Core.Misc
 
         public float GetSprintSpeedMult() => movementSprintSpeedMultiplier;
         public void SetSprintSpeedMult(float value) => movementSprintSpeedMultiplier = value;
+        public float GetSprintSpeedTransition() => movementSprintSpeedTransition;
+        public void SetSprintSpeedTransition(float value) => movementSprintSpeedTransition = value;
 
         public float GetCrouchSpeedMult() => movementCrouchSpeedMultiplier;
         public void SetCrouchSpeedMult(float value) => movementCrouchSpeedMultiplier = value;
+        public float GetCrouchSpeedTransition() => movementCrouchSpeedTransition;
+        public void SetCrouchSpeedTransition(float value) => movementCrouchSpeedTransition = value;
 
         public float GetWalkSpeedMult() => movementWalkSpeedMultiplier;
         public void SetWalkSpeedMult(float value) => movementWalkSpeedMultiplier = value;
+        public float GetWalkSpeedTransition() => movementWalkSpeedTransition;
+        public void SetWalkSpeedTransition(float value) => movementWalkSpeedTransition = value;
 
-        public float GetBackwardSpeedMult() => movementBackwardsSpeedMultiplier;
-        public void SetBackwardSpeedMult(float value) => movementBackwardsSpeedMultiplier = value;
+        public float GetBackwardSpeedMult() => movementBackwardSpeedMultiplier;
+        public void SetBackwardSpeedMult(float value) => movementBackwardSpeedMultiplier = value;
+        public float GetBackwardSpeedTransition() => movementBackwardSpeedTransition;
+        public void SetBackwardSpeedTransition(float value) => movementBackwardSpeedTransition = value;
 
-        public float GetNormalizedSpeed() => movementNormalizedGroundSpeed;
+        public float GetNormalizedSpeed() => movementNormalizedSpeed;
         public float GetCurrentSpeed() => movementVelocity.ClearY().magnitude;
 
         public float GetGroundSpeed() => movementGroundSpeed;

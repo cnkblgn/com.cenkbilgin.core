@@ -17,6 +17,7 @@ namespace Core.Input
         public static readonly InputActionType Sprint = new("Gameplay.Sprint");
         public static readonly InputActionType Crouch = new("Gameplay.Crouch");
         public static readonly InputActionType Interact = new("Gameplay.Interact");
+        public static readonly InputActionType Walk = new("Gameplay.Walk");
 
         // ===== UI =====
         public static readonly InputActionType UIUp = new("UI.NavigateUp");
