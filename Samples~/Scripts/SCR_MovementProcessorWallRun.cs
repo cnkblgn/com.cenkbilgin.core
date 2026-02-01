@@ -22,20 +22,24 @@ namespace Core.Misc
 
         [Header("_")]
         [SerializeField] private bool showGizmos = false;
+        [SerializeField, Min(1)] private float minHeight = 2.5f;
+        [SerializeField, Min(0.1f)] private float distance = 1.33f;
+
+        [Header("_")]
         [SerializeField, Min(1)] private float speed = 8f;
         [SerializeField, Min(0.1f)] private float duration = 10f;
         [SerializeField, Min(1)] private float gravity = 5f;
-
-        [Header("_")]
-        [SerializeField, Min(0.1f)] private float distance = 1.33f;
-        [SerializeField, Min(1)] private float minHeight = 2.5f;
+        [SerializeField, Min(0)] private float ejectForwardWeight = 1f;
+        [SerializeField, Min(0)] private float ejectNormalWeight = 0.25f;
+        [SerializeField, Min(0)] private float ejectUpWeight = 0.75f;
 
         private MovementController movementController;
         private readonly StackBool isEnabled = new();
+        private RaycastHit wallInfo = new();
+        private Collider wallCollider = null;
         private Vector3 wallVelocity = Vector3.zero;
         private Vector3 wallNormal = Vector3.up;
         private Vector3 wallSmoothNormal = Vector3.up;
-        private Vector3 wallLastNormal = Vector3.zero;
         private bool isWallRunning = false;
         private bool hasWallLeft = false;
         private bool hasWallRight = false;
@@ -77,6 +81,7 @@ namespace Core.Misc
 
             hasWallRight = Physics.Raycast(pos, origin.right, out RaycastHit hitR, distance);
             hasWallLeft = Physics.Raycast(pos, -origin.right, out RaycastHit hitL, distance);
+
             // Eğer ikisi de true ise: HER ZAMAN right wall seçiliyor Sol duvara daha yakın olsan bile umursamıyor
             RaycastHit hit = hasWallRight ? hitR : hitL;
 
@@ -90,7 +95,7 @@ namespace Core.Misc
                 return false;
             }
 
-            if (Time.time - wallLastTime < 1.5f && wallLastNormal != Vector3.zero && Vector3.Dot(hit.normal, wallLastNormal) >= 0.9f)
+            if (Time.time - wallLastTime < 1.5f && wallCollider != null && hit.collider == wallCollider)
             {
                 return false;
             }
@@ -100,35 +105,6 @@ namespace Core.Misc
             return true;
         }
 
-        private void StartWallRun()
-        {
-            if (!GetIsEnabled())
-            {
-                return;
-            }
-
-            if (isWallRunning)
-            {
-                return;
-            }
-
-            if (Physics.Raycast(movementController.GetCharacterOrigin().position + Vector3.up * (movementController.GetCharacterHeight() * 0.5f), Vector3.down, out RaycastHit hitG, minHeight))
-            {
-                return;
-            }
-
-            isWallRunning = true;
-            wallRunTimer = 0f;
-
-            wallVelocity = movementController.GetVelocity();
-            wallVelocity.y = Mathf.Max(0, wallVelocity.y);
-
-            movementController.SetIsMovementEnabled(false);
-            
-            wallSmoothNormal = wallNormal;
-
-            OnStart?.Invoke();
-        }
         private void UpdateWallRun()
         {
             if (movementController.CollisionGround)
@@ -149,13 +125,13 @@ namespace Core.Misc
                 return;
             }
 
-            if (!TryGetWallTarget(out RaycastHit hitInfo))
+            if (!TryGetWallTarget(out wallInfo))
             {
                 EndWallRun();
                 return;
             }
 
-            wallNormal = hitInfo.normal;
+            wallNormal = wallInfo.normal;
 
             if (!isWallRunning)
             {
@@ -172,16 +148,7 @@ namespace Core.Misc
 
             if (isWallRunning && Jump.GetKeyDown())
             {
-                EndWallRun();
-
-                float magnitude = this.wallVelocity.magnitude;
-
-                Vector3 lookVelocity = movementController.GetCharacterOrigin().forward.ClearY().normalized * magnitude;
-                Vector3 wallVelocity = 0.5f * magnitude * wallSmoothNormal;
-                Vector3 upVelocity = Vector3.up * magnitude;
-
-                movementController.SetVelocity(lookVelocity + wallVelocity + upVelocity);
-                movementController.RegisterJump();
+                EjectWallRun();
                 return;
             }
 
@@ -205,7 +172,6 @@ namespace Core.Misc
 
             Vector3 forward = Vector3.Slerp(currentForward, targetForward, 7.5f * Time.deltaTime);
             Vector3 horizontal = wallVelocity.ClearY();
-
             horizontal = forward * Mathf.Max(horizontal.magnitude, speed);
 
             wallVelocity.x = horizontal.x;
@@ -214,14 +180,40 @@ namespace Core.Misc
 
             movementController.SetVelocity(wallVelocity);
 
-            wallStepInterval = Mathf.Lerp(0.666f, 0.333f, 10);
+            wallStepInterval = Mathf.Lerp(0.666f, 0.333f, horizontal.magnitude / 10);
             wallStepTimer -= Time.deltaTime;
-
             if (wallStepTimer <= 0)
             {
-                OnStep?.Invoke(hitInfo);
+                OnStep?.Invoke(wallInfo);
                 wallStepTimer = wallStepInterval;
             }
+        }
+        private void StartWallRun()
+        {
+            if (!GetIsEnabled())
+            {
+                return;
+            }
+
+            if (isWallRunning)
+            {
+                return;
+            }
+
+            if (Physics.Raycast(movementController.GetCharacterOrigin().position + Vector3.up * (movementController.GetCharacterHeight() * 0.5f), Vector3.down, out RaycastHit hitG, minHeight))
+            {
+                return;
+            }
+
+            isWallRunning = true;
+            wallRunTimer = 0f;
+
+            wallSmoothNormal = wallNormal;
+            wallVelocity = movementController.GetVelocity();
+            wallVelocity.y = Mathf.Max(0, wallVelocity.y);
+
+            movementController.SetIsMovementEnabled(false);
+            OnStart?.Invoke();
         }
         private void EndWallRun()
         {
@@ -232,13 +224,27 @@ namespace Core.Misc
 
             isWallRunning = false;
             wallRunTimer = 0f;
-            wallLastNormal = wallSmoothNormal.normalized;
             wallLastTime = Time.time;
+            wallCollider = wallInfo.collider;
 
             movementController.SetIsMovementEnabled(true);
             movementController.SetVelocity(wallVelocity);
 
             OnEnd?.Invoke();
+        }
+        private void EjectWallRun()
+        {
+            EndWallRun();
+
+            float magnitude = this.wallVelocity.magnitude;
+
+            Vector3 velocity =
+                magnitude * ejectForwardWeight * movementController.GetCharacterOrigin().forward.ClearY().normalized +
+                magnitude * ejectUpWeight * Vector3.up +
+                magnitude * ejectNormalWeight * wallSmoothNormal;
+
+            movementController.SetVelocity(Vector3.ClampMagnitude(velocity, magnitude * 1.1f));
+            movementController.RegisterJump();
         }
 
         public bool GetIsEnabled() => isEnabled.IsEnabled;
