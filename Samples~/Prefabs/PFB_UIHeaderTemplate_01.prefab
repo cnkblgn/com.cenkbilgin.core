@@ -187,6 +187,18 @@ PrefabInstance:
       value: Text
       objectReference: {fileID: 0}
     - target: {fileID: 6604963300386185422, guid: e02da7727e6862b48b776764ce282796, type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+    - target: {fileID: 6604963300386185422, guid: e02da7727e6862b48b776764ce282796, type: 3}
+      propertyPath: m_fontStyle
+      value: 18
+      objectReference: {fileID: 0}
+    - target: {fileID: 6604963300386185422, guid: e02da7727e6862b48b776764ce282796, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+    - target: {fileID: 6604963300386185422, guid: e02da7727e6862b48b776764ce282796, type: 3}
       propertyPath: m_fontColor32.rgba
       value: 4294967295
       objectReference: {fileID: 0}

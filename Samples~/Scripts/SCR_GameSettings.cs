@@ -1,16 +1,19 @@
 using System;
 using UnityEngine;
+using Newtonsoft.Json;
 
 namespace Core.Misc
 {
-    using static Core.CoreUtility;
+    using static CoreUtility;
 
     [Serializable]
     public class GameSettings
     {
-        [Header("_")]
+        public Int2 ScreenResolution { get => (Int2)screenResolution; set => screenResolution = value; }
+
+        [Header("_")] 
         public FullScreenMode FullscreenMode = FullScreenMode.ExclusiveFullScreen;
-        public Int2 ScreenResolution = new(1920, 1080);
+        [JsonIgnore, SerializeField] public Vector2Int screenResolution = new(1920, 1080);
         [Range(0.1f, 2.0f)] public float RenderScale = 1.0f;
         [Range(0, 3), Tooltip("0 - Bilinear, 1 - Nearest, 2 - FSR, 3 - STP")] public int UpscaleFilter = 0;
         public bool Vsync = false;

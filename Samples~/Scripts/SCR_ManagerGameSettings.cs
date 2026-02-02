@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
-using Core;
 using Core.Graphics;
 using Core.Localization;
 using Core.UI;
@@ -17,7 +16,7 @@ namespace Core.Misc
     [DisallowMultipleComponent]
     public class ManagerGameSettings : Manager<ManagerGameSettings>
     {
-        public static event Action<GameSettings> OnSettingsUpdated = null;
+        public event Action<GameSettings> OnSettingsUpdated = null;
         public GameSettings Settings => settings;
 
         [Header("_")]
@@ -27,8 +26,10 @@ namespace Core.Misc
         private readonly List<UIOptionBase> optionElements = new();
         private bool isInitialized = false;
 
-        private void Start()
+        protected override void Awake()
         {
+            base.Awake();
+
             InitializeSettings();
         }
         private void OnEnable()
@@ -119,6 +120,11 @@ namespace Core.Misc
         }
         private void UpdateSettings()
         {
+            if (ManagerPlayer.Instance.Player != null)
+            {
+                ManagerCoreGraphics.Instance.SetMainCamera(ManagerPlayer.Instance.Player.GetComponentInChildren<Camera>());
+            }
+
             foreach (UIOptionBase option in optionElements)
             {
                 option.Apply();
@@ -177,19 +183,19 @@ namespace Core.Misc
         {
             settings.CameraFieldOfView = value;
 
-            //if (ManagerPlayer.Instance.Player != null && ManagerPlayer.Instance.Player.TryGetComponent(out MovementController controller))
-            //{
-            //    controller.SetFieldOfView(value, true);
-            //}
+            if (ManagerPlayer.Instance.Player != null && ManagerPlayer.Instance.Player.TryGetComponent(out MovementController controller))
+            {
+                controller.SetFieldOfView(value);
+            }
         }
         private void OnSensitivityApply(float value)
         {
             settings.CameraSensitivity = value;
 
-            //if (ManagerPlayer.Instance.Player != null && ManagerPlayer.Instance.Player.TryGetComponent(out MovementController controller))
-            //{
-            //    controller.SetSensitivity(value);
-            //}
+            if (ManagerPlayer.Instance.Player != null && ManagerPlayer.Instance.Player.TryGetComponent(out MovementController controller))
+            {
+                controller.SetSensitivity(value);
+            }
         }
         private void OnMasterVolumeApply(float value)
         {

@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
@@ -239,3 +240,4 @@ namespace Core.Misc
         }
     }
 }
+#endif
