@@ -154,6 +154,8 @@ namespace Core.Misc
             slideDirection = movementController.GetCharacterOrigin().forward.ClearY().normalized;
             slideVelocity = movementController.GetCurrentSpeed() * slideDirection;
 
+            slideVelocity = Vector3.ProjectOnPlane(slideVelocity, movementController.GetGroundCollisionInfo().normal);
+
             movementController.SetVelocity(slideVelocity);
             movementController.SetIsMovementEnabled(false);
             movementController.OverrideMovementStance(MovementStance.CROUCH, true);
