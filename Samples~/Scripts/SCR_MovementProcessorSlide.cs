@@ -26,10 +26,11 @@ namespace Core.Misc
         [SerializeField, Min(1)] private float acceleration = 8f;
 
         private MovementController movementController = null;
-        private readonly StackBool isEnabled = new();
+        private readonly StackBool isEnabled = new(8);
         private Vector3 slideDirection = Vector3.zero;
         private Vector3 slideVelocity = Vector3.zero;
         private float slideTimer = 0f;
+        private int movementToken = 0;
         private bool isSliding = false;
         private bool canSlide = true;
 
@@ -157,7 +158,7 @@ namespace Core.Misc
             slideVelocity = Vector3.ProjectOnPlane(slideVelocity, movementController.GetGroundCollisionInfo().normal);
 
             movementController.SetVelocity(slideVelocity);
-            movementController.SetIsMovementEnabled(false);
+            movementController.DisableMovement(out movementToken);
             movementController.OverrideMovementStance(MovementStance.CROUCH, true);
 
             OnStart?.Invoke();
@@ -173,7 +174,7 @@ namespace Core.Misc
             slideTimer = 0f;
 
             movementController.SetVelocity(slideVelocity);
-            movementController.SetIsMovementEnabled(true);
+            movementController.EnableMovement(ref movementToken);
             movementController.OverrideMovementStance(MovementStance.CROUCH, false);
 
             this.WaitSeconds(cooldown, () => canSlide = false, () => canSlide = true);
@@ -193,17 +194,7 @@ namespace Core.Misc
         }
 
         public bool GetIsEnabled() => isEnabled.IsEnabled;
-        public void SetIsEnabled(bool value)
-        {
-            if (value)
-            {
-                isEnabled.Enable();
-            }
-            else
-            {
-                EndSlide();
-                isEnabled.Disable();
-            }
-        }
+        public void Disable(out int token) => isEnabled.Disable(out token);
+        public void Enable(ref int token) => isEnabled.Enable(ref token);
     }
 }

@@ -15,8 +15,9 @@ namespace Core.Misc
         [SerializeField, Min(1)] private int maxStep = 15;
 
         private MovementController movementController = null;
-        private int targetIndex = 7;
         private float targetSpeed = 0;
+        private int targetIndex = 7;
+        private int movementToken = 0;
         private bool isActive = false;
 
         private void Awake() => movementController = GetComponent<MovementController>();
@@ -53,14 +54,14 @@ namespace Core.Misc
 
             if (isActive)
             {
-                movementController.SetIsMovementEnabled(false);
+                movementController.DisableMovement(out movementToken);
                 movementController.SetCollisionMask(0);
                 movementController.SetVelocity(Vector3.zero);
             }
             else
             {
 
-                movementController.SetIsMovementEnabled(true);
+                movementController.EnableMovement(ref movementToken);
                 movementController.ResetCollisionMask();
             }
         }

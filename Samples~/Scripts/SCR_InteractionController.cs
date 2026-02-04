@@ -30,7 +30,7 @@ namespace Core.Misc
 
         private GameEntity entityObject = null;
         private Interactable interactableObject = null;
-        private readonly StackBool isEnabled = new();
+        private readonly StackBool isEnabled = new(8);
         private float interactTimer = 0f;
         private float interactProgress = 0f;
         private bool wasInteracted = false;
@@ -213,30 +213,8 @@ namespace Core.Misc
         public float GetInteractionDistance() => interactionDistance;
         public void SetInteractionDistance(float value) => interactionDistance = value;
 
-        public void SetInteractionEnabled(bool status, object requester)
-        {
-            if (requester == null)
-            {
-                Debug.LogError("Requester is null!", this.gameObject);
-                return;
-            }
-
-            if (status)
-            {
-                isEnabled.Enable();
-            }
-            else
-            {
-                isEnabled.Disable();
-
-                if (interactableObject != null)
-                {
-                    OnInteractableExitFocus?.Invoke(interactableObject);
-                    interactableObject.OnExitFocus(entityObject);
-                    interactableObject = null;
-                }
-            }
-        }
-        public bool GetInteractionEnabled() => isEnabled.IsEnabled;
+        public bool GetIsEnabled() => isEnabled.IsEnabled;
+        public void Disable(out int token) => isEnabled.Disable(out token);
+        public void Enable(ref int token) => isEnabled.Enable(ref token);
     }
 }

@@ -32,13 +32,14 @@ namespace Core.Misc
         [SerializeField] private float maxSpeed = 12f;
 
         private MovementController movementController = null;
-        private readonly StackBool isEnabled = new();
+        private readonly StackBool isEnabled = new(8);
         private Vector3 enterVelocity = Vector3.zero;
         private Vector3 vaultVelocity = Vector3.zero;
         private VaultType vaultType = VaultType.SHORT;
         private float vaultHeight = 0f;
         private float vaultTimer = 0f;
         private readonly float vaultCooldown = 0.2f;
+        private int movementToken = 0;
         private bool canVault = false;
         private bool isVaulting = false;
 
@@ -187,7 +188,7 @@ namespace Core.Misc
 
             vaultVelocity += enterVelocity + movementController.GetCharacterOrigin().forward;
 
-            movementController.SetIsMovementEnabled(false);
+            movementController.DisableMovement(out movementToken);
 
             this.WaitSeconds(vaultCooldown, () => canVault = true, () => canVault = false);
             OnStart?.Invoke(vaultType);
@@ -215,7 +216,7 @@ namespace Core.Misc
             isVaulting = false;
 
             movementController.SetVelocity(vaultVelocity);
-            movementController.SetIsMovementEnabled(true);
+            movementController.EnableMovement(ref movementToken);
 
             OnEnd?.Invoke(vaultType);
         }
@@ -241,17 +242,7 @@ namespace Core.Misc
         }
 
         public bool GetIsEnabled() => isEnabled.IsEnabled;
-        public void SetIsEnabled(bool value)
-        {
-            if (value)
-            {
-                isEnabled.Enable();
-            }
-            else
-            {
-                EndVault();
-                isEnabled.Disable();
-            }
-        }
+        public void Disable(out int token) => isEnabled.Disable(out token);
+        public void Enable(ref int token) => isEnabled.Enable(ref token);
     }
 }

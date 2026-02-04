@@ -34,19 +34,20 @@ namespace Core.Misc
         [SerializeField, Min(0)] private float ejectUpWeight = 0.75f;
 
         private MovementController movementController;
-        private readonly StackBool isEnabled = new();
-        private RaycastHit wallInfo = new();
+        private readonly StackBool isEnabled = new(8);
         private Collider wallCollider = null;
+        private RaycastHit wallInfo = new();
         private Vector3 wallVelocity = Vector3.zero;
         private Vector3 wallNormal = Vector3.up;
         private Vector3 wallSmoothNormal = Vector3.up;
-        private bool isWallRunning = false;
-        private bool hasWallLeft = false;
-        private bool hasWallRight = false;
         private float wallRunTimer = 0;
         private float wallLastTime = 0;
         private float wallStepTimer = 0;
         private float wallStepInterval = 0;
+        private bool isWallRunning = false;
+        private bool hasWallLeft = false;
+        private bool hasWallRight = false;
+        private int movementToken = 0;
 
         private void Awake() => movementController = GetComponent<MovementController>();
         private void OnDrawGizmos()
@@ -205,8 +206,9 @@ namespace Core.Misc
             wallSmoothNormal = wallNormal;
             wallVelocity = movementController.GetVelocity();
             wallVelocity.y = Mathf.Max(0, wallVelocity.y);
+
             movementController.SetVelocity(wallVelocity);
-            movementController.SetIsMovementEnabled(false);
+            movementController.DisableMovement(out movementToken);
 
             OnStart?.Invoke();
         }
@@ -222,7 +224,7 @@ namespace Core.Misc
             wallLastTime = Time.time;
             wallCollider = wallInfo.collider;
 
-            movementController.SetIsMovementEnabled(true);
+            movementController.EnableMovement(ref movementToken);
             movementController.SetVelocity(wallVelocity);
 
             OnEnd?.Invoke();
@@ -243,17 +245,7 @@ namespace Core.Misc
         }
 
         public bool GetIsEnabled() => isEnabled.IsEnabled;
-        public void SetIsEnabled(bool value)
-        {
-            if (value)
-            {
-                isEnabled.Enable();
-            }
-            else
-            {
-                EndWallRun();
-                isEnabled.Disable();
-            }
-        }
+        public void Disable(out int token) => isEnabled.Disable(out token);
+        public void Enable(ref int token) => isEnabled.Enable(ref token);
     }
 }

@@ -17,8 +17,8 @@ namespace Core.Misc
     [RequireComponent(typeof(CharacterController))]
     public class MovementController : MonoBehaviour
     {
-        public event Action<MovememntCollisionData> OnColliderEnter = null;
-        public event Action<MovememntCollisionData> OnColliderExit = null;
+        public event Action<MovementCollisionData> OnColliderEnter = null;
+        public event Action<MovementCollisionData> OnColliderExit = null;
         public event Action<RaycastHit> OnStep = null;
         public event Action<float, float, float> OnLand = null; // fallTimer, fallVelocity.y, fallHeight
         public event Action OnJump = null;
@@ -101,15 +101,15 @@ namespace Core.Misc
         private Collider[] characterColliders = null;
         private readonly HashSet<Collider> collisionCurrentColliders = new();
         private readonly HashSet<Collider> collisionLastColliders = new();
-        private readonly StackBool isInputEnabled = new();
-        private readonly StackBool isMovementEnabled = new();
-        private readonly StackBool isSprintEnabled = new();
-        private readonly StackBool isWalkEnabled = new();
-        private readonly StackBool isCrouchEnabled = new();
-        private readonly StackBool isJumpEnabled = new();
-        private readonly StackBool isLookEnabled = new();
-        private readonly StackBool isGravityEnabled = new();
-        private readonly StackBool isCollidersEnabled = new();
+        private readonly StackBool isInputEnabled = new(4);
+        private readonly StackBool isMovementEnabled = new(4);
+        private readonly StackBool isSprintEnabled = new(4);
+        private readonly StackBool isWalkEnabled = new(4);
+        private readonly StackBool isCrouchEnabled = new(4);
+        private readonly StackBool isJumpEnabled = new(4);
+        private readonly StackBool isLookEnabled = new(4);
+        private readonly StackBool isGravityEnabled = new(4);
+        private readonly StackBool isCollidersEnabled = new(4);
         private IMovementProcessor[] movementProcessors = null;
         private Vector3 movementDirection = Vector3.zero;
         private Vector3 movementVelocity = Vector3.zero;
@@ -868,148 +868,40 @@ namespace Core.Misc
         public float GetAirAcceleration() => movementAirAccelerate;
         public void SetAirAcceleration(float value) => movementAirAccelerate = value;
 
-        public void SetIsSprintEnabled(bool status)
-        {
-            if (status)
-            {
-                isSprintEnabled.Enable();
-            }
-            else
-            {
-                isSprintEnabled.Disable();
-            }
-        }
+        public void DisableSprint(out int token) => isSprintEnabled.Disable(out token);
+        public void EnableSprint(ref int token) => isSprintEnabled.Enable(ref token);
         public bool GetIsSprintEnabled() => isSprintEnabled.IsEnabled;
 
-        public void SetIsWalkEnabled(bool status)
-        {
-            if (status)
-            {
-                isWalkEnabled.Enable();
-            }
-            else
-            {
-                isWalkEnabled.Disable();
-            }
-        }
+        public void DisableWalk(out int token) => isWalkEnabled.Disable(out token);
+        public void EnableWalk(ref int token) => isWalkEnabled.Enable(ref token);
         public bool GetIsWalkEnabled() => isWalkEnabled.IsEnabled;
 
-        public void SetIsCrouchEnabled(bool status)
-        {
-            if (status)
-            {
-                isCrouchEnabled.Enable();
-            }
-            else
-            {
-                isCrouchEnabled.Disable();
-            }
-        }
+        public void DisableCrouch(out int token) => isCrouchEnabled.Disable(out token);
+        public void EnableCrouch(ref int token) => isCrouchEnabled.Enable(ref token);
         public bool GetIsCrouchEnabled() => isCrouchEnabled.IsEnabled;
 
-        public void SetIsJumpEnabled(bool status)
-        {
-            if (status)
-            {
-                isJumpEnabled.Enable();
-            }
-            else
-            {
-                isJumpEnabled.Disable();
-            }
-        }
+        public void DisableJump(out int token) => isJumpEnabled.Disable(out token);
+        public void EnableJump(ref int token) => isJumpEnabled.Enable(ref token);
         public bool GetIsJumpEnabled() => isJumpEnabled.IsEnabled;
 
-        public void SetIsInputEnabled(bool status)
-        {
-            if (status)
-            {
-                isInputEnabled.Enable();
-            }
-            else
-            {
-                isInputEnabled.Disable();
-            }
-        }
+        public void DisableInput(out int token) => isInputEnabled.Disable(out token);
+        public void EnableInput(ref int token) => isInputEnabled.Enable(ref token);
         public bool GetIsInputEnabled() => isInputEnabled.IsEnabled;
 
-        public void SetIsMovementEnabled(bool status)
-        {
-            if (status)
-            {
-                isMovementEnabled.Enable();
-            }
-            else
-            {
-                isMovementEnabled.Disable();
-                fallTimer = 0;
-                groundTimer = 0;
-                canJump = false;
-                canCrouch = false;
-                canStand = false;
-                isSprinting = false;
-            }
-        }
+        public void DisableMovement(out int token) => isMovementEnabled.Disable(out token);
+        public void EnableMovement(ref int token) => isMovementEnabled.Enable(ref token);
         public bool GetIsMovementEnabled() => isMovementEnabled.IsEnabled;
 
-        public void SetIsGravityEnabled(bool status)
-        {
-            if (status)
-            {
-                isGravityEnabled.Enable();
-            }
-            else
-            {
-                isGravityEnabled.Disable();
-                movementVelocity = Vector3.zero;
-                fallTimer = 0;
-                groundTimer = 0;
-                canJump = false;
-                canCrouch = false;
-                canStand = false;
-                isSprinting = false;
-            }
-        }
+        public void DisableGravity(out int token) => isGravityEnabled.Disable(out token);
+        public void EnableGravity(ref int token) => isGravityEnabled.Enable(ref token);
         public bool GetIsGravityEnabled() => isGravityEnabled.IsEnabled;
 
-        public void SetIsLookEnabled(bool status)
-        {
-            if (status)
-            {
-                isLookEnabled.Enable();
-            }
-            else
-            {
-                isLookEnabled.Disable();
-            }
-        }
+        public void DisableLook(out int token) => isLookEnabled.Disable(out token);
+        public void EnableLook(ref int token) => isLookEnabled.Enable(ref token);
         public bool GetIsLookEnabled() => isLookEnabled.IsEnabled;
 
-        public void SetIsCollidersEnabled(bool status)
-        {
-            if (status)
-            {
-                isCollidersEnabled.Enable();
-            }
-            else
-            {
-                isCollidersEnabled.Disable();
-            }
-
-            for (int i = 0; i < characterColliders.Length; i++)
-            {
-                if (!GetIsCollidersEnabled())
-                {
-                    characterColliders[i].excludeLayers = ~0;
-                    characterColliders[i].includeLayers = 0;
-                }
-                else
-                {
-                    characterColliders[i].excludeLayers = ~collisionMask;
-                    characterColliders[i].includeLayers = collisionMask;
-                }
-            }
-        }
+        public void DisableColliders(out int token) => isCollidersEnabled.Disable(out token);
+        public void EnableColliders(ref int token) => isCollidersEnabled.Enable(ref token);
         public bool GetIsCollidersEnabled() => isCollidersEnabled.IsEnabled;
 
         public float GetLookRoll() => cameraRotationZ;
