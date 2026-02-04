@@ -1346,38 +1346,41 @@ namespace Core
                 this.multipliers = new float[capacity];
                 this.used = new bool[capacity];
             }
-            public int Apply(float multiplier)
+            public void Apply(float multiplier, out int token)
             {
+                token = -1;
+
                 for (int i = 0; i < used.Length; i++)
                 {
                     if (!used[i])
                     {
                         multipliers[i] = multiplier;
                         used[i] = true;
+                        token = i;
                         Recalculate();
-                        return i;
+                        return;
                     }
                 }
 
                 Debug.LogWarning("StackFloat.Apply() not enough space!");
-                return -1;
+                return;
             }
-            public void Revert(int index)
+            public void Revert(int token)
             {
-                if (index < 0 || index >= used.Length)
+                if (token < 0 || token >= used.Length)
                 {
-                    Debug.LogWarning("StackFloat.Revert() index out of range");
+                    Debug.LogWarning("StackFloat.Revert() token out of range");
                     return;
                 }
 
-                if (!used[index])
+                if (!used[token])
                 {
-                    Debug.LogWarning("StackFloat.Revert() index already released");
+                    Debug.LogWarning("StackFloat.Revert() token already released");
                     return;
                 }
 
-                multipliers[index] = 0;
-                used[index] = false;
+                multipliers[token] = 0;
+                used[token] = false;
                 Recalculate();
             }
             private void Recalculate()
@@ -1409,38 +1412,40 @@ namespace Core
                 this.values = new int[capacity];
                 this.used = new bool[capacity];
             }
-            public int Add(int value)
+            public void Add(int value, out int token)
             {
+                token = -1;
+
                 for (int i = 0; i < used.Length; i++)
                 {
                     if (!used[i])
                     {
                         values[i] = value;
                         used[i] = true;
+                        token = i;
                         Recalculate();
-                        return i;
+                        return;
                     }
                 }
 
                 Debug.LogWarning("StackInt.Add() not enough space!");
-                return -1;
             }
-            public void Remove(int index)
+            public void Remove(int token)
             {
-                if (index < 0 || index >= used.Length)
+                if (token < 0 || token >= used.Length)
                 {
-                    Debug.LogWarning("StackInt.Remove() index out of range");
+                    Debug.LogWarning("StackInt.Remove() token out of range");
                     return;
                 }
 
-                if (!used[index])
+                if (!used[token])
                 {
-                    Debug.LogWarning("StackFloat.Remove() index already released");
+                    Debug.LogWarning("StackFloat.Remove() token already released");
                     return;
                 }
 
-                values[index] = 0;
-                used[index] = false;
+                values[token] = 0;
+                used[token] = false;
                 Recalculate();
             }
             private void Recalculate()
@@ -1464,36 +1469,38 @@ namespace Core
             private readonly bool[] used = null;
 
             public StackBool(uint capacity) => used = new bool[capacity];
-            public int Disable()
+            public void Disable(out int token)
             {
+                token = -1;
+
                 for (int i = 0; i < used.Length; i++)
                 {
                     if (!used[i])
                     {
                         used[i] = true;
                         disableCount++;
-                        return i;
+                        token = i;
+                        return;
                     }
                 }
 
                 Debug.LogWarning("StackBool.Disable() not enough space!");
-                return -1;
             }
-            public void Enable(int index)
+            public void Enable(int token)
             {
-                if (index < 0 || index >= used.Length)
+                if (token < 0 || token >= used.Length)
                 {
-                    Debug.LogWarning("StackInt.Enable() index out of range");
+                    Debug.LogWarning("StackInt.Enable() token out of range");
                     return;
                 }
 
-                if (!used[index])
+                if (!used[token])
                 {
-                    Debug.LogWarning("StackFloat.Enable() index already released");
+                    Debug.LogWarning("StackFloat.Enable() token already released");
                     return;
                 }
 
-                used[index] = false;
+                used[token] = false;
                 disableCount--;
 
                 if (disableCount < 0)
