@@ -1362,9 +1362,9 @@ namespace Core
                 Debug.LogWarning("StackFloat.Apply() not enough space!");
                 return -1;
             }
-            public void Revert(uint index)
+            public void Revert(int index)
             {
-                if (index >= used.Length)
+                if (index < 0 || index >= used.Length)
                 {
                     Debug.LogWarning("StackFloat.Revert() index out of range");
                     return;
@@ -1425,9 +1425,9 @@ namespace Core
                 Debug.LogWarning("StackInt.Add() not enough space!");
                 return -1;
             }
-            public void Remove(uint index)
+            public void Remove(int index)
             {
-                if (index >= used.Length)
+                if (index < 0 || index >= used.Length)
                 {
                     Debug.LogWarning("StackInt.Remove() index out of range");
                     return;
@@ -1479,9 +1479,9 @@ namespace Core
                 Debug.LogWarning("StackBool.Disable() not enough space!");
                 return -1;
             }
-            public void Enable(uint index)
+            public void Enable(int index)
             {
-                if (index >= used.Length)
+                if (index < 0 || index >= used.Length)
                 {
                     Debug.LogWarning("StackInt.Enable() index out of range");
                     return;
