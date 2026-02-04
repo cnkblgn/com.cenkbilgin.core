@@ -15,12 +15,12 @@ namespace Core.Misc
         public int Priority => 4;
 
         [Header("_")]
-        [SerializeField] private bool isAdditive = true;
-        [SerializeField] private bool disableFriction = false;
-        [SerializeField] private bool disableGravity = false;
         [SerializeField, Min(-1)] private int maxDashInAir = 1;
 
         [Header("_")]
+        [SerializeField] private bool isAdditive = true;
+        [SerializeField] private bool disableFriction = false;
+        [SerializeField] private bool disableGravity = false;
         [SerializeField, Min(1)] private float force = 25f;
         [SerializeField, Min(0.1f)] private float cooldown = 2.5f;
 

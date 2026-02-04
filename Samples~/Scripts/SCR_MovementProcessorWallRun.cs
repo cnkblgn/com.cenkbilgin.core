@@ -22,6 +22,8 @@ namespace Core.Misc
 
         [Header("_")]
         [SerializeField] private bool showGizmos = false;
+
+        [Header("_")]
         [SerializeField, Min(1)] private float minHeight = 2.5f;
         [SerializeField, Min(0.1f)] private float distance = 1.33f;
 

@@ -5,7 +5,7 @@ namespace Core.Misc
 {
     using static CoreUtility;
 
-    public enum VaultType { SHORT = 0, STANDART = 1, SPEED = 2, CLIMB = 3 }
+    public enum VaultType { DEFAULT = 0, FAST = 1, CLIMB = 2 }
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(MovementController))]
@@ -23,10 +23,12 @@ namespace Core.Misc
         [SerializeField] private bool showGizmos = false;
         [SerializeField] private LayerMask layer = 0;
         [SerializeField, Min(0.1f)] private float minHeight = 0.5f;
-        [SerializeField, Min(0.1f)] private float maxHeight = 2.25f;
+        [SerializeField, Min(0.1f)] private float maxHeight = 1.5f;
         [SerializeField, Min(0.1f)] private float distance = 1.0f;
 
         [Header("_")]
+        [SerializeField] private bool carryMomentum = true;
+        [SerializeField] private bool disableLook = false;
         [SerializeField] private float duration = 0.425f;
         [SerializeField] private float gravity = -20f;
         [SerializeField] private float maxSpeed = 12f;
@@ -35,11 +37,13 @@ namespace Core.Misc
         private readonly StackBool isEnabled = new(8);
         private Vector3 enterVelocity = Vector3.zero;
         private Vector3 vaultVelocity = Vector3.zero;
-        private VaultType vaultType = VaultType.SHORT;
+        private RaycastHit vaultInfo = new();
+        private VaultType vaultType = VaultType.DEFAULT;
         private float vaultHeight = 0f;
         private float vaultTimer = 0f;
         private readonly float vaultCooldown = 0.2f;
         private int movementToken = 0;
+        private int lookToken = 0;
         private bool canVault = false;
         private bool isVaulting = false;
 
@@ -63,11 +67,8 @@ namespace Core.Misc
             Gizmos.color = COLOR_YELLOW;
             Gizmos.DrawLine(rayOrigin, rayOrigin + Vector3.down * rayLength);
 
-            if (TryGetVaultTarget(out Vector3 vaultPosition, out _))
-            {
-                Gizmos.color = COLOR_GREEN;
-                Gizmos.DrawSphere(vaultPosition, 0.1f);
-            }
+            Gizmos.color = TryGetVaultTarget(out Vector3 vaultPosition, out _) ? COLOR_GREEN : COLOR_RED;
+            Gizmos.DrawSphere(vaultPosition, 0.1f);
         }
 #endif
 
@@ -96,20 +97,19 @@ namespace Core.Misc
             Vector3 rayOrigin = GetRayOrigin();
             float rayLength = GetRayLength();
 
-            if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hitInfo, rayLength, layer))
+            if (Physics.Raycast(rayOrigin, Vector3.down, out vaultInfo, rayLength, layer))
             {
-                float vaultAngle = Vector3.Angle(hitInfo.normal, Vector3.up);
+                float vaultAngle = Vector3.Angle(vaultInfo.normal, Vector3.up);
+                vaultHeight = vaultInfo.point.y - movementController.GetCharacterOrigin().position.y;
+                vaultPosition = vaultInfo.point + Vector3.up * 0.1f;
 
                 if (vaultAngle > 5)
                 {
                     return false;
                 }
 
-                vaultHeight = hitInfo.point.y - movementController.GetCharacterOrigin().position.y;
-
                 if (vaultHeight >= minHeight && vaultHeight <= maxHeight)
-                {
-                    vaultPosition = hitInfo.point + Vector3.up * 0.1f;
+                {                   
                     return true;
                 }
             }
@@ -168,27 +168,13 @@ namespace Core.Misc
             enterVelocity = movementController.GetVelocity().ClearY();
 
             this.vaultHeight = vaultHeight;
-            vaultType = CalculateVaultType(enterVelocity.magnitude, vaultHeight);
-            vaultVelocity = CalculateVaultVelocity(movementController.GetCharacterOrigin().position, vaultPosition, duration);
+            this.vaultType = CalculateVaultType(enterVelocity.magnitude, vaultHeight);
+            this.vaultVelocity = CalculateVaultVelocity(movementController.GetCharacterOrigin().position, vaultPosition, duration);
 
-            switch (vaultType)
-            {
-                case VaultType.SHORT:
-                    break;
-                case VaultType.STANDART:
-                    enterVelocity = enterVelocity.Clamp(10f);
-                    break;
-                case VaultType.SPEED:
-                    enterVelocity = enterVelocity.Clamp(10f);
-                    break;
-                case VaultType.CLIMB:
-                    enterVelocity = enterVelocity.Clamp(2.5f);
-                    break;
-            }
-
-            vaultVelocity += enterVelocity + movementController.GetCharacterOrigin().forward;
+            if (carryMomentum) vaultVelocity += enterVelocity.Clamp(vaultType == VaultType.CLIMB ? 1 : enterVelocity.magnitude) + movementController.GetCharacterOrigin().forward;
 
             movementController.DisableMovement(out movementToken);
+            if (disableLook) movementController.DisableLook(out lookToken);
 
             this.WaitSeconds(vaultCooldown, () => canVault = true, () => canVault = false);
             OnStart?.Invoke(vaultType);
@@ -217,18 +203,26 @@ namespace Core.Misc
 
             movementController.SetVelocity(vaultVelocity);
             movementController.EnableMovement(ref movementToken);
+            if (disableLook) movementController.EnableLook(ref lookToken);
 
             OnEnd?.Invoke(vaultType);
         }
 
-        private float GetRayLength() => maxHeight + 0.5f;
+        private float GetRayLength() => movementController.GetCharacterHeight() + 0.5f;
         private Vector3 GetRayOrigin() => movementController.GetCameraOrigin().position + movementController.GetCharacterOrigin().forward * distance;
         private VaultType CalculateVaultType(float momentum, float height)
         {
-            if (height > maxHeight * 0.9f) return VaultType.CLIMB;
-            if (momentum > 6f) return VaultType.SPEED;
-            if (momentum > 3f) return VaultType.STANDART;
-            return VaultType.SHORT;
+            if (height > maxHeight * 0.75f)
+            {
+                return VaultType.CLIMB;
+            }
+
+            if (momentum > 6f)
+            {
+                return VaultType.FAST;
+            }
+
+            return VaultType.DEFAULT;
         }
         private Vector3 CalculateVaultVelocity(Vector3 start, Vector3 target, float time)
         {
