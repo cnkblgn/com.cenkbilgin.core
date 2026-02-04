@@ -1370,6 +1370,12 @@ namespace Core
                     return;
                 }
 
+                if (!used[index])
+                {
+                    Debug.LogWarning("StackFloat.Revert() index already released");
+                    return;
+                }
+
                 multipliers[index] = 0;
                 used[index] = false;
                 Recalculate();
@@ -1421,9 +1427,15 @@ namespace Core
             }
             public void Remove(uint index)
             {
-                if ((uint)index < 0 || (uint)index >= used.Length)
+                if (index >= used.Length)
                 {
                     Debug.LogWarning("StackInt.Remove() index out of range");
+                    return;
+                }
+
+                if (!used[index])
+                {
+                    Debug.LogWarning("StackFloat.Remove() index already released");
                     return;
                 }
 
@@ -1449,15 +1461,44 @@ namespace Core
             public bool IsEnabled => disableCount == 0;
 
             private int disableCount = 0;
-            
-            public void Disable() => disableCount++;
-            public void Enable()
+            private readonly bool[] used = null;
+
+            public StackBool(uint capacity) => used = new bool[capacity];
+            public int Disable()
             {
+                for (int i = 0; i < used.Length; i++)
+                {
+                    if (!used[i])
+                    {
+                        used[i] = true;
+                        disableCount++;
+                        return i;
+                    }
+                }
+
+                Debug.LogWarning("StackBool.Disable() not enough space!");
+                return -1;
+            }
+            public void Enable(uint index)
+            {
+                if (index >= used.Length)
+                {
+                    Debug.LogWarning("StackInt.Enable() index out of range");
+                    return;
+                }
+
+                if (!used[index])
+                {
+                    Debug.LogWarning("StackFloat.Enable() index already released");
+                    return;
+                }
+
+                used[index] = false;
                 disableCount--;
 
                 if (disableCount < 0)
                 {
-                    Debug.LogError("StackBool.Enable() called too many times");
+                    Debug.LogError("StackBool.Enable() internal counter underflow");
                     disableCount = 0;
                 }
             }
