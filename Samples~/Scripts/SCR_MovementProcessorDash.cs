@@ -16,6 +16,8 @@ namespace Core.Misc
 
         [Header("_")]
         [SerializeField] private bool isAdditive = true;
+        [SerializeField] private bool disableFriction = false;
+        [SerializeField] private bool disableGravity = false;
         [SerializeField, Min(-1)] private int maxDashInAir = 1;
 
         [Header("_")]
@@ -24,11 +26,30 @@ namespace Core.Misc
 
         private MovementController movementController = null;
         private readonly StackBool isEnabled = new(8);
+        private TaskInstance frictionTask = null;
+        private TaskInstance gravityTask = null;
+        private Action overrideFriction = null;
+        private Action overrideGravity = null;
+        private Action resetFriction = null;
+        private Action resetGravity = null;
         private readonly InputActionType dashInput = new("Gameplay.Dash");
+        private float dashFriction = 0;
+        private float dashGravity = 0;
         private float dashTime = 0;
         private int dashCount = 0;
+        private bool isFrictionOverriden = false;
+        private bool isGravityOverriden = false;
 
-        private void Awake() => movementController = GetComponent<MovementController>();
+        private void Awake()
+        {
+            movementController = GetComponent<MovementController>();
+
+            overrideFriction = OverrideFriction;
+            overrideGravity = OverrideGravity;
+
+            resetFriction = ResetFriction;
+            resetGravity = ResetGravity;
+        }
         private void OnEnable() => movementController.OnLand += OnLand;
         private void OnDisable() => movementController.OnLand -= OnLand;
 
@@ -72,9 +93,68 @@ namespace Core.Misc
                 {
                     dashCount++;
                 }
+
+                if (disableFriction)
+                {
+                    if (frictionTask != null)
+                    {
+                        frictionTask.Stop();
+                        frictionTask = null;
+                    }
+
+                    frictionTask = this.WaitSecondsExt(0.25f, overrideFriction, resetFriction);
+                }
+
+                if (disableGravity)
+                {
+                    if (gravityTask != null)
+                    {
+                        gravityTask.Stop();
+                        gravityTask = null;
+                    }
+
+                    gravityTask = this.WaitSecondsExt(0.25f, overrideGravity, resetGravity);
+                }
             }
         }
         public void OnBeforeLook(MovementController controller) { }
+
+        private void OverrideFriction()
+        {
+            if (isFrictionOverriden)
+            {
+                return;
+            }
+
+            dashFriction = movementController.GetGroundFriction();
+            movementController.SetGroundFriction(movementController.GetGroundFriction() - dashFriction);
+
+            isFrictionOverriden = true;
+        }
+        private void OverrideGravity()
+        {
+            if (isGravityOverriden)
+            {
+                return;
+            }
+
+            dashGravity = movementController.GetGravity();
+            movementController.SetGravity(movementController.GetGravity() - dashGravity);
+
+            isGravityOverriden = true;
+        }
+        private void ResetFriction()
+        {
+            movementController.SetGroundFriction(movementController.GetGroundFriction() + dashFriction);
+
+            isFrictionOverriden = false;
+        }
+        private void ResetGravity()
+        {
+            movementController.SetGravity(movementController.GetGravity() + dashGravity);
+
+            isGravityOverriden = false;
+        }
 
         public bool GetIsEnabled() => isEnabled.IsEnabled;
         public void Disable(out int token) => isEnabled.Disable(out token);

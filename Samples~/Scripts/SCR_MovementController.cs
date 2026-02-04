@@ -828,7 +828,7 @@ namespace Core.Misc
         public void SetGravity(float value) => movementGravity = value;
 
         public float GetJumpForce() => movementJumpForce;
-        public void SetJumpForce(float value) => movementJumpForce = Mathf.Max(0, value);
+        public void SetJumpForce(float value) => movementJumpForce = value;
 
         public float GetSprintSpeedMult() => movementSprintSpeedMultiplier;
         public void SetSprintSpeedMult(float value) => movementSprintSpeedMultiplier = value;
@@ -854,7 +854,7 @@ namespace Core.Misc
         public float GetCurrentSpeed() => movementVelocity.ClearY().magnitude;
 
         public float GetGroundSpeed() => movementGroundSpeed;
-        public void SetGroundSpeed(float value) => movementGroundSpeed = Mathf.Max(0, value);
+        public void SetGroundSpeed(float value) => movementGroundSpeed = value;
 
         public float GetGroundFriction() => movementGroundFriction;
         public void SetGroundFriction(float value) => movementGroundFriction = value;
