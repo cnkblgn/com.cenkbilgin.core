@@ -1365,22 +1365,25 @@ namespace Core
                 Debug.LogWarning("StackFloat.Apply() not enough space!");
                 return;
             }
-            public void Revert(int token)
+            public void Revert(ref int token)
             {
                 if (token < 0 || token >= used.Length)
                 {
                     Debug.LogWarning("StackFloat.Revert() token out of range");
+                    token = -1;
                     return;
                 }
 
                 if (!used[token])
                 {
                     Debug.LogWarning("StackFloat.Revert() token already released");
+                    token = -1;
                     return;
                 }
 
                 multipliers[token] = 0;
                 used[token] = false;
+                token = -1;
                 Recalculate();
             }
             private void Recalculate()
@@ -1430,22 +1433,25 @@ namespace Core
 
                 Debug.LogWarning("StackInt.Add() not enough space!");
             }
-            public void Remove(int token)
+            public void Remove(ref int token)
             {
                 if (token < 0 || token >= used.Length)
                 {
                     Debug.LogWarning("StackInt.Remove() token out of range");
+                    token = -1;
                     return;
                 }
 
                 if (!used[token])
                 {
-                    Debug.LogWarning("StackFloat.Remove() token already released");
+                    Debug.LogWarning("StackInt.Remove() token already released");
+                    token = -1;
                     return;
                 }
 
                 values[token] = 0;
                 used[token] = false;
+                token = -1;
                 Recalculate();
             }
             private void Recalculate()
@@ -1486,21 +1492,24 @@ namespace Core
 
                 Debug.LogWarning("StackBool.Disable() not enough space!");
             }
-            public void Enable(int token)
+            public void Enable(ref int token)
             {
                 if (token < 0 || token >= used.Length)
                 {
-                    Debug.LogWarning("StackInt.Enable() token out of range");
+                    Debug.LogWarning("StackBool.Enable() token out of range");
+                    token = -1;
                     return;
                 }
 
                 if (!used[token])
                 {
-                    Debug.LogWarning("StackFloat.Enable() token already released");
+                    Debug.LogWarning("StackBool.Enable() token already released");
+                    token = -1;
                     return;
                 }
 
                 used[token] = false;
+                token = -1;
                 disableCount--;
 
                 if (disableCount < 0)
