@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
+using static PlasticGui.PlasticTableCell;
 
 namespace Core
 { 
@@ -656,7 +657,8 @@ namespace Core
         #endregion
 
         #region GAMEOBJECT
-        public static bool IsInBitMask(this GameObject gameObject, int bitMask) => (bitMask & (1 << gameObject.layer)) > 0;
+        /// <summary> Returns true if gameobject layer in bitmask </summary>
+        public static bool IsInBitMask(this GameObject gameObject, int bitMask) => (bitMask & (1 << gameObject.layer)) != 0;
         public static void SetName(this GameObject gameObject, string name) => gameObject.name = name;
         public static void SetLayer(this GameObject gameObject, int layer, bool includeChildren = false)
         {
