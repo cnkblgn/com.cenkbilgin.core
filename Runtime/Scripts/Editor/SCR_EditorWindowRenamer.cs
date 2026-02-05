@@ -26,7 +26,6 @@ namespace Core.Editor
 
         private void RenameSelected()
         {
-            // Asset ve GameObjectleri al
             var selectedObjects = Selection.objects;
 
             if (selectedObjects.Length == 0)

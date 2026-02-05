@@ -12,10 +12,10 @@ namespace Core
         public event Action OnDeactivated = null;
 
         public Collider ThisCollider => thisCollider;
-        public GameUser ThisUser => thisUser;
+        public bool IsPlayer => isPlayer;
 
         [Header("_")]
-        [SerializeField] private GameUser thisUser = GameUser.NONE;
+        [SerializeField] private bool isPlayer = false;
 
         private Collider thisCollider = null;
 
@@ -28,24 +28,11 @@ namespace Core
 #if UNITY_EDITOR
         private void Reset() => UpdateLayer();
 #endif
-        protected virtual void UpdateLayer()
-        {
-            switch (thisUser)
-            {
-                case GameUser.NONE:
-                    break;
-                case GameUser.PLAYER:
-                    gameObject.SetLayer(LayerMask.NameToLayer("Player"));
-                    break;
-                case GameUser.ENTITY:
-                    gameObject.SetLayer(LayerMask.NameToLayer("Entity"));
-                    break;
-            }
-        }
-        public void Override(GameUser value)
-        {
-            thisUser = value;
+        protected virtual void UpdateLayer() => gameObject.SetLayer(LayerMask.NameToLayer(isPlayer ? "Player" : "Entity"));
 
+        public void Override(bool isPlayer)
+        {
+            this.isPlayer = isPlayer;
             UpdateLayer();
         }
         public void Activate()
