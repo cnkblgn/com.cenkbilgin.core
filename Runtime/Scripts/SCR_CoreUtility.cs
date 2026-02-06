@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
-using static PlasticGui.PlasticTableCell;
 
 namespace Core
 { 
@@ -544,6 +543,191 @@ namespace Core
         public static Vector3 ClearX(this Vector3 a) { a.x = 0; return a; }
         public static Vector3 ClearY(this Vector3 a) { a.y = 0; return a; }
         public static Vector3 ClearZ(this Vector3 a) { a.z = 0; return a; }
+        #endregion
+
+        #region PHYSICS
+        public readonly struct HitData
+        {
+            public readonly Collider Collider;
+            public readonly Rigidbody Rigidbody;
+            public readonly Vector3 Point;
+            public readonly Vector3 Normal;
+            public readonly float Distance;
+
+            public HitData(Collider collider, Vector3 point, Vector3 normal, float distance)
+            {
+                Collider = collider;
+                Rigidbody = collider.attachedRigidbody;
+                Point = point;
+                Normal = normal;
+                Distance = distance;
+            }
+        }
+
+        public static int HitScan(Vector3 origin, Vector3 direction, float range, int mask, RaycastHit[] buffer, List<HitData> result)
+        {
+            int hits = Physics.RaycastNonAlloc
+            (
+                origin,
+                direction,
+                buffer,
+                range,
+                mask,
+                QueryTriggerInteraction.Ignore
+            );
+
+            for (int i = 0; i < hits; i++)
+            {
+                RaycastHit hit = buffer[i];
+
+                result.Add
+                (
+                    new
+                    (
+                        hit.collider,
+                        hit.point,
+                        hit.normal,
+                        hit.distance
+                    )
+                );
+            }
+
+            return hits;
+        }
+        public static int HitCone(Vector3 origin, Vector3 forward, float angle, float radius, int mask, Collider[] buffer, List<HitData> result)
+        {
+            int count = Physics.OverlapSphereNonAlloc
+            (
+                origin,
+                radius,
+                buffer,
+                mask,
+                QueryTriggerInteraction.Ignore
+            );
+
+            float cos = Mathf.Cos(angle * Mathf.Deg2Rad);
+
+            for (int i = 0; i < count; i++)
+            {
+                Collider collider = buffer[i];
+
+                Vector3 center = collider.bounds.center;
+                Vector3 direction = (center - origin);
+                float distance = direction.sqrMagnitude;
+
+                direction = direction.normalized;
+
+                if (Vector3.Dot(forward, direction) < cos)
+                {
+                    continue;
+                }
+
+                result.Add
+                (
+                    new
+                    (
+                        collider,
+                        center,
+                        -direction,
+                        Mathf.Sqrt(distance)
+                    )
+                );
+            }
+
+            return result.Count;
+        }
+        public static int HitSweep(Vector3 start, Vector3 end, Vector3 direction, float radius, float distance, int mask, RaycastHit[] buffer, List<HitData> result)
+        {
+            int hits = Physics.CapsuleCastNonAlloc
+            (
+                start,
+                end,
+                radius,
+                direction,
+                buffer,
+                distance,
+                mask,
+                QueryTriggerInteraction.Ignore
+            );
+
+            for (int i = 0; i < hits; i++)
+            {
+                RaycastHit hit = buffer[i];
+
+                result.Add
+                (
+                    new
+                    (
+                        hit.collider,
+                        hit.point,
+                        hit.normal,
+                        hit.distance
+                    )
+                );
+            }
+
+            return hits;
+        }
+        public static int HitArea(Vector3 origin, float radius, int overlapMask, int obstructionMask, Collider[] colliderBuffer, RaycastHit[] raycastBuffer, List<HitData> result)
+        {
+            int count = Physics.OverlapSphereNonAlloc
+            (
+                origin,
+                radius,
+                colliderBuffer,
+                overlapMask,
+                QueryTriggerInteraction.Ignore
+            );
+
+            for (int i = 0; i < count; i++)
+            {
+                Collider collider = colliderBuffer[i];
+                Vector3 center = collider.bounds.center;
+                Vector3 direction = center - origin;
+                float distance = direction.magnitude;
+
+                direction /= distance;
+
+                int hits = Physics.RaycastNonAlloc
+                (
+                    origin,
+                    direction,
+                    raycastBuffer,
+                    distance,
+                    obstructionMask,
+                    QueryTriggerInteraction.Ignore
+                );
+
+                bool blocked = false;
+
+                for (int j = 0; j < hits; j++)
+                {
+                    if (raycastBuffer[j].collider != collider)
+                    {
+                        blocked = true;
+                        break;
+                    }
+                }
+
+                if (blocked)
+                {
+                    continue;
+                }
+
+                result.Add
+                (
+                    new
+                    (
+                        collider,
+                        center,
+                        -direction,
+                        distance
+                    )
+                );
+            }
+
+            return result.Count;
+        }
 
         public static Vector3 GetRequiredLaunchVelocity(Vector3 targetPosition, Vector3 launchPosition, float forceMax)
         {
