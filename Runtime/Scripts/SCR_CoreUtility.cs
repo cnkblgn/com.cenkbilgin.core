@@ -564,7 +564,7 @@ namespace Core
             }
         }
 
-        public static int HitScan(Vector3 origin, Vector3 direction, float range, int mask, RaycastHit[] buffer, List<HitData> result)
+        public static int HitScan(Vector3 origin, Vector3 direction, float range, int mask, RaycastHit[] buffer, List<HitData> result, QueryTriggerInteraction query)
         {
             int hits = Physics.RaycastNonAlloc
             (
@@ -573,7 +573,7 @@ namespace Core
                 buffer,
                 range,
                 mask,
-                QueryTriggerInteraction.Ignore
+                query
             );
 
             for (int i = 0; i < hits; i++)
@@ -594,7 +594,7 @@ namespace Core
 
             return hits;
         }
-        public static int HitCone(Vector3 origin, Vector3 forward, float angle, float radius, int mask, Collider[] buffer, List<HitData> result)
+        public static int HitCone(Vector3 origin, Vector3 forward, float angle, float radius, int mask, Collider[] buffer, List<HitData> result, QueryTriggerInteraction query)
         {
             int count = Physics.OverlapSphereNonAlloc
             (
@@ -602,7 +602,7 @@ namespace Core
                 radius,
                 buffer,
                 mask,
-                QueryTriggerInteraction.Ignore
+                query
             );
 
             float cos = Mathf.Cos(angle * Mathf.Deg2Rad);
@@ -636,7 +636,7 @@ namespace Core
 
             return result.Count;
         }
-        public static int HitSweep(Vector3 start, Vector3 end, Vector3 direction, float radius, float distance, int mask, RaycastHit[] buffer, List<HitData> result)
+        public static int HitSweep(Vector3 start, Vector3 end, Vector3 direction, float radius, float distance, int mask, RaycastHit[] buffer, List<HitData> result, QueryTriggerInteraction query)
         {
             int hits = Physics.CapsuleCastNonAlloc
             (
@@ -647,7 +647,7 @@ namespace Core
                 buffer,
                 distance,
                 mask,
-                QueryTriggerInteraction.Ignore
+                query
             );
 
             for (int i = 0; i < hits; i++)
@@ -668,7 +668,7 @@ namespace Core
 
             return hits;
         }
-        public static int HitArea(Vector3 origin, float radius, int overlapMask, int obstructionMask, Collider[] colliderBuffer, RaycastHit[] raycastBuffer, List<HitData> result)
+        public static int HitArea(Vector3 origin, float radius, int overlapMask, int obstructionMask, Collider[] colliderBuffer, RaycastHit[] raycastBuffer, List<HitData> result, QueryTriggerInteraction query)
         {
             int count = Physics.OverlapSphereNonAlloc
             (
@@ -676,7 +676,7 @@ namespace Core
                 radius,
                 colliderBuffer,
                 overlapMask,
-                QueryTriggerInteraction.Ignore
+                query
             );
 
             for (int i = 0; i < count; i++)
