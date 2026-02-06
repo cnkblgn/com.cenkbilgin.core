@@ -32,7 +32,7 @@ namespace Core.Misc
             return false;
         }
 
-        [ContextMenu("MoveCursor")]
+        [ContextMenu("Update Tags")]
         public void Update()
         {
             defaultLayerIndex = LayerMask.NameToLayer("Default");
@@ -92,6 +92,7 @@ namespace Core.Misc
             }
         }
 #endif
+
         public void Spawn(Collider collider, Vector3 position, Vector3 normal, AudioGroup audioGroup, float audioVolume = 1, int audioBlend = 1)
         {
             if (collider == null)
