@@ -5,19 +5,19 @@ namespace Core.Misc
 {
     using static CoreUtility;
 
-    public enum VaultType { DEFAULT = 0, FAST = 1, CLIMB = 2 }
+    public enum ClimbType { DEFAULT = 0, FAST = 1, CLIMB = 2 }
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(MovementController))]
-    public class MovementProcessorVault : MonoBehaviour, IMovementProcessor
+    public class MovementProcessorClimb : MonoBehaviour, IMovementProcessor
     {
-        public event Action<VaultType> OnStart = null;
-        public event Action<VaultType> OnEnd = null;
+        public event Action<ClimbType> OnStart = null;
+        public event Action<ClimbType> OnEnd = null;
 
         public int Priority => 3;
-        public bool IsVaulting => isVaulting;
-        public VaultType VaultType => vaultType;
-        public float VaultHeight => vaultHeight;
+        public bool IsClimbing => isClimbing;
+        public ClimbType ClimbType => climbType;
+        public float ClimbHeight => climbHeight;
 
         [Header("_")]
         [SerializeField] private bool showGizmos = false;
@@ -36,16 +36,16 @@ namespace Core.Misc
         private MovementController movementController = null;
         private readonly StackBool isEnabled = new(8);
         private Vector3 enterVelocity = Vector3.zero;
-        private Vector3 vaultVelocity = Vector3.zero;
-        private RaycastHit vaultInfo = new();
-        private VaultType vaultType = VaultType.DEFAULT;
-        private float vaultHeight = 0f;
-        private float vaultTimer = 0f;
-        private readonly float vaultCooldown = 0.2f;
+        private Vector3 climbVelocity = Vector3.zero;
+        private RaycastHit climbInfo = new();
+        private ClimbType climbType = ClimbType.DEFAULT;
+        private float climbHeight = 0f;
+        private float climbTimer = 0f;
+        private readonly float climbCooldown = 0.2f;
         private int movementToken = 0;
         private int lookToken = 0;
-        private bool canVault = false;
-        private bool isVaulting = false;
+        private bool canClimb = false;
+        private bool isClimbing = false;
 
         private void Awake() => movementController = GetComponent<MovementController>();
 #if UNITY_EDITOR
@@ -67,8 +67,8 @@ namespace Core.Misc
             Gizmos.color = COLOR_YELLOW;
             Gizmos.DrawLine(rayOrigin, rayOrigin + Vector3.down * rayLength);
 
-            Gizmos.color = TryGetVaultTarget(out Vector3 vaultPosition, out _) ? COLOR_GREEN : COLOR_RED;
-            Gizmos.DrawSphere(vaultPosition, 0.1f);
+            Gizmos.color = TryGetClimbTarget(out Vector3 climbPosition, out _) ? COLOR_GREEN : COLOR_RED;
+            Gizmos.DrawSphere(climbPosition, 0.1f);
         }
 #endif
 
@@ -79,36 +79,36 @@ namespace Core.Misc
                 return;
             }
 
-            if (isVaulting)
+            if (isClimbing)
             {
-                UpdateVault();
+                UpdateClimb();
                 return;
             }
 
-            TryVault();
+            TryClimb();
         }
         public void OnBeforeLook(MovementController controller) { }
 
-        private bool TryGetVaultTarget(out Vector3 vaultPosition, out float vaultHeight)
+        private bool TryGetClimbTarget(out Vector3 climbPosition, out float climbHeight)
         {
-            vaultPosition = Vector3.zero;
-            vaultHeight = 0;
+            climbPosition = Vector3.zero;
+            climbHeight = 0;
 
             Vector3 rayOrigin = GetRayOrigin();
             float rayLength = GetRayLength();
 
-            if (Physics.Raycast(rayOrigin, Vector3.down, out vaultInfo, rayLength, layer))
+            if (Physics.Raycast(rayOrigin, Vector3.down, out climbInfo, rayLength, layer))
             {
-                float vaultAngle = Vector3.Angle(vaultInfo.normal, Vector3.up);
-                vaultHeight = vaultInfo.point.y - movementController.GetCharacterOrigin().position.y;
-                vaultPosition = vaultInfo.point + Vector3.up * 0.1f;
+                float climbAngle = Vector3.Angle(climbInfo.normal, Vector3.up);
+                climbHeight = climbInfo.point.y - movementController.GetCharacterOrigin().position.y;
+                climbPosition = climbInfo.point + Vector3.up * 0.1f;
 
-                if (vaultAngle > 5)
+                if (climbAngle > 5)
                 {
                     return false;
                 }
 
-                if (vaultHeight >= minHeight && vaultHeight <= maxHeight)
+                if (climbHeight >= minHeight && climbHeight <= maxHeight)
                 {                   
                     return true;
                 }
@@ -116,14 +116,14 @@ namespace Core.Misc
 
             return false;
         }
-        private void TryVault()
+        private void TryClimb()
         {
             if (!GetIsEnabled())
             {
                 return;
             }
 
-            if (canVault)
+            if (canClimb)
             {
                 return;
             }
@@ -150,81 +150,81 @@ namespace Core.Misc
                 return;
             }    
 
-            if (TryGetVaultTarget(out Vector3 vaultPosition, out float vaultHeight))
+            if (TryGetClimbTarget(out Vector3 climbPosition, out float climbHeight))
             {
-                StartVault(vaultPosition, vaultHeight);
+                StartClimb(climbPosition, climbHeight);
             }
         }
-        private void StartVault(Vector3 vaultPosition, float vaultHeight)
+        private void StartClimb(Vector3 climbPosition, float climbHeight)
         {
-            if (isVaulting)
+            if (isClimbing)
             {
                 return;
             }
 
-            isVaulting = true;
-            vaultTimer = 0f;
+            isClimbing = true;
+            climbTimer = 0f;
 
             enterVelocity = movementController.GetVelocity().ClearY();
 
-            this.vaultHeight = vaultHeight;
-            this.vaultType = CalculateVaultType(enterVelocity.magnitude, vaultHeight);
-            this.vaultVelocity = CalculateVaultVelocity(movementController.GetCharacterOrigin().position, vaultPosition, duration);
+            this.climbHeight = climbHeight;
+            this.climbType = CalculateClimbType(enterVelocity.magnitude, climbHeight);
+            this.climbVelocity = CalculateClimbVelocity(movementController.GetCharacterOrigin().position, climbPosition, duration);
 
-            if (carryMomentum) vaultVelocity += enterVelocity.Clamp(vaultType == VaultType.CLIMB ? 1 : enterVelocity.magnitude) + movementController.GetCharacterOrigin().forward;
+            if (carryMomentum) climbVelocity += enterVelocity.Clamp(climbType == ClimbType.CLIMB ? 1 : enterVelocity.magnitude) + movementController.GetCharacterOrigin().forward;
 
             movementController.DisableMovement(out movementToken);
             if (disableLook) movementController.DisableLook(out lookToken);
 
-            this.WaitSeconds(vaultCooldown, () => canVault = true, () => canVault = false);
-            OnStart?.Invoke(vaultType);
+            this.WaitSeconds(climbCooldown, () => canClimb = true, () => canClimb = false);
+            OnStart?.Invoke(climbType);
         }
-        private void UpdateVault()
+        private void UpdateClimb()
         {
-            vaultTimer += Time.deltaTime;
+            climbTimer += Time.deltaTime;
 
-            vaultVelocity.y += gravity * Time.deltaTime;
+            climbVelocity.y += gravity * Time.deltaTime;
 
-            movementController.SetVelocity(vaultVelocity);
+            movementController.SetVelocity(climbVelocity);
 
-            if (vaultTimer >= duration)
+            if (climbTimer >= duration)
             {
-                EndVault();
+                EndClimb();
             }
         }
-        private void EndVault()
+        private void EndClimb()
         {
-            if (!isVaulting)
+            if (!isClimbing)
             {
                 return;
             }
 
-            isVaulting = false;
+            isClimbing = false;
 
-            movementController.SetVelocity(vaultVelocity);
+            movementController.SetVelocity(climbVelocity);
             movementController.EnableMovement(ref movementToken);
             if (disableLook) movementController.EnableLook(ref lookToken);
 
-            OnEnd?.Invoke(vaultType);
+            OnEnd?.Invoke(climbType);
         }
 
         private float GetRayLength() => movementController.GetCharacterHeight() + 0.5f;
         private Vector3 GetRayOrigin() => movementController.GetCameraOrigin().position + movementController.GetCharacterOrigin().forward * distance;
-        private VaultType CalculateVaultType(float momentum, float height)
+        private ClimbType CalculateClimbType(float momentum, float height)
         {
             if (height > maxHeight * 0.75f)
             {
-                return VaultType.CLIMB;
+                return ClimbType.CLIMB;
             }
 
             if (momentum > 6f)
             {
-                return VaultType.FAST;
+                return ClimbType.FAST;
             }
 
-            return VaultType.DEFAULT;
+            return ClimbType.DEFAULT;
         }
-        private Vector3 CalculateVaultVelocity(Vector3 start, Vector3 target, float time)
+        private Vector3 CalculateClimbVelocity(Vector3 start, Vector3 target, float time)
         {
             Vector3 d = target - start;
             Vector3 h = d.ClearY();
