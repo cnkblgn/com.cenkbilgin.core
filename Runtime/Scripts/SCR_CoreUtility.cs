@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Codice.Client.BaseCommands;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
@@ -564,166 +565,116 @@ namespace Core
             }
         }
 
-        public static bool HitScan(Vector3 origin, Vector3 direction, float range, int mask, RaycastHit[] buffer, List<HitData> result, QueryTriggerInteraction query, out int hits)
+        public delegate void HitProcessor(in HitData hitData);
+
+        public static bool HitScan(Vector3 origin, Vector3 direction, float range, int mask, RaycastHit[] hitBuffer, HitData[] resultBuffer, QueryTriggerInteraction query, out int hits, HitProcessor processor = null)
         {
-            result.Clear();
+            int rayHits = Physics.RaycastNonAlloc(origin, direction, hitBuffer, range, mask, query);
+            int maxHits = Mathf.Min(rayHits, resultBuffer.Length);
+            hits = 0;
 
-            hits = Physics.RaycastNonAlloc
-            (
-                origin,
-                direction,
-                buffer,
-                range,
-                mask,
-                query
-            );
-
-            for (int i = 0; i < hits; i++)
+            for (int i = 0; i < maxHits; i++)
             {
-                RaycastHit hit = buffer[i];
+                RaycastHit hit = hitBuffer[i];
+                HitData data = new(hit.collider, hit.point, hit.normal, hit.distance);
 
-                result.Add
-                (
-                    new
-                    (
-                        hit.collider,
-                        hit.point,
-                        hit.normal,
-                        hit.distance
-                    )
-                );
+                resultBuffer[hits++] = data;
+                processor?.Invoke(in data);
             }
 
             return hits > 0;
         }
-        public static bool HitCone(Vector3 origin, Vector3 forward, float angle, float radius, int mask, Collider[] buffer, List<HitData> result, QueryTriggerInteraction query, out int hits)
-        {
-            result.Clear();
-
-            hits = Physics.OverlapSphereNonAlloc
-            (
-                origin,
-                radius,
-                buffer,
-                mask,
-                query
-            );
-
+        public static bool HitCone(Vector3 origin, Vector3 forward, float angle, float radius, int mask, Collider[] overlapBuffer, HitData[] resultBuffer, QueryTriggerInteraction query, out int hits, HitProcessor processor = null)
+        {            
+            hits = 0;
+            int overlapHits = Physics.OverlapSphereNonAlloc(origin, radius, overlapBuffer, mask, query);
             float cos = Mathf.Cos(angle * Mathf.Deg2Rad);
-
-            for (int i = 0; i < hits; i++)
+            
+            for (int i = 0; i < overlapHits && hits < resultBuffer.Length; i++)
             {
-                Collider collider = buffer[i];
+                Collider collider = overlapBuffer[i];
 
-                Vector3 point = collider.ClosestPoint(origin);
-                Vector3 direction = point - origin;
-                float distance = direction.sqrMagnitude;
-
-                direction = direction.normalized;
-
-                if (Vector3.Dot(forward, direction) < cos)
-                {
-                    continue;
-                }
-
-                if (distance <= Mathf.Epsilon)
-                {
-                    result.Add(new(collider, origin, Vector3.up, 0f));
-                    continue;
-                }
-
-                result.Add
-                (
-                    new
-                    (
-                        collider,
-                        point,
-                        -direction,
-                        Mathf.Sqrt(distance)
-                    )
-                );
-            }
-
-            hits = result.Count;
-            return hits > 0;
-        }
-        public static bool HitSweep(Vector3 start, Vector3 end, Vector3 direction, float radius, float distance, int mask, RaycastHit[] buffer, List<HitData> result, QueryTriggerInteraction query, out int hits)
-        {
-            result.Clear();
-
-            hits = Physics.CapsuleCastNonAlloc
-            (
-                start,
-                end,
-                radius,
-                direction,
-                buffer,
-                distance,
-                mask,
-                query
-            );
-
-            for (int i = 0; i < hits; i++)
-            {
-                RaycastHit hit = buffer[i];
-
-                result.Add
-                (
-                    new
-                    (
-                        hit.collider,
-                        hit.point,
-                        hit.normal,
-                        hit.distance
-                    )
-                );
-            }
-
-            return hits > 0;
-        }
-        public static bool HitArea(Vector3 origin, float radius, int overlapMask, int obstructionMask, Collider[] colliderBuffer, RaycastHit[] raycastBuffer, List<HitData> result, QueryTriggerInteraction query, out int hits)
-        {
-            result.Clear();
-
-            int areaHits = Physics.OverlapSphereNonAlloc
-            (
-                origin,
-                radius,
-                colliderBuffer,
-                overlapMask,
-                query
-            );
-
-            for (int i = 0; i < areaHits; i++)
-            {
-                Collider collider = colliderBuffer[i];
                 Vector3 point = collider.ClosestPoint(origin);
                 Vector3 direction = point - origin;
                 float distance = direction.magnitude;
 
                 if (distance <= Mathf.Epsilon)
                 {
-                    result.Add(new(collider, point, Vector3.up, 0f));
+                    resultBuffer[hits++] = new(collider, origin, Vector3.up, 0f);
                     continue;
                 }
 
                 direction /= distance;
 
-                int obstructionHits = Physics.RaycastNonAlloc
-                (
-                    origin,
-                    direction,
-                    raycastBuffer,
-                    distance,
-                    obstructionMask,
-                    QueryTriggerInteraction.Ignore
-                );
+                if (Vector3.Dot(forward, direction) < cos)
+                {
+                    continue;
+                }
+
+                HitData data = new(collider, point, -direction, distance);
+
+                resultBuffer[hits++] = data;
+                processor?.Invoke(in data);
+            }
+
+            return hits > 0;
+        }
+        public static bool HitSweep(Vector3 start, Vector3 end, float radius, int mask, RaycastHit[] hitBuffer, HitData[] resultBuffer, QueryTriggerInteraction query, out int hits, HitProcessor processor = null)
+        {
+            hits = 0;
+
+            Vector3 direction = end - start;
+            float distance = direction.magnitude;
+
+            if (distance <= Mathf.Epsilon)
+            {
+                return false;
+            }
+
+            direction /= distance;
+
+            int capsuleHits = Physics.CapsuleCastNonAlloc(start, end, radius, direction, hitBuffer, distance, mask, query);
+            int maxHits = Mathf.Min(capsuleHits, resultBuffer.Length);
+
+            for (int i = 0; i < maxHits; i++)
+            {
+                RaycastHit hit = hitBuffer[i];
+
+                HitData data = new(hit.collider, hit.point, hit.normal, hit.distance);
+
+                resultBuffer[hits++] = data;
+                processor?.Invoke(in data);
+            }
+
+            return hits > 0;
+        }
+        public static bool HitArea(Vector3 origin, float radius, int overlapMask, int obstructionMask, Collider[] overlapBuffer, RaycastHit[] obstructionBuffer, HitData[] resultBuffer, QueryTriggerInteraction query, out int hits, HitProcessor processor = null)
+        {
+            int areaHits = Physics.OverlapSphereNonAlloc(origin, radius, overlapBuffer, overlapMask, query);
+            hits = 0;
+
+            for (int i = 0; i < areaHits && hits < resultBuffer.Length; i++)
+            {
+                Collider collider = overlapBuffer[i];
+                Vector3 point = collider.ClosestPoint(origin);
+                Vector3 direction = point - origin;
+                float distance = direction.magnitude;
+
+                if (distance <= Mathf.Epsilon)
+                {
+                    resultBuffer[hits++] = new(collider, point, Vector3.up, 0f);
+                    continue;
+                }
+
+                direction /= distance;
+
+                int obstructionHits = Physics.RaycastNonAlloc(origin, direction, obstructionBuffer, distance, obstructionMask, QueryTriggerInteraction.Ignore);
 
                 bool blocked = false;
 
                 for (int j = 0; j < obstructionHits; j++)
                 {
-                    RaycastHit hit = raycastBuffer[j];
+                    RaycastHit hit = obstructionBuffer[j];
 
                     if (hit.collider == collider || hit.collider.transform.IsChildOf(collider.transform))
                     {
@@ -742,19 +693,12 @@ namespace Core
                     continue;
                 }
 
-                result.Add
-                (
-                    new
-                    (
-                        collider,
-                        point,
-                        -direction,
-                        distance
-                    )
-                );
+                HitData data = new(collider, point, -direction, distance);
+
+                resultBuffer[hits++] = data;
+                processor?.Invoke(in data);
             }
 
-            hits = result.Count;
             return hits > 0;
         }
 
@@ -1032,7 +976,7 @@ namespace Core
                 throw new ArgumentOutOfRangeException("bitOffset + length exceeds 32 bits.");
             }
 
-            // Extract and set individual bits into result
+            // Extract and set individual bits into resultBuffer
             for (int i = 0; i < length; i++)
             {
                 bool bit = ((value >> i) & 1) != 0;
