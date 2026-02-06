@@ -564,9 +564,11 @@ namespace Core
             }
         }
 
-        public static int HitScan(Vector3 origin, Vector3 direction, float range, int mask, RaycastHit[] buffer, List<HitData> result, QueryTriggerInteraction query)
+        public static bool HitScan(Vector3 origin, Vector3 direction, float range, int mask, RaycastHit[] buffer, List<HitData> result, QueryTriggerInteraction query, out int hits)
         {
-            int hits = Physics.RaycastNonAlloc
+            result.Clear();
+
+            hits = Physics.RaycastNonAlloc
             (
                 origin,
                 direction,
@@ -592,11 +594,13 @@ namespace Core
                 );
             }
 
-            return hits;
+            return hits > 0;
         }
-        public static int HitCone(Vector3 origin, Vector3 forward, float angle, float radius, int mask, Collider[] buffer, List<HitData> result, QueryTriggerInteraction query)
+        public static bool HitCone(Vector3 origin, Vector3 forward, float angle, float radius, int mask, Collider[] buffer, List<HitData> result, QueryTriggerInteraction query, out int hits)
         {
-            int count = Physics.OverlapSphereNonAlloc
+            result.Clear();
+
+            hits = Physics.OverlapSphereNonAlloc
             (
                 origin,
                 radius,
@@ -607,12 +611,12 @@ namespace Core
 
             float cos = Mathf.Cos(angle * Mathf.Deg2Rad);
 
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < hits; i++)
             {
                 Collider collider = buffer[i];
 
-                Vector3 center = collider.bounds.center;
-                Vector3 direction = (center - origin);
+                Vector3 point = collider.ClosestPoint(origin);
+                Vector3 direction = point - origin;
                 float distance = direction.sqrMagnitude;
 
                 direction = direction.normalized;
@@ -622,23 +626,32 @@ namespace Core
                     continue;
                 }
 
+                if (distance <= Mathf.Epsilon)
+                {
+                    result.Add(new(collider, origin, Vector3.up, 0f));
+                    continue;
+                }
+
                 result.Add
                 (
                     new
                     (
                         collider,
-                        center,
+                        point,
                         -direction,
                         Mathf.Sqrt(distance)
                     )
                 );
             }
 
-            return result.Count;
+            hits = result.Count;
+            return hits > 0;
         }
-        public static int HitSweep(Vector3 start, Vector3 end, Vector3 direction, float radius, float distance, int mask, RaycastHit[] buffer, List<HitData> result, QueryTriggerInteraction query)
+        public static bool HitSweep(Vector3 start, Vector3 end, Vector3 direction, float radius, float distance, int mask, RaycastHit[] buffer, List<HitData> result, QueryTriggerInteraction query, out int hits)
         {
-            int hits = Physics.CapsuleCastNonAlloc
+            result.Clear();
+
+            hits = Physics.CapsuleCastNonAlloc
             (
                 start,
                 end,
@@ -666,11 +679,13 @@ namespace Core
                 );
             }
 
-            return hits;
+            return hits > 0;
         }
-        public static int HitArea(Vector3 origin, float radius, int overlapMask, int obstructionMask, Collider[] colliderBuffer, RaycastHit[] raycastBuffer, List<HitData> result, QueryTriggerInteraction query)
+        public static bool HitArea(Vector3 origin, float radius, int overlapMask, int obstructionMask, Collider[] colliderBuffer, RaycastHit[] raycastBuffer, List<HitData> result, QueryTriggerInteraction query, out int hits)
         {
-            int count = Physics.OverlapSphereNonAlloc
+            result.Clear();
+
+            int areaHits = Physics.OverlapSphereNonAlloc
             (
                 origin,
                 radius,
@@ -679,16 +694,22 @@ namespace Core
                 query
             );
 
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < areaHits; i++)
             {
                 Collider collider = colliderBuffer[i];
-                Vector3 center = collider.bounds.center;
-                Vector3 direction = center - origin;
+                Vector3 point = collider.ClosestPoint(origin);
+                Vector3 direction = point - origin;
                 float distance = direction.magnitude;
+
+                if (distance <= Mathf.Epsilon)
+                {
+                    result.Add(new(collider, point, Vector3.up, 0f));
+                    continue;
+                }
 
                 direction /= distance;
 
-                int hits = Physics.RaycastNonAlloc
+                int obstructionHits = Physics.RaycastNonAlloc
                 (
                     origin,
                     direction,
@@ -700,9 +721,16 @@ namespace Core
 
                 bool blocked = false;
 
-                for (int j = 0; j < hits; j++)
+                for (int j = 0; j < obstructionHits; j++)
                 {
-                    if (raycastBuffer[j].collider != collider)
+                    RaycastHit hit = raycastBuffer[j];
+
+                    if (hit.collider == collider || hit.collider.transform.IsChildOf(collider.transform))
+                    {
+                        continue;
+                    }
+
+                    if (hit.distance < distance)
                     {
                         blocked = true;
                         break;
@@ -719,14 +747,15 @@ namespace Core
                     new
                     (
                         collider,
-                        center,
+                        point,
                         -direction,
                         distance
                     )
                 );
             }
 
-            return result.Count;
+            hits = result.Count;
+            return hits > 0;
         }
 
         public static Vector3 GetRequiredLaunchVelocity(Vector3 targetPosition, Vector3 launchPosition, float forceMax)
