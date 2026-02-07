@@ -565,7 +565,7 @@ namespace Core
 
         public delegate void HitProcessor(in HitData hitData);
 
-        public static bool HitScan(Vector3 origin, Vector3 direction, float range, int mask, RaycastHit[] hitBuffer, HitData[] resultBuffer, QueryTriggerInteraction query, out int hits, HitProcessor processor = null)
+        public static bool HitScan(Vector3 origin, Vector3 direction, float range, int mask, in RaycastHit[] hitBuffer, in HitData[] resultBuffer, QueryTriggerInteraction query, out int hits, HitProcessor processor = null)
         {
             int rayHits = Physics.RaycastNonAlloc(origin, direction, hitBuffer, range, mask, query);
             int maxHits = Mathf.Min(rayHits, resultBuffer.Length);
@@ -582,7 +582,7 @@ namespace Core
 
             return hits > 0;
         }
-        public static bool HitCone(Vector3 origin, Vector3 forward, float angle, float radius, int mask, Collider[] overlapBuffer, HitData[] resultBuffer, QueryTriggerInteraction query, out int hits, HitProcessor processor = null)
+        public static bool HitCone(Vector3 origin, Vector3 forward, float angle, float radius, int mask, Collider[] overlapBuffer, in HitData[] resultBuffer, QueryTriggerInteraction query, out int hits, HitProcessor processor = null)
         {            
             hits = 0;
             int overlapHits = Physics.OverlapSphereNonAlloc(origin, radius, overlapBuffer, mask, query);
@@ -617,7 +617,7 @@ namespace Core
 
             return hits > 0;
         }
-        public static bool HitSweep(Vector3 start, Vector3 end, float radius, int mask, RaycastHit[] hitBuffer, HitData[] resultBuffer, QueryTriggerInteraction query, out int hits, HitProcessor processor = null)
+        public static bool HitSweep(Vector3 start, Vector3 end, float radius, int mask, in RaycastHit[] hitBuffer, in HitData[] resultBuffer, QueryTriggerInteraction query, out int hits, HitProcessor processor = null)
         {
             hits = 0;
 
@@ -646,7 +646,7 @@ namespace Core
 
             return hits > 0;
         }
-        public static bool HitArea(Vector3 origin, float radius, int overlapMask, int obstructionMask, Collider[] overlapBuffer, RaycastHit[] obstructionBuffer, HitData[] resultBuffer, QueryTriggerInteraction query, out int hits, HitProcessor processor = null)
+        public static bool HitArea(Vector3 origin, float radius, int overlapMask, int obstructionMask, Collider[] overlapBuffer, in RaycastHit[] obstructionBuffer, in HitData[] resultBuffer, QueryTriggerInteraction query, out int hits, HitProcessor processor = null)
         {
             int areaHits = Physics.OverlapSphereNonAlloc(origin, radius, overlapBuffer, overlapMask, query);
             hits = 0;
