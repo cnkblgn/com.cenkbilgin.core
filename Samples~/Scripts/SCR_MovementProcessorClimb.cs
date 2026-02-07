@@ -217,7 +217,7 @@ namespace Core.Misc
                 return ClimbType.CLIMB;
             }
 
-            if (momentum > 6f)
+            if (momentum > 10f)
             {
                 return ClimbType.FAST;
             }

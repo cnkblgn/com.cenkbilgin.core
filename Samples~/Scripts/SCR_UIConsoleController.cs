@@ -45,13 +45,16 @@ namespace Core.Misc
         private string lastLog = STRING_EMPTY;
         private string lastInput = STRING_EMPTY;
         private int lastLogCount = 0;
-        private int suggestionIndex = -1; 
+        private int suggestionIndex = -1;
         private bool requestSuggestionDraw = false;
         private bool isOpen = false;
 
         private void Awake()
         {
             thisCanvas = GetComponent<Canvas>();
+            consoleInputField.onFocusSelectAll = false;
+            consoleInputField.resetOnDeActivation = false;
+            consoleInputField.restoreOriginalTextOnEscape = false;
 
             Hide();
         }
@@ -205,9 +208,9 @@ namespace Core.Misc
             {
                 lastCommand = input;
             }
-
+           
             consoleInputField.text = STRING_EMPTY;
-            consoleInputField.ActivateInputField();
+            if (isOpen) consoleInputField.ActivateInputField();
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(consoleHistoryRect.content);
             this.WaitFrame(() => consoleHistoryRect.verticalNormalizedPosition = 0);
@@ -216,9 +219,7 @@ namespace Core.Misc
         public void Show()
         {
             thisCanvas.Show();
-
             ManagerCoreInput.Instance.SwitchMap("UI");
-
             consoleInputField.ActivateInputField();
 
             isOpen = true;
@@ -226,17 +227,12 @@ namespace Core.Misc
         public void Hide()
         {
             thisCanvas.Hide();
-
-            if (ManagerCoreGame.Instance.GetGameState() == GameState.RESUME)
-            {
-                ManagerCoreInput.Instance.SwitchMap("Gameplay");
-            }
-
+            if (ManagerCoreGame.Instance.GetGameState() == GameState.RESUME) ManagerCoreInput.Instance.SwitchMap("Gameplay");
             consoleInputField.DeactivateInputField();
 
             isOpen = false;
-            requestSuggestionDraw = false;
 
+            requestSuggestionDraw = false;
             ClearSuggestion();
         }
         private void Clear()
@@ -368,7 +364,6 @@ namespace Core.Misc
                 bool selected = i == suggestionIndex;
 
                 suggestionBuilder.Append(selected ? OPEN_YELLOW : OPEN_GHOST);
-                //suggestionBuilder.Append(selected ? "  > " : "   ");
                 suggestionBuilder.Append(selected ? "  > " : "");
                 suggestionBuilder.Append(command.ID);
                 suggestionBuilder.Append(CLOSE_COLOR);

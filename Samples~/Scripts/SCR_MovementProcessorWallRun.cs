@@ -177,7 +177,7 @@ namespace Core.Misc
 
             movementController.SetVelocity(wallVelocity);
       
-            wallStepInterval = Mathf.Lerp(0.666f, 0.333f, horizontal.magnitude / 10);
+            wallStepInterval = Mathf.Lerp(0.5f, 0.25f, horizontal.magnitude / 10);
             wallStepTimer -= Time.deltaTime;
             if (wallStepTimer <= 0)
             {
