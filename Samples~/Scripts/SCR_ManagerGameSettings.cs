@@ -162,7 +162,7 @@ namespace Core.Misc
         {
             settings.AntialiasingMode = value;
             ManagerCoreGraphics.Instance.SetAntialiasing(value == 1 ? AntialiasingMode.TemporalAntiAliasing : AntialiasingMode.SubpixelMorphologicalAntiAliasing);
-            ManagerCoreGraphics.Instance.SetMultiSampling(value >= 2 ? value + 2 : 1);
+            ManagerCoreGraphics.Instance.SetMultiSampling(value >= 2 ? (int)Mathf.Pow(2, value - 1) : 1);
         }
         private void OnTextureQualityApply(int value)
         {
