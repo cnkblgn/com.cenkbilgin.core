@@ -165,10 +165,7 @@ namespace Core.Graphics
         public void SetRenderScale(float value) => urpPipelineSettings.renderScale = value;
 
         public bool GetMultiSampling() => urpPipelineSettings.msaaSampleCount > 1;
-        public void SetMultiSampling(bool value)
-        {
-            urpPipelineSettings.msaaSampleCount = value ? 8 : 1;
-        }
+        public void SetMultiSampling(int value) => urpPipelineSettings.msaaSampleCount = Mathf.Clamp(value, 1, 8);
 
         public AntialiasingMode GetAntialiasing()
         {

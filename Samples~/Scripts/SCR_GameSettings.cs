@@ -20,7 +20,7 @@ namespace Core.Misc
         [Range(24, 240)] public int FrameLimit = 60;
 
         [Header("_")]
-        [Range(0, 2), Tooltip("0 - Off, 1 - TAA, 2 - MSAA x8")] public int AntialiasingMode = 1;
+        [Range(0, 4), Tooltip("0 - Off, 1 - TAA, 2 - MSAA x2, 3 - MSAA x4, 4 - MSAA x8")] public int AntialiasingMode = 1;
         [Range(0, 2), Tooltip("0 - Low, 1 - Medium, 2 - High")] public int TextureQuality = 3;
         [Range(0, 3), Tooltip("0 - Off, 1 - Low, 2 - Medium, 3 - High")] public int ShadowQuality = 3;
 

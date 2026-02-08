@@ -58,6 +58,7 @@ namespace Core.Misc
         [SerializeField] private float stanceCrouchCameraHeight = 1.000f;
 
         [Header("_")]
+        [SerializeField, Required] private Transform cameraFollow = null;
         [SerializeField, Required] private Transform cameraPivot = null;
         [SerializeField, Range(45, 90)] private float cameraFieldOfView = 60.0f;
         [SerializeField, Min(0)] private float cameraSensitivity = 1.25f;
@@ -113,7 +114,7 @@ namespace Core.Misc
         private IMovementProcessor[] movementProcessors = null;
         private Vector3 movementDirection = Vector3.zero;
         private Vector3 movementVelocity = Vector3.zero;
-        private Vector3 cameraPosition = Vector3.zero;
+        private Vector3 cameraOffset = Vector3.zero;
         private LayerMask collisionDefaultMask = -1;
         private RaycastHit collisionGroundInfo = new();
         private RaycastHit collisionSidesInfo = new();
@@ -187,7 +188,7 @@ namespace Core.Misc
             characterController.includeLayers = collisionDefaultMask;
             characterController.excludeLayers = ~collisionDefaultMask;
             characterController.skinWidth = characterController.radius * 0.1f;
-            cameraPosition = Vector3.up * stanceStandCameraHeight;
+            cameraOffset = Vector3.up * stanceStandCameraHeight;
             cameraController.fieldOfView = cameraFieldOfView;
             SetLookPitchClamp(cameraPitchClampAngle);
             SetLookYawClamp(cameraYawClampAngle);
@@ -209,17 +210,21 @@ namespace Core.Misc
         }
         private void LateUpdate()
         {
-            if (ManagerCoreGame.Instance.GetGameState() != GameState.RESUME)
-            {
-                return;
-            }
-
             UpdateCamera();
 
             foreach (IMovementProcessor i in movementProcessors) i.OnBeforeLook(this);
 
             characterOrigin.localRotation = Quaternion.Euler(0, cameraRotationY, 0);
-            cameraPivot.SetLocalPositionAndRotation(cameraPosition, Quaternion.Euler(cameraRotationX, 0, cameraRotationZ));
+            cameraPivot.localRotation = Quaternion.Euler(cameraRotationX, 0, cameraRotationZ);
+
+            if (cameraFollow != null)
+            {
+                cameraPivot.position = cameraFollow.position + cameraOffset;
+            }
+            else
+            {
+                cameraPivot.localPosition = cameraOffset;
+            }
         }
 
 #if UNITY_EDITOR
@@ -516,7 +521,7 @@ namespace Core.Misc
 
             float cameraTime = (movementCurrentStance == MovementStance.CROUCH ? stanceCrouchTransitionRoughness : stanceStandTransitionRoughness);
 
-            cameraPosition = Vector3.Lerp(cameraPosition, cameraCenter, Time.deltaTime * cameraTime);
+            cameraOffset = Vector3.Lerp(cameraOffset, cameraCenter, Time.deltaTime * cameraTime);
 
             if (GetIsLookEnabled())
             {

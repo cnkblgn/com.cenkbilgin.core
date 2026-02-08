@@ -93,7 +93,7 @@ namespace Core.Misc
 
                 optionElements.Add(ui.InsertSettingSlider(settings.FrameLimit, 1, local.Get("settings.optionFrameLimit"), 10F, 360, true, OnFrameLimitApply, null));
 
-                optionElements.Add(ui.InsertSettingButton(settings.AntialiasingMode, 1, local.Get("settings.optionAntialiasing"), new string[] { off, "TAA", "MSAAx8" }, OnAntialiasingApply, null));
+                optionElements.Add(ui.InsertSettingButton(settings.AntialiasingMode, 1, local.Get("settings.optionAntialiasing"), new string[] { off, "TAA", "MSAAx2", "MSAAx4", "MSAAx8" }, OnAntialiasingApply, null));
 
                 optionElements.Add(ui.InsertSettingButton(settings.TextureQuality, 2, local.Get("settings.optionTextureQuality"), new string[] { low, medium, high }, OnTextureQualityApply, null));
 
@@ -162,7 +162,7 @@ namespace Core.Misc
         {
             settings.AntialiasingMode = value;
             ManagerCoreGraphics.Instance.SetAntialiasing(value == 1 ? AntialiasingMode.TemporalAntiAliasing : AntialiasingMode.SubpixelMorphologicalAntiAliasing);
-            ManagerCoreGraphics.Instance.SetMultiSampling(value == 2);
+            ManagerCoreGraphics.Instance.SetMultiSampling(value - 2);
         }
         private void OnTextureQualityApply(int value)
         {
