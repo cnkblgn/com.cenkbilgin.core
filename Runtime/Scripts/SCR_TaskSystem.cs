@@ -4,7 +4,7 @@ namespace Core
 {
     using static CoreUtility;
 
-    internal static class TaskSystem
+    public static class TaskSystem
     {
         private const int MAX_TASKS = 2048;
         private static readonly SwapBackArray<TaskInstance> ACTIVE_TASKS = new(MAX_TASKS);
