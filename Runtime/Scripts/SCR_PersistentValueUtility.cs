@@ -6,7 +6,7 @@ namespace Core
 {
     using static CoreUtility;
 
-    public static class PersistentValueExtensions
+    public static class PersistentValueUtility
     {
         public static void SetInt(this Dictionary<string, PersistentValue> data, string key, int value) => data[key] = new PersistentValue { Int = value };
         public static void SetFloat(this Dictionary<string, PersistentValue> data, string key, float value) => data[key] = new PersistentValue { Float = value };
