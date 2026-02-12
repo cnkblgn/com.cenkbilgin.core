@@ -49,7 +49,6 @@ namespace Core
             if (duration <= 0)
             {
                 onComplete?.Invoke();
-                Debug.LogWarning("WaitSeconds() seconds <= 0!");
                 return;
             }
 
@@ -76,7 +75,6 @@ namespace Core
             if (duration <= 0)
             {
                 onComplete?.Invoke();
-                Debug.LogWarning("WaitSeconds() seconds <= 0!");
                 return;
             }
 
