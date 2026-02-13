@@ -26,13 +26,13 @@ namespace Core.UI
             {
                 if (!thisTween.IsCompleted)
                 {
-                    onStartAction.Invoke();
+                    onStartAction?.Invoke();
                     this.WaitFrame(onFinishAction);
                     return;
                 }
             }
 
-            onStartAction.Invoke();
+            onStartAction?.Invoke();
             thisCanvas.Show();
             thisCanvas.alpha = 0;
 
@@ -40,7 +40,7 @@ namespace Core.UI
             {
                 thisTween.Stop();
                 thisTween = null;
-                onFinishAction.Invoke();
+                onFinishAction?.Invoke();
             });
         }
         /// <summary> 1 -> 0, fades to white </summary>
@@ -50,20 +50,20 @@ namespace Core.UI
             {
                 if (!thisTween.IsCompleted)
                 {
-                    onStartAction.Invoke();
+                    onStartAction?.Invoke();
                     this.WaitFrame(onFinishAction);
                     return;
                 }
             }
 
-            onStartAction.Invoke();
+            onStartAction?.Invoke();
             thisCanvas.Show();
             thisCanvas.alpha = 1;
 
             thisTween = thisCanvas.Fade(0, fadeTime, waitTime, TweenType.UNSCALED, EaseType.EASE_IN_SINE, () =>
             {
                 Hide();
-                onFinishAction.Invoke();
+                onFinishAction?.Invoke();
             });
         }
         public void Hide()
