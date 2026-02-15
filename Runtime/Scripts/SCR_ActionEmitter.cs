@@ -1,15 +1,15 @@
 using System;
-using System.Threading;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace Core.Misc
+namespace Core
 {
-    using static TaskUtility;
-
     [DisallowMultipleComponent]
     public class ActionEmitter : MonoBehaviour
     {
+        [Header("_")]
+        [SerializeField] private bool emitOnStart = false;
+
         [Header("_")]
         [SerializeField] private UnityEvent actionEvent = null;
         [SerializeField, Min(0)] private float actionDelay = 0;
@@ -23,6 +23,13 @@ namespace Core.Misc
         private Action callback = default;
 
         private void Awake() => callback = EmitInternal;
+        private void Start()
+        {
+            if (emitOnStart)
+            {
+                Emit();
+            }
+        }
 
         public void Emit()
         {
@@ -41,7 +48,6 @@ namespace Core.Misc
             this.WaitSeconds(actionDelay, callback);
         }
         private void EmitInternal() => actionEvent?.Invoke();
-
         private void StartInterval()
         {
             if (intervalTask != null)
@@ -50,7 +56,6 @@ namespace Core.Misc
             }
 
             intervalTask = new TaskInstanceWaitInterval(this, minInterval, maxInterval, callback);
-
             TaskSystem.TryCreate(intervalTask);
         }
     }

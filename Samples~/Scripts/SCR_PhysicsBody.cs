@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Core.Misc
+namespace Game
 {
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Collider))]

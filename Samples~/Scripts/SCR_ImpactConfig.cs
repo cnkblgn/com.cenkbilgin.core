@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Core;
 using Core.Graphics;
 using Core.Audio;
 
-namespace Core.Misc
+namespace Game
 {
     [CreateAssetMenu(fileName = "SCO_Impact", menuName = "Resources/Impact Config", order = 0)]
     public class ImpactConfig : ScriptableObject

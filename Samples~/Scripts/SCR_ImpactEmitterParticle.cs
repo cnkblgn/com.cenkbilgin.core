@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Core;
+using Core.Audio;
 
-namespace Core.Misc
+namespace Game
 {
     using static CoreUtility;
 
@@ -64,7 +66,7 @@ namespace Core.Misc
 
             ParticleCollisionEvent collisionEvent = particleCollisionEvents[0];
 
-            impactConfig.Spawn(particleLastCollider, collisionEvent.intersection, collisionEvent.normal, Audio.AudioGroup.EFFECT);
+            impactConfig.Spawn(particleLastCollider, collisionEvent.intersection, collisionEvent.normal, AudioGroup.EFFECT);
         }
     }
 }

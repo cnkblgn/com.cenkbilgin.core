@@ -2,8 +2,9 @@ using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using Core;
 
-namespace Core.Misc.Editor
+namespace Game.Editor
 {
     using static CoreUtility;
 

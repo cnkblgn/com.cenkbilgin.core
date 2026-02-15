@@ -1,9 +1,9 @@
 using System;
 using UnityEngine;
+using Core;
 using Core.Graphics;
-using Core.Audio;
 
-namespace Core.Misc
+namespace Game
 {
     using static CoreUtility;
 

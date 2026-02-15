@@ -1,4 +1,4 @@
-namespace Core.Misc
+namespace Game
 {
     public enum InteractableType
     {

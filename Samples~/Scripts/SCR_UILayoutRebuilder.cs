@@ -1,8 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
+using Core;
 using Core.Graphics;
 
-namespace Core.Misc
+namespace Game
 {
     using static CoreUtility;
 

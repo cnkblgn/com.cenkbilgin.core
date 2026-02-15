@@ -4,9 +4,10 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Core;
 using Core.Input;
 
-namespace Core.Misc
+namespace Game
 {
     using static CoreUtility;
     using static TaskUtility;

@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
+using Core;
 using Core.Graphics;
 using Core.Localization;
 using Core.UI;
 using Core.Audio;
 
-namespace Core.Misc
+namespace Game
 {
     using static CoreUtility;
     using static TaskUtility;

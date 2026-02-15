@@ -1,7 +1,7 @@
 using UnityEngine;
 using Core.Input;
 
-namespace Core.Misc
+namespace Game
 {
     using static InputActionDatabase;
 

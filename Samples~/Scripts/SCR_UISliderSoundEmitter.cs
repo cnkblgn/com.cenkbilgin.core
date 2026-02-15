@@ -1,8 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
+using Core;
 using Core.Audio;
 
-namespace Core.Misc
+namespace Game
 {
     using static CoreUtility;
 

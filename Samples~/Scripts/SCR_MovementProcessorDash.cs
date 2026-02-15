@@ -1,8 +1,9 @@
 using System;
 using UnityEngine;
+using Core;
 using Core.Input;
 
-namespace Core.Misc
+namespace Game
 {
     using static CoreUtility;
 

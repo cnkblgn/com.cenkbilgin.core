@@ -1,6 +1,8 @@
 using UnityEngine;
+using Core;
+using Core.Audio;
 
-namespace Core.Misc
+namespace Game
 {
     using static CoreUtility;
 
@@ -23,7 +25,7 @@ namespace Core.Misc
             }
 
             ContactPoint contactPoint = collision.GetContact(0);
-            impactConfig.Spawn(collision.collider, contactPoint.point, contactPoint.normal, Audio.AudioGroup.EFFECT);
+            impactConfig.Spawn(collision.collider, contactPoint.point, contactPoint.normal, AudioGroup.EFFECT);
         }
     }
 }

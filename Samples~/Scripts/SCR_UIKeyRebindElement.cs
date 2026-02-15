@@ -1,9 +1,10 @@
-﻿using Core.Input;
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Core;
+using Core.Input;
 
-namespace Core.Misc
+namespace Game
 {
     using static CoreUtility;
 

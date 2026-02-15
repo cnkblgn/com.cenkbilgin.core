@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Core.Misc
+namespace Game
 {
     public class PhysicsBone
     {

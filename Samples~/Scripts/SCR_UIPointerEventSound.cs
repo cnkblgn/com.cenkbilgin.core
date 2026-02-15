@@ -1,9 +1,10 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using Core;
 using Core.Audio;
 using Core.UI;
 
-namespace Core.Misc
+namespace Game
 {
     using static CoreUtility;
 

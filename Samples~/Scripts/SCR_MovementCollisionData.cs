@@ -1,7 +1,7 @@
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace Core.Misc
+namespace Game
 {
     public readonly struct MovementCollisionData
     {

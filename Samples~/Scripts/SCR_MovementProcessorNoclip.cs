@@ -2,7 +2,7 @@ using UnityEngine;
 using Core.Input;
 using Core.UI;
 
-namespace Core.Misc
+namespace Game
 {
     using static InputActionDatabase;
 

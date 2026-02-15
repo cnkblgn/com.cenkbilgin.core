@@ -1,9 +1,10 @@
 using System;
 using UnityEngine;
 using UnityEngine.Events;
+using Core;
 using Core.Localization;
 
-namespace Core.Misc
+namespace Game
 {
     using static CoreUtility;
 

@@ -6,9 +6,11 @@ using UnityEngine;
 #if UNITY_EDITOR
 using Core.Editor;
 #endif
+
+using Core;
 using Core.Input;
 
-namespace Core.Misc
+namespace Game
 {
     using static CoreUtility;
     using static InputActionDatabase;

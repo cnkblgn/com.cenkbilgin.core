@@ -2,8 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Core;
 
-namespace Core.Misc
+namespace Game
 {
     using static CoreUtility;
 
