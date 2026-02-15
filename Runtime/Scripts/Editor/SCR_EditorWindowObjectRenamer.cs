@@ -7,10 +7,12 @@ namespace Core.Editor
 
     public class EditorWindowObjectRenamer : EditorWindow
     {
-        private string prefix = "PFB_";
+        private string prefix = "";
+        private string suffix = "";
         private string removeBefore = "";
         private string removeAfter = "";
         private string previewName = "";
+        private bool sequenceNumbering = false;
 
         [MenuItem("Tools/Object Renamer")]
         public static void ShowWindow() => GetWindow<EditorWindowObjectRenamer>("Object Renamer");
@@ -20,8 +22,10 @@ namespace Core.Editor
             GUILayout.Label("Apply Name to Selected Assets or GameObjects", EditorStyles.boldLabel);
 
             prefix = EditorGUILayout.TextField("Prefix", prefix);
+            suffix = EditorGUILayout.TextField("Suffix", suffix);
             removeBefore = EditorGUILayout.TextField("Remove Before", removeBefore);
             removeAfter = EditorGUILayout.TextField("Remove After", removeAfter);
+            sequenceNumbering = EditorGUILayout.Toggle("Sequence Numbering", sequenceNumbering);
 
             UpdatePreview();
 
@@ -41,8 +45,7 @@ namespace Core.Editor
                 return;
             }
 
-            string name = Selection.objects[0].name;
-            previewName = ComputeName(name);
+            previewName = ComputeName(Selection.objects[0].name);
         }
         
         private void Rename()
@@ -55,10 +58,17 @@ namespace Core.Editor
                 return;
             }
 
-            foreach (var obj in selectedObjects)
+            for (int i = 0; i < selectedObjects.Length; i++)
             {
+                Object obj = selectedObjects[i];
+
                 string name = ComputeName(obj.name);
                 string path = AssetDatabase.GetAssetPath(obj);
+
+                if (sequenceNumbering)
+                {
+                    name = $"{name}_{i + 1:00}";
+                }
 
                 if (!string.IsNullOrEmpty(path))
                 {
@@ -102,6 +112,11 @@ namespace Core.Editor
             if (!string.IsNullOrEmpty(prefix))
             {
                 name = prefix + name;
+            }
+
+            if (!string.IsNullOrEmpty(suffix))
+            {
+                name += suffix;
             }
 
             return string.IsNullOrEmpty(name) ? original : name;
