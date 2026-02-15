@@ -1,0 +1,20 @@
+{
+    "name": "ASM_CoreMiscEditor",
+    "rootNamespace": "Core.Misc.Editor",
+    "references": [
+        "GUID:cd1711b8a18680d4d823307638cb8090",
+        "GUID:1d623e8bdcfc7404e812f09ec1d93209",
+        "GUID:a22c05da8f78f25449ffcbddb53034cb"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

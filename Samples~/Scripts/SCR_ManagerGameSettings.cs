@@ -16,7 +16,7 @@ namespace Core.Misc
     [DisallowMultipleComponent]
     public class ManagerGameSettings : Manager<ManagerGameSettings>
     {
-        public event Action<GameSettings> OnSettingsUpdated = null;
+        public static event Action<GameSettings> OnSettingsUpdated = null;
         public GameSettings Settings => settings;
 
         [Header("_")]

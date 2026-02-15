@@ -15,17 +15,12 @@ namespace Core.Misc
 
         [Header("_")]
         [SerializeField] private bool disableCollidersOnAwake = false;
-
-        [Header("_")]
-        [SerializeField] private int ragdollLayer = 10;
-        [SerializeField] private int armatureLayer = 12;
+        [SerializeField] private bool enableCollidersOnClear = true;
 
         [Header("_")]
         [SerializeField] private LayerMask collisionMask = -1;
 
-        private Rigidbody[] thisBones = null;
-        private Animator[] thisAnimators = null;
-        private Collider[] thisColliders = null;
+        private PhysicsBone[] thisBones = null;
         private Coroutine activationCoroutine = null;
         private Coroutine deactivationCoroutine = null;
         private readonly Dictionary<Collider, Rigidbody> mappedBones = new(2);
@@ -36,25 +31,24 @@ namespace Core.Misc
 
         private void Awake()
         {
-            thisAnimators = GetComponentsInChildren<Animator>();
-            thisBones = GetComponentsInChildren<Rigidbody>();
-            thisColliders = new Collider[thisBones.Length];
+            Rigidbody[] temp = GetComponentsInChildren<Rigidbody>();
 
-            thisBones[0].gameObject.SetLayer(armatureLayer);
+            thisBones = new PhysicsBone[temp.Length];
+
             for (int i = 0; i < thisBones.Length; i++)
             {
-                thisColliders[i] = thisBones[i].GetComponent<Collider>();
-                thisColliders[i].includeLayers = collisionMask;
-                thisColliders[i].excludeLayers = ~collisionMask;
-                thisBones[i].isKinematic = true;
-                thisBones[i].useGravity = false;
-                thisBones[i].collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
-                mappedBones.Add(thisColliders[i], thisBones[i]);
+                PhysicsBone bone = new(temp[i]);
 
-                if (disableCollidersOnAwake)
-                {
-                    thisColliders[i].enabled = false;
-                }
+                bone.Collider.includeLayers = collisionMask;
+                bone.Collider.excludeLayers = ~collisionMask;
+                bone.Collider.enabled = !disableCollidersOnAwake;
+
+                bone.Rigidbody.isKinematic = true;
+                bone.Rigidbody.useGravity = false;
+                bone.Rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+                
+                mappedBones.Add(bone.Collider, bone.Rigidbody);
+                thisBones[i] = bone;
             }
         }
 
@@ -67,13 +61,13 @@ namespace Core.Misc
 
             if (isArea)
             {
-                thisBones[0].AddExplosionForce(force, position, radius, force, ForceMode.Impulse);
+                thisBones[0].Rigidbody.AddExplosionForce(force, position, radius, force, ForceMode.Impulse);
                 return;
             }
 
             if (collider == null)
             {
-                collider = thisColliders[0];
+                collider = thisBones[0].Collider;
             }
 
             if (!mappedBones.TryGetValue(collider, out var rigidbody))
@@ -101,17 +95,16 @@ namespace Core.Misc
                 deactivationCoroutine = null;
             }
 
-            for (int i = 0; i < thisAnimators.Length; i++)
-            {
-                thisAnimators[i].enabled = true;
-            }
-
             for (int i = 0; i < thisBones.Length; i++)
             {
-                thisBones[i].angularVelocity = Vector3.zero;
-                thisBones[i].linearVelocity = Vector3.zero;
-                thisBones[i].isKinematic = true;
-                thisBones[i].useGravity = false;
+                PhysicsBone bone = thisBones[i];
+
+                bone.Rigidbody.angularVelocity = Vector3.zero;
+                bone.Rigidbody.linearVelocity = Vector3.zero;
+                bone.Rigidbody.isKinematic = true;
+                bone.Rigidbody.useGravity = false;
+
+                bone.Collider.enabled = enableCollidersOnClear;
             }
 
             OnCleared?.Invoke();
@@ -130,7 +123,6 @@ namespace Core.Misc
             }
 
             OnActivated?.Invoke();
-
             activationCoroutine = StartCoroutine(ActivateInternal(velocity));
         }       
         private IEnumerator ActivateInternal(Vector3 velocity)
@@ -140,32 +132,25 @@ namespace Core.Misc
                 yield break;
             }
 
-            for (int i = 0; i < thisAnimators.Length; i++)
-            {
-                thisAnimators[i].enabled = false;
-            }
-
             for (int i = 0; i < thisBones.Length; i++)
             {
-                thisBones[i].gameObject.SetLayer(ragdollLayer);
+                PhysicsBone bone = thisBones[i];
 
-                if (thisBones[i].isKinematic)
-                {
-                    thisBones[i].isKinematic = false;
-                }
+                bone.Rigidbody.isKinematic = false;
+                bone.Rigidbody.linearVelocity = Vector3.zero;
+                bone.Rigidbody.angularVelocity = Vector3.zero;
 
-                thisColliders[i].enabled = true;
-
-                thisBones[i].linearVelocity = Vector3.zero;
-                thisBones[i].angularVelocity = Vector3.zero;
+                bone.Collider.enabled = true;
             }
 
             yield return waitPhysics;
 
             for (int i = 0; i < thisBones.Length; i++)
             {
-                thisBones[i].useGravity = true;
-                thisBones[i].AddForce(velocity, ForceMode.Impulse);
+                PhysicsBone bone = thisBones[i];
+
+                bone.Rigidbody.useGravity = true;
+                bone.Rigidbody.AddForce(velocity, ForceMode.VelocityChange);
             }
 
             Deactivate();
@@ -198,9 +183,11 @@ namespace Core.Misc
 
             for (int i = 0; i < thisBones.Length; i++)
             {
-                thisBones[i].isKinematic = true;
-                thisBones[i].useGravity = false;
-                thisBones[i].collisionDetectionMode = CollisionDetectionMode.Discrete;
+                PhysicsBone bone = thisBones[i];
+
+                bone.Rigidbody.isKinematic = true;
+                bone.Rigidbody.useGravity = false;
+                bone.Rigidbody.collisionDetectionMode = CollisionDetectionMode.Discrete;
             }
 
             isDeactivated = true;
@@ -211,7 +198,7 @@ namespace Core.Misc
         {
             for (int i = 0; i < thisBones.Length; i++)
             {
-                if (!thisBones[i].IsSleeping())
+                if (!thisBones[i].Rigidbody.IsSleeping())
                 {
                     return false;
                 }
@@ -221,6 +208,6 @@ namespace Core.Misc
         }
 
         public LayerMask GetCollisionMask() => collisionMask;
-        public Rigidbody[] GetBones() => thisBones;
+        public PhysicsBone[] GetBones() => thisBones;
     }
 }

@@ -1,15 +1,14 @@
-#if UNITY_EDITOR
 using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-namespace Core.Misc
+namespace Core.Misc.Editor
 {
     using static CoreUtility;
 
     [RequireComponent(typeof(Terrain))]
-    public class TerrainBaker : MonoBehaviour
+    public class EditorTerrainBaker : MonoBehaviour
     {
         private enum Size
         {
@@ -240,4 +239,3 @@ namespace Core.Misc
         }
     }
 }
-#endif

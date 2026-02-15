@@ -58,7 +58,7 @@ namespace Core.Misc
         [SerializeField] private float stanceCrouchCameraHeight = 1.000f;
 
         [Header("_")]
-        [SerializeField, Required] private Transform cameraFollow = null;
+        [SerializeField] private Transform cameraFollow = null;
         [SerializeField, Required] private Transform cameraPivot = null;
         [SerializeField, Range(45, 90)] private float cameraFieldOfView = 60.0f;
         [SerializeField, Min(0)] private float cameraSensitivity = 1.25f;
@@ -215,15 +215,14 @@ namespace Core.Misc
             foreach (IMovementProcessor i in movementProcessors) i.OnBeforeLook(this);
 
             characterOrigin.localRotation = Quaternion.Euler(0, cameraRotationY, 0);
-            cameraPivot.localRotation = Quaternion.Euler(cameraRotationX, 0, cameraRotationZ);
 
             if (cameraFollow != null)
             {
-                cameraPivot.position = cameraFollow.position + cameraOffset;
+                cameraPivot.SetPositionAndRotation(cameraFollow.position + cameraOffset, cameraFollow.rotation * Quaternion.Euler(cameraRotationX, 0, cameraRotationZ));
             }
             else
             {
-                cameraPivot.localPosition = cameraOffset;
+                cameraPivot.SetLocalPositionAndRotation(cameraOffset, Quaternion.Euler(cameraRotationX, 0, cameraRotationZ));
             }
         }
 
@@ -283,7 +282,11 @@ namespace Core.Misc
         }
         private void OnValidate()
         {
-            if (cameraPivot != null)
+            if (cameraFollow != null)
+            {
+                cameraPivot.position = cameraFollow.position;
+            }
+            else if (cameraPivot != null)
             {
                 cameraPivot.localPosition = Vector3.up * stanceStandCameraHeight;
             }
@@ -809,7 +812,7 @@ namespace Core.Misc
             characterController.includeLayers = collisionDefaultMask;
             characterController.excludeLayers = ~collisionDefaultMask;
         }
-        public void ResetCollisionMask() => SetCollisionMask(collisionMask);
+        public void ResetCollisionMask() => SetCollisionMask(collisionDefaultMask);
 
         public void SetVelocity(Vector3 velocity) => movementVelocity = velocity;
         public void AddVelocity(Vector3 velocity) => movementVelocity += velocity;

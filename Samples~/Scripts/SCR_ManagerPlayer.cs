@@ -10,8 +10,8 @@ namespace Core.Misc
     [DisallowMultipleComponent]
     public class ManagerPlayer : Manager<ManagerPlayer>
     {      
-        public event Action<GameEntity> OnPlayerLoaded = null;
-        public event Action<GameEntity> OnPlayerUnloaded = null;
+        public static event Action<GameEntity> OnPlayerLoaded = null;
+        public static event Action<GameEntity> OnPlayerUnloaded = null;
 
         public GameEntity Player => playerInstance; 
 

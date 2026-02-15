@@ -11,6 +11,8 @@ namespace Core.Localization
     [DisallowMultipleComponent]
     public class ManagerCoreLocalization : Manager<ManagerCoreLocalization>
     {
+        public static event Action<int> OnLocalizationUpdated = null;
+
         public string[] Languages => languages; private string[] languages = null;
 
         [Header("_")]
@@ -52,6 +54,7 @@ namespace Core.Localization
             }
 
             currentLocalizationData = Parse(database.text, currentLocalizationIndex = localizationIndex);
+            OnLocalizationUpdated?.Invoke(currentLocalizationIndex);
         }
         public string[] Get()
         {

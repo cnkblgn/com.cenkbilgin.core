@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-// User RRUV, renderer user value to change shader!
+// User RSUV, renderer user value to change shader!
 // https://discussions.unity.com/t/renderer-shader-user-value-customize-your-visual-per-renderer/1682526
 
 namespace Core.Graphics
