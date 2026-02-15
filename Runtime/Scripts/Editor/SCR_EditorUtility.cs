@@ -208,6 +208,41 @@ namespace Core.Editor
         [MenuItem("Tools/Paste All Components", true)]
         private static bool ValidatePaste() => copiedObject != null && Selection.activeGameObject != null;
 
+        [MenuItem("Tools/Search and Remap Materials", false, 7)]
+        private static void SearchAndRemapMaterials()
+        {
+            Object[] objects = Selection.objects;
+
+            if (objects.Length <= 0)
+            {
+                Debug.LogWarning("Please select .fbx asset");
+                return;
+            }
+
+            foreach (Object obj in objects)
+            {
+                string path = AssetDatabase.GetAssetPath(obj);
+
+                if (!path.EndsWith(".fbx"))
+                {
+                    continue;
+                }
+
+                ModelImporter importer = AssetImporter.GetAtPath(path) as ModelImporter;
+
+                if (importer == null)
+                {
+                    continue;
+                }
+
+                importer.materialImportMode = ModelImporterMaterialImportMode.ImportStandard;
+                importer.SearchAndRemapMaterials(ModelImporterMaterialName.BasedOnMaterialName, ModelImporterMaterialSearch.Everywhere);
+                importer.SaveAndReimport();
+
+                Debug.Log($"Material found and remapped to: {path}");
+            }
+        }
+
         public static T FindAssetByName<T>(string nameKeyword, string searchFolder = "Assets") where T : Object
         {
             // Construct the search query.
