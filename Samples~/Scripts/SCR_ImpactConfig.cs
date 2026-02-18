@@ -135,7 +135,7 @@ namespace Game
                 return;
             }
 
-            ManagerCoreGraphics.Instance.SpawnParticle(impactData.ImpactParticle, position, Quaternion.identity, normal);
+            ManagerCoreGraphics.Instance.SpawnParticle(impactData.ImpactParticle, position, normal);
         }       
         private void SpawnDecalInternal(ImpactData impactData, Collider collider, Vector3 position, Vector3 normal)
         {

@@ -20,11 +20,11 @@ namespace Core.Graphics
             }
         }
         protected override void OnReset(ParticleEmitter item) => item.Clear();
-        public ParticleEmitter Spawn(Vector3 position, Quaternion rotation, Vector3 normal)
+        public ParticleEmitter Spawn(Vector3 position, Vector3 direction)
         {
             ParticleEmitter particleEmitter = GetNext();
             particleEmitter.gameObject.SetActive(true);
-            particleEmitter.Emit(position, rotation, normal);
+            particleEmitter.Emit(position, direction);
             return particleEmitter;
         }
     }

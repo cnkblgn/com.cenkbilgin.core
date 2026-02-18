@@ -116,7 +116,7 @@ namespace Core.Graphics
             }
         }
 
-        public ParticleEmitter SpawnParticle(ParticleEmitter particle, Vector3 position, Quaternion rotation, Vector3 normal)
+        public ParticleEmitter SpawnParticle(ParticleEmitter particle, Vector3 position, Vector3 direction)
         {
             if (particle == null)
             {
@@ -129,7 +129,7 @@ namespace Core.Graphics
                 return null;
             }
 
-            return pool.Spawn(position, rotation, normal);
+            return pool.Spawn(position, direction);
         }
         public DecalEmitter SpawnDecal(DecalEmitter decal, Transform parent, Vector3 position, Quaternion rotation, float scale)
         {
