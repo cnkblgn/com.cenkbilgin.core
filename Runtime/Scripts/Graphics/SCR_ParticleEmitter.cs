@@ -8,6 +8,7 @@ namespace Core.Graphics
     public class ParticleEmitter : MonoBehaviour
     {
         private ParticleSystem[] thisEmitters = null;
+        private Transform[] emitterOrigins = null;
         private int[] emitterCounts = null;
         private int lastEmitFrame = -1;
 
@@ -22,9 +23,11 @@ namespace Core.Graphics
             }
 
             emitterCounts = new int[thisEmitters.Length];
+            emitterOrigins = new Transform[thisEmitters.Length];
 
             for (int i = 0; i < emitterCounts.Length; i++)
             {
+                emitterOrigins[i] = thisEmitters[i].transform;
                 emitterCounts[i] = (int)thisEmitters[i].emission.GetBurst(0).count.Evaluate(0, Random.value);
             }
         }
@@ -42,7 +45,7 @@ namespace Core.Graphics
                 (
                     new()
                     {
-                        position = position,
+                        position = position + emitterOrigins[i].localPosition,
                         rotation3D = Quaternion.LookRotation(direction).eulerAngles
                     },
                     emitterCounts[i]
