@@ -7,13 +7,14 @@ namespace Core.Graphics
     [DisallowMultipleComponent]
     public class ParticleEmitter : MonoBehaviour
     {
+        private Transform thisTransform = null;
         private ParticleSystem[] thisEmitters = null;
-        private Transform[] emitterOrigins = null;
         private int[] emitterCounts = null;
         private int lastEmitFrame = -1;
 
         private void Awake()
         {
+            thisTransform = GetComponent<Transform>();
             thisEmitters = GetComponentsInChildren<ParticleSystem>();
 
             if (thisEmitters == null || thisEmitters.Length == 0)
@@ -23,11 +24,9 @@ namespace Core.Graphics
             }
 
             emitterCounts = new int[thisEmitters.Length];
-            emitterOrigins = new Transform[thisEmitters.Length];
 
             for (int i = 0; i < emitterCounts.Length; i++)
             {
-                emitterOrigins[i] = thisEmitters[i].transform;
                 emitterCounts[i] = (int)thisEmitters[i].emission.GetBurst(0).count.Evaluate(0, Random.value);
             }
         }
@@ -35,23 +34,15 @@ namespace Core.Graphics
         public void Emit(Vector3 position, Vector3 direction)
         {
             if (lastEmitFrame == Time.frameCount)
+            {
                 return;
+            }
 
-            Quaternion rotation =
-                Quaternion.FromToRotation(Vector3.forward, direction);
+            thisTransform.SetPositionAndRotation(position, Quaternion.LookRotation(direction, Vector3.up));
 
             for (int i = 0; i < thisEmitters.Length; i++)
             {
-                ParticleSystem.EmitParams emitParams = new();
-
-                Vector3 worldOffset =
-                    rotation * emitterOrigins[i].localPosition;
-
-                emitParams.position = position + worldOffset;
-                emitParams.rotation3D =
-                    (rotation * emitterOrigins[i].localRotation).eulerAngles;
-
-                thisEmitters[i].Emit(emitParams, emitterCounts[i]);
+                thisEmitters[i].Emit(emitterCounts[i]);
             }
 
             lastEmitFrame = Time.frameCount;
