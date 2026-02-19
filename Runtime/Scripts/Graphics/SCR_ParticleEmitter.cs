@@ -35,21 +35,23 @@ namespace Core.Graphics
         public void Emit(Vector3 position, Vector3 direction)
         {
             if (lastEmitFrame == Time.frameCount)
-            {
                 return;
-            }
+
+            Quaternion rotation =
+                Quaternion.FromToRotation(Vector3.forward, direction);
 
             for (int i = 0; i < thisEmitters.Length; i++)
             {
-                thisEmitters[i].Emit
-                (
-                    new()
-                    {
-                        position = position + emitterOrigins[i].localPosition,
-                        rotation3D = Quaternion.LookRotation(direction).eulerAngles
-                    },
-                    emitterCounts[i]
-                );
+                ParticleSystem.EmitParams emitParams = new();
+
+                Vector3 worldOffset =
+                    rotation * emitterOrigins[i].localPosition;
+
+                emitParams.position = position + worldOffset;
+                emitParams.rotation3D =
+                    (rotation * emitterOrigins[i].localRotation).eulerAngles;
+
+                thisEmitters[i].Emit(emitParams, emitterCounts[i]);
             }
 
             lastEmitFrame = Time.frameCount;
