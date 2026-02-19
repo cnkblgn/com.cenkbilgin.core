@@ -126,6 +126,7 @@ namespace Core.Graphics
 
             if (!particlePool.TryGetValue(particle.name, out PoolSystemParticle pool))
             {
+                Debug.LogError($"ManagerCoreGraphics.SpawnParticle() [{particle.name}] not found!");
                 return null;
             }
 
@@ -141,6 +142,7 @@ namespace Core.Graphics
 
             if (!decalPool.TryGetValue(decal.name, out PoolSystemDecal pool))
             {
+                Debug.LogError($"ManagerCoreGraphics.SpawnDecal() [{decal.name}] not found!");
                 return null;
             }
 
