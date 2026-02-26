@@ -97,7 +97,7 @@ namespace Core
         {
             if (!gameObject.TryGetComponent(out persistentObject))
             {
-                Debug.LogError($"PersistentSceneController.RegisterController() [{gameObject}] has no [PersistentInstanceEntity]");
+                Debug.LogError($"PersistentSceneController.RegisterController() [{gameObject.name}] has no [PersistentInstanceEntity], Destroying [{gameObject.name}]");
                 Destroy(gameObject);
                 return false;
             }
