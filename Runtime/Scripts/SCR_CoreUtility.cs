@@ -1519,21 +1519,27 @@ namespace Core
                     }
                 }
 
+#if UNITY_EDITOR
                 Debug.LogWarning("StackFloat.Apply() not enough space!");
+#endif
                 return;
             }
             public void Revert(ref int token)
             {
                 if (token < 0 || token >= used.Length)
                 {
+#if UNITY_EDITOR
                     Debug.LogWarning("StackFloat.Revert() token out of range");
+#endif
                     token = -1;
                     return;
                 }
 
                 if (!used[token])
                 {
+#if UNITY_EDITOR
                     Debug.LogWarning("StackFloat.Revert() token already released");
+#endif
                     token = -1;
                     return;
                 }
@@ -1587,21 +1593,26 @@ namespace Core
                         return;
                     }
                 }
-
+#if UNITY_EDITOR
                 Debug.LogWarning("StackInt.Add() not enough space!");
+#endif
             }
             public void Remove(ref int token)
             {
                 if (token < 0 || token >= used.Length)
                 {
+#if UNITY_EDITOR
                     Debug.LogWarning("StackInt.Remove() token out of range");
+#endif
                     token = -1;
                     return;
                 }
 
                 if (!used[token])
                 {
+#if UNITY_EDITOR
                     Debug.LogWarning("StackInt.Remove() token already released");
+#endif
                     token = -1;
                     return;
                 }
@@ -1647,20 +1658,26 @@ namespace Core
                     }
                 }
 
+#if UNITY_EDITOR
                 Debug.LogWarning("StackBool.Disable() not enough space!");
+#endif
             }
             public void Enable(ref int token)
             {
                 if (token < 0 || token >= used.Length)
                 {
+#if UNITY_EDITOR
                     Debug.LogWarning("StackBool.Enable() token out of range");
+#endif
                     token = -1;
                     return;
                 }
 
                 if (!used[token])
                 {
+#if UNITY_EDITOR
                     Debug.LogWarning("StackBool.Enable() token already released");
+#endif
                     token = -1;
                     return;
                 }
@@ -1671,7 +1688,9 @@ namespace Core
 
                 if (disableCount < 0)
                 {
+#if UNITY_EDITOR
                     Debug.LogError("StackBool.Enable() internal counter underflow");
+#endif
                     disableCount = 0;
                 }
             }
