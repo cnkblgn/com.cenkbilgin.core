@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Core.Audio
@@ -21,7 +22,8 @@ namespace Core.Audio
         [SerializeField, HideInInspector] private Transform thisTransform = null;
         [SerializeField, HideInInspector] private AudioSource thisAudioSource = null;
         [SerializeField, HideInInspector] private AudioLowPassFilter thisAudioFilter = null;
- 
+
+        private Action<GameState> onGameStateChangedCallback = null;
         private AudioClip thisAudioClip = null;
         private Transform thisAudioListener = null;
         private AudioGroup thisAudioGroup = AudioGroup.MASTER;
@@ -55,6 +57,7 @@ namespace Core.Audio
         private bool isPaused = false;
         private bool hasFocus = true;
 
+        private void Awake() => onGameStateChangedCallback = OnGameStateChanged;
         private void Update()
         {
             if (!hasFocus)
@@ -168,8 +171,8 @@ namespace Core.Audio
             Gizmos.DrawRay(ThisTransform.position, directionToRight * distanceToListener);
         }
 #endif
-        private void OnEnable() => ManagerCoreGame.OnGameStateChanged += OnGameStateChanged;
-        private void OnDisable() => ManagerCoreGame.OnGameStateChanged -= OnGameStateChanged;
+        private void OnEnable() => ManagerCoreGame.OnGameStateChanged += onGameStateChangedCallback;
+        private void OnDisable() => ManagerCoreGame.OnGameStateChanged -= onGameStateChangedCallback;
         private void OnApplicationFocus(bool focus) => hasFocus = focus;
 
         private void OnGameStateChanged(GameState gameState)
