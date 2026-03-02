@@ -22,6 +22,9 @@ namespace Core.Localization
         private int currentLocalizationIndex = -1;       
         private bool isInitialized = false;
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void RESET() => OnLocalizationUpdated = null;
+
         private void Initialize()
         {
             if (isInitialized)
