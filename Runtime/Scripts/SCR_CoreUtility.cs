@@ -423,6 +423,7 @@ namespace Core
             public bool Equals(Float3 other) => x == other.x && y == other.y && z == other.z;
             public override bool Equals(object obj) => obj is Float3 other && Equals(other);
             public override readonly int GetHashCode() => x.GetHashCode() ^ (y.GetHashCode() << 2) ^ (z.GetHashCode() >> 2);
+            public override string ToString() => $"({x},{y},{z})";
         }
         [Serializable]
         public readonly struct Float2 : IEquatable<Float2>
@@ -454,6 +455,7 @@ namespace Core
             public bool Equals(Float2 other) => x == other.x && y == other.y;
             public override bool Equals(object obj) => obj is Float2 other && Equals(other);
             public override readonly int GetHashCode() => x.GetHashCode() ^ (y.GetHashCode() << 2);
+            public override string ToString() => $"({x},{y})";
         }
         [Serializable]
         public readonly struct Int3 : IEquatable<Int3>
@@ -488,6 +490,7 @@ namespace Core
                     return x ^ (y << 2) ^ (z >> 2);
                 }
             }
+            public override string ToString() => $"({x},{y},{z})";
         }
         [Serializable]
         public readonly struct Int2 : IEquatable<Int2>
@@ -522,6 +525,8 @@ namespace Core
                     return x ^ (y << 16);
                 }
             }
+
+            public override string ToString() => $"({x},{y})";
         }
 
         public static Vector3 Clamp(this Vector3 a, float length)
