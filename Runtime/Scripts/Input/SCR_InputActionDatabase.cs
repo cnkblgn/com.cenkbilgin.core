@@ -24,8 +24,9 @@ namespace Core.Input
         public static readonly InputActionType UIDown = new("UI.NavigateDown");
         public static readonly InputActionType UIRight = new("UI.NavigateRight");
         public static readonly InputActionType UILeft = new("UI.NavigateLeft");
-        public static readonly InputActionType Submit = new("UI.Submit");
-        public static readonly InputActionType Cancel = new("UI.Cancel");
-        public static readonly InputActionType Context = new("UI.Context");
+        public static readonly InputActionType UISubmit = new("UI.Submit");
+        public static readonly InputActionType UICancel = new("UI.Cancel");
+        public static readonly InputActionType UIContext = new("UI.Context");
+        public static readonly InputActionType UIClick = new("UI.Click");
     }
 }
