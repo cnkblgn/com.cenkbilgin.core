@@ -11,7 +11,7 @@ namespace Core.Localization
     [DisallowMultipleComponent]
     public class ManagerCoreLocalization : Manager<ManagerCoreLocalization>
     {
-        public static event Action<int> OnLocalizationUpdated = null;
+        public static event Action<int> OnLocalizationChanged = null;
 
         public string[] Languages => languages; private string[] languages = null;
 
@@ -23,7 +23,7 @@ namespace Core.Localization
         private bool isInitialized = false;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void RESET() => OnLocalizationUpdated = null;
+        private static void RESET() => OnLocalizationChanged = null;
 
         private void Initialize()
         {
@@ -36,7 +36,7 @@ namespace Core.Localization
 
             if (target == -1)
             {
-                Debug.LogError("ManagerCoreLocalization.Initialize() currentLocalizationIndex == -1, setting force to 0");
+                Debug.LogWarning("ManagerCoreLocalization.Initialize() currentLocalizationIndex == -1, setting force to 0");
                 target = 0;
             }
 
@@ -57,7 +57,7 @@ namespace Core.Localization
             }
 
             currentLocalizationData = Parse(database.text, currentLocalizationIndex = localizationIndex);
-            OnLocalizationUpdated?.Invoke(currentLocalizationIndex);
+            OnLocalizationChanged?.Invoke(currentLocalizationIndex);
         }
         public string[] Get()
         {

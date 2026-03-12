@@ -215,7 +215,7 @@ GameObject:
   - component: {fileID: 4661898071588245619}
   - component: {fileID: 2176939744260019904}
   m_Layer: 6
-  m_Name: PFB_Player
+  m_Name: PFB_PlayerTemplate_01
   m_TagString: Untagged
   m_Icon: {fileID: 5132851093641282708, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0

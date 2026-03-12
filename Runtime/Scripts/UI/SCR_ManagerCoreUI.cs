@@ -25,7 +25,6 @@ namespace Core.UI
         [SerializeField, Required] private UIConfirmationController confirmationController = null;
         [SerializeField, Required] private UITransitionController transitionController = null;
         [SerializeField, Required] private UIKeyActionController keyActionController = null;
-        [SerializeField, Required] private UISettingsController settingsController = null;
 
         protected override void Awake()
         {
@@ -36,41 +35,17 @@ namespace Core.UI
         }
         private void OnEnable()
         {
-            ManagerCoreGame.OnGameStateChanged += OnGameStateChanged;
             ManagerCoreGame.OnBeforeSceneChanged += OnBeforeSceneChanged;
             ManagerCoreGame.OnAfterSceneChanged += OnAfterSceneChanged;
         }
         private void OnDisable()
         {
-            ManagerCoreGame.OnGameStateChanged -= OnGameStateChanged;
             ManagerCoreGame.OnBeforeSceneChanged -= OnBeforeSceneChanged;
             ManagerCoreGame.OnAfterSceneChanged -= OnAfterSceneChanged;
         }
 
-        private void OnGameStateChanged(GameState gameState)
-        {
-            switch (gameState)
-            {
-                case GameState.NULL:
-                    settingsController.Hide();
-                    break;
-                case GameState.RESUME:
-                    settingsController.Hide();
-                    break;
-                case GameState.PAUSE:
-                    break;
-                default:
-                    break;
-            }
-        }
-        private void OnAfterSceneChanged(string _)
-        {
-            waypointController.Hide();
-        }
-        private void OnBeforeSceneChanged(string _)
-        {
-            notificationController.Hide();
-        }
+        private void OnAfterSceneChanged(string _) => waypointController.Hide();
+        private void OnBeforeSceneChanged(string _) => notificationController.Hide();
 
         public void ShowNotification(string text, float duration = 5) => notificationController.Show(text, duration);
         public void HideNotification() => notificationController.Hide();
@@ -115,27 +90,6 @@ namespace Core.UI
         public void HideAction(UIKeyActionType keyActionType) => keyActionController.Hide(keyActionType);
         public void InsertAction(UIKeyActionType keyActionType, KeyActionData[] data) => keyActionController.Insert(keyActionType, data);
         public void RemoveAction(UIKeyActionType keyActionType) => keyActionController.Remove(keyActionType);
-
-        public void ShowSettings() => settingsController.Show();
-        public void HideSettings() => settingsController.Hide();
-        public void InsertSettingEvent(Action onApply, Action onRevert, Action onLoad)
-        {
-            settingsController.OnApply += onApply;
-            settingsController.OnRevert += onRevert;
-            settingsController.OnLoad += onLoad;
-        }
-        public void RemoveSettingEvent(Action onApply, Action onRevert, Action onLoad)
-        {
-            settingsController.OnApply -= onApply;
-            settingsController.OnRevert -= onRevert;
-            settingsController.OnLoad -= onLoad;
-        }
-        public void InsertSettingHeader(string description) => settingsController.InsertHeader(description);
-        public UIOptionButton InsertSettingButton(int initial, int @default, string description, string[] values, Action<int> onApply, Action<int> onChanged) => settingsController.InsertButton(initial, @default, description, values, onApply, onChanged);
-        public UIOptionButton InsertSettingButton(int initial, int @default, string description, int maximumIndex, Action<int> onApply, Action<int> onChanged) => settingsController.InsertButton(initial, @default, description, maximumIndex, onApply, onChanged);
-        public UIOptionToggle InsertSettingToggle(bool initial, bool @default, string description, Action<bool> onApply, Action<bool> onChanged) => settingsController.InsertToggle(initial, @default, description, onApply, onChanged);
-        public UIOptionSlider InsertSettingSlider(float initial, float @default, string description, string[] values, Action<float> onApply, Action<float> onChanged) => settingsController.InsertSlider(initial, @default, description, values, onApply, onChanged);
-        public UIOptionSlider InsertSettingSlider(float initial, float @default, string description, float minValue, float maxValue, bool isInt, Action<float> onApply, Action<float> onChanged) => settingsController.InsertSlider(initial, @default, description, minValue, maxValue, isInt, onApply, onChanged);
 
         public void MoveCursor(Vector2 pointerPosition) => cursorController.MoveCursor(pointerPosition);
         public void SetCursor(UICursorType type = UICursorType.DEFAULT) => cursorController.SetCursor(type);

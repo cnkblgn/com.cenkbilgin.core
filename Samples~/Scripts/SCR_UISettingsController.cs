@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Core;
+using Core.UI;
 
-namespace Core.UI
+namespace Game
 {
     using static CoreUtility;
 

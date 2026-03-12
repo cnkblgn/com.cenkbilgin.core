@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 7399126763247508170}
   - component: {fileID: 3518726346630410641}
   - component: {fileID: 4642378006673368154}
-  - component: {fileID: 5299818768057826259}
   m_Layer: 5
   m_Name: PFB_UIInputTemplate_01
   m_TagString: Untagged
@@ -193,21 +192,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 3
---- !u!114 &5299818768057826259
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4739959252644119810}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec287f43a96c30e479572dc53de80571, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ASM_CoreUI::Core.UI.UIInputSoundEmitter
-  sounds:
-  - {fileID: 8300000, guid: e92596bd70abe434ab290a7b6fdc8e3c, type: 3}
-  cooldown: 0
 --- !u!1001 &4831897315315825791
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -304,6 +288,14 @@ PrefabInstance:
       propertyPath: m_text
       value: "\u200B"
       objectReference: {fileID: 0}
+    - target: {fileID: 6604963300386185422, guid: e02da7727e6862b48b776764ce282796, type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+    - target: {fileID: 6604963300386185422, guid: e02da7727e6862b48b776764ce282796, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
     - target: {fileID: 6604963300386185422, guid: e02da7727e6862b48b776764ce282796, type: 3}
       propertyPath: m_TextWrappingMode
       value: 3

@@ -17,10 +17,15 @@ namespace Game
 
         private TextMeshProUGUI thisText = null;
 
-        private void Start()
+        private void Awake() => thisText = GetComponent<TextMeshProUGUI>();
+        private void OnEnable()
         {
-            thisText = GetComponent<TextMeshProUGUI>();
-            thisText.text = prefix + ManagerCoreLocalization.Instance.Get(key);
-        } 
+            ManagerCoreLocalization.OnLocalizationChanged += OnLocalizationChanged;
+        }
+        private void OnDisable()
+        {
+            ManagerCoreLocalization.OnLocalizationChanged -= OnLocalizationChanged;
+        }
+        private void OnLocalizationChanged(int _) => thisText.text = prefix + ManagerCoreLocalization.Instance.Get(key);
     }
 }

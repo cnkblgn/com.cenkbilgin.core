@@ -878,41 +878,64 @@ namespace Game
         public float GetAirAcceleration() => movementAirAccelerate;
         public void SetAirAcceleration(float value) => movementAirAccelerate = value;
 
+        public void Enable()
+        {
+            if (this.enabled)
+            {
+                return;
+            }
+
+            this.enabled = true;
+            characterController.enabled = true;
+            this.WaitFrame(() => SetVelocity(Vector3.zero));
+        }
+        public void Disable()
+        {
+            if (!this.enabled)
+            {
+                return;
+            }
+
+            this.enabled = false;
+            characterController.enabled = false;
+            this.WaitFrame(() => SetVelocity(Vector3.zero));
+        }
+
         public void DisableSprint(out int token) => isSprintEnabled.Disable(out token);
         public void EnableSprint(ref int token) => isSprintEnabled.Enable(ref token);
-        public bool GetIsSprintEnabled() => isSprintEnabled.IsEnabled;
+        public bool GetIsSprintEnabled() => isSprintEnabled.IsEnabled && this.enabled;
 
         public void DisableWalk(out int token) => isWalkEnabled.Disable(out token);
         public void EnableWalk(ref int token) => isWalkEnabled.Enable(ref token);
-        public bool GetIsWalkEnabled() => isWalkEnabled.IsEnabled;
+        public bool GetIsWalkEnabled() => isWalkEnabled.IsEnabled && this.enabled;
 
         public void DisableCrouch(out int token) => isCrouchEnabled.Disable(out token);
         public void EnableCrouch(ref int token) => isCrouchEnabled.Enable(ref token);
-        public bool GetIsCrouchEnabled() => isCrouchEnabled.IsEnabled;
+        public bool GetIsCrouchEnabled() => isCrouchEnabled.IsEnabled && this.enabled;
 
         public void DisableJump(out int token) => isJumpEnabled.Disable(out token);
         public void EnableJump(ref int token) => isJumpEnabled.Enable(ref token);
-        public bool GetIsJumpEnabled() => isJumpEnabled.IsEnabled;
+        public bool GetIsJumpEnabled() => isJumpEnabled.IsEnabled && this.enabled;
 
         public void DisableInput(out int token) => isInputEnabled.Disable(out token);
         public void EnableInput(ref int token) => isInputEnabled.Enable(ref token);
-        public bool GetIsInputEnabled() => isInputEnabled.IsEnabled;
+        public bool GetIsInputEnabled() => isInputEnabled.IsEnabled && this.enabled;
 
         public void DisableMovement(out int token) => isMovementEnabled.Disable(out token);
         public void EnableMovement(ref int token) => isMovementEnabled.Enable(ref token);
-        public bool GetIsMovementEnabled() => isMovementEnabled.IsEnabled;
+        public bool GetIsMovementEnabled() => isMovementEnabled.IsEnabled && this.enabled;
 
         public void DisableGravity(out int token) => isGravityEnabled.Disable(out token);
         public void EnableGravity(ref int token) => isGravityEnabled.Enable(ref token);
-        public bool GetIsGravityEnabled() => isGravityEnabled.IsEnabled;
+        public bool GetIsGravityEnabled() => isGravityEnabled.IsEnabled && this.enabled;
 
         public void DisableLook(out int token) => isLookEnabled.Disable(out token);
         public void EnableLook(ref int token) => isLookEnabled.Enable(ref token);
-        public bool GetIsLookEnabled() => isLookEnabled.IsEnabled;
+        public bool GetIsLookEnabled() => isLookEnabled.IsEnabled && this.enabled;
 
         public void DisableColliders(out int token) => isCollidersEnabled.Disable(out token);
         public void EnableColliders(ref int token) => isCollidersEnabled.Enable(ref token);
-        public bool GetIsCollidersEnabled() => isCollidersEnabled.IsEnabled;
+        public bool GetIsCollidersEnabled() => isCollidersEnabled.IsEnabled && this.enabled;
 
         public float GetLookRoll() => cameraRotationZ;
         public void SetLookRoll(float value) => cameraRotationZ = value;

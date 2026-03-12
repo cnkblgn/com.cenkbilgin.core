@@ -18,6 +18,9 @@ namespace Game
     [RequireComponent(typeof(GraphicRaycaster))]
     public class UIConsoleController : MonoBehaviour
     {
+        public event Action OnOpened = null;
+        public event Action OnClosed = null;
+
         private const string DECORATOR = "] ";
         private const string ELLIPSIS = "...";
         private const int MAX_LOG_COUNT = 64;
@@ -56,10 +59,12 @@ namespace Game
             consoleInputField.onFocusSelectAll = false;
             consoleInputField.resetOnDeActivation = false;
             consoleInputField.restoreOriginalTextOnEscape = false;
-
-            Hide();
         }
-        private void Start() => OnSubmit("help");
+        private void Start()
+        {
+            Hide();
+            OnSubmit("help");
+        }
         private void Update()
         {
             if (ManagerCoreGame.Instance.IsLoading)
@@ -229,6 +234,8 @@ namespace Game
             isOpen = true;
             thisCanvas.Show();
             consoleInputField.ActivateInputField();
+
+            OnOpened?.Invoke();
         }
         public void Hide()
         {
@@ -238,6 +245,8 @@ namespace Game
 
             requestSuggestionDraw = false;
             ClearSuggestion();
+
+            OnClosed?.Invoke();
         }
         private void Clear()
         {

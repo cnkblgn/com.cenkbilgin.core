@@ -8,14 +8,15 @@ namespace Core
     [DisallowMultipleComponent]
     [DefaultExecutionOrder(-1)]
     public abstract class Manager<T> : MonoBehaviour where T : Manager<T>
-    {        
+    {
+        public static bool HasInstance => instance != null;
         public static T Instance
         {
             get
             {
                 if (instance == null)
                 {
-                    Debug.LogWarning($"Manager() [{typeof(T).Name}] has not been initialized.");
+                    throw new InvalidOperationException($"Manager() [{typeof(T).Name}] has not been initialized.");
                 }
 
                 return instance;

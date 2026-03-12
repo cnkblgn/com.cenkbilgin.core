@@ -8,20 +8,20 @@ namespace Core.UI
     [RequireComponent(typeof(UIPointerEventTooltip))]
     public class UIPointerEventTooltipLocalized : MonoBehaviour
     {
-        [Header("_ Localization")]
+        [Header("_")]
         [SerializeField] private string localizedID = STRING_EMPTY;
 
-        private string localizedText = STRING_EMPTY;
+        private UIPointerEventTooltip thisTooltip = null;
 
-        private void Start()
+        private void Awake() => thisTooltip = GetComponent<UIPointerEventTooltip>();
+        private void OnEnable()
         {
-            if (string.IsNullOrEmpty(localizedID))
-            {
-                return;
-            }
-
-            localizedText = ManagerCoreLocalization.Instance.Get(localizedID);
-            GetComponent<UIPointerEventTooltip>().Initialize(localizedText, true);
+            ManagerCoreLocalization.OnLocalizationChanged += OnLocalizationChanged;
         }
+        private void OnDisable()
+        {
+            ManagerCoreLocalization.OnLocalizationChanged -= OnLocalizationChanged;
+        }
+        private void OnLocalizationChanged(int _) => thisTooltip.Initialize(ManagerCoreLocalization.Instance.Get(localizedID), true);
     }
 }

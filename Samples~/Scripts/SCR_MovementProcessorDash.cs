@@ -33,7 +33,7 @@ namespace Game
         private Action overrideGravity = null;
         private Action resetFriction = null;
         private Action resetGravity = null;
-        private readonly InputActionType dashInput = new("Gameplay.Dash");
+        private static readonly InputActionType dashInput = new("Gameplay.Dash");
         private float dashFriction = 0;
         private float dashGravity = 0;
         private float dashTime = 0;
