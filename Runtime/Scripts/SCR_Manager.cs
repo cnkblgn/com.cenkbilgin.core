@@ -6,6 +6,7 @@ namespace Core
     using static CoreUtility;
 
     [DisallowMultipleComponent]
+    [DefaultExecutionOrder(-1)]
     public abstract class Manager<T> : MonoBehaviour where T : Manager<T>
     {        
         public static T Instance
@@ -14,7 +15,7 @@ namespace Core
             {
                 if (instance == null)
                 {
-                    throw new InvalidOperationException($"Manager() [{typeof(T).Name}] has not been initialized.");
+                    Debug.LogWarning($"Manager() [{typeof(T).Name}] has not been initialized.");
                 }
 
                 return instance;
@@ -23,13 +24,6 @@ namespace Core
 
         protected virtual void Awake()
         {
-            if (instance != null && instance != this)
-            {
-                Debug.LogError($"Manager.Awake() [{typeof(T).Name}] duplicate found!");
-                Destroy(gameObject);
-                return;
-            }
-
             instance = (T)this;
             DontDestroyOnLoad(gameObject);
         }

@@ -115,6 +115,13 @@ namespace Game
                     }
                 }
             }
+            else
+            {
+                if (consoleInputField.isFocused)
+                {
+                    consoleInputField.DeactivateInputField();
+                }
+            }
         }
         private void LateUpdate()
         {
@@ -209,7 +216,7 @@ namespace Game
             {
                 lastCommand = input;
             }
-           
+
             consoleInputField.text = STRING_EMPTY;
             if (isOpen) consoleInputField.ActivateInputField();
 
@@ -219,19 +226,15 @@ namespace Game
 
         public void Show()
         {
-            thisCanvas.Show();
-            ManagerCoreInput.Instance.SwitchMap("UI");
-            consoleInputField.ActivateInputField();
-
             isOpen = true;
+            thisCanvas.Show();
+            consoleInputField.ActivateInputField();
         }
         public void Hide()
         {
-            thisCanvas.Hide();
-            if (ManagerCoreGame.Instance.GetGameState() == GameState.RESUME) ManagerCoreInput.Instance.SwitchMap("Gameplay");
-            consoleInputField.DeactivateInputField();
-
             isOpen = false;
+            thisCanvas.Hide();
+            consoleInputField.DeactivateInputField();
 
             requestSuggestionDraw = false;
             ClearSuggestion();
