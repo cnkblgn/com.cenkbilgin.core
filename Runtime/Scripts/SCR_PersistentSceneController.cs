@@ -39,7 +39,7 @@ namespace Core
         {
             PersistentInstanceEntity.OnMarkedForDestroy -= OnEntityRequestDestroy;
 
-            if (ManagerCorePersistent.Instance != null)
+            if (ManagerCorePersistent.HasInstance)
             {
                 ManagerCorePersistent.Instance.UnregisterController(this);
             }         
