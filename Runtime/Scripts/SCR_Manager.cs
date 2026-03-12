@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Core
@@ -5,30 +6,32 @@ namespace Core
     using static CoreUtility;
 
     [DisallowMultipleComponent]
-    public class Manager<T> : MonoBehaviour where T : Component
-    {
+    public abstract class Manager<T> : MonoBehaviour where T : Manager<T>
+    {        
         public static T Instance
         {
             get
             {
                 if (instance == null)
                 {
-                    instance = FindAnyObjectByType<T>();
+                    throw new InvalidOperationException($"Manager() [{typeof(T).Name}] has not been initialized.");
                 }
 
                 return instance;
             }
-        } private static T instance = default;
+        } private static T instance;
 
         protected virtual void Awake()
         {
-            DontDestroyOnLoad(transform.gameObject);
-
-            if (this != Instance)
+            if (instance != null && instance != this)
             {
-                Debug.LogError("Manager.Awake() " + typeof(T).Name + " type duplicate is found!");
-                Destroy(this.gameObject);
+                Debug.LogError($"Manager.Awake() [{typeof(T).Name}] duplicate found!");
+                Destroy(gameObject);
+                return;
             }
+
+            instance = (T)this;
+            DontDestroyOnLoad(gameObject);
         }
     }
 }

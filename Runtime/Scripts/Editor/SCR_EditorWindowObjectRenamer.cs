@@ -11,6 +11,7 @@ namespace Core.Editor
         private string suffix = "";
         private string removeBefore = "";
         private string removeAfter = "";
+        private string removeWord = "";
         private string previewName = "";
         private bool sequenceNumbering = false;
 
@@ -25,6 +26,7 @@ namespace Core.Editor
             suffix = EditorGUILayout.TextField("Suffix", suffix);
             removeBefore = EditorGUILayout.TextField("Remove Before", removeBefore);
             removeAfter = EditorGUILayout.TextField("Remove After", removeAfter);
+            removeWord = EditorGUILayout.TextField("Remove Word", removeWord);
             sequenceNumbering = EditorGUILayout.Toggle("Sequence Numbering", sequenceNumbering);
 
             UpdatePreview();
@@ -47,7 +49,7 @@ namespace Core.Editor
 
             previewName = ComputeName(Selection.objects[0].name);
         }
-        
+
         private void Rename()
         {
             var selectedObjects = Selection.objects;
@@ -105,6 +107,11 @@ namespace Core.Editor
                 {
                     name = name[..index];
                 }
+            }
+
+            if (!string.IsNullOrEmpty(removeWord))
+            {
+                name = name.Replace(removeWord, "");
             }
 
             name = name.Replace(" ", "");

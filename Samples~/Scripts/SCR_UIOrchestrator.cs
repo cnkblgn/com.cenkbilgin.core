@@ -42,10 +42,8 @@ namespace Game
                     pauseCanvas.Hide();
                     gameCanvas.Show();
 
-
                     ManagerCoreUI.Instance.ShowWaypoint();
                     ManagerCoreUI.Instance.ShowMessage();
-                    ManagerCoreUI.Instance.ShowCrosshair();
                     ManagerCoreUI.Instance.HideCursor();
 
                     break;
@@ -53,10 +51,8 @@ namespace Game
                     pauseCanvas.Show();
                     gameCanvas.Hide();
 
-
                     ManagerCoreUI.Instance.HideWaypoint();
                     ManagerCoreUI.Instance.HideMessage();
-                    ManagerCoreUI.Instance.HideCrosshair();
                     ManagerCoreUI.Instance.ShowCursor();
                     break;
                 default:

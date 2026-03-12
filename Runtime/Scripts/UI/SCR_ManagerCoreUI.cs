@@ -23,7 +23,6 @@ namespace Core.UI
         [SerializeField, Required] private UINotificationController notificationController = null;
         [SerializeField, Required] private UIMessageController messageController = null;
         [SerializeField, Required] private UIConfirmationController confirmationController = null;
-        [SerializeField, Required] private UICrosshairController crosshairController = null;
         [SerializeField, Required] private UITransitionController transitionController = null;
         [SerializeField, Required] private UIKeyActionController keyActionController = null;
         [SerializeField, Required] private UISettingsController settingsController = null;
@@ -99,9 +98,6 @@ namespace Core.UI
 
         public void ShowConfirmation(string text, Action onAcceptEvent, Action onCancelEvent) => confirmationController.Show(text, onAcceptEvent, onCancelEvent);
         public void HideConfirmation() => confirmationController.Hide();
-
-        public void ShowCrosshair() => crosshairController.Show();
-        public void HideCrosshair() => crosshairController.Hide();
 
         public void SetEnableAction(bool value)
         {

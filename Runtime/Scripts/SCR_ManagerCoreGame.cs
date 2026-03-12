@@ -16,9 +16,9 @@ namespace Core
         public interface IContextHandler 
         { 
             /// <summary> Called when game wants to resume </summary>
-            public bool OnRequestResume();
+            public bool OnTryResumeGame();
             /// <summary> Called when game wants to pause </summary>
-            public bool OnRequestPause(); 
+            public bool OnTryPauseGame(); 
         }
 
         public static event Action<GameState> OnGameStateChanged = null;
@@ -151,7 +151,7 @@ namespace Core
 
             for (int i = contextHandlers.Count - 1; i >= 0; i--)
             {
-                if (contextHandlers[i].OnRequestResume())
+                if (!contextHandlers[i].OnTryResumeGame())
                 {
                     return;
                 }
@@ -168,7 +168,7 @@ namespace Core
 
             for (int i = contextHandlers.Count - 1; i >= 0; i--)
             {
-                if (contextHandlers[i].OnRequestPause())
+                if (!contextHandlers[i].OnTryPauseGame())
                 {
                     return;
                 }
