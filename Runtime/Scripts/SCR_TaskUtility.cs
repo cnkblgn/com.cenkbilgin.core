@@ -146,7 +146,6 @@ namespace Core
 
             return instance;
         }
-
         public static void WaitFrame(this MonoBehaviour host, Action onComplete)
         {
             TaskSystem.TryCreate(new TaskInstanceWaitFrame(host, onComplete));

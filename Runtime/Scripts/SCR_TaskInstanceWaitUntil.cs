@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Core
 {
-    internal class TaskInstanceWaitUntil: TaskInstance
+    public class TaskInstanceWaitUntil: TaskInstance
     {
         private readonly Func<bool> predicate = default;
         private readonly Action callback = default;

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Core
 {
-    internal class TaskInstanceWaitFrame : TaskInstance
+    public class TaskInstanceWaitFrame : TaskInstance
     {
         private readonly Action callback = default;
         private readonly int frame = 0;
