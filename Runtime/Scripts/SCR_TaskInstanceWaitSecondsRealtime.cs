@@ -23,5 +23,6 @@ namespace Core
                 callback.Invoke();
             }
         }
+        public void OverrideDuration(float value) => time = value;
     }
 }
