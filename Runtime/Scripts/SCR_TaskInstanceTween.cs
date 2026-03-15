@@ -53,8 +53,8 @@ namespace Core
         }
         public void Complete()
         {
-            onComplete?.Invoke();
-            Stop();
+            IsCompleted = true;
+            onComplete?.Invoke();            
         }
         protected abstract void OnFadeUpdate(float time);
         protected abstract void OnFadeComplete();

@@ -17,8 +17,8 @@ namespace Core
         {
             if (Time.frameCount > frame)
             {
-                callback.Invoke();
                 IsCompleted = true;
+                callback.Invoke();
                 return;
             }
         }
