@@ -33,6 +33,7 @@ namespace Core
 
             OnUpdate();
         }
+        public void Reset() => IsCompleted = false;
         public void Stop() => IsCompleted = true;
         protected abstract void OnUpdate();
     }
