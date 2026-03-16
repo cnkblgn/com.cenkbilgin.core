@@ -14,6 +14,18 @@ namespace Core
         private static bool WaitResumeInternal() => ManagerCoreGame.HasInstance && ManagerCoreGame.Instance.GetGameState() == GameState.RESUME;
         private static bool WaitPauseInternal() => ManagerCoreGame.HasInstance && ManagerCoreGame.Instance.GetGameState() == GameState.PAUSE;
 
+        public static void Schedule(this TaskInstanceWaitSeconds task, float duration)
+        {
+            task.Reset();
+            task.OverrideDuration(duration);
+            TaskSystem.TryCreate(task);
+        }
+        public static void Schedule(this TaskInstanceWaitSecondsRealtime task, float duration)
+        {
+            task.Reset();
+            task.OverrideDuration(duration);
+            TaskSystem.TryCreate(task);
+        }
         public static void WaitUntil(this MonoBehaviour host, Func<bool> predicate, Action onStart, Action onComplete)
         {
             onStart?.Invoke();
