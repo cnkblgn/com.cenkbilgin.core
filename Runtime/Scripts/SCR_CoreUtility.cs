@@ -665,7 +665,7 @@ namespace Core
 
                 if (distance <= Mathf.Epsilon)
                 {
-                    resultBuffer[hits++] = new(collider, point, Vector3.up, 0f);
+                    resultBuffer[hits++] = new(collider, point, direction.normalized, 0f);
                     continue;
                 }
 
