@@ -9,8 +9,19 @@ namespace Core.Editor
 
     public static class EditorUtility
     {
-        [MenuItem("Tools/Find Missing Scripts", priority = 0)]
-        public static void FindMissingScripts()
+        [MenuItem("Tools/Toggle Gizmos %g", false, 0)] // Ctrl+G or Cmd+G
+        private static void ToggleGizmos()
+        {
+            if (SceneView.lastActiveSceneView == null)
+            {
+                return;
+            }
+
+            SceneView.lastActiveSceneView.drawGizmos = !SceneView.lastActiveSceneView.drawGizmos;
+            SceneView.RepaintAll();
+        }
+        [MenuItem("Tools/Validate All Components", priority = 1)]
+        public static void ValidateComponents()
         {
             foreach (GameObject gameObject in GameObject.FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
@@ -24,130 +35,8 @@ namespace Core.Editor
                 }
             }
         }
-
-        [MenuItem("Tools/Create Prefab From Object With Parent", false, 1)]
-        public static void CreatePrefab()
-        {
-            string prefabsFolder = "Assets/";
-
-            if (!AssetDatabase.IsValidFolder(prefabsFolder))
-            {
-                string parentFolder = Path.GetDirectoryName(prefabsFolder);
-                string newFolder = Path.GetFileName(prefabsFolder);
-                AssetDatabase.CreateFolder(parentFolder, newFolder);
-            }
-
-            foreach (GameObject selectedObject in Selection.gameObjects.Where(go => go.name.StartsWith("MDL_")))
-            {
-                CreatePrefabInternal(selectedObject, prefabsFolder);
-            }
-
-            AssetDatabase.Refresh();
-        }
-        private static void CreatePrefabInternal(GameObject originalObject, string folderPath)
-        {
-            string originalName = originalObject.name;
-            string prefabName = originalName.Replace("MDL_", "PFB_");
-            string prefabPath = Path.Combine(folderPath, $"{prefabName}.prefab").Replace("\\", "/");
-
-            // Delete existing prefab if it exists
-            if (AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath) != null)
-            {
-                AssetDatabase.DeleteAsset(prefabPath);
-            }
-
-            GameObject parentObject = new(prefabName);
-            originalObject.transform.SetParent(parentObject.transform);
-            originalObject.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-
-            PrefabUtility.SaveAsPrefabAsset(parentObject, prefabPath);
-
-            // Replace original with prefab instance
-            GameObject newInstance = PrefabUtility.InstantiatePrefab(
-                AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath)) as GameObject;
-
-            Object.DestroyImmediate(parentObject);
-        }
-
-        [MenuItem("Tools/Snap Selected To Decimal", false, 2)]
-        private static void SnapSelectedDecimal()
-        {
-            //float snap(float value) => Mathf.Floor(value * 10f) / 10f;
-            static float snap(float value)
-            {
-                // 0.25 aralýkla yuvarlamak için:
-                float lower = Mathf.Floor(value); // en yakýn alt tam sayý
-                float fraction = value - lower;
-
-                if (fraction < 0.25f)
-                    return lower;
-                else if (fraction < 0.75f)
-                    return lower + 0.5f;
-                else
-                    return lower + 1f;
-            }
-
-            foreach (GameObject obj in Selection.gameObjects)
-            {
-                Undo.RecordObject(obj.transform, "Snap To Int");
-
-                // Snap position
-                Vector3 pos = obj.transform.localPosition;
-                pos.x = snap(pos.x);
-                pos.y = snap(pos.y);
-                pos.z = snap(pos.z);
-                obj.transform.localPosition = pos;
-
-                // Snap rotation
-                Vector3 rot = obj.transform.localEulerAngles;
-                rot.x = snap(rot.x);
-                rot.y = snap(rot.y);
-                rot.z = snap(rot.z);
-                obj.transform.localEulerAngles = rot;
-            }
-        }
-        [MenuItem("Tools/Snap Selected To Decimal", true)]
-        private static bool SnapSelectedDecimalValidate() => Selection.gameObjects.Length > 0;
-
-        [MenuItem("Tools/Snap Selected To Int %#i", false, 3)] // Ctrl+Shift+I (Windows) / Cmd+Shift+I (Mac)
-        private static void SnapSelected()
-        {
-            foreach (GameObject obj in Selection.gameObjects)
-            {
-                Undo.RecordObject(obj.transform, "Snap To Int");
-
-                // Snap position
-                Vector3 pos = obj.transform.localPosition;
-                pos.x = Mathf.Round(pos.x);
-                pos.y = Mathf.Round(pos.y);
-                pos.z = Mathf.Round(pos.z);
-                obj.transform.localPosition = pos;
-
-                // Snap rotation
-                Vector3 rot = obj.transform.localEulerAngles;
-                rot.x = Mathf.Round(rot.x);
-                rot.y = Mathf.Round(rot.y);
-                rot.z = Mathf.Round(rot.z);
-                obj.transform.localEulerAngles = rot;
-            }
-        }
-        [MenuItem("Tools/Snap Selected To Int %#i", true)]
-        private static bool SnapSelectedValidate() => Selection.gameObjects.Length > 0;
-
-        [MenuItem("Tools/Toggle Gizmos %g", false, 4)] // Ctrl+G or Cmd+G
-        private static void ToggleGizmos()
-        {
-            if (SceneView.lastActiveSceneView == null)
-            {
-                return;
-            }
-
-            SceneView.lastActiveSceneView.drawGizmos = !SceneView.lastActiveSceneView.drawGizmos;
-            SceneView.RepaintAll();
-        }
-
         private static GameObject copiedObject;
-        [MenuItem("Tools/Copy All Components", false, 5)]
+        [MenuItem("Tools/Copy All Components", false, 2)]
         private static void CopyComponents()
         {
             if (Selection.activeGameObject == null)
@@ -159,7 +48,7 @@ namespace Core.Editor
             copiedObject = Selection.activeGameObject;
             Debug.Log($"Copied components from: {copiedObject.name}");
         }
-        [MenuItem("Tools/Paste All Components", false, 6)]
+        [MenuItem("Tools/Paste All Components", false, 3)]
         private static void PasteComponents()
         {
             if (copiedObject == null)
@@ -203,12 +92,11 @@ namespace Core.Editor
             copiedObject = null;
             Debug.Log($"Pasted {copiedCount} components from {source.name} to {target.name}");
         }
-        [MenuItem("Tools/Copy All Components", true)]
+        [MenuItem("Tools/Copy All Components", true, 4)]
         private static bool ValidateCopy() => Selection.activeGameObject != null;
-        [MenuItem("Tools/Paste All Components", true)]
+        [MenuItem("Tools/Paste All Components", true, 5)]
         private static bool ValidatePaste() => copiedObject != null && Selection.activeGameObject != null;
-
-        [MenuItem("Tools/Search and Remap Materials", false, 7)]
+        [MenuItem("Tools/Search and Remap Materials", false, 6)]
         private static void SearchAndRemapMaterials()
         {
             Object[] objects = Selection.objects;
@@ -263,6 +151,24 @@ namespace Core.Editor
             string assetPath = AssetDatabase.GUIDToAssetPath(guids[0]);
             T asset = AssetDatabase.LoadAssetAtPath<T>(assetPath);
             return asset;
+        }
+
+        public static void DrawFieldOfView(Transform origin, float radius, float angle)
+        {
+            if (origin == null)
+            {
+                return;
+            }
+
+            Gizmos.color = COLOR_GREEN;
+            Gizmos.DrawWireSphere(origin.position, radius);
+
+            Vector3 left = new(Mathf.Sin((-angle / 2 + origin.eulerAngles.y) * Mathf.Deg2Rad), 0, Mathf.Cos((-angle / 2 + origin.eulerAngles.y) * Mathf.Deg2Rad));
+            Vector3 right = new(Mathf.Sin((angle / 2 + origin.eulerAngles.y) * Mathf.Deg2Rad), 0, Mathf.Cos((angle / 2 + origin.eulerAngles.y) * Mathf.Deg2Rad));
+
+            Gizmos.color = COLOR_BLUE;
+            Gizmos.DrawLine(origin.position, origin.position + left * radius);
+            Gizmos.DrawLine(origin.position, origin.position + right * radius);
         }
         public static void DrawOutline(Rect rect, Color color, int thickness)
         {
