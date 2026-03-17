@@ -642,11 +642,27 @@ namespace Core
             for (int i = 0; i < maxHits; i++)
             {
                 RaycastHit hit = hitBuffer[i];
+                HitData data;
 
-                HitData data = new(hit.collider, hit.point, hit.normal, hit.distance);
+                if (hit.distance <= 0f)
+                {
+                    Vector3 point = hit.collider.ClosestPoint(start);
+                    Vector3 normal = (point - start).normalized;
 
-                resultBuffer[hits++] = data;
+                    if (normal.sqrMagnitude < Mathf.Epsilon)
+                    {
+                        normal = Vector3.up;
+                    }
+
+                    data = new(hit.collider, point, normal, 0f);
+                }
+                else
+                {
+                    data = new(hit.collider, hit.point, hit.normal, hit.distance);
+                }
+
                 processor?.Invoke(in data);
+                resultBuffer[hits++] = data;
             }
 
             return hits > 0;
