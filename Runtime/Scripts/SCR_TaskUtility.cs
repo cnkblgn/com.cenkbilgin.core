@@ -16,14 +16,18 @@ namespace Core
 
         public static void Schedule(this TaskInstanceWaitSeconds task, float duration)
         {
-            task.Reset();
             task.OverrideDuration(duration);
+
+            task.Reset();
+
             TaskSystem.TryCreate(task);
         }
         public static void Schedule(this TaskInstanceWaitSecondsRealtime task, float duration)
         {
-            task.Reset();
             task.OverrideDuration(duration);
+
+            task.Reset();
+
             TaskSystem.TryCreate(task);
         }
         public static void WaitUntil(this MonoBehaviour host, Func<bool> predicate, Action onStart, Action onComplete)
