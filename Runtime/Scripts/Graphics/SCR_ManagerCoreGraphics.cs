@@ -129,6 +129,15 @@ namespace Core.Graphics
 
             return pool.Spawn(position, direction);
         }
+        public ParticleEmitter SpawnParticle(ParticleEmitter[] particle, Vector3 position, Vector3 direction)
+        {
+            if (particle == null)
+            {
+                return null;
+            }
+
+            return SpawnParticle(particle[UnityEngine.Random.Range(0, particle.Length)], position, direction);
+        }
         public DecalEmitter SpawnDecal(DecalEmitter decal, Transform parent, Vector3 position, Quaternion rotation, float scale)
         {
             if (decal == null)
