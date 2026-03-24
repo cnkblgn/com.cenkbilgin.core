@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.SocialPlatforms;
 
 namespace Core.Graphics
 {
@@ -136,6 +137,11 @@ namespace Core.Graphics
                 return null;
             }
 
+            if (particle.Length <= 0)
+            {
+                return null;
+            }
+
             return SpawnParticle(particle[UnityEngine.Random.Range(0, particle.Length)], position, direction);
         }
         public DecalEmitter SpawnDecal(DecalEmitter decal, Transform parent, Vector3 position, Quaternion rotation, float scale)
@@ -157,6 +163,11 @@ namespace Core.Graphics
         public DecalEmitter SpawnDecal(DecalEmitter[] decal, Transform parent, Vector3 position, Quaternion rotation, float scale)
         {
             if (decal == null)
+            {
+                return null;
+            }
+
+            if (decal.Length <= 0)
             {
                 return null;
             }

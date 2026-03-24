@@ -10,11 +10,12 @@ namespace Game
     public class ImpactConfig : ScriptableObject
     {
         [Header("_")]
-        [SerializeField] private ImpactData fallbackConfig = null;
+        [SerializeField] private ImpactData fallback = null;
 
         [Header("_")]
-        [SerializeField] private List<ImpactData> configs = new() { new() };
+        [SerializeField] private List<ImpactData> database = new() { new() };
 
+        private readonly Dictionary<string, ImpactData> table = new();
         private int defaultLayerIndex = -1;
         private int terrainLayerIndex = -1;
         private int decalBitmask = -1;
@@ -22,7 +23,7 @@ namespace Game
 #if UNITY_EDITOR
         private bool IsExists(string tag)
         {
-            foreach (ImpactData config in configs)
+            foreach (ImpactData config in database)
             {
                 if (string.Equals(config.Name, tag))
                 {
@@ -36,16 +37,25 @@ namespace Game
         [ContextMenu("Update Tags")]
         public void Update()
         {
-            defaultLayerIndex = LayerMask.NameToLayer("Default");
-            terrainLayerIndex = LayerMask.NameToLayer("Terrain");
-            decalBitmask = (1 << defaultLayerIndex) | (1 << terrainLayerIndex);
+            PopulateLayers();
 
-            if (configs == null)
+            if (database == null)
             {
                 Reset();
                 return;
             }
 
+            PopulateDatabase();
+            PopulateTable();
+        }
+        private void PopulateLayers()
+        {
+            defaultLayerIndex = LayerMask.NameToLayer("Default");
+            terrainLayerIndex = LayerMask.NameToLayer("Terrain");
+            decalBitmask = (1 << defaultLayerIndex) | (1 << terrainLayerIndex);
+        }
+        private void PopulateDatabase()
+        {
             string[] tags = UnityEditorInternal.InternalEditorUtility.tags;
             List<ImpactData> effects = new();
 
@@ -64,78 +74,53 @@ namespace Game
                 effects.Add(new(null) { Name = tag });
             }
 
-            configs.AddRange(effects);
+            database.AddRange(effects);
+
+        }
+        private void PopulateTable()
+        {
+            table.Clear();
+
+            foreach (ImpactData config in database)
+            {
+                table[config.Name] = config;
+            }
+
         }
         public void Reset()
         {
-            defaultLayerIndex = LayerMask.NameToLayer("Default");
-            terrainLayerIndex = LayerMask.NameToLayer("Terrain");
-            decalBitmask = (1 << defaultLayerIndex) | (1 << terrainLayerIndex);
+            database ??= new();
+            database.Clear();
 
-            configs ??= new();
-            configs.Clear();
-
-            string[] tags = UnityEditorInternal.InternalEditorUtility.tags;
-
-            foreach (string tag in tags)
-            {
-                if (!tag.Contains("Material/"))
-                {
-                    continue;
-                }
-
-                ImpactData effect = new(null)
-                {
-                    Name = tag,
-                };
-
-                configs.Add(effect);
-            }
+            PopulateLayers();
+            PopulateDatabase();
+            PopulateTable();
         }
+        private void OnValidate() => PopulateTable();
 #endif
 
         public void Spawn(Collider collider, Vector3 position, Vector3 normal, AudioGroup audioGroup, float audioVolume = 1, int audioBlend = 1)
         {
-            if (collider == null)
+            if (collider != null && table.TryGetValue(collider.tag, out ImpactData data))
             {
-                SpawnDecalInternal(fallbackConfig, collider, position, normal);
-                SpawnParticleInternal(fallbackConfig, position, normal);
-                SpawnAudioInternal(fallbackConfig, position, audioGroup, audioVolume, audioBlend);
-                return;
+                SpawnDecalInternal(data, collider, position, normal);
+                SpawnParticleInternal(data, position, normal);
+                SpawnAudioInternal(data, position, audioGroup, audioVolume, audioBlend);
             }
-
-            for (int i = 0; i < configs.Count; i++)
+            else
             {
-                if (!collider.CompareTag(configs[i].Name))
-                {
-                    continue;
-                }
-
-                SpawnDecalInternal(configs[i], collider, position, normal);
-                SpawnParticleInternal(configs[i], position, normal);
-                SpawnAudioInternal(configs[i], position, audioGroup, audioVolume, audioBlend);
-                return;
+                SpawnDecalInternal(fallback, collider, position, normal);
+                SpawnParticleInternal(fallback, position, normal);
+                SpawnAudioInternal(fallback, position, audioGroup, audioVolume, audioBlend);
             }
-
-            SpawnDecalInternal(fallbackConfig, collider, position, normal);
-            SpawnParticleInternal(fallbackConfig, position, normal);
-            SpawnAudioInternal(fallbackConfig, position, audioGroup, audioVolume, audioBlend);
         }
         private void SpawnAudioInternal(ImpactData impactData, Vector3 position, AudioGroup audioGroup, float audioVolume, int audioBlend)
         {
-            if (impactData.ImpactSounds != null && impactData.ImpactSounds.Length > 0)
-            {
-                ManagerCoreAudio.Instance.PlaySound(impactData.ImpactSounds, audioGroup, position, audioBlend, audioVolume, 1, 1, 100, true);
-            }
+            ManagerCoreAudio.Instance.PlaySound(impactData.ImpactSounds, audioGroup, position, audioBlend, audioVolume, 1, 1, 100, true);
         }
         private void SpawnParticleInternal(ImpactData impactData, Vector3 position, Vector3 normal)
         {
-            if (impactData.ImpactParticle == null)
-            {
-                return;
-            }
-
-            ManagerCoreGraphics.Instance.SpawnParticle(impactData.ImpactParticle, position, normal);
+            ManagerCoreGraphics.Instance.SpawnParticle(impactData.ImpactParticles, position, normal);
         }       
         private void SpawnDecalInternal(ImpactData impactData, Collider collider, Vector3 position, Vector3 normal)
         {
