@@ -3,6 +3,14 @@
 
 #include "HLSL_RSUVHelper.hlsl"
 
+void GetNegate_float(out float4 Color)
+{
+    Color = decodeUintToFloat4(getData() & 0xFFFFFFFE);
+}
+void GetNegate_half(out half4 Color)
+{
+    GetNegate_float(Color);
+}
 void Get_float(out float4 Color)
 {
     uint data = getData();  
