@@ -3,23 +3,47 @@
 
 #include "HLSL_RSUVHelper.hlsl"
 
-void GetNegate_float(out float4 Color)
+uint4 ColorToBytes(float4 c)
 {
-    Color = decodeUintToFloat4(getData() & 0xFFFFFFFE);
+    c = saturate(c);
+    
+    return (uint4) (c * 255.0 + 0.5);
 }
-void GetNegate_half(out half4 Color)
+uint ColorRToByte(float4 c)
 {
-    GetNegate_float(Color);
+    return (uint) (saturate(c.r) * 255.0 + 0.5);
 }
+uint ColorGToByte(float4 c)
+{
+    return (uint) (saturate(c.g) * 255.0 + 0.5);
+}
+uint ColorBToByte(float4 c)
+{
+    return (uint) (saturate(c.b) * 255.0 + 0.5);
+}
+uint ColorAToByte(float4 c)
+{
+    return (uint) (saturate(c.a) * 255.0 + 0.5);
+}
+
 void Get_float(out float4 Color)
+{
+    Color = decodeUintToFloat4(getData());
+}
+void Get_half(out half4 Color)
+{
+    Get_float(Color);
+}
+
+void GetWithFlag_float(out float4 Color)
 {
     uint data = getData();  
     float useRSV = hasData(data) ? 1.0 : 0.0;
     
     Color = lerp(1.0.xxxx, decodeUintToFloat4(data & 0xFFFFFFFE), useRSV);
 } 
-void Get_half(out half4 Color) 
+void GetWithFlag_half(out half4 Color) 
 {
-    Get_float(Color);
+    GetWithFlag_float(Color);
 }
 #endif

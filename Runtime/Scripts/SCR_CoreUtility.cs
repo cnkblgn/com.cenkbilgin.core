@@ -1025,7 +1025,28 @@ namespace Core
 
             return (int)extracted;
         }
-        public static uint EncodeColor(Color color, bool enabled)
+        public static uint EncodeColor(Color color)
+        {
+            byte r = (byte)(Mathf.Clamp01(color.linear.r) * 255f);
+            byte g = (byte)(Mathf.Clamp01(color.linear.g) * 255f);
+            byte b = (byte)(Mathf.Clamp01(color.linear.b) * 255f);
+            byte a = (byte)(Mathf.Clamp01(color.linear.a) * 255f);
+
+            return
+                ((uint)a << 24) |
+                ((uint)r << 16) |
+                ((uint)g << 8) |
+                ((uint)b << 0);
+        }
+        public static uint EncodeColor32(Color color)
+        {
+            return
+                ((uint)color.a << 24) |
+                ((uint)color.r << 16) |
+                ((uint)color.g << 8) |
+                ((uint)color.b << 0);
+        }
+        public static uint EncodeColorWithFlag(Color color, bool enabled)
         {
             byte r = (byte)(Mathf.Clamp01(color.linear.r) * 255f);
             byte g = (byte)(Mathf.Clamp01(color.linear.g) * 255f);
@@ -1044,7 +1065,16 @@ namespace Core
 
             return data;
         }
-        public static Color DecodeColor(uint data, out bool enabled)
+        public static Color32 DecodeColor(uint data)
+        {
+            byte a = (byte)((data >> 24) & 0xFF);
+            byte r = (byte)((data >> 16) & 0xFF);
+            byte g = (byte)((data >> 8) & 0xFF);
+            byte b = (byte)(data & 0xFF);
+
+            return new Color32(r, g, b, a);
+        }
+        public static Color32 DecodeColorWithFlag(uint data, out bool enabled)
         {
             enabled = (data & 1u) != 0;
 
@@ -1057,35 +1087,21 @@ namespace Core
 
             return new Color32(r, g, b, a);
         }
-        public static uint EncodeColor32(Color32 color, bool enabled)
+        public static uint EncodeUV(Vector2 offset, float scale)
         {
-            uint data =
-                ((uint)color.a << 24) |
-                ((uint)color.r << 16) |
-                ((uint)color.g << 8) |
-                ((uint)color.b << 0);
+            scale = Mathf.Clamp(scale, 0f, 8f);
+            offset = Vector2.ClampMagnitude(offset, 4f);
 
-            // bit0 = enable (blue LSB sacrifice)
-            data &= 0xFFFFFFFE;
-            data |= enabled ? 0x1u : 0x0u;
+            uint uScale = (uint)Mathf.RoundToInt(scale / 8f * 1023f);
+            uint uOffX = (uint)Mathf.RoundToInt((offset.x + 4f) / 8f * 1023f);
+            uint uOffY = (uint)Mathf.RoundToInt((offset.y + 4f) / 8f * 1023f);
 
-            return data;
+            return
+                ((uScale & 0x3FFu) << 0) |  // bit 0–9
+                ((uOffX & 0x3FFu) << 10) |  // bit 10–19
+                ((uOffY & 0x3FFu) << 20);   // bit 20–29
         }
-        public static Color32 DecodeColor32(uint data, out bool enabled)
-        {
-            enabled = (data & 1u) != 0;
-
-            byte a = (byte)((data >> 24) & 0xFF);
-            byte r = (byte)((data >> 16) & 0xFF);
-            byte g = (byte)((data >> 8) & 0xFF);
-            byte b = (byte)(data & 0xFF);
-
-            // mirror shader: blue LSB is not color
-            b = (byte)(b & 0xFE);
-
-            return new Color32(r, g, b, a);
-        }
-        public static uint EncodeUV(Vector2 offset, float scale, bool enabled)
+        public static uint EncodeUVWithFlag(Vector2 offset, float scale, bool enabled)
         {
             scale = Mathf.Clamp(scale, 0f, 8f);
             offset = Vector2.ClampMagnitude(offset, 4f);
@@ -1103,7 +1119,18 @@ namespace Core
 
             return data;
         }
-        public static void DecodeUV(uint data, out Vector2 offset, out float scale,  out bool enabled)
+        public static void DecodeUV(uint data, out Vector2 offset, out float scale)
+        {
+            uint uScale = (data >> 0) & 0x3FFu;
+            uint uOffX = (data >> 10) & 0x3FFu;
+            uint uOffY = (data >> 20) & 0x3FFu;
+
+            scale = (uScale / 1023f) * 8f;
+
+            offset.x = (uOffX / 1023f) * 8f - 4f;
+            offset.y = (uOffY / 1023f) * 8f - 4f;
+        }
+        public static void DecodeUVWithFlag(uint data, out Vector2 offset, out float scale, out bool enabled)
         {
             enabled = (data & 1u) != 0;
 
