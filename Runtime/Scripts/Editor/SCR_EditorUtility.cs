@@ -170,6 +170,24 @@ namespace Core.Editor
             Gizmos.DrawLine(origin.position, origin.position + left * radius);
             Gizmos.DrawLine(origin.position, origin.position + right * radius);
         }
+        public static void DrawCone(Transform origin, float radius, float angle)
+        {
+            if (!origin)
+            {
+                return;
+            }
+
+            Gizmos.color = COLOR_GREEN;
+            Vector3 forward = origin.forward;
+            Vector3 left = Quaternion.AngleAxis(-angle * 0.5f, origin.up) * forward;
+            Vector3 right = Quaternion.AngleAxis(angle * 0.5f, origin.up) * forward;
+            Gizmos.DrawWireSphere(origin.position, radius);
+
+            Gizmos.color = COLOR_BLUE;
+            Gizmos.DrawLine(origin.position, origin.position + left * radius);
+            Gizmos.DrawLine(origin.position, origin.position + right * radius);
+            Gizmos.DrawLine(origin.position, origin.position + forward * radius);
+        }
         public static void DrawOutline(Rect rect, Color color, int thickness)
         {
             EditorGUI.DrawRect(new Rect(rect.x, rect.y, rect.width, thickness), color);
