@@ -1,5 +1,4 @@
-﻿using Codice.Client.BaseCommands;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
@@ -1534,6 +1533,69 @@ namespace Core
                 throw new InvalidOperationException("SwapBackArray.GetEnumerator() does not support for each loop!");
             }
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        }
+        public class RingBufferArray<T>
+        {
+            public int Count => count;
+            public int Capacity => buffer.Length;
+
+            private readonly T[] buffer;
+            private int index;
+            private int count;
+
+            public RingBufferArray(uint capacity)
+            {
+                buffer = new T[capacity];
+                index = 0;
+                count = 0;
+            }
+
+            public void Add(T item)
+            {
+                buffer[index] = item;
+                index = (index + 1) % buffer.Length;
+
+                if (count < buffer.Length)
+                {
+                    count++;
+                }
+            }
+
+            public T Get(int i)
+            {
+                if (i < 0 || i >= count)
+                {
+                    throw new IndexOutOfRangeException();
+                }
+
+                int idx = (index - count + i + buffer.Length) % buffer.Length;
+                return buffer[idx];
+            }
+            public T GetLatest()
+            {
+                if (count == 0)
+                {
+                    throw new InvalidOperationException("Buffer is empty");
+                }
+
+                int idx = (index - 1 + buffer.Length) % buffer.Length;
+                return buffer[idx];
+            }
+            public void SetLatest(T item)
+            {
+                if (count == 0)
+                {
+                    return;
+                }
+
+                int idx = (index - 1 + buffer.Length) % buffer.Length;
+                buffer[idx] = item;
+            }
+            public void Clear()
+            {
+                index = 0;
+                count = 0;
+            }
         }
         public class StackFloat
         {
