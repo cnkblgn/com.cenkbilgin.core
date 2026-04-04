@@ -33,6 +33,11 @@ namespace Core.UI
                 return;
             }
 
+            if (instanceTable.ContainsKey(id))
+            {
+                return;
+            }
+
             thisCanvas.Show();
 
             List<UIKeyActionElement> instances = new(keys.Length);
