@@ -9,6 +9,6 @@ namespace Core.UI
     public class UICursorData
     {
         [Required] public Sprite Icon = null;
-        public UICursorType Type = UICursorType.DEFAULT;
+        public string ID = "default";
     }
 }

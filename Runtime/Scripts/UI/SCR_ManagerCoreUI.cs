@@ -30,7 +30,7 @@ namespace Core.UI
         {
             base.Awake();
 
-            SetCursor(UICursorType.DEFAULT);
+            SetCursor();
             HideCursor();
         }
         private void OnEnable()
@@ -92,7 +92,7 @@ namespace Core.UI
         public void RemoveAction(UIKeyActionType keyActionType) => keyActionController.Remove(keyActionType);
 
         public void MoveCursor(Vector2 pointerPosition) => cursorController.MoveCursor(pointerPosition);
-        public void SetCursor(UICursorType type = UICursorType.DEFAULT) => cursorController.SetCursor(type);
+        public void SetCursor(string id = "default") => cursorController.SetCursor(id);
         public void ShowCursor() => cursorController.ShowCursor();
         public void HideCursor() => cursorController.HideCursor();
 
