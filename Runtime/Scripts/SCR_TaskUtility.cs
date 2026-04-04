@@ -215,7 +215,7 @@ namespace Core
 
             return tweenObject;
         }
-        public static TaskInstanceTweenFillImage Fade(this Image image, float targetValue, float fadeSeconds, float waitSeconds = 0, TweenType tweenType = TweenType.UNSCALED, EaseType easeType = EaseType.LINEAR, Action onComplete = null)
+        public static TaskInstanceTweenFillImage Fill(this Image image, float targetValue, float fadeSeconds, float waitSeconds = 0, TweenType tweenType = TweenType.UNSCALED, EaseType easeType = EaseType.LINEAR, Action onComplete = null)
         {
             TaskInstanceTweenFillImage tweenObject = new(image, targetValue, fadeSeconds, waitSeconds, tweenType, easeType, onComplete);
             TaskSystem.TryCreate(tweenObject);

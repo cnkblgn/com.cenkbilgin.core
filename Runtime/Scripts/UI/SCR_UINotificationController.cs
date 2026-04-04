@@ -10,9 +10,8 @@ namespace Core.UI
     [RequireComponent(typeof(Canvas))]
     public class UINotificationController : MonoBehaviour
     {
-        private const int MAX_SIZE = 12;
-
         [Header("_")]
+        [SerializeField, Range(0, 16)] private int maxSize = 12;
         [SerializeField, Required] private UINotificationElement notificationTemplate = null;
         [SerializeField, Required] private RectTransform notificationContainer = null;
 
@@ -20,18 +19,21 @@ namespace Core.UI
         [SerializeField, Min(0)] private float yPadding = 16;
 
         private Canvas thisCanvas = null;
-        private readonly List<UINotificationElement> activeElements = new(MAX_SIZE);
+        private List<UINotificationElement> activeElements = new(1);
         private Vector2 objectOffset = Vector2.zero;
         private Vector2 objectPadding = Vector2.zero;
 
         private void Awake()
         {
             thisCanvas = GetComponent<Canvas>();
+            activeElements = new(maxSize);
+
             notificationTemplate.gameObject.SetActive(false);
+
             objectOffset = new(0, notificationTemplate.GetComponent<RectTransform>().rect.height);
             objectPadding = new(0, yPadding);
 
-            for (int i = 0; i < MAX_SIZE; i++)
+            for (int i = 0; i < maxSize; i++)
             {
                 UINotificationElement obj = Instantiate(notificationTemplate, notificationContainer);
                 obj.Initialize();
