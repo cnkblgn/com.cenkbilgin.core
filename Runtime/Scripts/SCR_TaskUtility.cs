@@ -215,6 +215,13 @@ namespace Core
 
             return tweenObject;
         }
+        public static TaskInstanceTweenFillImage Fade(this Image image, float targetValue, float fadeSeconds, float waitSeconds = 0, TweenType tweenType = TweenType.UNSCALED, EaseType easeType = EaseType.LINEAR, Action onComplete = null)
+        {
+            TaskInstanceTweenFillImage tweenObject = new(image, targetValue, fadeSeconds, waitSeconds, tweenType, easeType, onComplete);
+            TaskSystem.TryCreate(tweenObject);
+
+            return tweenObject;
+        }
         public static TaskInstanceTweenScaleTransform Scale(this Transform transform, Vector3 targetValue, float fadeSeconds, float waitSeconds = 0, TweenType tweenType = TweenType.UNSCALED, EaseType easeType = EaseType.LINEAR, Action onComplete = null)
         {
             TaskInstanceTweenScaleTransform tweenObject = new(transform, targetValue, fadeSeconds, waitSeconds, tweenType, easeType, onComplete);
