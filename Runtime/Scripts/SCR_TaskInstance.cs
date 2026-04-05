@@ -18,7 +18,8 @@ namespace Core
             this.host = host;
         }
 
-        internal void Update()
+        /// <summary> WARNING: Only use this if necessary! This belongs to TaskSystem but if you run locally then you can call this Update </summary>
+        public void Update()
         {
             if (IsCompleted)
             {

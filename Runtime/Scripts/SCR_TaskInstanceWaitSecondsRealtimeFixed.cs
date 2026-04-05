@@ -3,19 +3,19 @@ using UnityEngine;
 
 namespace Core
 {
-    public class TaskInstanceWaitSeconds : TaskInstance
+    public class TaskInstanceWaitSecondsRealtimeFixed : TaskInstance
     {
         private readonly Action callback = default;
         private float time = 0;
 
-        public TaskInstanceWaitSeconds(MonoBehaviour host, float duration, Action callback) : base(host)
+        public TaskInstanceWaitSecondsRealtimeFixed(MonoBehaviour host, float duration, Action callback) : base(host)
         {
-            this.callback = callback ?? throw new NullReferenceException("TaskInstanceWaitSeconds() callback == null");
+            this.callback = callback ?? throw new NullReferenceException("TaskInstanceWaitSecondsRealtimeFixed() callback == null");
             this.time = duration;
         }
         protected override void OnUpdate()
         {
-            time -= Time.deltaTime;
+            time -= Time.fixedUnscaledDeltaTime;
 
             if (time <= 0)
             {

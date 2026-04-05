@@ -635,7 +635,7 @@ namespace Core
 
             direction /= distance;
 
-            int capsuleHits = Physics.CapsuleCastNonAlloc(start, end, radius, direction, hitBuffer, distance, mask, query);
+            int capsuleHits = Physics.CapsuleCastNonAlloc(start, end, radius, direction, hitBuffer, 0f, mask, query);
             int maxHits = Mathf.Min(capsuleHits, resultBuffer.Length);
 
             for (int i = 0; i < maxHits; i++)
