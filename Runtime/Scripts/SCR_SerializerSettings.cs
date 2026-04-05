@@ -1,12 +1,11 @@
 using System;
-using UnityEngine;
 using Newtonsoft.Json;
 
 namespace Core
 {
     using static CoreUtility;
 
-    public class SerializerSettings : MonoBehaviour
+    public class SerializerSettings
     {
         private class JsonConverterGuid : JsonConverter<Guid>
         {
