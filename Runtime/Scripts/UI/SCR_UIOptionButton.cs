@@ -7,7 +7,7 @@ namespace Core.UI
 {
     using static CoreUtility;
 
-    public class UIOptionButton : UIOption<int>
+    public sealed class UIOptionButton : UIOption<int>
     {
         [Header("_")]
         [SerializeField, Required] private Button nextButton = null;
@@ -17,65 +17,77 @@ namespace Core.UI
         [SerializeField] private TextMeshProUGUI descriptionText = null;
         [SerializeField] private TextMeshProUGUI valueText = null;
 
-        private string[] valueTexts = null;
-        private int maximumIndex = 0;
-        private int currentIndex = 0;
-        private bool wrapAround = false;
+        private string[] valueTexts;
+        private int maximumIndex;
+        private bool wrapAround;
 
+        private void Awake()
+        {
+            nextButton.onClick.AddListener(SetForward);
+            previousButton.onClick.AddListener(SetPrevious);
+        }
         private void OnDisable()
         {
-            nextButton.onClick.RemoveAllListeners();
-            previousButton.onClick.RemoveAllListeners();
+            nextButton.onClick.RemoveListener(SetForward);
+            previousButton.onClick.RemoveListener(SetPrevious);
         }
+
         public UIOptionButton Initialize(int initial, int @default, string description, int maximumIndex, Action<int> onApply, Action<int> onChanged, bool wrapAround = false)
         {
-            if (this.descriptionText != null)
+            valueTexts = null;
+
+            if (descriptionText != null)
             {
-                this.descriptionText.text = description;
+                descriptionText.text = description;
             }
 
-            this.currentIndex = 0;
             this.maximumIndex = maximumIndex;
             this.wrapAround = wrapAround;
 
-            nextButton.onClick.AddListener(SetForward);
-            previousButton.onClick.AddListener(SetPrevious);
-
             base.Initialize(initial, @default, onApply, onChanged);
-
             return this;
         }
         public UIOptionButton Initialize(int initial, int @default, string description, string[] values, Action<int> onApply, Action<int> onChanged, bool wrapAround = false)
         {
             valueTexts = values;
+
             return Initialize(initial, @default, description, values.Length - 1, onApply, onChanged, wrapAround);
         }
-        private void SetForward() => Set(currentIndex + 1);
-        private void SetPrevious() => Set(currentIndex - 1);
-        protected override void SetInternal(int value)
+
+        private void SetForward() => Set(currentValue + 1);
+        private void SetPrevious() => Set(currentValue - 1);
+
+        protected override int Validate(int value)
         {
             if (wrapAround)
             {
-                value = value > maximumIndex ? 0 : value < 0 ? maximumIndex : value;
-            }
-
-            currentIndex = Mathf.Clamp(value, 0, maximumIndex);
-
-            if (valueText != null)
-            {
-                if (valueTexts != null && currentIndex < valueTexts.Length)
+                if (value > maximumIndex)
                 {
-                    valueText.text = valueTexts[currentIndex];
+                    return 0;
                 }
-                else
+
+                if (value < 0)
                 {
-                    valueText.text = currentIndex.ToString();
+                    return maximumIndex;
                 }
             }
 
-            if (isInitialized)
+            return Mathf.Clamp(value, 0, maximumIndex);
+        }
+        protected override void SetInternal(int value)
+        {
+            if (valueText == null)
             {
-                onChanged?.Invoke(value);
+                return;
+            }
+
+            if (valueTexts != null && value < valueTexts.Length)
+            {
+                valueText.text = valueTexts[value];
+            }
+            else
+            {
+                valueText.text = value.ToString();
             }
         }
     }

@@ -10,20 +10,15 @@ namespace Core.UI
         public abstract void Apply();
         public abstract void Revert();
     }
+
     public abstract class UIOption<T> : UIOptionBase
     {
-        protected Action<T> onApply = null;
-        protected Action<T> onChanged = null;
-        protected T currentValue = default;
-        protected T appliedValue = default;
-        protected T defaultValue = default;
-        protected bool isInitialized = false;
-
-        protected virtual void OnDestroy()
-        {
-            onApply = null;
-            onChanged = null;
-        }
+        protected Action<T> onApply;
+        protected Action<T> onChanged;
+        protected T currentValue;
+        protected T appliedValue;
+        protected T defaultValue;
+        protected bool isInitialized;
 
         public void Initialize(T initial, T @default, Action<T> onApply, Action<T> onChanged)
         {
@@ -31,9 +26,10 @@ namespace Core.UI
             this.onApply = onApply;
             this.onChanged = onChanged;
 
+            isInitialized = false;
             appliedValue = initial;
 
-            Set(initial);
+            Set(initial, false);
 
             isInitialized = true;
         }
@@ -45,19 +41,27 @@ namespace Core.UI
         }
         public override void Load()
         {
-            Set(appliedValue);
+            Set(appliedValue, false);
         }
         public override void Revert()
         {
             appliedValue = defaultValue;
-
             Load();
         }
 
-        public void Set(T value)
+        protected virtual T Validate(T value) => value;
+
+        public void Set(T value) => Set(value, true);
+        private void Set(T value, bool notify)
         {
-            currentValue = value;
+            currentValue = Validate(value);
+
             SetInternal(currentValue);
+
+            if (notify && isInitialized)
+            {
+                onChanged?.Invoke(currentValue);
+            }
         }
         protected abstract void SetInternal(T value);
     }
