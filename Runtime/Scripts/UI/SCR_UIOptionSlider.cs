@@ -16,15 +16,13 @@ namespace Core.UI
         [SerializeField] private TextMeshProUGUI descriptionText = null;
         [SerializeField] private TextMeshProUGUI valueText = null;
 
-        private string[] valueTexts = default;
+        private string[] valueTexts = null;
 
         private void Awake() => sliderObject.onValueChanged.AddListener(Set);
         private void OnDisable() => sliderObject.onValueChanged.RemoveListener(Set);
 
         public UIOptionSlider Initialize(float initial, float @default, string description, float minValue, float maxValue, bool isInt, Action<float> onApply, Action<float> onChanged)
         {
-            valueTexts = null;
-
             if (descriptionText != null)
             {
                 descriptionText.text = description;

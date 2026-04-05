@@ -17,9 +17,9 @@ namespace Core.UI
         [SerializeField] private TextMeshProUGUI descriptionText = null;
         [SerializeField] private TextMeshProUGUI valueText = null;
 
-        private string[] valueTexts;
-        private int maximumIndex;
-        private bool wrapAround;
+        private string[] valueTexts = null;
+        private int maximumIndex = 0;
+        private bool wrapAround = false;
 
         private void Awake()
         {
@@ -34,8 +34,6 @@ namespace Core.UI
 
         public UIOptionButton Initialize(int initial, int @default, string description, int maximumIndex, Action<int> onApply, Action<int> onChanged, bool wrapAround = false)
         {
-            valueTexts = null;
-
             if (descriptionText != null)
             {
                 descriptionText.text = description;
