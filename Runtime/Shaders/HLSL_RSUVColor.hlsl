@@ -34,14 +34,14 @@ void Get_half(out half4 Color)
 {
     Get_float(Color);
 }
-
 void GetWithFlag_float(out float4 Color)
 {
-    uint data = getData();  
-    float useRSV = hasData(data) ? 1.0 : 0.0;
+    float4 data = decodeUintToFloat4(getData());
     
-    Color = lerp(1.0.xxxx, decodeUintToFloat4(data & 0xFFFFFFFE), useRSV);
-} 
+    float enabled = data.a > 0.5 ? 1.0 : 0.0;
+
+    Color = lerp(1.0.xxxx, float4(data.rgb, 1.0), enabled);
+}
 void GetWithFlag_half(out half4 Color) 
 {
     GetWithFlag_float(Color);

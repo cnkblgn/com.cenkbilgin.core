@@ -22,6 +22,11 @@ namespace Core
         static CoreBootstrapper() => EditorApplication.playModeStateChanged += OnPlay;
         private static void OnPlay(PlayModeStateChange state)
         {
+            if (state != PlayModeStateChange.EnteredPlayMode)
+            {
+                return;
+            }
+
             if (sceneAsset == null)
             {
                 string[] guids = AssetDatabase.FindAssets($"t:Scene {SCENE_NAME}");

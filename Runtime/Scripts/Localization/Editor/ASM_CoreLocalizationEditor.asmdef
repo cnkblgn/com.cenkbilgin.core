@@ -1,11 +1,14 @@
 {
-    "name": "ASM_CoreLocalization",
-    "rootNamespace": "Core.Localization",
+    "name": "ASM_CoreLocalizationEditor",
+    "rootNamespace": "Core.Localization.Editor",
     "references": [
         "GUID:cd1711b8a18680d4d823307638cb8090",
-        "GUID:1d623e8bdcfc7404e812f09ec1d93209"
+        "GUID:1d623e8bdcfc7404e812f09ec1d93209",
+        "GUID:f2df4e96f8a40fc4a99ccdd2aef35e6f"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

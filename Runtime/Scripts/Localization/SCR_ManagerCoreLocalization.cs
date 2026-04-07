@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 using UnityEngine;
 
@@ -13,69 +12,63 @@ namespace Core.Localization
     {
         public static event Action<int> OnLocalizationChanged = null;
 
-        public string[] Languages => languages; private string[] languages = null;
-
         [Header("_")]
-        [SerializeField, Required] private TextAsset database = null;
+        [SerializeField, Required] private LocalizationDatabaseConfig database = null;
 
-        private Dictionary<string, string> currentLocalizationData = null;
-        private int currentLocalizationIndex = -1;       
+        private Dictionary<string, string> language = null;
+        private int languageIndex = -1;
         private bool isInitialized = false;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void RESET() => OnLocalizationChanged = null;
 
-        private void Initialize()
+        private void Validate()
         {
             if (isInitialized)
             {
                 return;
             }
 
-            int target = currentLocalizationIndex;
-
-            if (target == -1)
-            {
-                Debug.LogWarning("ManagerCoreLocalization.Initialize() currentLocalizationIndex == -1, setting force to 0");
-                target = 0;
-            }
-
-            Set(target);
+            Initialize();
             isInitialized = true;
         }
-        public void Set(int localizationIndex)
+        private void Initialize()
         {
             if (database == null)
             {
-                Debug.LogError("ManagerCoreLocalization.Set() database == null!");
-                return;
+                throw new NullReferenceException($"ManagerCoreLocalization.SetLanguage() [{nameof(database)}]");
             }
 
-            if (currentLocalizationIndex == localizationIndex)
-            {
-                return;
-            }
+            languageIndex = languageIndex == -1 ? 0 : languageIndex;
+            language = database.GetLanguage(languageIndex);
 
-            currentLocalizationData = Parse(database.text, currentLocalizationIndex = localizationIndex);
-            OnLocalizationChanged?.Invoke(currentLocalizationIndex);
+            if (language == null)
+            { 
+                throw new InvalidOperationException($"ManagerCoreLocalization.SetLanguage() language missing for index {languageIndex}.");
+            }
         }
-        public string[] Get()
+         
+        public IReadOnlyCollection<string> GetLanguages() => database.Languages;
+        public string GetLanguage() => database.Languages[languageIndex];
+        public void SetLanguage(int index)
         {
-            if (!isInitialized)
+            Validate();
+
+            if (this.languageIndex == index || index < 0 || index >= database.Languages.Length)
             {
-                Initialize();
+                return;
             }
 
-            return languages;
+            this.languageIndex = index;
+            language = database.GetLanguage(index);
+            OnLocalizationChanged?.Invoke(this.languageIndex);
         }
+
         public string Get(string key)
         {
-            if (!isInitialized)
-            {
-                Initialize();
-            }
+            Validate();
 
-            if (currentLocalizationData.TryGetValue(key, out var format))
+            if (language.TryGetValue(key, out var format))
             {
                 if (!string.IsNullOrEmpty(format))
                 {
@@ -83,17 +76,14 @@ namespace Core.Localization
                 }
             }
 
-            Debug.LogWarning($"Missing localization for '{key}' in '{languages[currentLocalizationIndex]}'");
+            Debug.LogWarning($"Missing localization for '{key}' in '{GetLanguage()}'");
             return $"[{key}]";
         }
         public string Get(string key, string arg0)
         {
-            if (!isInitialized)
-            {
-                Initialize();
-            }
+            Validate();
 
-            if (currentLocalizationData.TryGetValue(key, out var format))
+            if (language.TryGetValue(key, out var format))
             {
                 if (!string.IsNullOrEmpty(format))
                 {
@@ -101,17 +91,14 @@ namespace Core.Localization
                 }
             }
 
-            Debug.LogWarning($"Missing localization for '{key}' in '{languages[currentLocalizationIndex]}'");
+            Debug.LogWarning($"Missing localization for '{key}' in '{GetLanguage()}'");
             return $"[{key}]";
         }
         public string Get(string key, params object[] args)
         {
-            if (!isInitialized)
-            {
-                Initialize();
-            }
+            Validate();
 
-            if (currentLocalizationData.TryGetValue(key, out var format))
+            if (language.TryGetValue(key, out var format))
             {
                 if (!string.IsNullOrEmpty(format))
                 {
@@ -119,118 +106,8 @@ namespace Core.Localization
                 }
             }
 
-            Debug.LogWarning($"Missing localization for '{key}' in '{languages[currentLocalizationIndex]}'");
+            Debug.LogWarning($"Missing localization for '{key}' in '{GetLanguage()}'");
             return $"[{key}]";
-        }
-        private Dictionary<string, string> Parse(string csvFile, int languageIndex, char separator = ',')
-        {
-            List<string> lines = Read(csvFile).ToList();
-
-            if (lines.Count < 2)
-            {
-                throw new Exception("lines.Length < 2. CSV must have header + at least one data row.");
-            }
-
-            List<string> header = Split(lines[0], separator);
-            if (header.Count < 2 || header[0] != "key")
-            {
-                throw new Exception("First header cell must be 'key' and at least one language column.");
-            }
-
-            languages = header.Skip(1).ToArray();
-            languageIndex = Mathf.Clamp(languageIndex, 0, languages.Length - 1);
-            int columnIndex = languageIndex + 1;
-
-            Dictionary<string, string> languageData = new(StringComparer.OrdinalIgnoreCase);
-
-            for (int rowIndex = 1; rowIndex < lines.Count; rowIndex++)
-            {
-                List<string> cells = Split(lines[rowIndex], separator);
-                if (cells.Count == 0)
-                {
-                    continue;
-                }
-
-                string key = cells[0].Trim();
-                if (key.Length == 0)
-                {
-                    continue;
-                }
-
-                string value = columnIndex < cells.Count ? cells[columnIndex] : string.Empty;
-                languageData[key] = value;
-            }
-
-            return languageData;
-        }
-        private List<string> Split(string line, char seperator)
-        {
-            List<string> stringCells = new();
-            StringBuilder stringBuilder = new();
-            bool inQuotes = false;
-
-            for (int i = 0; i < line.Length; i++)
-            {
-                char c = line[i];
-
-                if (c == '"')
-                {
-                    if (inQuotes && i + 1 < line.Length && line[i + 1] == '"')
-                    {
-                        stringBuilder.Append('"');
-                        i++;
-                    }
-                    else
-                    {
-                        inQuotes = !inQuotes;
-                    }
-                }
-                else if (c == seperator && !inQuotes)
-                {
-                    stringCells.Add(stringBuilder.ToString());
-                    stringBuilder.Clear();
-                }
-                else
-                {
-                    stringBuilder.Append(c);
-                }
-            }
-
-            stringCells.Add(stringBuilder.ToString());
-            return stringCells;
-        }
-        private IEnumerable<string> Read(string csvFile)
-        {
-            string[] lines = csvFile.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
-            StringBuilder stringBuilder = new();
-            bool inQuotes = false;
-
-            foreach (var raw in lines)
-            {
-                stringBuilder.Append(raw);
-
-                int quoteCount = raw.Count(c => c == '"');
-
-                if (quoteCount % 2 == 1)
-                {
-                    inQuotes = !inQuotes;
-                }
-
-                if (!inQuotes)
-                {
-                    yield return stringBuilder.ToString();
-                    stringBuilder.Clear();
-                }
-                else
-                {
-                    stringBuilder.Append("\n");
-                }
-            }
-
-            if (stringBuilder.Length > 0)
-            {
-                yield return stringBuilder.ToString();
-            }
         }
     }
 }

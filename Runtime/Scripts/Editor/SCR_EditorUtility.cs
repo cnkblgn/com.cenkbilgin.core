@@ -1,5 +1,4 @@
 using System.IO;
-using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -131,25 +130,66 @@ namespace Core.Editor
             }
         }
 
-        public static T FindAssetByName<T>(string nameKeyword, string searchFolder = "Assets") where T : Object
+        public static T CreateAsset<T>(string assetPath) where T : ScriptableObject
         {
-            // Construct the search query.
-            // "nameKeyword" searches for assets that contain the keyword in the name.
-            // "t:TypeName" is used to filter by type. For example, t:AudioSettingsConfig.
-            string typeFilter = "t:" + typeof(T).Name;
-            string searchQuery = nameKeyword + " " + typeFilter;
+            // Klasör kýsmýný al
+            string folderPath = Path.GetDirectoryName(assetPath);
 
-            // Search within the given folder (or the entire project)
-            string[] guids = AssetDatabase.FindAssets(searchQuery, new[] { searchFolder });
-            if (guids.Length == 0)
+            if (!Directory.Exists(folderPath))
             {
-                Debug.LogError("EditorUtility.FindAssetByName() No asset found with keyword: " + nameKeyword);
+                Directory.CreateDirectory(folderPath);
+            }
+
+            T asset = ScriptableObject.CreateInstance<T>();
+
+            AssetDatabase.CreateAsset(asset, assetPath);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
+            Selection.activeObject = asset;
+            EditorGUIUtility.PingObject(asset);
+
+            Debug.Log($"EditorUtility.CreateAsset() [{nameof(T)}] created at [{folderPath}]");
+            return asset;
+        }
+        public static T FindAssetByKeyword<T>(string keyword, string folder = "Assets") where T : Object
+        {
+            string filter = "t:" + typeof(T).Name;
+            string query = keyword + " " + filter;
+
+            GUID[] guids = AssetDatabase.FindAssetGUIDs(query, new[] { folder });
+
+            if (guids == null || guids.Length == 0)
+            {
+                Debug.LogError($"EditorUtility.FindAssetByKeyword() No asset found with keyword: " + keyword);
                 return null;
             }
 
-            // Get the first asset's path
-            string assetPath = AssetDatabase.GUIDToAssetPath(guids[0]);
-            T asset = AssetDatabase.LoadAssetAtPath<T>(assetPath);
+            return GetAssetFromGuid<T>(guids[0]);
+        }
+        public static T FindAssetByType<T>(string folder = "Assets") where T : Object
+        {
+            string filter = "t:" + typeof(T).Name;
+            GUID[] guids = AssetDatabase.FindAssetGUIDs(filter, new[] { folder });
+
+            if (guids.Length == 0)
+            {
+                Debug.LogError($"EditorUtility.FindAssetByName() No asset found with type: [{filter}]");
+                return null;
+            }
+
+            return GetAssetFromGuid<T>(guids[0]);
+        }
+        private static T GetAssetFromGuid<T>(GUID guid) where T : Object
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            T asset = AssetDatabase.LoadAssetAtPath<T>(path);
+
+            if (asset == null)
+            {
+                Debug.LogError($"EditorUtility.GetAssetFromGuid() No asset found with path: [{path}]");
+            }
+
             return asset;
         }
 

@@ -3,27 +3,26 @@ using UnityEditor;
 
 namespace Core.Editor
 {
-    using static CoreUtility;
-
     [CustomEditor(typeof(PersistentSceneController))]
     public class EditorDrawPersistentSceneController : UnityEditor.Editor
     {
-        private PersistentSceneController baseClass = null;
-
-        private void OnEnable() => baseClass = (PersistentSceneController)target;
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
 
             DrawDefaultInspector();
 
+            GUILayout.Space(10);
+
             if (GUILayout.Button("Populate"))
             {
-                Undo.RecordObject(baseClass, "Populate Persistent Objects");
+                PersistentSceneController controller = (PersistentSceneController)target;
 
-                baseClass.Populate();
+                Undo.RecordObject(controller, "Populate Persistent Objects");
 
-                UnityEditor.EditorUtility.SetDirty(baseClass);
+                controller.Populate();
+
+                UnityEditor.EditorUtility.SetDirty(controller);
             }
 
             serializedObject.ApplyModifiedProperties();
