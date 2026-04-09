@@ -6,7 +6,7 @@ namespace Core
     public class TaskInstanceWaitFrame : TaskInstance
     {
         private readonly Action callback = default;
-        private readonly int frame = 0;
+        private int frame = 0;
 
         public TaskInstanceWaitFrame(MonoBehaviour host, Action callback) : base(host)
         {
@@ -21,6 +21,13 @@ namespace Core
                 callback.Invoke();
                 return;
             }
+        }
+
+        public override void Reset()
+        {
+            base.Reset();
+
+            this.frame = Time.frameCount + 1;
         }
     }
 }

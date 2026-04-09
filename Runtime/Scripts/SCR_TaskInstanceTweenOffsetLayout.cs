@@ -8,8 +8,8 @@ namespace Core
     {
         private readonly LayoutGroup thisLayout = null;
         private readonly RectTransform thisRoot = null;
-        private readonly RectOffset startValue = null;
-        private readonly RectOffset targetValue = null;
+        private RectOffset startValue = null;
+        private RectOffset targetValue = null;
 
         public TaskInstanceTweenOffsetLayout(LayoutGroup layoutGroup, RectOffset startValue, RectOffset targetValue, float fadeSeconds, float waitSeconds, TweenType tweenType, EaseType easeType, Action onComplete) : base(layoutGroup, fadeSeconds, waitSeconds, tweenType, easeType, onComplete)
         {
@@ -40,5 +40,8 @@ namespace Core
             thisLayout.padding.top = targetValue.top;
             thisLayout.padding.bottom = targetValue.bottom;
         }
+
+        public void OverrideStartValue(RectOffset value) => startValue = value;
+        public void OverrideTargetValue(RectOffset value) => targetValue = value;
     }
 }

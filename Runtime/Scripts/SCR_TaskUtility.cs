@@ -14,6 +14,12 @@ namespace Core
         private static bool WaitResumeInternal() => ManagerCoreGame.HasInstance && ManagerCoreGame.Instance.GetGameState() == GameState.RESUME;
         private static bool WaitPauseInternal() => ManagerCoreGame.HasInstance && ManagerCoreGame.Instance.GetGameState() == GameState.PAUSE;
 
+        public static void Schedule(this TaskInstanceWaitFrame task)
+        {
+            task.Reset();
+
+            TaskSystem.TryCreate(task);
+        }
         public static void Schedule(this TaskInstanceWaitSeconds task, float duration)
         {
             task.OverrideDuration(duration);
@@ -30,6 +36,79 @@ namespace Core
 
             TaskSystem.TryCreate(task);
         }
+        public static void Schedule(this TaskInstanceTweenFadeCanvas task, float startValue, float targetValue)
+        {
+            task.Reset();
+
+            task.OverrideStartValue(startValue);
+            task.OverrideTargetValue(targetValue);
+
+            TaskSystem.TryCreate(task);
+        }
+        public static void Schedule(this TaskInstanceTweenFillImage task, float startValue, float targetValue)
+        {
+            task.Reset();
+
+            task.OverrideStartValue(startValue);
+            task.OverrideTargetValue(targetValue);
+
+            TaskSystem.TryCreate(task);
+        }
+        public static void Schedule(this TaskInstanceTweenFadeImage task, Color startValue, Color targetValue)
+        {
+            task.Reset();
+
+            task.OverrideStartValue(startValue);
+            task.OverrideTargetValue(targetValue);
+
+            TaskSystem.TryCreate(task);
+        }
+        public static void Schedule(this TaskInstanceTweenOffsetLayout task, RectOffset startValue, RectOffset targetValue)
+        {
+            task.Reset();
+
+            task.OverrideStartValue(startValue);
+            task.OverrideTargetValue(targetValue);
+
+            TaskSystem.TryCreate(task);
+        }
+        public static void Schedule(this TaskInstanceTweenOffsetRect task, Vector2 startValue, Vector2 targetValue)
+        {
+            task.Reset();
+
+            task.OverrideStartValue(startValue);
+            task.OverrideTargetValue(targetValue);
+
+            TaskSystem.TryCreate(task);
+        }
+        public static void Schedule(this TaskInstanceTweenOffsetRectX task, Vector2 startValue, Vector2 targetValue)
+        {
+            task.Reset();
+
+            task.OverrideStartValue(startValue);
+            task.OverrideTargetValue(targetValue);
+
+            TaskSystem.TryCreate(task);
+        }
+        public static void Schedule(this TaskInstanceTweenOffsetRectY task, Vector2 startValue, Vector2 targetValue)
+        {
+            task.Reset();
+
+            task.OverrideStartValue(startValue);
+            task.OverrideTargetValue(targetValue);
+
+            TaskSystem.TryCreate(task);
+        }
+        public static void Schedule(this TaskInstanceTweenScaleTransform task, Vector3 startValue, Vector3 targetValue)
+        {
+            task.Reset();
+
+            task.OverrideStartValue(startValue);
+            task.OverrideTargetValue(targetValue);
+
+            TaskSystem.TryCreate(task);
+        }
+
         public static void WaitUntil(this MonoBehaviour host, Func<bool> predicate, Action onStart, Action onComplete)
         {
             onStart?.Invoke();

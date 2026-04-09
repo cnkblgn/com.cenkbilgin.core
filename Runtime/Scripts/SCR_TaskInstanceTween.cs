@@ -54,8 +54,17 @@ namespace Core
         public void Complete()
         {
             IsCompleted = true;
-            onComplete?.Invoke();            
+            onComplete?.Invoke();
         }
+        public override void Reset()
+        {
+            base.Reset();
+
+            fadeTimer = 0;
+            waitTimer = 0;
+            isFaded = false;
+        }
+
         protected abstract void OnFadeUpdate(float time);
         protected abstract void OnFadeComplete();
     }

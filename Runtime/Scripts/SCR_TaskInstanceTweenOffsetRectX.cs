@@ -24,5 +24,8 @@ namespace Core
             thisTransform.anchoredPosition = Vector2.Lerp(startValue, targetValue, time);
         }
         protected override void OnFadeComplete() => thisTransform.anchoredPosition = new(targetValue.x, thisTransform.anchoredPosition.y);
+
+        public void OverrideStartValue(Vector2 value) => startValue = value;
+        public void OverrideTargetValue(Vector2 value) => targetValue = value;
     }
 }

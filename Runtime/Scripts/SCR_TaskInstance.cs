@@ -34,8 +34,8 @@ namespace Core
 
             OnUpdate();
         }
-        public void Reset() => IsCompleted = false;
-        public void Stop() => IsCompleted = true;
+        public virtual void Reset() => IsCompleted = false;
+        public virtual void Stop() => IsCompleted = true;
         protected abstract void OnUpdate();
     }
 }
