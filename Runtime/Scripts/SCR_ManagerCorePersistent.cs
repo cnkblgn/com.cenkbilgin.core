@@ -11,13 +11,23 @@ namespace Core
 
         private PersistentSceneController sceneController = null;
 
+        private bool IsValid()
+        {
+            if (sceneController == null)
+            {
+                Debug.LogError("ManagerCorePersistent.IsValid() sceneController == null");
+                return false;
+            }
+
+            return true;
+        }
+
         public bool TryRegisterObject(GameObject gameObject, out PersistentInstanceEntity persistentObject)
         {
             persistentObject = null;
 
-            if (sceneController == null)
+            if (!IsValid())
             {
-                Debug.LogError("ManagerCorePersistent.TryRegisterObject() sceneController == null");
                 return false;
             }
 
@@ -25,9 +35,8 @@ namespace Core
         }
         public bool TryUnregisterObject(PersistentInstanceEntity persistentObject)
         {
-            if (sceneController == null)
+            if (!IsValid())
             {
-                Debug.LogError("ManagerCorePersistent.TryUnregisterObject() sceneController == null");
                 return false;
             }
 
@@ -37,9 +46,8 @@ namespace Core
         }
         public void RegisterController(PersistentSceneController sceneController)
         {
-            if (sceneController == null)
+            if (!IsValid())
             {
-                Debug.LogError("ManagerCorePersistent.RegisterController() sceneController == null");
                 return;
             }
 
@@ -57,9 +65,8 @@ namespace Core
         }
         public PersistentSceneData Export()
         {
-            if (sceneController == null)
+            if (!IsValid())
             {
-                Debug.LogError("ManagerCorePersistent.Export() sceneController == null");
                 return null;
             }
 
@@ -67,9 +74,8 @@ namespace Core
         }
         public void Import(PersistentSceneData sceneData)
         {
-            if (sceneController == null)
+            if (!IsValid())
             {
-                Debug.LogError("ManagerCorePersistent.Import() sceneController == null");
                 return;
             }
 

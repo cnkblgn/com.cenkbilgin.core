@@ -3,7 +3,7 @@ using UnityEngine.Rendering.Universal;
 
 namespace Core.Graphics
 {
-    using static Core.CoreUtility;
+    using static CoreUtility;
 
     [DisallowMultipleComponent]
     public class DecalBaker : MonoBehaviour
@@ -15,7 +15,7 @@ namespace Core.Graphics
 
         [Header("_")]
         [SerializeField, Min(1)] private float raycastDistance = 2f;
-        [SerializeField] public LayerMask raycastMask = ~0;
+        [SerializeField] private LayerMask raycastMask = ~0;
 
         private void Start()
         {
