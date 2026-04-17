@@ -4,7 +4,7 @@ namespace Core
 {
     public static class HitUtility
     {
-        public static bool HitScan(Vector3 origin, Vector3 direction, float range, int mask, RaycastHit[] hitBuffer, HitData[] resultBuffer, QueryTriggerInteraction query, out int hits, HitProcessor processor = null)
+        public static bool HitScan(Vector3 origin, Vector3 direction, float strength, float range, int mask, RaycastHit[] hitBuffer, HitData[] resultBuffer, QueryTriggerInteraction query, out int hits, HitProcessor processor = null)
         {
             int rayHits = Physics.RaycastNonAlloc(origin, direction, hitBuffer, range, mask, query);
             int maxHits = Mathf.Min(rayHits, resultBuffer.Length);
@@ -13,7 +13,7 @@ namespace Core
             for (int i = 0; i < maxHits; i++)
             {
                 RaycastHit hit = hitBuffer[i];
-                HitData data = new(hit.collider, hit.point, hit.normal, hit.distance);
+                HitData data = new(hit.collider, hit.point, hit.normal, hit.distance, strength);
 
                 resultBuffer[hits++] = data;
                 processor?.Invoke(in data);
@@ -21,7 +21,7 @@ namespace Core
 
             return hits > 0;
         }
-        public static bool HitCone(Vector3 origin, Vector3 forward, float angle, float radius, int mask, Collider[] overlapBuffer, HitData[] resultBuffer, QueryTriggerInteraction query, out int hits, HitProcessor processor = null)
+        public static bool HitCone(Vector3 origin, Vector3 forward, float strength, float angle, float radius, int mask, Collider[] overlapBuffer, HitData[] resultBuffer, QueryTriggerInteraction query, out int hits, HitProcessor processor = null)
         {
             hits = 0;
             int overlapHits = Physics.OverlapSphereNonAlloc(origin, radius, overlapBuffer, mask, query);
@@ -37,7 +37,7 @@ namespace Core
 
                 if (distance <= Mathf.Epsilon)
                 {
-                    resultBuffer[hits++] = new(collider, origin, Vector3.up, 0f);
+                    resultBuffer[hits++] = new(collider, origin, Vector3.up, 0f, strength);
                     continue;
                 }
 
@@ -48,7 +48,7 @@ namespace Core
                     continue;
                 }
 
-                HitData data = new(collider, point, -direction, distance);
+                HitData data = new(collider, point, -direction, distance, strength);
 
                 resultBuffer[hits++] = data;
                 processor?.Invoke(in data);
@@ -56,7 +56,7 @@ namespace Core
 
             return hits > 0;
         }
-        public static bool HitSweep(Vector3 start, Vector3 end, float radius, int mask, RaycastHit[] hitBuffer, HitData[] resultBuffer, QueryTriggerInteraction query, out int hits, HitProcessor processor = null)
+        public static bool HitSweep(Vector3 start, Vector3 end, float strength, float radius, int mask, RaycastHit[] hitBuffer, HitData[] resultBuffer, QueryTriggerInteraction query, out int hits, HitProcessor processor = null)
         {
             hits = 0;
 
@@ -88,11 +88,11 @@ namespace Core
                         normal = Vector3.up;
                     }
 
-                    data = new(hit.collider, point, normal, 0f);
+                    data = new(hit.collider, point, normal, 0f, strength);
                 }
                 else
                 {
-                    data = new(hit.collider, hit.point, hit.normal, hit.distance);
+                    data = new(hit.collider, hit.point, hit.normal, hit.distance, strength);
                 }
 
                 processor?.Invoke(in data);
@@ -101,7 +101,7 @@ namespace Core
 
             return hits > 0;
         } 
-        public static bool HitArea(Vector3 origin, float radius, int overlapMask, int obstructionMask, Collider[] overlapBuffer, RaycastHit[] obstructionBuffer, HitData[] resultBuffer, QueryTriggerInteraction query, out int hits, HitProcessor processor = null)
+        public static bool HitArea(Vector3 origin, float strength, float radius, int overlapMask, int obstructionMask, Collider[] overlapBuffer, RaycastHit[] obstructionBuffer, HitData[] resultBuffer, QueryTriggerInteraction query, out int hits, HitProcessor processor = null)
         {
             int areaHits = Physics.OverlapSphereNonAlloc(origin, radius, overlapBuffer, overlapMask, query);
             hits = 0;
@@ -115,7 +115,7 @@ namespace Core
 
                 if (distance <= Mathf.Epsilon)
                 {
-                    resultBuffer[hits++] = new(collider, point, direction.normalized, 0f);
+                    resultBuffer[hits++] = new(collider, point, direction.normalized, 0f, strength);
                     continue;
                 }
 
@@ -146,7 +146,7 @@ namespace Core
                     continue;
                 }
 
-                HitData data = new(collider, point, -direction, distance);
+                HitData data = new(collider, point, -direction, distance, strength);
 
                 resultBuffer[hits++] = data;
                 processor?.Invoke(in data);

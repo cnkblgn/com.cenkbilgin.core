@@ -8,13 +8,15 @@ namespace Core
         public readonly Vector3 Point;
         public readonly Vector3 Normal;
         public readonly float Distance;
+        public readonly float Strength;
 
-        public HitData(Collider collider, Vector3 point, Vector3 normal, float distance)
+        public HitData(Collider collider, Vector3 point, Vector3 normal, float distance, float strength)
         {
             Collider = collider;
             Point = point;
             Normal = normal;
             Distance = distance;
+            Strength = strength;
         }
     }
 }
