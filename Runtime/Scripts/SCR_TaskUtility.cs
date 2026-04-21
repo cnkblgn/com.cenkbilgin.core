@@ -54,10 +54,20 @@ namespace Core
 
             TaskSystem.TryCreate(task);
         }
-        public static void Schedule(this TaskInstanceTweenFadeImage task, Color startValue, Color targetValue)
+        public static void Schedule(this TaskInstanceTweenFadeImage task, Color startValue, Color targetValue, float startAlpha, float targetAlpha)
         {
             task.Reset();
 
+            task.OverrideStartValue(startValue, startAlpha);
+            task.OverrideTargetValue(targetValue, targetAlpha);
+
+            TaskSystem.TryCreate(task);
+        }
+        public static void Schedule(this TaskInstanceTweenBlinkImage task, Color startValue, Color targetValue, float interval)
+        {
+            task.Reset();
+
+            task.OverrideInterval(interval);
             task.OverrideStartValue(startValue);
             task.OverrideTargetValue(targetValue);
 
@@ -287,9 +297,16 @@ namespace Core
 
             return tweenObject;
         }
-        public static TaskInstanceTweenFadeImage Fade(this Image image, Color targetValue, float fadeSeconds, float waitSeconds = 0, TweenType tweenType = TweenType.UNSCALED, EaseType easeType = EaseType.LINEAR, Action onComplete = null)
+        public static TaskInstanceTweenFadeImage Fade(this Image image, Color targetValue, float targetAlpha, float fadeSeconds, float waitSeconds = 0, TweenType tweenType = TweenType.UNSCALED, EaseType easeType = EaseType.LINEAR, Action onComplete = null)
         {
-            TaskInstanceTweenFadeImage tweenObject = new(image, targetValue, fadeSeconds, waitSeconds, tweenType, easeType, onComplete);
+            TaskInstanceTweenFadeImage tweenObject = new(image, targetValue, targetAlpha, fadeSeconds, waitSeconds, tweenType, easeType, onComplete);
+            TaskSystem.TryCreate(tweenObject);
+
+            return tweenObject;
+        }
+        public static TaskInstanceTweenBlinkImage Blink(this Image image, Color startColor, Color targetColor, float interval, float fadeSeconds, float waitSeconds = 0, TweenType tweenType = TweenType.UNSCALED, EaseType easeType = EaseType.LINEAR, Action onComplete = null)
+        {
+            TaskInstanceTweenBlinkImage tweenObject = new(image, startColor, targetColor, interval, fadeSeconds, waitSeconds, tweenType, easeType, onComplete);
             TaskSystem.TryCreate(tweenObject);
 
             return tweenObject;

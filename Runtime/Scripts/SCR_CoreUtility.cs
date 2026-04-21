@@ -1203,6 +1203,7 @@ namespace Core
         /// <summary> It Does not cause rebuild mesh </summary> ///
         public static void SetCanvasColor(this Image image, Color color) => image.canvasRenderer.SetColor(color);
         /// <summary> It Does not cause rebuild mesh </summary> ///
+        public static float GetCanvasAlpha(this Image image) => image.canvasRenderer.GetAlpha();        
         public static void SetCanvasAlpha(this Image image, float alpha) => image.canvasRenderer.SetAlpha(alpha);        
         #endregion
 

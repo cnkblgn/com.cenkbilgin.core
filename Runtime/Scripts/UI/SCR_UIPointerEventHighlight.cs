@@ -76,14 +76,14 @@ namespace Core.UI
             }
 
             thisTween?.Stop();
-            thisTween = thisImage.Fade(defaultColor, fadeDuration, 0, TweenType.UNSCALED, fadeEasingType);
+            thisTween = thisImage.Fade(defaultColor, 1, fadeDuration, 0, TweenType.UNSCALED, fadeEasingType);
 
             if (influenceChild)
             {
                 for (int i = 0; i < childImages.Length; i++)
                 {
                     childTweens[i]?.Stop();
-                    childTweens[i] = childImages[i].Fade(defaultColor, fadeDuration, 0, TweenType.UNSCALED, fadeEasingType);
+                    childTweens[i] = childImages[i].Fade(defaultColor, 1, fadeDuration, 0, TweenType.UNSCALED, fadeEasingType);
                 }
             }
         }
@@ -113,14 +113,14 @@ namespace Core.UI
             }
 
             thisTween?.Stop();
-            thisTween = thisImage.Fade(highlightColor, fadeDuration, 0, TweenType.UNSCALED, fadeEasingType);
+            thisTween = thisImage.Fade(highlightColor, 1, fadeDuration, 0, TweenType.UNSCALED, fadeEasingType);
 
             if (influenceChild)
             {
                 for (int i = 0; i < childImages.Length; i++)
                 {
                     childTweens[i]?.Stop();
-                    childTweens[i] = childImages[i].Fade(highlightColor, fadeDuration, 0, TweenType.UNSCALED, fadeEasingType);
+                    childTweens[i] = childImages[i].Fade(highlightColor, 1, fadeDuration, 0, TweenType.UNSCALED, fadeEasingType);
                 }
             }
         }
