@@ -127,6 +127,16 @@ namespace Core
                     (commandInstance as DebugCommandInstance<float, float>).Execute(float.Parse(properties[1]), float.Parse(properties[2]));
                     return true;
                 }
+                else if (commandInstance as DebugCommandInstance<int, int> != null)
+                {
+                    if (properties.Length != 3)
+                    {
+                        break;
+                    }
+
+                    (commandInstance as DebugCommandInstance<int, int>).Execute(int.Parse(properties[1]), int.Parse(properties[2]));
+                    return true;
+                }
             }
 
             return isSuccessfull;
