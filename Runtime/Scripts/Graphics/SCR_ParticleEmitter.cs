@@ -31,6 +31,8 @@ namespace Core.Graphics
             }
         }
 
+        private void Align(Vector3 position, Vector3 direction) => thisTransform.SetPositionAndRotation(position, Quaternion.LookRotation(direction, Vector3.up));
+
         public void Emit(Vector3 position, Vector3 direction)
         {
             if (lastEmitFrame == Time.frameCount)
@@ -38,7 +40,7 @@ namespace Core.Graphics
                 return;
             }
 
-            thisTransform.SetPositionAndRotation(position, Quaternion.LookRotation(direction, Vector3.up));
+            Align(position, direction);
 
             for (int i = 0; i < thisEmitters.Length; i++)
             {
@@ -77,6 +79,15 @@ namespace Core.Graphics
         }
         public void Play()
         {
+            for (int i = 0; i < thisEmitters.Length; i++)
+            {
+                thisEmitters[i].Play();
+            }
+        }
+        public void Play(Vector3 position, Vector3 direction)
+        {
+            Align(position, direction);
+
             for (int i = 0; i < thisEmitters.Length; i++)
             {
                 thisEmitters[i].Play();
