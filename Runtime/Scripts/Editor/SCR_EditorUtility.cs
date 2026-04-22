@@ -22,7 +22,7 @@ namespace Core.Editor
         [MenuItem("Tools/Validate All Components", priority = 1)]
         public static void ValidateComponents()
         {
-            foreach (GameObject gameObject in GameObject.FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            foreach (GameObject gameObject in GameObject.FindObjectsByType<GameObject>(FindObjectsInactive.Include))
             {
                 foreach (Component component in gameObject.GetComponentsInChildren<Component>())
                 {
@@ -179,6 +179,26 @@ namespace Core.Editor
             }
 
             return GetAssetFromGuid<T>(guids[0]);
+        }
+        public static T[] FindAssetsByType<T>(string folder = "Assets") where T : Object
+        {
+            string filter = "t:" + typeof(T).Name;
+            GUID[] guids = AssetDatabase.FindAssetGUIDs(filter, new[] { folder });
+
+            if (guids.Length == 0)
+            {
+                Debug.LogError($"EditorUtility.FindAssetByName() No asset found with type: [{filter}]");
+                return null;
+            }
+
+            T[] assets = new T[guids.Length];
+
+            for (int i = 0; i < guids.Length; i++)
+            {
+                assets[i] = GetAssetFromGuid<T>(guids[i]);
+            }
+
+            return assets;
         }
         private static T GetAssetFromGuid<T>(GUID guid) where T : Object
         {

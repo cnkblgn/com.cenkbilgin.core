@@ -21,7 +21,7 @@ namespace Core.Localization.Editor
             public readonly List<int> FilteredIndices = new(64);
         }
 
-        private static readonly Dictionary<int, Dictionary<string, State>> states = new();
+        private static readonly Dictionary<EntityId, Dictionary<string, State>> states = new();
 
         private const float ROW_HEIGHT = 16f;
         private const float SEARCH_HEIGHT = 16f;
@@ -228,7 +228,7 @@ namespace Core.Localization.Editor
         }
         private static State GetState(SerializedProperty baseProperty)
         {
-            int instanceId = baseProperty.serializedObject.targetObject.GetInstanceID();
+            EntityId instanceId = baseProperty.serializedObject.targetObject.GetEntityId();
 
             string path = baseProperty.propertyPath;
 
