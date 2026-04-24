@@ -711,7 +711,7 @@ namespace Core
             StitchTo(thisSkinnedRenderer, targetSkinnedRenderer);
             thisSkinnedRenderer.sharedMesh = targetSkinnedRenderer.sharedMesh;
         }
-        public static void BakeToDefault(this SkinnedMeshRenderer thisSkinnedRenderer, MeshFilter targetMeshFilter, bool cleanOldMesh)
+        public static void BakeToDefault(this SkinnedMeshRenderer thisSkinnedRenderer, MeshFilter targetMeshFilter, bool cleanOldMesh, string suffix = STRING_EMPTY)
         {
             if (targetMeshFilter == null)
             {
@@ -719,7 +719,7 @@ namespace Core
                 return;
             }
 
-            Mesh bakedMesh = new() {  name = thisSkinnedRenderer.sharedMesh.name + "_BAKED" };
+            Mesh bakedMesh = new() {  name = thisSkinnedRenderer.sharedMesh.name + suffix};
 
             thisSkinnedRenderer.BakeMesh(bakedMesh);
 
