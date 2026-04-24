@@ -701,52 +701,37 @@ namespace Core
         #endregion
 
         #region MESH
-        public static void StitchTo(this SkinnedMeshRenderer thisSkinnedMesh, SkinnedMeshRenderer targetSkinnedMesh)
+        public static void StitchTo(this SkinnedMeshRenderer thisSkinnedRenderer, SkinnedMeshRenderer targetSkinnedRenderer)
         {
-            thisSkinnedMesh.bones = targetSkinnedMesh.bones;
-            thisSkinnedMesh.rootBone = targetSkinnedMesh.rootBone;
+            thisSkinnedRenderer.bones = targetSkinnedRenderer.bones;
+            thisSkinnedRenderer.rootBone = targetSkinnedRenderer.rootBone;
         }
-        public static void SwapTo(this SkinnedMeshRenderer thisSkinnedMesh, SkinnedMeshRenderer targetSkinnedMesh)
+        public static void SwapTo(this SkinnedMeshRenderer thisSkinnedRenderer, SkinnedMeshRenderer targetSkinnedRenderer)
         {
-            StitchTo(thisSkinnedMesh, targetSkinnedMesh);
-            thisSkinnedMesh.sharedMesh = targetSkinnedMesh.sharedMesh;
+            StitchTo(thisSkinnedRenderer, targetSkinnedRenderer);
+            thisSkinnedRenderer.sharedMesh = targetSkinnedRenderer.sharedMesh;
         }
-        public static MeshRenderer BakeToDefault(this SkinnedMeshRenderer thisSkinnedMesh)
+        public static void BakeToDefault(this SkinnedMeshRenderer thisSkinnedRenderer, MeshFilter targetMeshFilter, bool cleanOldMesh)
         {
-            thisSkinnedMesh.enabled = true;
+            if (targetMeshFilter == null)
+            {
+                Debug.LogError("CoreUtility.BakeToDefault() targetMeshFilter == null");
+                return;
+            }
 
-            GameObject meshHolder = thisSkinnedMesh.gameObject;
+            Mesh bakedMesh = new() {  name = thisSkinnedRenderer.sharedMesh.name + "_BAKED" };
 
-            Mesh bakedMesh = new() { name = thisSkinnedMesh.name };
-            thisSkinnedMesh.BakeMesh(bakedMesh);
+            thisSkinnedRenderer.BakeMesh(bakedMesh);
 
             bakedMesh.RecalculateBounds();
 
-            MeshFilter meshFilter = meshHolder.GetComponent<MeshFilter>();
-            MeshRenderer meshRenderer = meshHolder.GetComponent<MeshRenderer>();
-
-            if (meshFilter != null)
+            if (cleanOldMesh)
             {
-                // Cleanup for previous baked mesh
-                GameObject.Destroy(meshFilter.sharedMesh);
+                GameObject.Destroy(targetMeshFilter.sharedMesh);
             }
 
-            if (meshFilter == null)
-            {
-                meshFilter = meshHolder.AddComponent<MeshFilter>();
-            }
-
-            if (meshRenderer == null)
-            {
-                meshRenderer = meshHolder.AddComponent<MeshRenderer>();
-            }
-           
-            meshFilter.sharedMesh = bakedMesh;
-            meshRenderer.sharedMaterial = thisSkinnedMesh.sharedMaterial;
-            thisSkinnedMesh.enabled = false;
-
-            return meshRenderer;
-        }
+            targetMeshFilter.sharedMesh = bakedMesh;
+        } 
         public static void BakeToCollider(this MeshRenderer thisMeshRenderer, MeshCollider targetCollider)
         {
             targetCollider.sharedMesh = null;
