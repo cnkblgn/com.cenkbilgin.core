@@ -1325,7 +1325,7 @@ namespace Core
             }
             public void RemoveAll(Predicate<T> match)
             {
-                for (int i = 0; i < Count; i++)
+                for (int i = 0; i < Count;)
                 {
                     if (match(items[i]))
                     {
