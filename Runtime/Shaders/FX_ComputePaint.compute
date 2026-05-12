@@ -1,0 +1,93 @@
+#pragma kernel CSMain
+
+RWTexture3D<float> Result;
+
+float3 Position;
+float3 Direction;
+
+float Radius;
+float Length;
+float Strength;
+
+int Shape;
+int Blend;
+
+uint Resolution;
+uint3 Cell;
+
+float SphereShape(float3 _position, float _radius)
+{
+    float d = length(_position);
+    return saturate(1.0 - d / _radius);
+}
+float CapsuleShape(float3 _position, float3 _direction, float _radius, float _length)
+{
+    float forward = dot(_position, _direction);
+    float3 side = _position - _direction * forward;
+    float lateral = length(side);
+
+    float2 mask;
+    mask.x = saturate(1.0 - abs(forward) / _length);
+    mask.y = saturate(1.0 - lateral / _radius);
+
+    return min(mask.x, mask.y);
+}
+float EvaluateShape(float3 _position, float3 _direction)
+{
+    if (Shape == 0)
+    {
+        return SphereShape(_position, Radius);
+    }
+
+    if (Shape == 1)
+    {
+        return CapsuleShape(_position, _direction, Radius, Length);
+    }
+
+    return 0;
+}
+float BlendMask(float a, float b)
+{
+    if (Blend == 0)
+    {
+        return a + b;
+    }
+    if (Blend == 1)
+    {
+        return max(a, b);
+    }
+    if (Blend == 2)
+    {
+        return a * b;
+    }
+    if (Blend == 3)
+    {
+        return a - b;
+    }
+    
+    return a;
+}
+
+[numthreads(8, 8, 8)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    uint3 cell = id + Cell;
+    
+    if (cell.x >= Resolution || cell.y >= Resolution || cell.z >= Resolution)
+    {
+        return;
+    }
+     
+    float3 uvw = (cell + 0.5) / (float) Resolution;
+    
+    float3 p = uvw - Position;
+    float3 d = normalize(Direction);
+
+    float m = EvaluateShape(p, d);
+    m = (m * m) * Strength;
+
+    float previous = Result[cell];
+    float value = BlendMask(previous, m);
+
+    Result[cell] = saturate(value);
+}
