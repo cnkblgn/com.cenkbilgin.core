@@ -27,7 +27,7 @@ namespace Core
                 return;
             }
 
-            SerializerObject.Clear(Path, useInEditor);
+            SerializerSystem.Clear(Path, useInEditor);
             isInitialized = false;
         }
         public void Save(bool useInEditor = false)
@@ -37,7 +37,7 @@ namespace Core
                 return;
             }
 
-            SerializerObject.Save(Path, this, useInEditor, Optimize);
+            SerializerSystem.Save(Path, this, useInEditor, Optimize);
             isInitialized = true;
         }
         public void Load(bool useInEditor = false)
@@ -58,21 +58,21 @@ namespace Core
                 return;
             }
 
-            T data = SerializerObject.Load<T>(Path, useInEditor);
+            T data = SerializerSystem.Load<T>(Path, useInEditor);
 
             if (data == null)
             {
                 Save(useInEditor);
-                Debug.LogError("SerializeableData.Load() data == null");
+                Debug.LogError("data == null");
                 return;
             }
 
             if (!string.Equals(data.version, version))
             {
-                Debug.LogError($"SerializeableData.Load() Version Mismatch! || " + "Path: " + data.Path + " << Path Version: " + data.version + " << Game Version : " + version);
+                Debug.LogError($"Version Mismatch! || " + "Path: " + data.Path + " << Path Version: " + data.version + " << Game Version : " + version);
 
                 Save(useInEditor);
-                OnLoad(SerializerObject.Load<T>(Path, useInEditor));
+                OnLoad(SerializerSystem.Load<T>(Path, useInEditor));
             }
             else
             {

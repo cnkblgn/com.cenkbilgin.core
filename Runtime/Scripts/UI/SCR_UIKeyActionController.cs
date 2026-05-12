@@ -29,7 +29,7 @@ namespace Core.UI
 
             if (!dataTable.TryGetValue(id, out KeyActionData[] keys))
             {
-                Debug.LogError($"UIKeyActionController.Show() undefined type [{id}]");
+                Debug.LogError($"Undefined type [{id}]");
                 return;
             }
 
@@ -61,7 +61,7 @@ namespace Core.UI
 
             if (!instanceTable.TryGetValue(id, out var keys))
             {
-                Debug.LogError($"UIKeyActionController.Show() undefined type [{id}]");
+                Debug.LogError($"Undefined type [{id}]");
                 return;
             }
 
@@ -89,13 +89,13 @@ namespace Core.UI
 
             if (data.Length <= 0)
             {
-                Debug.LogError($"UIKeyActionController.Insert() data.Length <= 0 [{id}]");
+                Debug.LogError($"data.Length <= 0 [{id}]");
                 return;
             }
 
             if (dataTable.TryGetValue(id, out _))
             {
-                Debug.LogError($"UIKeyActionController.Insert() type exists [{id}]");
+                Debug.LogError($"Type exists for [{id}]");
                 return;
             }
 
@@ -105,7 +105,7 @@ namespace Core.UI
         {
             if (!dataTable.TryGetValue(id, out _))
             {
-                Debug.LogError($"UIKeyActionController.Revert() type not found [{id}]");
+                Debug.LogError($"Type not found for [{id}]");
                 return;
             }
 

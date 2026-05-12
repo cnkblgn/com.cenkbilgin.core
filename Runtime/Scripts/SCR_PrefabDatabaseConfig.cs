@@ -16,7 +16,7 @@ namespace Core
         {
             if (id == null)
             {
-                throw new ArgumentNullException($"PrefabDatabaseConfig.TryGet() [{nameof(id)}]");
+                throw new ArgumentNullException($"[{nameof(id)}]");
             }
 
             if (table.TryGetValue(id, out prefab))
@@ -24,7 +24,7 @@ namespace Core
                 return true;
             }
 
-            Debug.LogError($"PrefabDatabaseConfig.TryGet() prefab not found! [{id}]");
+            Debug.LogError($"prefab not found! [{id}]");
             return false;
         }
 
@@ -40,7 +40,7 @@ namespace Core
 
                 if (prefab == null)
                 {
-                    Debug.LogError($"PrefabDatabaseConfig.Build() prefab == null at [{i}]");
+                    Debug.LogError($"prefab == null at [{i}]");
                     continue;
                 }
 
@@ -48,7 +48,7 @@ namespace Core
 
                 if (table.ContainsKey(id))
                 {
-                    Debug.LogError($"PrefabDatabaseConfig.Build() duplicate prefab [{i}]");
+                    Debug.LogError($"duplicate prefab [{i}]");
                     continue;
                 }
 

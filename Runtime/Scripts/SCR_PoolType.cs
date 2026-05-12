@@ -3,6 +3,8 @@ namespace Core
     public enum PoolType
     {
         SINGLE,
-        RING_BUFFER
+        RING_BUFFER,
+        PING_PONG,
+        RELEASE,
     }
 }

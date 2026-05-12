@@ -30,12 +30,12 @@ namespace Core.Localization
 
             if (!IsParsed)
             {
-                throw new InvalidOperationException($"LocalizationDatabaseConfig.GetLanguage() database is not parsed!");
+                throw new InvalidOperationException($"Database is not parsed!");
             }
 
             if (index < 0 || index >= database.Length)
             {
-                throw new ArgumentOutOfRangeException($"LocalizationDatabaseConfig.GetLanguage() invalid access [{index}]");
+                throw new ArgumentOutOfRangeException($"Invalid access [{index}]");
             }
 
             return database[index];
@@ -44,16 +44,16 @@ namespace Core.Localization
         { 
             if (file == null)
             {
-                Debug.LogError("LocalizationDatabase.TryParse() file == null");
+                Debug.LogError("file == null");
                 return false;
             }
 
             try
             {
-                database = LocalizationUtility.ParseAll(file.text, ',', out languages, out keys);
+                database = LocalizationFactory.ParseAll(file.text, ',', out languages, out keys);
                 isParsed = true;
 
-                Debug.Log($"LocalizationDatabase.TryParse() parse successfull");
+                Debug.Log($"Parse successfull!");
             }
             catch (Exception e)
             {
@@ -62,7 +62,7 @@ namespace Core.Localization
                 languages = Array.Empty<string>();
                 isParsed = false;
 
-                Debug.LogError($"LocalizationDatabase.TryParse() {e.Message}", this);
+                Debug.LogError($"Parse failed: {e.Message}", this);
             }
 
             return isParsed;

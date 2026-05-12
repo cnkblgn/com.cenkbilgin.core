@@ -155,7 +155,7 @@ namespace Core
         {
             if (commandInstance == null)
             {
-                Debug.LogError("DebugCommandData.Insert() commandInstance == null");
+                Debug.LogError("commandInstance == null");
                 return;
             }
 
@@ -173,13 +173,13 @@ namespace Core
         {
             if (commandInstance == null)
             {
-                Debug.LogError("DebugCommandData.Revert() commandInstance == null");
+                Debug.LogError("commandInstance == null");
                 return;
             }
 
             if (!data.Contains(commandInstance))
             {
-                Debug.LogError("DebugCommandData.Revert() !data.Contains(commandInstance)");
+                Debug.LogError("!data.Contains(commandInstance)");
                 return;
             }
 

@@ -13,14 +13,6 @@ namespace Core
     [DisallowMultipleComponent]
     public class ManagerCoreGame : Manager<ManagerCoreGame>
     {
-        public interface IContextHandler 
-        { 
-            /// <summary> Called when game wants to resume </summary>
-            public bool OnTryResumeGame();
-            /// <summary> Called when game wants to pause </summary>
-            public bool OnTryPauseGame(); 
-        }
-
         public static event Action<GameState> OnGameStateChanged = null;
         public static event Action<float> OnCurrentSceneLoading = null;
         public static event Action<string> OnBeforeSceneChanged = null;
@@ -39,7 +31,7 @@ namespace Core
         [SerializeField, ReadOnly] private string[] playableScenes = null;
         [SerializeField, ReadOnly] private string[] buildScenes = null;
 
-        private readonly List<IContextHandler> contextHandlers = new();
+        private readonly List<IGameStateHandler> thisHandlers = new();
         private Coroutine sceneCoroutine = null;
         private Coroutine timeCoroutine = null;
         private bool timeCoroutinePause = false;
@@ -123,23 +115,23 @@ namespace Core
             }
         }
 
-        public void InstertContext(IContextHandler value)
+        public void InstertStateHandler(IGameStateHandler value)
         {
-            if (contextHandlers.Contains(value))
+            if (thisHandlers.Contains(value))
             {
                 return;
             }
 
-            contextHandlers.Add(value);
+            thisHandlers.Add(value);
         }
-        public void RemoveContext(IContextHandler value)
+        public void RemoveStateHandler(IGameStateHandler value)
         {
-            if (!contextHandlers.Contains(value))
+            if (!thisHandlers.Contains(value))
             {
                 return;
             }
 
-            contextHandlers.Remove(value);
+            thisHandlers.Remove(value);
         }
 
         public void ResumeGame()
@@ -149,9 +141,9 @@ namespace Core
                 return;
             }
 
-            for (int i = contextHandlers.Count - 1; i >= 0; i--)
+            for (int i = thisHandlers.Count - 1; i >= 0; i--)
             {
-                if (!contextHandlers[i].OnTryResumeGame())
+                if (!thisHandlers[i].OnTryResumeGame())
                 {
                     return;
                 }
@@ -166,9 +158,9 @@ namespace Core
                 return;
             }
 
-            for (int i = contextHandlers.Count - 1; i >= 0; i--)
+            for (int i = thisHandlers.Count - 1; i >= 0; i--)
             {
-                if (!contextHandlers[i].OnTryPauseGame())
+                if (!thisHandlers[i].OnTryPauseGame())
                 {
                     return;
                 }

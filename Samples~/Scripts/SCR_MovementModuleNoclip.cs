@@ -6,7 +6,7 @@ namespace Game
 {
     using static InputActionDatabase;
 
-    public class MovementProcessorNoclip : MonoBehaviour, IMovementProcessor
+    public class MovementModuleNoclip : MonoBehaviour, IMovementModule
     {
         public int Priority => 0;
         public bool IsActive => isActive;
@@ -14,22 +14,29 @@ namespace Game
         [Header("_")]
         [SerializeField, Min(1)] private int maxStep = 15;
 
-        private MovementController movementController = null;
+        private MovementController controller = null;
         private float targetSpeed = 0;
         private int targetIndex = 7;
         private int movementToken = 0;
         private bool isActive = false;
 
-        private void Awake() => movementController = GetComponent<MovementController>();
+        public void Bind(MovementController controller)
+        {
+            this.controller = controller;
+        }
+        public void Unbind(MovementController controller)
+        {
 
-        public void OnBeforeMove(MovementController movementController)
+        }
+
+        public void OnBeforeMove()
         {
             if (!isActive)
             {
                 return;
             }
 
-            Vector3 direction = this.movementController.GetCameraOrigin().TransformVector(new(Move.GetAxis().x, 0f, Move.GetAxis().y));
+            Vector3 direction = controller.GetCameraOrigin().TransformVector(new(Move.GetAxis().x, 0f, Move.GetAxis().y));
 
             if (ManagerCoreInput.Instance.PointerScroll.y > 0)
             {
@@ -44,9 +51,9 @@ namespace Game
 
             targetSpeed = targetIndex * 0.5f;
 
-            movementController.SetVelocity(targetSpeed * direction);
+            controller.SetVelocity(targetSpeed * direction);
         }
-        public void OnBeforeLook(MovementController controller) { }
+        public void OnBeforeLook() { }
 
         public void Toggle()
         {
@@ -54,15 +61,15 @@ namespace Game
 
             if (isActive)
             {
-                movementController.DisableMovement(out movementToken);
-                movementController.SetCollisionMask(0);
-                movementController.SetVelocity(Vector3.zero);
+                controller.DisableMovement(out movementToken);
+                controller.SetCollisionMask(0);
+                controller.SetVelocity(Vector3.zero);
             }
             else
             {
 
-                movementController.EnableMovement(ref movementToken);
-                movementController.ResetCollisionMask();
+                controller.EnableMovement(ref movementToken);
+                controller.ResetCollisionMask();
             }
         }
     }

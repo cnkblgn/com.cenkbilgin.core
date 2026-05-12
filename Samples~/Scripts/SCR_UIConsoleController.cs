@@ -10,7 +10,6 @@ using Core.Input;
 namespace Game
 {
     using static CoreUtility;
-    using static TaskUtility;
     using static InputActionDatabase;
 
     [DisallowMultipleComponent]
@@ -25,22 +24,21 @@ namespace Game
         private const string ELLIPSIS = "...";
         private const int MAX_LOG_COUNT = 64;
         private const int MAX_SUGGESTION_COUNT = 5;
-
         public bool IsOpen => isOpen;
 
         [Header("_")]
-        [SerializeField, Required] private TMP_InputField consoleInputField = null;
+        [SerializeField] private TMP_InputField consoleInputField = null;
 
         [Header("_")]
-        [SerializeField, Required] private ScrollRect consoleHistoryRect = null;
-        [SerializeField, Required] private TMP_Text consoleHistoryText = null;
+        [SerializeField] private ScrollRect consoleHistoryRect = null;
+        [SerializeField] private TMP_Text consoleHistoryText = null;
 
         [Header("_")]
-        [SerializeField, Required] private RectTransform consoleSuggestionContainer = null;
-        [SerializeField, Required] private TMP_Text consoleSuggestionText = null;
+        [SerializeField] private RectTransform consoleSuggestionContainer = null;
+        [SerializeField] private TMP_Text consoleSuggestionText = null;
         [SerializeField] private Vector2 consoleSuggestionOffset = new(16, 16);
 
-        private readonly List<string> logBuffer = new(MAX_LOG_COUNT);
+        private readonly RingBufferArray<string> logBuffer = new(MAX_LOG_COUNT);
         private readonly List<DebugCommandInstanceBase> suggestionBuffer = new();
         private readonly StringBuilder logBuilder = new(8192);
         private readonly StringBuilder suggestionBuilder = new(1024);
@@ -52,10 +50,12 @@ namespace Game
         private int suggestionIndex = -1;
         private bool requestSuggestionDraw = false;
         private bool isOpen = false;
+        private bool isDirty = false;
 
         private void Awake()
         {
             thisCanvas = GetComponent<Canvas>();
+
             consoleInputField.onFocusSelectAll = false;
             consoleInputField.resetOnDeActivation = false;
             consoleInputField.restoreOriginalTextOnEscape = false;
@@ -110,13 +110,10 @@ namespace Game
                 }
                 else
                 {
-                    if (UIUp.GetKeyDown())
+                    if (UIUp.GetKeyDown() && lastCommand != STRING_EMPTY)
                     {
-                        if (lastCommand != STRING_EMPTY)
-                        {
-                            RebuildInput(lastCommand);
-                            lastCommand = STRING_EMPTY;
-                        }
+                        RebuildInput(lastCommand);
+                        lastCommand = STRING_EMPTY;
                     }
                 }
             }
@@ -135,13 +132,19 @@ namespace Game
                 return;
             }
 
-            if (!requestSuggestionDraw)
+            if (isDirty)
             {
-                return;
+                RebuildText();
+                LayoutRebuilder.ForceRebuildLayoutImmediate(consoleHistoryRect.content);
+                consoleHistoryRect.verticalNormalizedPosition = 0;
+                isDirty = false;
             }
 
-            requestSuggestionDraw = false;
-            DrawSuggestion();
+            if (requestSuggestionDraw)
+            {
+                requestSuggestionDraw = false;
+                DrawSuggestion();
+            }
         }
         private void OnEnable()
         {
@@ -177,33 +180,15 @@ namespace Game
             switch (type)
             {
                 case LogType.Error:
-                    Log(value.ToRed());
-                    break;
-                case LogType.Assert:
-                    Log(value.ToYellow());
-                    break;
+                case LogType.Exception: Log(value.ToRed()); break;
                 case LogType.Warning:
-                    Log(value.ToYellow());
-                    break;
-                case LogType.Log:
-                    Log(value);
-                    break;
-                case LogType.Exception:
-                    Log(value.ToRed());
-                    break;
-                default:
-                    Log(value);
-                    break;
+                case LogType.Assert: Log(value.ToYellow()); break;
+                default: Log(value); break;
             }
         }
         private void OnInput(string value)
         {
-            if (!isOpen)
-            {
-                return;
-            }
-
-            if (Console.GetKeyDown())
+            if (!isOpen || Console.GetKeyDown())
             {
                 return;
             }
@@ -217,16 +202,17 @@ namespace Game
                 Log(input);
             }
 
-            if (!string.IsNullOrEmpty(input) && !string.IsNullOrWhiteSpace(input))
+            if (!string.IsNullOrWhiteSpace(input))
             {
                 lastCommand = input;
             }
 
             consoleInputField.text = STRING_EMPTY;
-            if (isOpen) consoleInputField.ActivateInputField();
 
-            LayoutRebuilder.ForceRebuildLayoutImmediate(consoleHistoryRect.content);
-            this.WaitFrame(() => consoleHistoryRect.verticalNormalizedPosition = 0);
+            if (isOpen)
+            {
+                consoleInputField.ActivateInputField();
+            }
         }
 
         public void Show()
@@ -235,6 +221,7 @@ namespace Game
             thisCanvas.Show();
             consoleInputField.ActivateInputField();
 
+            ManagerCoreInput.Instance.SwitchMap("UI");
             OnOpened?.Invoke();
         }
         public void Hide()
@@ -246,6 +233,7 @@ namespace Game
             requestSuggestionDraw = false;
             ClearSuggestion();
 
+            ManagerCoreInput.Instance.SwitchMap("Gameplay");
             OnClosed?.Invoke();
         }
         private void Clear()
@@ -253,44 +241,40 @@ namespace Game
             logBuffer.Clear();
             lastLog = STRING_EMPTY;
             lastLogCount = 0;
-            RebuildText();
+            isDirty = true;
         }
         private void Log(string value)
         {
             if (value == lastLog && logBuffer.Count > 0)
             {
                 lastLogCount++;
-                logBuffer[^1] = ($"{DECORATOR}{value} " + $"(x{lastLogCount})".ToYellow());
-                RebuildText();
+                logBuffer.SetLatest($"{DECORATOR}{value} " + $"(x{lastLogCount})".ToYellow());
+                isDirty = true;
                 return;
             }
 
             lastLog = value;
             lastLogCount = 1;
 
-            if (logBuffer.Count >= MAX_LOG_COUNT)
-            {
-                logBuffer.RemoveAt(0);
-            }
-
             logBuffer.Add($"{DECORATOR}{value}");
-            RebuildText();
+            isDirty = true;
         }
+
         private void RebuildText()
         {
             logBuilder.Clear();
 
-            foreach (var value in logBuffer)
+            for (int i = 0; i < logBuffer.Count; i++)
             {
-                logBuilder.AppendLine(value);
+                logBuilder.AppendLine(logBuffer.Get(i));
             }
 
-            consoleHistoryText.text = logBuilder.ToString();
+            consoleHistoryText.SetText(logBuilder);
         }
         private void RebuildInput(string value)
         {
             consoleInputField.text = value;
-            consoleInputField.caretPosition = consoleInputField.text.Length;
+            consoleInputField.caretPosition = value.Length;
             consoleInputField.ActivateInputField();
         }
 
@@ -343,6 +327,7 @@ namespace Game
 
             int spaceIndex = value.IndexOf(' ');
             string prefix = spaceIndex >= 0 ? value[..spaceIndex] : value;
+
             IReadOnlyList<DebugCommandInstanceBase> data = DebugCommandData.Data;
 
             for (int i = 0; i < data.Count; i++)
@@ -367,13 +352,11 @@ namespace Game
             suggestionBuilder.Clear();
 
             int total = suggestionBuffer.Count;
-            bool overflow = total > MAX_SUGGESTION_COUNT;
-            int count = overflow ? MAX_SUGGESTION_COUNT : total;
-            int index = overflow && suggestionIndex >= 0 ? Mathf.Clamp(suggestionIndex - (count - 1), 0, total - count) : 0;
+            int count = Mathf.Min(total, MAX_SUGGESTION_COUNT);
 
-            for (int i = index; i < index + count; i++)
+            for (int i = 0; i < count; i++)
             {
-                var command = suggestionBuffer[i];
+                DebugCommandInstanceBase command = suggestionBuffer[i];
                 bool selected = i == suggestionIndex;
 
                 suggestionBuilder.Append(selected ? OPEN_YELLOW : OPEN_GHOST);
@@ -381,21 +364,10 @@ namespace Game
                 suggestionBuilder.Append(command.ID);
                 suggestionBuilder.Append(CLOSE_COLOR);
 
-                if (i < count - 1 || overflow)
+                if (i < count - 1)
                 {
                     suggestionBuilder.Append('\n');
                 }
-            }
-
-            if (overflow)
-            {
-                string t = OPEN_GHOST + "   " + ELLIPSIS + CLOSE_COLOR + '\n';
-
-                bool insertAtStart = suggestionIndex >= MAX_SUGGESTION_COUNT;
-                bool insertAtEnd = suggestionIndex < total - 1;
-
-                if (insertAtStart) suggestionBuilder.Insert(0, t);
-                if (insertAtEnd) suggestionBuilder.Append(t);
             }
 
             consoleSuggestionText.SetText(suggestionBuilder);

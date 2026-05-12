@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Audio;
 
 namespace Core.Audio
 {
@@ -10,10 +11,15 @@ namespace Core.Audio
     [RequireComponent(typeof(AudioLowPassFilter))]
     public class AudioEmitter : MonoBehaviour
     {
+        public static event Action<AudioEmitter> OnCreated = null;
+        public static event Action<AudioEmitter> OnDestroyed = null;
+
         private const float OCCLUSION_DEPTH = 2;
         private const float OCCLUSION_FACTOR = 1 / (OCCLUSION_DEPTH * 3);
+        private const float OCCLUSION_INTERVAL = 0.25F;
+        private const float MAX_CUTOFF = 22000f;
 
-        public Transform ThisTransform => thisTransform;
+        public string AudioGroup => thisAudioGroup.name;
         public bool IsPlaying => isPlaying; 
         public bool IsPaused => isPaused; 
 
@@ -23,10 +29,9 @@ namespace Core.Audio
         [SerializeField, HideInInspector] private AudioSource thisAudioSource = null;
         [SerializeField, HideInInspector] private AudioLowPassFilter thisAudioFilter = null;
 
-        private Action<GameState> onGameStateChangedCallback = null;
         private AudioClip thisAudioClip = null;
         private Transform thisAudioListener = null;
-        private AudioGroup thisAudioGroup = AudioGroup.MASTER;
+        private AudioMixerGroup thisAudioGroup = null;
         private AnimationCurve occlusionLowpassCurve = null;
         private AnimationCurve occlusionVolumeCurve = null;
         private LayerMask occlusionMask = 0;
@@ -39,12 +44,13 @@ namespace Core.Audio
         private float basePitch = 1;
         private float baseVolume = 1;
         private float targetVolume = 1;
-        private float targetLowpass = 22000;
+        private float targetLowpass = MAX_CUTOFF;
         private float distanceToListener = float.MinValue;
         private float occlusionValue = 0;
-        private float occlusionLowpassBlendSpeed = 12.5f;
-        private float occlusionVolumeBlendSpeed = 12.5f;
-        private float occlusionRaycastAngle = 5.0f;
+        private float occlusionBlend = 12.5f;
+        private float occlusionAngle = 5.0f;
+        private float occlusionUpdateTime = 0f;
+        private float maxDistanceSqr = 0f;
         private float volumeMultiplier = 1;
         private float pitchMultiplier = 1;
         private float lowpassMultiplier = 1;
@@ -57,8 +63,48 @@ namespace Core.Audio
         private bool isPaused = false;
         private bool hasFocus = true;
 
-        private void Awake() => onGameStateChangedCallback = OnGameStateChanged;
-        private void Update()
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void RESET()
+        {
+            OnCreated = null;
+            OnDestroyed = null;
+        }
+
+        private void Start() => OnCreated?.Invoke(this);
+        private void OnDestroy() => OnDestroyed?.Invoke(this);
+#if UNITY_EDITOR
+        private void Reset()
+        {
+            if (thisTransform == null) thisTransform = GetComponent<Transform>();
+            if (thisAudioSource == null) thisAudioSource = GetComponent<AudioSource>();
+            if (thisAudioFilter == null) thisAudioFilter = GetComponent<AudioLowPassFilter>();
+
+            thisAudioFilter.cutoffFrequency = MAX_CUTOFF;
+            thisAudioSource.priority = 128;
+            thisAudioSource.playOnAwake = false;
+            thisAudioSource.loop = false;
+            distanceToListener = float.MinValue;
+        }
+        private void OnDrawGizmos()
+        {
+            if (!useGizmos || thisTransform == null || thisAudioListener == null || !occlusionEnabled)
+            {
+                return;
+            }
+
+            Gizmos.color = occlusionFront ? Color.red : Color.green;
+            Gizmos.DrawRay(thisTransform.position, directionToTarget * distanceToListener);
+
+            Gizmos.color = occlusionLeft ? Color.red : Color.green;
+            Gizmos.DrawRay(thisTransform.position, directionToLeft * distanceToListener);
+
+            Gizmos.color = occlusionRight ? Color.red : Color.green;
+            Gizmos.DrawRay(thisTransform.position, directionToRight * distanceToListener);
+        }
+#endif
+        private void OnApplicationFocus(bool focus) => hasFocus = focus;
+
+        public void Tick()
         {
             if (!hasFocus)
             {
@@ -72,35 +118,17 @@ namespace Core.Audio
                 return;
             }
 
-            if (!thisAudioSource.loop)
+            if (!isPlaying)
             {
-                if (!isPlaying && !IsPaused)
+                if (!isPaused)
                 {
                     Stop();
-                    return;
                 }
 
-                if (thisAudioSource.time >= thisAudioSource.clip.length - 0.001f)
-                {
-                    Stop();
-                    return;
-                }
-            }
-            else
-            {
-                if (!isPlaying && !IsPaused)
-                {
-                    Stop();
-                    return;
-                }
-            }
-
-            if (thisAudioSource.isVirtual)
-            {
                 return;
             }
 
-            if (!isPlaying)
+            if (thisAudioSource.isVirtual)
             {
                 return;
             }
@@ -112,154 +140,68 @@ namespace Core.Audio
                 return;
             }
 
+            if (Time.unscaledTime < occlusionUpdateTime)
+            {
+                return;
+            }
+
+            occlusionUpdateTime = Time.unscaledTime + OCCLUSION_INTERVAL;
+
             Occlude();
         }
+        public void Play(AudioClip clip, Transform listener, AudioMixerGroup group, float blend, float volume, float pitch, float minDistance, float maxDistance, bool loop, LayerMask occlusionMask, float occlusionAngle, float occlusionBlend, AnimationCurve occlusionLowpass, AnimationCurve occlusionVolume)
+        {
+            Play(clip, listener, group, blend, volume, pitch, minDistance, maxDistance, loop);
 
+            this.occlusionMask = occlusionMask;
+            this.occlusionLowpassCurve = occlusionLowpass;
+            this.occlusionVolumeCurve = occlusionVolume;
+            this.occlusionBlend = occlusionBlend;
+            this.occlusionAngle = occlusionAngle;
+
+            occlusionEnabled = blend >= 1;
+            occlusionUpdateTime = 0f;
+
+            Occlude(true);
+        }
+        public void Play(AudioClip clip, Transform listener, AudioMixerGroup group, float blend, float volume, float pitch, float minDistance, float maxDistance, bool loop)
+        {
+            if (clip == null)
+            {
 #if UNITY_EDITOR
-        private void Reset()
-        {
-            if (thisTransform == null)
-            {
-                thisTransform = GetComponent<Transform>();
-            }
-
-            if (thisAudioSource == null)
-            {
-                thisAudioSource = GetComponent<AudioSource>();
-            }
-
-            if (thisAudioFilter == null)
-            {
-                thisAudioFilter = GetComponent<AudioLowPassFilter>();
-            }
-
-            thisAudioFilter.cutoffFrequency = 22000;
-            thisAudioSource.priority = 128;
-            thisAudioSource.playOnAwake = false;
-            thisAudioSource.loop = false;
-            distanceToListener = float.MinValue;
-        }
-        private void OnDrawGizmos()
-        {
-            if (!useGizmos)
-            {
-                return;
-            }
-
-            if (ThisTransform == null)
-            {
-                return;
-            }
-
-            if (thisAudioListener == null)
-            {
-                return;
-            }
-
-            if (!occlusionEnabled)
-            {
-                return;
-            }
-
-            Gizmos.color = occlusionFront ? Color.red : Color.green;
-            Gizmos.DrawRay(ThisTransform.position, directionToTarget * distanceToListener);
-
-            Gizmos.color = occlusionLeft ? Color.red : Color.green;
-            Gizmos.DrawRay(ThisTransform.position, directionToLeft * distanceToListener);
-
-            Gizmos.color = occlusionRight ? Color.red : Color.green;
-            Gizmos.DrawRay(ThisTransform.position, directionToRight * distanceToListener);
-        }
+                Debug.LogError("AudioClip is null!");
 #endif
-        private void OnEnable() => ManagerCoreGame.OnGameStateChanged += onGameStateChangedCallback;
-        private void OnDisable() => ManagerCoreGame.OnGameStateChanged -= onGameStateChangedCallback;
-        private void OnApplicationFocus(bool focus) => hasFocus = focus;
-
-        private void OnGameStateChanged(GameState gameState)
-        {
-            switch (gameState)
-            {
-                case GameState.NULL:
-                    if (thisAudioGroup != AudioGroup.MASTER)
-                    {
-                        Stop();
-                    }
-                    break;
-                case GameState.RESUME:
-                    Resume();
-                    break;
-                case GameState.PAUSE:
-                    if (thisAudioGroup != AudioGroup.MASTER)
-                    {
-                        Pause();
-                    }
-                    break;
-            }
-        }
-
-        private void Occlude(bool isFirstTime = false)
-        {
-            if (!occlusionEnabled)
-            {
                 return;
             }
 
-            if (thisAudioListener == null)
-            {
-                return;
-            }
+            occlusionEnabled = false;
 
-            Vector3 listenerVector = thisAudioListener.position - ThisTransform.position;
-            directionToTarget = listenerVector.normalized;
-            distanceToListener = listenerVector.magnitude;
+            thisAudioClip = clip;
+            thisAudioListener = listener;
+            thisAudioGroup = group;
 
-            if (distanceToListener > thisAudioSource.maxDistance)
-            {
-                return;
-            }
+            maxDistanceSqr = maxDistance * maxDistance;
 
-            Vector3 thisPosition = ThisTransform.position;
+            thisAudioFilter.cutoffFrequency = MAX_CUTOFF;
+            thisAudioFilter.lowpassResonanceQ = 1;
 
-            directionToLeft = Quaternion.AngleAxis(-occlusionRaycastAngle, Vector3.up) * directionToTarget;
-            directionToRight = Quaternion.AngleAxis(occlusionRaycastAngle, Vector3.up) * directionToTarget;
+            thisAudioSource.playOnAwake = false;
+            thisAudioSource.clip = thisAudioClip;
+            thisAudioSource.outputAudioMixerGroup = thisAudioGroup;
+            thisAudioSource.minDistance = minDistance;
+            thisAudioSource.maxDistance = maxDistance;
+            thisAudioSource.volume = volume * volumeMultiplier;
+            thisAudioSource.spatialBlend = blend;
+            thisAudioSource.pitch = pitch * pitchMultiplier;
+            thisAudioSource.loop = loop;
 
-            int frontHits = Physics.RaycastNonAlloc(thisPosition, directionToTarget, occlusionFrontHits, distanceToListener, occlusionMask, QueryTriggerInteraction.Ignore);
-            int leftHits = Physics.RaycastNonAlloc(thisPosition, directionToLeft, occlusionLeftHits, distanceToListener, occlusionMask, QueryTriggerInteraction.Ignore);
-            int rightHits = Physics.RaycastNonAlloc(thisPosition, directionToRight, occlusionRightHits, distanceToListener, occlusionMask, QueryTriggerInteraction.Ignore);
+            baseVolume = volume;
+            basePitch = pitch;
 
-            occlusionFront = frontHits > 0;
-            occlusionLeft = leftHits > 0;
-            occlusionRight = rightHits > 0;
+            if (!thisAudioSource.enabled) thisAudioSource.enabled = true;
 
-            if (occlusionFront)
-            {
-                occlusionValue += 1 * frontHits;
-            }
-            if (occlusionLeft)
-            {
-                occlusionValue += 1 * leftHits;
-            }
-            if (occlusionRight)
-            {
-                occlusionValue += 1 * rightHits;
-            }
-
-            targetLowpass = 22000f * (1 - occlusionLowpassCurve.Evaluate(occlusionValue * OCCLUSION_FACTOR)) * lowpassMultiplier;
-            targetVolume = baseVolume * (1 - occlusionVolumeCurve.Evaluate(occlusionValue * OCCLUSION_FACTOR));
-
-            if (isFirstTime)
-            {
-                thisAudioFilter.cutoffFrequency = targetLowpass;
-                thisAudioSource.volume = targetVolume;
-            }
-            else
-            {
-                thisAudioFilter.cutoffFrequency = thisAudioSource.clip.length <= Time.deltaTime ? targetLowpass : Mathf.Lerp(thisAudioFilter.cutoffFrequency, targetLowpass, occlusionLowpassBlendSpeed * Time.deltaTime);
-                thisAudioSource.volume = thisAudioSource.clip.length <= Time.deltaTime ? targetVolume : Mathf.Lerp(thisAudioSource.volume, targetVolume, occlusionVolumeBlendSpeed * Time.deltaTime) * volumeMultiplier;
-                thisAudioSource.pitch = basePitch * pitchMultiplier;
-            }
-
-            occlusionValue = 0;
+            thisAudioSource.Play();
+            isInitialized = true;
         }
         public void Stop()
         {
@@ -271,10 +213,12 @@ namespace Core.Audio
             thisAudioSource.Stop();
             thisAudioSource.clip = null;
             thisAudioSource.gameObject.SetActive(false);
+
             volumeMultiplier = 1;
             pitchMultiplier = 1;
             lowpassMultiplier = 1;
 
+            isPaused = false;
             isPlaying = false;
         }
         public void Pause()
@@ -292,57 +236,70 @@ namespace Core.Audio
             isPaused = false;
             thisAudioSource.UnPause();
         }
-
-        public void Play(AudioClip clip, Transform listener, AudioGroup group = AudioGroup.EFFECT, float blend = 1, float volume = 1, float pitch = 1, float minDistance = 1, float maxDistance = 100, bool loop = false, bool occulusion = false)
+        private void Occlude(bool isFirstTime = false)
         {
-            if (clip == null)
+            if (thisAudioListener == null)
             {
-#if UNITY_EDITOR
-                Debug.LogError("AudioEmitter.Play() clip is null!");
-#endif
                 return;
             }
 
-            ManagerCoreAudio m = ManagerCoreAudio.Instance;
-            occlusionMask = m.OcclusionMask;
-            occlusionLowpassCurve = m.OcclusionLowpassCurve;
-            occlusionVolumeCurve = m.OcclusionVolumeCurve;
-            occlusionLowpassBlendSpeed = m.OcclusionLowpassBlendSpeed;
-            occlusionVolumeBlendSpeed = m.OcclusionVolumeBlendSpeed;
-            occlusionRaycastAngle = m.OcclusionRaycastAngle;
+            Vector3 sourcePos = thisTransform.position;
+            Vector3 listenerPos = thisAudioListener.position;
+            Vector3 toListener = listenerPos - sourcePos;
 
-            thisAudioClip = clip;
-            thisAudioListener = listener;
-            thisAudioGroup = group;
-
-            occlusionEnabled = occulusion && blend >= 1;
-            distanceToListener = float.MinValue;
-
-            thisAudioFilter.cutoffFrequency = 22000;
-            thisAudioFilter.lowpassResonanceQ = 1;
-            thisAudioSource.playOnAwake = false;
-
-            thisAudioSource.clip = thisAudioClip;
-            thisAudioSource.outputAudioMixerGroup = ManagerCoreAudio.Instance.GetAudioGroup(thisAudioGroup);
-            thisAudioSource.minDistance = minDistance;
-            thisAudioSource.maxDistance = maxDistance;
-            thisAudioSource.volume = volume * volumeMultiplier;
-            thisAudioSource.spatialBlend = blend;
-            thisAudioSource.pitch = pitch * pitchMultiplier;
-            thisAudioSource.loop = loop;
-            baseVolume = volume;
-            basePitch = pitch;
-
-            if (!thisAudioSource.enabled)
+            float sqrDist = toListener.sqrMagnitude;
+            if (sqrDist > maxDistanceSqr)
             {
-                thisAudioSource.enabled = true;
+                return;
             }
 
-            thisAudioSource.Play();
-            Occlude(true);
+            float dist = Mathf.Sqrt(sqrDist);
+            if (dist <= 0.0001f)
+            {
+                return;
+            }
 
-            isInitialized = true;
+            directionToTarget = toListener / dist;
+            distanceToListener = dist;
+
+            directionToLeft = Quaternion.AngleAxis(-occlusionAngle, Vector3.up) * directionToTarget;
+            directionToRight = Quaternion.AngleAxis(occlusionAngle, Vector3.up) * directionToTarget;
+
+            int frontHits = Physics.RaycastNonAlloc(sourcePos, directionToTarget, occlusionFrontHits, dist, occlusionMask, QueryTriggerInteraction.Ignore);
+            int leftHits = Physics.RaycastNonAlloc(sourcePos, directionToLeft, occlusionLeftHits, dist, occlusionMask, QueryTriggerInteraction.Ignore);
+            int rightHits = Physics.RaycastNonAlloc(sourcePos, directionToRight, occlusionRightHits, dist, occlusionMask, QueryTriggerInteraction.Ignore);
+
+            occlusionFront = frontHits > 0;
+            occlusionLeft = leftHits > 0;
+            occlusionRight = rightHits > 0;
+
+            float localOcclusion = 0f;
+            if (occlusionFront) localOcclusion += frontHits;
+            if (occlusionLeft) localOcclusion += leftHits;
+            if (occlusionRight) localOcclusion += rightHits;
+
+            occlusionValue = localOcclusion;
+
+            float occlusionT = Mathf.Clamp01(occlusionValue * OCCLUSION_FACTOR);
+            targetLowpass = MAX_CUTOFF * (1f - occlusionLowpassCurve.Evaluate(occlusionT)) * lowpassMultiplier;
+            targetVolume = baseVolume * (1f - occlusionVolumeCurve.Evaluate(occlusionT)) * volumeMultiplier;
+
+            if (isFirstTime)
+            {
+                thisAudioFilter.cutoffFrequency = targetLowpass;
+                thisAudioSource.volume = targetVolume;
+            }
+            else
+            {
+                thisAudioFilter.cutoffFrequency = Mathf.Lerp(thisAudioFilter.cutoffFrequency, targetLowpass, occlusionBlend * Time.deltaTime);
+                thisAudioSource.volume = Mathf.Lerp(thisAudioSource.volume, targetVolume, occlusionBlend * Time.deltaTime);
+            }
+
+            thisAudioSource.pitch = basePitch * pitchMultiplier;
         }
+
+        public Vector3 GetPosition() => thisTransform.position;
+        public void SetPosition(Vector3 position) => thisTransform.position = position;
 
         public float GetPitch() => pitchMultiplier;
         public void SetPitch(float value) => pitchMultiplier = value;
@@ -350,14 +307,14 @@ namespace Core.Audio
         public float GetVolume() => volumeMultiplier;
         public void SetVolume(float value) => volumeMultiplier = value;
 
-        public float GetLowpass() => 22000f * lowpassMultiplier;
+        public float GetLowpass() => MAX_CUTOFF * lowpassMultiplier;
         public void SetLowpass(float value)
         {
             lowpassMultiplier = value;
 
             if (!occlusionEnabled)
             {
-                thisAudioFilter.cutoffFrequency = 22000f * lowpassMultiplier;
+                thisAudioFilter.cutoffFrequency = MAX_CUTOFF * lowpassMultiplier;
             }
         }
 

@@ -33,14 +33,14 @@ namespace Core
 
             if (!IsMarkedForDestroy && Application.isPlaying && !ManagerCorePersistent.Instance.IsLoading && !ManagerCoreGame.Instance.IsLoading)
             {
-                Debug.LogError($"PersistentInstanceEntity.OnDestroy() [{name}] destroyed without persistence or destroyed illegally");
+                Debug.LogError($"[{name}] destroyed without persistence or destroyed illegally");
             }
         }
         protected virtual void Start()
         {
             if (instanceID == Guid.Empty)
             {
-                Debug.LogError($"PersistentInstanceEntity.Start() instanceID missing for {gameObject.name}", gameObject);
+                Debug.LogError($"InstanceID missing for {gameObject.name}", gameObject);
             }
         }
 #if UNITY_EDITOR

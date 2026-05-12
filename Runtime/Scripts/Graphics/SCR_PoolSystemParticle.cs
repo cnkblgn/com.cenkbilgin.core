@@ -1,14 +1,13 @@
-using System;
 using UnityEngine;
 
 namespace Core.Graphics
 {
-    using static CoreUtility;
-
-    [Serializable]
-    public class PoolSystemParticle : PoolSystem<ParticleEmitter>
+    public sealed class PoolSystemParticle : PoolSystem<ParticleEmitter>
     {
-        protected override void OnInitialize(ParticleEmitter item)
+        public override PoolType Type => PoolType.SINGLE;
+        public override string ID => "PARTICLE_POOL";
+
+        protected sealed override void OnInitialize(ParticleEmitter item)
         {
             ParticleSystem[] emitters = item.GetComponentsInChildren<ParticleSystem>();
 
@@ -19,7 +18,8 @@ namespace Core.Graphics
                 mainModule.simulationSpace = ParticleSystemSimulationSpace.World;
             }
         }
-        protected override void OnReset(ParticleEmitter item) => item.Clear();
+        protected sealed override void OnReset(ParticleEmitter item) => item.Clear();
+
         public ParticleEmitter Spawn(Vector3 position, Vector3 direction)
         {
             ParticleEmitter particleEmitter = GetNext();

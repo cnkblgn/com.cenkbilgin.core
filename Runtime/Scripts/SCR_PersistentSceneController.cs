@@ -27,7 +27,7 @@ namespace Core
             {
                 if (entity == null)
                 {
-                    throw new Exception("PersistentSceneController.Awake() entity == null");
+                    throw new Exception();
                 }
 
                 entityTable[entity.InstanceID] = entity;
@@ -83,21 +83,21 @@ namespace Core
                 {
                     entity.GenerateID(true);
 
-                    Debug.LogWarning($"PersistentSceneController.Populate() Duplicate GUID fixed: {group.Key} on object {entity.name}, new GUID: {entity.InstanceID}");
+                    Debug.LogWarning($"Duplicate GUID fixed: {group.Key} on object {entity.name}, new GUID: {entity.InstanceID}");
 
                     UnityEditor.EditorUtility.SetDirty(entity);
                 }
             }
 
             UnityEditor.EditorUtility.SetDirty(gameObject);
-            Debug.LogWarning($"PersistentSceneController.Populate() collected {entityList.Count} objects!");
+            Debug.LogWarning($"Collected {entityList.Count} objects!");
         }
 #endif
         public bool TryRegister(GameObject gameObject, out PersistentInstanceEntity persistentObject)
         {
             if (!gameObject.TryGetComponent(out persistentObject))
             {
-                Debug.LogError($"PersistentSceneController.RegisterController() [{gameObject.name}] has no [PersistentInstanceEntity], Destroying [{gameObject.name}]");
+                Debug.LogError($"[{gameObject.name}] has no [PersistentInstanceEntity], Destroying [{gameObject.name}]");
                 Destroy(gameObject);
                 return false;
             }
@@ -116,7 +116,7 @@ namespace Core
 
             if (entityTable.ContainsKey(entityObject.InstanceID))
             {
-                Debug.LogError($"PersistentSceneController.Register() Trying to duplicate {entityObject.InstanceID}");
+                Debug.LogError($"Trying to duplicate {entityObject.InstanceID}");
                 return false;
             }
 
@@ -208,12 +208,12 @@ namespace Core
                     }
                     else
                     {
-                        Debug.LogWarning($"PersistentSceneController.Import() [PersistentInstanceEntity] component not found in [{gameObject.name}]");
+                        Debug.LogWarning($"[PersistentInstanceEntity] component not found in [{gameObject.name}]");
                     }
                 }
                 else
                 {
-                    Debug.LogWarning($"PersistentSceneController.Import() Prefab not found for Orphan data: [{remainingData.Value.PrefabID}]");
+                    Debug.LogWarning($"Prefab not found for Orphan data: [{remainingData.Value.PrefabID}]");
                 }
             }
 

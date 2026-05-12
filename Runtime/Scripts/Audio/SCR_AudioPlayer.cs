@@ -44,7 +44,7 @@ namespace Core.Audio
         {
             if (TryGetComponent(out AudioEmitter _))
             {
-                Debug.LogError($"{"AudioPlayer.Validate() [AudioPlayer]".ToYellow()} and {"[AudioEmitter]".ToYellow()} components can't exist in same gameobject!");
+                Debug.LogError($"{"[AudioPlayer]".ToYellow()} and {"[AudioEmitter]".ToYellow()} components can't exist in same gameobject!");
                 return;
             }
 
@@ -94,7 +94,25 @@ namespace Core.Audio
                 FadeIn();
             }
 
-            audioObject.Play(audioClip, ManagerCoreAudio.Instance.AudioListener, audioGroup, blend, volume * (randomizeVolume ? Random.Range(0.75f, 1.15f) : 1), pitch * (randomizePitch ? Random.Range(0.9f, 1.1f) : 1), minDistance, maxDistance, playOnLoop, useOcculusion);
+            ManagerCoreAudio m = ManagerCoreAudio.Instance;
+
+            audioObject.Play
+            (
+                audioClip, 
+                m.AudioListener,
+                m.GetAudioGroup(audioGroup), 
+                blend, 
+                volume * (randomizeVolume ? Random.Range(0.75f, 1.15f) : 1), 
+                pitch * (randomizePitch ? Random.Range(0.9f, 1.1f) : 1), 
+                minDistance,
+                maxDistance, 
+                playOnLoop, 
+                m.OcclusionMask,
+                m.OcclusionAngle,
+                m.OcclusionBlend,
+                m.OcclusionLowpass,
+                m.OcclusionVolume
+            );
 
             SetLowpass(lowpass / 22000f);
             SetResonance(rezonance);

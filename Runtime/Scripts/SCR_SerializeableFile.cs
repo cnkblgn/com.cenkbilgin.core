@@ -27,7 +27,7 @@ namespace Core
                 return;
             }
 
-            Data = SerializerObject.Load<T>(path, useInEditor);
+            Data = SerializerSystem.Load<T>(path, useInEditor);
 
             if (Data == null)
             {
@@ -44,7 +44,7 @@ namespace Core
                 return;
             }
 
-            SerializerObject.Save(path, Data, useInEditor);
+            SerializerSystem.Save(path, Data, useInEditor);
             isInitialized = true;
         }
         public void Clear()

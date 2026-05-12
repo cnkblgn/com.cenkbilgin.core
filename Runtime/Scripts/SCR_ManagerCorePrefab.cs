@@ -15,10 +15,7 @@ namespace Core
         {
             base.Awake();
 
-            if (database == null)
-            {
-                throw new NullReferenceException($"ManagerCorePrefab.Awake() [{nameof(database)}]");
-            }
+            if (database == null) throw new NullReferenceException($"[{nameof(database)}]");
         }
 
         public bool TrySpawn(string id, Vector3 position, Quaternion rotation, Transform parent, out GameObject gameObject)

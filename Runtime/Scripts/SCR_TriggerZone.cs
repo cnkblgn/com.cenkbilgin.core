@@ -65,7 +65,7 @@ namespace Core
 
             if (debugMode)
             {
-                Debug.Log("TriggerZone.Enter() " + other.gameObject.name);
+                Debug.Log("TriggerZoneEnter: " + other.gameObject.name);
             }
         }
         private void OnTriggerExit(Collider other)
@@ -75,7 +75,7 @@ namespace Core
 
             if (debugMode)
             {
-                Debug.Log("TriggerZone.Exit() " + other.gameObject.name);
+                Debug.Log("TriggerZoneExit: " + other.gameObject.name);
             }
         }
         private void OnDestroy()

@@ -6,7 +6,7 @@ namespace Core.Graphics
     using static CoreUtility;
 
     [Serializable]
-    public class PoolGroupDecal
+    public class DecalGroup
     {
 #if UNITY_EDITOR
         [field: SerializeField, HideInInspector] public string Name { get; set; } = "Object";

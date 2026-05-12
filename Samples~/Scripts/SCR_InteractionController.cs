@@ -10,17 +10,12 @@ namespace Game
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(GameEntity))]
-    public class InteractionController : MonoBehaviour
+    public sealed class InteractionController : MonoBehaviour
     {
-        public event Action<Interactable, float> OnInteractProgress = null;
-        public event Action<Interactable> OnInteractSuccess = null;
-        public event Action<Interactable> OnInteractFailed = null;
-        public event Action<Interactable> OnInteractableExitFocus = null;
-        public event Action<Interactable> OnInteractableEnterFocus = null;
-        public event Action<Interactable> OnInteractableStayFocus = null;
-
-        public bool IsFocusing => isFocusing;
-        public float InteractProgress => interactProgress;
+        public event Action<InteractableEntity> OnSuccess = null;
+        public event Action<InteractableEntity> OnFailed = null;
+        public event Action<InteractableEntity> OnExitFocus = null;
+        public event Action<InteractableEntity> OnEnterFocus = null;
 
         [Header("_")]
         [SerializeField, Required] private Transform interactionTransform = null;
@@ -29,23 +24,18 @@ namespace Game
         [SerializeField] private LayerMask interactionMask = 0;
         [SerializeField, Min(0.1f)] private float interactionDistance = 2.5f;
 
-        private GameEntity entityObject = null;
-        private Interactable interactableObject = null;
-        private readonly StackBool isEnabled = new(8);
+        private GameEntity thisEntity = null;
+        private InteractableEntity interactableEntity = null;
+        private readonly StackBool isInputEnabled = new(8);
         private float interactTimer = 0f;
-        private float interactProgress = 0f;
         private bool wasInteracted = false;
         private bool wishInteract = false;
-        private bool wishHold = false;
         private bool wasInteractSuccess = false;
-        private bool wasInteractHold = false;
         private bool canInteract = false;
-        private bool canHold = true;
         private bool isExitedFocus = false;
         private bool isFocusing = false;
-        private bool isHolding = false;
 
-        private void Awake() => entityObject = GetComponent<GameEntity>();
+        private void Awake() => thisEntity = GetComponent<GameEntity>();
         private void Update()
         {
             if (ManagerCoreGame.Instance.GetGameState() != GameState.RESUME)
@@ -53,33 +43,14 @@ namespace Game
                 return;
             }
 
-            if (!isEnabled.IsEnabled)
+            if (!isInputEnabled.IsEnabled)
             {
                 return;
             }
 
             interactTimer += Time.deltaTime;
-            wishHold = Interact.GetKey();
             wishInteract = Interact.GetKeyDown();
             canInteract = wishInteract && interactTimer > 0.01f;
-            canHold = wishHold && !wasInteractHold;
-
-            if (wasInteractHold && Interact.GetKeyUp())
-            {
-                wasInteractHold = false;
-            }
-            if (isHolding)
-            {
-                if (Interact.GetKeyUp())
-                {
-                    isHolding = false;
-
-                    if (interactableObject != null && interactableObject.Type == InteractableType.HOLD_DEFAULT)
-                    {
-                        interactableObject.SetInteractionProgress(interactProgress = 0);
-                    }
-                }
-            }
 
             if (canInteract)
             {
@@ -99,90 +70,49 @@ namespace Game
 
             if (isFocusing)
             {
-                if (interactableObject == null)
+                if (interactableEntity == null)
                 {
                     if (wasInteractSuccess)
                     {
-                        OnInteractableExitFocus?.Invoke(interactableObject);
+                        OnExitFocus?.Invoke(interactableEntity);
                         wasInteractSuccess = false;
                     }
 
-                    if (!hitInfo.collider.TryGetComponent(out interactableObject))
+                    if (!hitInfo.collider.TryGetComponent(out interactableEntity))
                     {
                         if (canInteract)
                         {
-                            OnInteractFailed?.Invoke(null);
+                            OnFailed?.Invoke(null);
                         }
 
                         return;
                     }
 
-                    interactableObject.OnEnterFocus(entityObject);
-                    OnInteractableEnterFocus?.Invoke(interactableObject);
+                    interactableEntity.OnEnterFocus(thisEntity);
+                    OnEnterFocus?.Invoke(interactableEntity);
                     isExitedFocus = false;
                 }
                 else
                 {
-                    if (hitInfo.collider.gameObject.GetInstanceID() != interactableObject.gameObject.GetInstanceID())
+                    if (hitInfo.collider.gameObject.GetEntityId() != interactableEntity.gameObject.GetEntityId())
                     {
-                        OnInteractableExitFocus?.Invoke(interactableObject);
-                        interactableObject.OnExitFocus(entityObject);
-                        interactableObject = null;
+                        OnExitFocus?.Invoke(interactableEntity);
+                        interactableEntity.OnExitFocus(thisEntity);
+                        interactableEntity = null;
                     }
                     else
                     {
-                        OnInteractableStayFocus?.Invoke(interactableObject);
-                        interactableObject.OnStayFocus(entityObject);
-
-                        if (interactableObject.Type == InteractableType.DEFAULT)
+                        if (canInteract)
                         {
-                            if (canInteract)
+                            if (interactableEntity.OnInteract(thisEntity))
                             {
-                                if (interactableObject.OnInteract(entityObject))
-                                {
-                                    wasInteractSuccess = true;
-                                    OnInteractSuccess?.Invoke(interactableObject);
-                                }
-                                else
-                                {
-                                    OnInteractFailed?.Invoke(interactableObject);
-                                }
+                                wasInteractSuccess = true;
+                                OnSuccess?.Invoke(interactableEntity);
                             }
-                        }
-                        else if (interactableObject.Type == InteractableType.HOLD_DEFAULT || interactableObject.Type == InteractableType.HOLD_PERSISTENT)
-                        {
-                            if (canHold)
+                            else
                             {
-                                interactProgress = interactableObject.OnProgress(entityObject);
-
-                                if (interactProgress >= 0)
-                                {
-                                    OnInteractProgress?.Invoke(interactableObject, interactProgress);
-
-                                    // Completed hold interaction
-                                    if (interactProgress >= 1f)
-                                    {
-                                        if (interactableObject.OnInteract(entityObject))
-                                        {
-                                            wasInteractSuccess = true;
-                                            OnInteractSuccess?.Invoke(interactableObject);
-                                        }
-                                        else
-                                        {
-                                            OnInteractFailed?.Invoke(interactableObject);
-                                        }
-
-                                        interactableObject.SetInteractionProgress(interactProgress = 0);
-                                        wasInteractHold = true;
-                                    }
-
-                                    isHolding = true;
-                                }
+                                OnFailed?.Invoke(interactableEntity);
                             }
-                        }
-                        else
-                        {
-                            Debug.LogError("InteractionController interactableObject.Type == null");
                         }
                     }
                 }
@@ -191,20 +121,20 @@ namespace Game
             {
                 if (canInteract)
                 {
-                    OnInteractFailed?.Invoke(null);
+                    OnFailed?.Invoke(null);
                 }
 
-                if (interactableObject != null)
+                if (interactableEntity != null)
                 {
-                    OnInteractableExitFocus?.Invoke(interactableObject);
-                    interactableObject.OnExitFocus(entityObject);
-                    interactableObject = null;
+                    OnExitFocus?.Invoke(interactableEntity);
+                    interactableEntity.OnExitFocus(thisEntity);
+                    interactableEntity = null;
                 }
                 else
                 {
                     if (!isExitedFocus)
                     {
-                        OnInteractableExitFocus?.Invoke(null);
+                        OnExitFocus?.Invoke(null);
                         isExitedFocus = true;
                     }
                 }
@@ -214,8 +144,20 @@ namespace Game
         public float GetInteractionDistance() => interactionDistance;
         public void SetInteractionDistance(float value) => interactionDistance = value;
 
-        public bool GetIsEnabled() => isEnabled.IsEnabled;
-        public void Disable(out int token) => isEnabled.Disable(out token);
-        public void Enable(ref int token) => isEnabled.Enable(ref token);
+        public void DisableInput(out int token)
+        {
+            isInputEnabled.Disable(out token);
+
+            if (!isInputEnabled.IsEnabled && interactableEntity != null)
+            {
+                OnExitFocus?.Invoke(interactableEntity);
+                interactableEntity.OnExitFocus(thisEntity);
+                interactableEntity = null;
+            }
+        }
+        public void EnableInput(ref int token)
+        {
+            isInputEnabled.Enable(ref token);
+        }
     }
 }

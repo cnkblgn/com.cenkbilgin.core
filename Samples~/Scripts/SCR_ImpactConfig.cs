@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using Core;
 using Core.Graphics;
@@ -10,113 +9,58 @@ namespace Game
     public class ImpactConfig : ScriptableObject
     {
         [Header("_")]
-        [SerializeField] private ImpactData fallback = null;
+        [SerializeField] private ImpactData fallback = new();
 
         [Header("_")]
-        [SerializeField] private List<ImpactData> database = new() { new() };
+        [SerializeField] private ImpactData[] database = new ImpactData[] { new() };
 
-        private readonly Dictionary<string, ImpactData> table = new();
         private int defaultLayerIndex = -1;
         private int terrainLayerIndex = -1;
         private int decalBitmask = -1;
 
 #if UNITY_EDITOR
-        private bool IsExists(string tag)
-        {
-            foreach (ImpactData config in database)
-            {
-                if (string.Equals(config.Name, tag))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        [ContextMenu("Update Tags")]
-        public void Update()
-        {
-            PopulateLayers();
-
-            if (database == null)
-            {
-                Reset();
-                return;
-            }
-
-            PopulateDatabase();
-            PopulateTable();
-        }
-        private void PopulateLayers()
+        public void Reset()
         {
             defaultLayerIndex = LayerMask.NameToLayer("Default");
             terrainLayerIndex = LayerMask.NameToLayer("Terrain");
             decalBitmask = (1 << defaultLayerIndex) | (1 << terrainLayerIndex);
         }
-        private void PopulateDatabase()
+        private void OnValidate()
         {
-            string[] tags = UnityEditorInternal.InternalEditorUtility.tags;
-            List<ImpactData> effects = new();
+            fallback.Validate();
 
-            foreach (string tag in tags)
+            foreach (ImpactData data in database)
             {
-                if (!tag.Contains("Material/"))
-                {
-                    continue;
-                }
-
-                if (IsExists(tag))
-                {
-                    continue;
-                }
-
-                effects.Add(new(null) { Name = tag });
+                data.Validate();
             }
-
-            database.AddRange(effects);
-
         }
-        private void PopulateTable()
-        {
-            table.Clear();
-
-            foreach (ImpactData config in database)
-            {
-                table[config.Name] = config;
-            }
-
-        }
-        public void Reset()
-        {
-            database ??= new();
-            database.Clear();
-
-            PopulateLayers();
-            PopulateDatabase();
-            PopulateTable();
-        }
-        private void OnValidate() => PopulateTable();
 #endif
 
-        public void Spawn(Collider collider, Vector3 position, Vector3 normal, AudioGroup audioGroup, float audioVolume = 1, int audioBlend = 1)
+        public void Spawn(Collider collider, Vector3 position, Vector3 normal, AudioGroup audioGroup, float audioVolume = 1, int audioBlend = 1, float audioMinDistance = 1, float audioMaxDistance = 100)
         {
-            if (collider != null && table.TryGetValue(collider.tag, out ImpactData data))
-            {
-                SpawnDecalInternal(data, collider, position, normal);
-                SpawnParticleInternal(data, position, normal);
-                SpawnAudioInternal(data, position, audioGroup, audioVolume, audioBlend);
-            }
-            else
+            if (collider == null)
             {
                 SpawnDecalInternal(fallback, collider, position, normal);
                 SpawnParticleInternal(fallback, position, normal);
-                SpawnAudioInternal(fallback, position, audioGroup, audioVolume, audioBlend);
+                SpawnAudioInternal(fallback, position, audioGroup, audioVolume, audioBlend, audioMinDistance, audioMaxDistance);
+                return;
+            }
+
+            MaterialID id = collider.GetMaterial();
+
+            foreach (ImpactData data in database)
+            {
+                if (data.ID.HasAny(id))
+                {
+                    SpawnDecalInternal(data, collider, position, normal);
+                    SpawnParticleInternal(data, position, normal);
+                    SpawnAudioInternal(data, position, audioGroup, audioVolume, audioBlend, audioMinDistance, audioMaxDistance);
+                }
             }
         }
-        private void SpawnAudioInternal(ImpactData impactData, Vector3 position, AudioGroup audioGroup, float audioVolume, int audioBlend)
+        private void SpawnAudioInternal(ImpactData impactData, Vector3 position, AudioGroup audioGroup, float audioVolume, int audioBlend, float audioMinDistance, float audioMaxDistance)
         {
-            ManagerCoreAudio.Instance.PlaySound(impactData.ImpactSounds, audioGroup, position, audioBlend, audioVolume, 1, 1, 100, true);
+            ManagerCoreAudio.Instance.PlaySound(impactData.ImpactSounds, audioGroup, position, audioBlend, audioVolume, 1, audioMinDistance, audioMaxDistance, true);
         }
         private void SpawnParticleInternal(ImpactData impactData, Vector3 position, Vector3 normal)
         {

@@ -10,7 +10,7 @@ namespace Game
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(MovementController))]
-    public class MovementProcessorWallRun : MonoBehaviour, IMovementProcessor
+    public class MovementModuleWallRun : MonoBehaviour, IMovementModule
     {
         public event Action OnStart = null;
         public event Action OnEnd = null;
@@ -36,7 +36,7 @@ namespace Game
         [SerializeField, Min(0)] private float ejectNormalWeight = 0.25f;
         [SerializeField, Min(0)] private float ejectUpWeight = 0.75f;
 
-        private MovementController movementController;
+        private MovementController controller;
         private readonly StackBool isEnabled = new(8);
         private Collider wallCollider = null;
         private RaycastHit wallInfo = new();
@@ -52,7 +52,6 @@ namespace Game
         private bool hasWallRight = false;
         private int movementToken = 0;
 
-        private void Awake() => movementController = GetComponent<MovementController>();
         private void OnDrawGizmos()
         { 
             if (!showGizmos) 
@@ -60,13 +59,13 @@ namespace Game
                 return; 
             } 
             
-            if (movementController == null) 
+            if (controller == null) 
             { 
                 return; 
             } 
             
-            Transform origin = movementController.GetCharacterOrigin(); 
-            Vector3 position = origin.position + 0.5f * movementController.GetCharacterHeight() * Vector3.up; 
+            Transform origin = controller.GetCharacterOrigin(); 
+            Vector3 position = origin.position + 0.5f * controller.GetCharacterHeight() * Vector3.up; 
 
             Gizmos.color = hasWallRight ? COLOR_GREEN : COLOR_RED; 
             Gizmos.DrawRay(position, origin.right * distance);
@@ -74,13 +73,22 @@ namespace Game
             Gizmos.DrawRay(position, -origin.right * distance); 
         }
 
-        public void OnBeforeMove(MovementController controller) => UpdateWallRun();
-        public void OnBeforeLook(MovementController controller) { }
+        public void Bind(MovementController controller)
+        {
+            this.controller = controller;
+        }
+        public void Unbind(MovementController controller)
+        {
+
+        }
+
+        public void OnBeforeMove() => UpdateWallRun();
+        public void OnBeforeLook() { }
 
         private bool TryGetWallTarget(out RaycastHit hitInfo)
         {
-            Transform origin = movementController.GetCharacterOrigin();
-            Vector3 pos = origin.position + Vector3.up * (movementController.GetCharacterHeight() * 0.5f);
+            Transform origin = controller.GetCharacterOrigin();
+            Vector3 pos = origin.position + Vector3.up * (controller.GetCharacterHeight() * 0.5f);
             hitInfo = new();
 
             hasWallRight = Physics.Raycast(pos, origin.right, out RaycastHit hitR, distance);
@@ -111,7 +119,7 @@ namespace Game
 
         private void UpdateWallRun()
         {
-            if (movementController.CollisionGround)
+            if (controller.CollisionGround)
             {
                 EndWallRun();
                 return;
@@ -157,9 +165,9 @@ namespace Game
             }
 
             wallSmoothNormal = Vector3.Slerp(wallSmoothNormal, wallNormal, 7.5f * Time.deltaTime);
-            wallVelocity = movementController.GetVelocity();
+            wallVelocity = controller.GetVelocity();
 
-            Transform origin = movementController.GetCharacterOrigin();
+            Transform origin = controller.GetCharacterOrigin();
             Vector3 currentForward = wallVelocity.ClearY().normalized;
             Vector3 targetForward = Vector3.Cross(wallSmoothNormal, Vector3.up);
 
@@ -176,7 +184,7 @@ namespace Game
             wallVelocity.z = horizontal.z;
             wallVelocity.y -= gravity * Time.deltaTime;
 
-            movementController.SetVelocity(wallVelocity);
+            controller.SetVelocity(wallVelocity);
       
             wallStepInterval = Mathf.Lerp(0.5f, 0.25f, horizontal.magnitude / 10);
             wallStepTimer -= Time.deltaTime;
@@ -198,7 +206,7 @@ namespace Game
                 return;
             }
 
-            if (Physics.Raycast(movementController.GetCharacterOrigin().position + Vector3.up * (movementController.GetCharacterHeight() * 0.5f), Vector3.down, out RaycastHit hitG, minHeight))
+            if (Physics.Raycast(controller.GetCharacterOrigin().position + Vector3.up * (controller.GetCharacterHeight() * 0.5f), Vector3.down, out RaycastHit hitG, minHeight))
             {
                 return;
             }
@@ -207,11 +215,11 @@ namespace Game
             wallRunTimer = 0f;
 
             wallSmoothNormal = wallNormal;
-            wallVelocity = movementController.GetVelocity();
+            wallVelocity = controller.GetVelocity();
             wallVelocity.y = Mathf.Max(0, wallVelocity.y);
 
-            movementController.SetVelocity(wallVelocity);
-            movementController.DisableMovement(out movementToken);
+            controller.SetVelocity(wallVelocity);
+            controller.DisableMovement(out movementToken);
 
             OnStart?.Invoke();
         }
@@ -227,8 +235,8 @@ namespace Game
             wallLastTime = Time.time;
             wallCollider = wallInfo.collider;
 
-            movementController.EnableMovement(ref movementToken);
-            movementController.SetVelocity(wallVelocity);
+            controller.EnableMovement(ref movementToken);
+            controller.SetVelocity(wallVelocity);
 
             OnEnd?.Invoke();
         }
@@ -239,12 +247,12 @@ namespace Game
             float magnitude = this.wallVelocity.magnitude;
 
             Vector3 velocity =
-                magnitude * ejectForwardWeight * movementController.GetCharacterOrigin().forward.ClearY().normalized +
+                magnitude * ejectForwardWeight * controller.GetCharacterOrigin().forward.ClearY().normalized +
                 magnitude * ejectUpWeight * Vector3.up +
                 magnitude * ejectNormalWeight * wallSmoothNormal;
 
-            movementController.SetVelocity(Vector3.ClampMagnitude(velocity, magnitude * 1.1f));
-            movementController.RegisterJump();
+            controller.SetVelocity(Vector3.ClampMagnitude(velocity, magnitude * 1.1f));
+            controller.RegisterJump();
         }
 
         public bool GetIsEnabled() => isEnabled.IsEnabled;

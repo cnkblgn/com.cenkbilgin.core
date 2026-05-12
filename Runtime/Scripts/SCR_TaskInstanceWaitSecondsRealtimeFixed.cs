@@ -10,7 +10,7 @@ namespace Core
 
         public TaskInstanceWaitSecondsRealtimeFixed(MonoBehaviour host, float duration, Action callback) : base(host)
         {
-            this.callback = callback ?? throw new NullReferenceException("TaskInstanceWaitSecondsRealtimeFixed() callback == null");
+            this.callback = callback ?? throw new NullReferenceException();
             this.time = duration;
         }
         protected override void OnUpdate()

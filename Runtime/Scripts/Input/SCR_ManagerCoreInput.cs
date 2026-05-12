@@ -110,7 +110,7 @@ namespace Core.Input
         {
             if (!actionLookup.TryGetValue(path, out var action))
             {
-                Debug.LogError($"ManagerCoreInput.GetAction() [{path}] not found!");
+                Debug.LogError($"[{path}] not found!");
                 return null;
             }
 
@@ -161,7 +161,7 @@ namespace Core.Input
 
             if (action == null)
             {
-                Debug.LogWarning("ManagerCoreInput.StartRebind() action == null");
+                Debug.LogWarning("action == null");
                 return;
             }
 
@@ -199,7 +199,7 @@ namespace Core.Input
 
             if (action == null)
             {
-                Debug.LogWarning("ManagerCoreInput.RevertRebind() action == null");
+                Debug.LogWarning("action == null");
                 return;
             }
 

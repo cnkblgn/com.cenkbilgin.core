@@ -13,7 +13,7 @@ namespace Game
     {
         [Header("_")]
         [SerializeField] private string prefix = STRING_EMPTY;
-        [SerializeField, Required] private string key = STRING_EMPTY;
+        [SerializeField] private LocalizedString key = default;
 
         private TextMeshProUGUI thisText = null;
 
@@ -26,6 +26,6 @@ namespace Game
         {
             ManagerCoreLocalization.OnLocalizationChanged -= OnLocalizationChanged;
         }
-        private void OnLocalizationChanged(int _) => thisText.text = prefix + ManagerCoreLocalization.Instance.Get(key);
+        private void OnLocalizationChanged(int _) => thisText.text = prefix + key.Get();
     }
 }

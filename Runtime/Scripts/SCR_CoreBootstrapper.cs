@@ -33,7 +33,7 @@ namespace Core
 
                 if (guids.Length <= 0)
                 {
-                    Debug.LogError($"CoreBootstrapper.OnPlay() Could not find scene: {SCENE_NAME}");
+                    Debug.LogError($"Could not find scene: {SCENE_NAME}");
                     return;
                 }
 

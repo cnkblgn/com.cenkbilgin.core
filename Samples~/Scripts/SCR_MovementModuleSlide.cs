@@ -11,7 +11,7 @@ namespace Game
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(MovementController))]
-    public class MovementProcessorSlide : MonoBehaviour, IMovementProcessor
+    public class MovementModuleSlide : MonoBehaviour, IMovementModule
     {
         public event Action OnStart = null;
         public event Action OnEnd = null;
@@ -26,7 +26,7 @@ namespace Game
         [SerializeField, Min(1)] private float minSpeed = 4f;
         [SerializeField, Min(1)] private float acceleration = 8f;
 
-        private MovementController movementController = null;
+        private MovementController controller = null;
         private readonly StackBool isEnabled = new(8);
         private Vector3 slideDirection = Vector3.zero;
         private Vector3 slideVelocity = Vector3.zero;
@@ -35,10 +35,17 @@ namespace Game
         private bool isSliding = false;
         private bool canSlide = true;
 
-        private void Awake() => movementController = GetComponent<MovementController>();
+        public void Bind(MovementController controller)
+        {
+            this.controller = controller;
+        }
+        public void Unbind(MovementController controller)
+        {
 
-        public void OnBeforeMove(MovementController controller) => UpdateSlide();
-        public void OnBeforeLook(MovementController controller) { }
+        }
+
+        public void OnBeforeMove() => UpdateSlide();
+        public void OnBeforeLook() { }
 
         private void TryStartSlide()
         {
@@ -47,17 +54,17 @@ namespace Game
                 return;
             }
 
-            if (!movementController.CollisionGround)
+            if (!controller.CollisionGround)
             {
                 return;
             }
 
-            if (movementController.IsOnSteepSlope)
+            if (controller.IsOnSteepSlope)
             {
                 return;
             }
 
-            if (!movementController.GetIsMovementEnabled())
+            if (!controller.GetIsMovementEnabled())
             {
                 return;
             }
@@ -67,7 +74,7 @@ namespace Game
                 return;
             }
 
-            float speed = movementController.GetCurrentSpeed();
+            float speed = controller.GetCurrentSpeed();
 
             if (speed < minSpeed)
             {
@@ -84,15 +91,15 @@ namespace Game
                 return;
             }
 
-            if (!movementController.CollisionGround)
+            if (!controller.CollisionGround)
             {
                 EndSlide();
                 return;
             }
 
-            slideVelocity = movementController.GetVelocity();
-            RaycastHit ground = movementController.GetGroundCollisionInfo();
-            RaycastHit sides = movementController.GetSidesCollisionInfo();
+            slideVelocity = controller.GetVelocity();
+            RaycastHit ground = controller.GetGroundCollisionInfo();
+            RaycastHit sides = controller.GetSidesCollisionInfo();
             Vector3 slopeDirection = Vector3.ProjectOnPlane(Vector3.down, ground.normal).normalized;
             float slopeAngle = Vector3.Angle(ground.normal, Vector3.up);
 
@@ -110,7 +117,7 @@ namespace Game
 
             bool isMovingDownhill = Vector3.Dot(slideVelocity, slopeDirection) > 0f;
 
-            if (!isMovingDownhill && slopeAngle > movementController.GetSlopeLimit())
+            if (!isMovingDownhill && slopeAngle > controller.GetSlopeLimit())
             {
                 isSliding = false;
                 return;
@@ -127,16 +134,16 @@ namespace Game
 
             slideVelocity = slideVelocity.normalized * Mathf.MoveTowards(slideVelocity.magnitude, targetSpeed, acceleration * Time.deltaTime);
 
-            if (!movementController.CollisionSides)
+            if (!controller.CollisionSides)
             {
                 slideVelocity = Vector3.ProjectOnPlane(slideVelocity, ground.normal);
             }
             else
             {
-                slideVelocity = movementController.CalculateClipVelocity(slideVelocity, sides.normal);
+                slideVelocity = controller.CalculateClipVelocity(slideVelocity, sides.normal);
             }
 
-            movementController.SetVelocity(slideVelocity);
+            controller.SetVelocity(slideVelocity);
         }
         private void StartSlide()
         {
@@ -153,14 +160,14 @@ namespace Game
             isSliding = true;
             slideTimer = 0f;
 
-            slideDirection = movementController.GetCharacterOrigin().forward.ClearY().normalized;
-            slideVelocity = movementController.GetCurrentSpeed() * slideDirection;
+            slideDirection = controller.GetCharacterOrigin().forward.ClearY().normalized;
+            slideVelocity = controller.GetCurrentSpeed() * slideDirection;
 
-            slideVelocity = Vector3.ProjectOnPlane(slideVelocity, movementController.GetGroundCollisionInfo().normal);
+            slideVelocity = Vector3.ProjectOnPlane(slideVelocity, controller.GetGroundCollisionInfo().normal);
 
-            movementController.SetVelocity(slideVelocity);
-            movementController.DisableMovement(out movementToken);
-            movementController.OverrideMovementStance(MovementStance.CROUCH, true);
+            controller.SetVelocity(slideVelocity);
+            controller.DisableMovement(out movementToken);
+            controller.OverrideMovementStance(MovementStance.CROUCH, true);
 
             OnStart?.Invoke();
         }
@@ -174,24 +181,24 @@ namespace Game
             isSliding = false;
             slideTimer = 0f;
 
-            movementController.SetVelocity(slideVelocity);
-            movementController.EnableMovement(ref movementToken);
-            movementController.OverrideMovementStance(MovementStance.CROUCH, false);
+            controller.SetVelocity(slideVelocity);
+            controller.EnableMovement(ref movementToken);
+            controller.OverrideMovementStance(MovementStance.CROUCH, false);
 
             this.WaitSeconds(cooldown, () => canSlide = false, () => canSlide = true);
             OnEnd?.Invoke();
         }
         private void EjectSlide()
         {
-            Vector3 groundNormal = movementController.GetGroundCollisionInfo().normal;
+            Vector3 groundNormal = controller.GetGroundCollisionInfo().normal;
             float slopeAngle = Vector3.Angle(groundNormal, Vector3.up);
 
             slideVelocity += (groundNormal * Mathf.Lerp(1, 5, Mathf.Max(slopeAngle, 50) / 50));
-            slideVelocity.y = movementController.GetJumpForce();
+            slideVelocity.y = controller.GetJumpForce();
 
             EndSlide();
 
-            movementController.RegisterJump();
+            controller.RegisterJump();
         }
 
         public bool GetIsEnabled() => isEnabled.IsEnabled;

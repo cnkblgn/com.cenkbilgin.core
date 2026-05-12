@@ -7,7 +7,7 @@ using Core.Editor;
 
 namespace Core.Localization
 {
-    public static class LocalizationUtility
+    public static class LocalizationFactory
     {
         private const string DEFAULT_PATH = "Assets/LocalizationDatabase.asset";
 

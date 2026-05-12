@@ -11,7 +11,7 @@ namespace Game
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Canvas))]
-    public class UISettingsController : MonoBehaviour
+    public class UISettingsController : MonoBehaviour, IGameStateHandler
     {
         public event Action OnApply = null;
         public event Action OnRevert = null;
@@ -36,6 +36,7 @@ namespace Game
         private bool isApplied = false;
 
         private void Awake() => thisCanvas = GetComponent<Canvas>();
+        private void Start() => ManagerCoreGame.Instance.InstertStateHandler(this);
         private void OnEnable()
         {
             applyButton.onClick.AddListener(OnApplyButtonClicked);
@@ -46,6 +47,18 @@ namespace Game
             applyButton.onClick.RemoveListener(OnApplyButtonClicked);
             closeButton.onClick.RemoveListener(OnCloseButtonClicked);
         }
+
+        public bool OnTryResumeGame()
+        {
+            if (isOpened)
+            {
+                Hide();
+                return false;
+            }
+
+            return true;
+        }
+        public bool OnTryPauseGame() => true;
 
         private void OnApplyButtonClicked()
         {

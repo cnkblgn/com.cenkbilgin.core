@@ -15,7 +15,7 @@ namespace Core
         {
             if (sceneController == null)
             {
-                Debug.LogError("ManagerCorePersistent.IsValid() sceneController == null");
+                Debug.LogError("sceneController == null");
                 return false;
             }
 
@@ -40,7 +40,7 @@ namespace Core
                 return false;
             }
 
-            Debug.LogWarning("ManagerCorePersistent.TryUnregisterObject() warning you are unregistering illegally! are you sure! this should handeld by 'PersistentSceneController'");
+            Debug.LogWarning("Warning you are unregistering illegally! are you sure! this should handeld by 'PersistentSceneController'");
 
             return sceneController.TryUnregister(persistentObject);
         }
@@ -57,7 +57,7 @@ namespace Core
         {
             if (this.sceneController != sceneController)
             {
-                Debug.LogError("ManagerCorePersistent.UnregisterController() this.sceneController != sceneController");
+                Debug.LogError("this.sceneController != sceneController");
                 return;
             }
 

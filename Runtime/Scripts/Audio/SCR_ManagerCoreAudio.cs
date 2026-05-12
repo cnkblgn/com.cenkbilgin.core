@@ -1,10 +1,13 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 
 namespace Core.Audio
 {
     using static CoreUtility;
+    using Random = UnityEngine.Random;
 
     [DisallowMultipleComponent]
     public class ManagerCoreAudio : Manager<ManagerCoreAudio>
@@ -23,7 +26,7 @@ namespace Core.Audio
                     }
                     else
                     {
-                        Debug.LogError("ManagerCoreAudio.AudioListener() listener not found in scene!");
+                        Debug.LogError("AudioListener not found in scene!");
                     }
                 }
 
@@ -59,12 +62,11 @@ namespace Core.Audio
         private const string PITCH_EFFECT = "EffectPitch";
         private const string PITCH_AMBIENT = "AmbientPitch";
 
-        public AnimationCurve OcclusionLowpassCurve => occlusionLowpassCurve;
-        public AnimationCurve OcclusionVolumeCurve => occlusionVolumeCurve;
+        public AnimationCurve OcclusionLowpass => occlusionLowpass;
+        public AnimationCurve OcclusionVolume => occlusionVolume;
         public LayerMask OcclusionMask => occlusionMask;
-        public float OcclusionLowpassBlendSpeed => occlusionLowpassBlendSpeed;
-        public float OcclusionVolumeBlendSpeed => occlusionVolumeBlendSpeed;
-        public float OcclusionRaycastAngle => occlusionRaycastAngle;
+        public float OcclusionBlend => occlusionBlend;
+        public float OcclusionAngle => occlusionAngle;
 
         [Header("_")]
         [SerializeField, Required] private AudioMixer audioMixer = null;
@@ -79,17 +81,18 @@ namespace Core.Audio
 
         [Header("_")]
         [SerializeField] private LayerMask occlusionMask = 0;
-        [SerializeField] private AnimationCurve occlusionLowpassCurve = null;
-        [SerializeField] private AnimationCurve occlusionVolumeCurve = null;
-        [SerializeField, Min(1)] private float occlusionLowpassBlendSpeed = 12.5f;
-        [SerializeField, Min(1)] private float occlusionVolumeBlendSpeed = 12.5f;
-        [SerializeField, Range(2.5f, 15f)] private float occlusionRaycastAngle = 5.0f;
+        [SerializeField] private AnimationCurve occlusionLowpass = null;
+        [SerializeField] private AnimationCurve occlusionVolume = null;
+        [SerializeField, Min(1)] private float occlusionBlend = 12.5f;
+        [SerializeField, Range(2.5f, 15f)] private float occlusionAngle = 5.0f;
 
         [Header("_")]
         [SerializeField, Required] private AudioEmitter audioEmitterPrefab = null;
         [SerializeField, Required] private Transform audioEmitterContainer = null;
 
         private readonly PoolSystemAudio audioEmitterPool = new();
+        private readonly List<AudioEmitter> audioEmitterCollection = new();
+        private readonly Dictionary<string, AudioGroup> audioGroups = new();
         private Transform audioListenerTransform = null;
         private AudioReverbZone audioLastReverbZone = null;
         private Coroutine audioCoroutineReverb = null;
@@ -119,15 +122,56 @@ namespace Core.Audio
         private float ambientVolumeMult = 1;
         private float ambientPitchBase = 1;
         private float ambientPitchMult = 1;
+        private int updateEmitterIndex = 0;
 
         protected override void Awake()
         {
+            if (audioMixer == null) throw new NullReferenceException();
+            if (audioMasterGroup == null) throw new NullReferenceException();
+            if (audioGameGroup == null) throw new NullReferenceException();
+            if (audioMusicGroup == null) throw new NullReferenceException();
+            if (audioMiscGroup == null) throw new NullReferenceException();
+            if (audioEffectsGroup == null) throw new NullReferenceException();
+            if (audioAmbientGroup == null) throw new NullReferenceException();
+            if (audioEmitterPrefab == null) throw new NullReferenceException();
+            if (audioEmitterContainer == null) throw new NullReferenceException();
+
             base.Awake();
 
+            InitializeGroups();
             InitializePool();
+        }
+        private void Update()
+        {
+            const int updatesPerFrame = 8;
+
+            for (int i = 0; i < updatesPerFrame; i++)
+            {
+                if (audioEmitterCollection.Count == 0)
+                {
+                    return;
+                }
+
+                updateEmitterIndex %= audioEmitterCollection.Count;
+
+                AudioEmitter emitter = audioEmitterCollection[updateEmitterIndex];
+
+                updateEmitterIndex++;
+
+                if (emitter == null)
+                {
+                    Debug.LogError($"Invalid (ghost) emitter detected! at: [{i}]");
+                    continue;
+                }
+
+                emitter.Tick();               
+            }
         }
         private void OnEnable()
         {
+            AudioEmitter.OnCreated += OnEmitterCreated;
+            AudioEmitter.OnDestroyed += OnEmitterDestroyed;
+
             ManagerCoreGame.OnGameStateChanged += OnGameStateChanged;
             ManagerCoreGame.OnBeforeSceneChanged += OnBeforeSceneChanged;
             ManagerCoreGame.OnAfterSceneChanged += OnAfterSceneChanged;
@@ -135,10 +179,46 @@ namespace Core.Audio
         }
         private void OnDisable()
         {
+            AudioEmitter.OnCreated -= OnEmitterCreated;
+            AudioEmitter.OnDestroyed -= OnEmitterDestroyed;
+
             ManagerCoreGame.OnGameStateChanged -= OnGameStateChanged;
             ManagerCoreGame.OnBeforeSceneChanged -= OnBeforeSceneChanged;
             ManagerCoreGame.OnAfterSceneChanged -= OnAfterSceneChanged;
             ManagerCoreGame.OnTimeScaleChanged -= OnTimeScaleChanged;
+        }
+
+        private void OnEmitterCreated(AudioEmitter emitter)
+        {
+            if (emitter == null)
+            {
+                Debug.LogError("emitter == null");
+                return;
+            }
+
+            if (audioEmitterCollection.Contains(emitter))
+            {
+                Debug.LogError("Duplicate emitter!");
+                return;
+            }
+
+            audioEmitterCollection.Add(emitter);
+        }
+        private void OnEmitterDestroyed(AudioEmitter emitter)
+        {
+            if (emitter == null)
+            {
+                Debug.LogError("emitter == null");
+                return;
+            }
+
+            if (!audioEmitterCollection.Contains(emitter))
+            {
+                Debug.LogError("Invalid emitter!");
+                return;
+            }
+
+            audioEmitterCollection.Remove(emitter);
         }
 
         private void OnBeforeSceneChanged(string scene)
@@ -185,11 +265,46 @@ namespace Core.Audio
                     ClearReverb();
                     break;
             }
+
+            foreach (AudioEmitter emitter in audioEmitterCollection)
+            {
+                switch (gameState)
+                {
+                    case GameState.NULL:
+                        if (GetAudioGroup(emitter.AudioGroup) != AudioGroup.MASTER)
+                        {
+                            emitter.Stop();
+                        }
+                        break;
+                    case GameState.RESUME:
+                        emitter.Resume();
+                        break;
+                    case GameState.PAUSE:
+                        if (GetAudioGroup(emitter.AudioGroup) != AudioGroup.MASTER)
+                        {
+                            emitter.Pause();
+                        }
+                        break;
+                }
+            }
         }
 
         private void ResetPool() => audioEmitterPool.Reset();
-        private void InitializePool() => audioEmitterPool.Initialize(audioEmitterPrefab, audioEmitterContainer, PoolType.RING_BUFFER, "audio", 128);
+        private void InitializePool() => audioEmitterPool.Initialize(audioEmitterPrefab, audioEmitterContainer, 128);
 
+        private void InitializeGroups()
+        {
+            audioGroups[audioMasterGroup.name] = AudioGroup.MASTER;
+            audioGroups[audioMiscGroup.name] = AudioGroup.MISC;
+            audioGroups[audioEffectsGroup.name] = AudioGroup.EFFECT;
+            audioGroups[audioAmbientGroup.name] = AudioGroup.AMBIENT;
+            audioGroups[audioMusicGroup.name] = AudioGroup.MUSIC;
+            audioGroups[audioGameGroup.name] = AudioGroup.GAME;
+        }
+        public AudioGroup GetAudioGroup(string group)
+        {
+            return audioGroups.TryGetValue(group, out AudioGroup val) ? val : AudioGroup.MASTER;
+        }
         public AudioMixerGroup GetAudioGroup(AudioGroup group)
         {
             return group switch
@@ -444,12 +559,22 @@ namespace Core.Audio
         public void SetAmbientVolumeBase(float value) { ambientVolumeBase = value; SetVolume(VOLUME_AMBIENT, ambientVolumeBase * ambientVolumeMult); }
         public void SetAmbientVolumeMult(float value) { ambientVolumeMult = value; SetVolume(VOLUME_AMBIENT, ambientVolumeBase * ambientVolumeMult); }
 
-        public AudioEmitter PlaySound(AudioClip clip, AudioGroup group, Vector3 position, float blend, float volume, float pitch, float minDistance, float maxDistance, bool occulusion) => audioEmitterPool.Spawn(clip, AudioListener, group, position, blend, volume, pitch, minDistance, maxDistance, occulusion);
+        public AudioEmitter PlaySound(AudioClip clip, AudioGroup group, Vector3 position, float blend, float volume, float pitch, float minDistance, float maxDistance, bool occulusion)
+        {
+            if (!occulusion)
+            {
+                return audioEmitterPool.Spawn(clip, AudioListener, GetAudioGroup(group), position, blend, volume, pitch, minDistance, maxDistance);
+            }
+            else
+            {
+                return audioEmitterPool.Spawn(clip, AudioListener, GetAudioGroup(group), position, blend, volume, pitch, minDistance, maxDistance, occlusionMask, occlusionAngle, occlusionBlend, occlusionLowpass, occlusionVolume);
+            }
+        }
         public AudioEmitter PlaySound(AudioClip[] clip, AudioGroup group, Vector3 position, float blend, float volume, float pitch, float minDistance, float maxDistance, bool occulusion)
         {
             if (clip == null)
             {
-                Debug.LogError("ManagerCoreAudio.PlaySound() clip == null");
+                Debug.LogError("AudioClip == null");
                 return null;
             }
 

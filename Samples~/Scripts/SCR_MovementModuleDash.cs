@@ -9,7 +9,7 @@ namespace Game
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(MovementController))]
-    public class MovementProcessorDash : MonoBehaviour, IMovementProcessor
+    public class MovementModuleDash : MonoBehaviour, IMovementModule
     {
         public event Action OnStart = null;
 
@@ -25,7 +25,7 @@ namespace Game
         [SerializeField, Min(1)] private float force = 25f;
         [SerializeField, Min(0.1f)] private float cooldown = 2.5f;
 
-        private MovementController movementController = null;
+        private MovementController controller = null;
         private readonly StackBool isEnabled = new(8);
         private TaskInstance frictionTask = null;
         private TaskInstance gravityTask = null;
@@ -41,28 +41,32 @@ namespace Game
         private bool isFrictionOverriden = false;
         private bool isGravityOverriden = false;
 
-        private void Awake()
+        public void Bind(MovementController controller)
         {
-            movementController = GetComponent<MovementController>();
+            this.controller = controller;
 
             overrideFriction = OverrideFriction;
             overrideGravity = OverrideGravity;
 
             resetFriction = ResetFriction;
             resetGravity = ResetGravity;
+
+            this.controller.OnLand += OnLand;
         }
-        private void OnEnable() => movementController.OnLand += OnLand;
-        private void OnDisable() => movementController.OnLand -= OnLand;
+        public void Unbind(MovementController controller)
+        {
+            this.controller.OnLand -= OnLand;
+        }
 
         private void OnLand(float arg1, float arg2, float arg3) => dashCount = Mathf.Max(0, dashCount - 1);
-        public void OnBeforeMove(MovementController controller) 
+        public void OnBeforeMove() 
         {
             if (!GetIsEnabled())
             {
                 return;
             }
 
-            if (maxDashInAir != -1 && !movementController.CollisionGround && dashCount >= maxDashInAir)
+            if (maxDashInAir != -1 && !controller.CollisionGround && dashCount >= maxDashInAir)
             {
                 return;
             }
@@ -74,23 +78,23 @@ namespace Game
                     return;
                 }
 
-                Vector3 moveDirection = movementController.GetMovementDirectionWorld();
-                Vector3 lookDirection = movementController.GetCharacterOrigin().forward;
+                Vector3 moveDirection = controller.GetMovementDirectionWorld();
+                Vector3 lookDirection = controller.GetCharacterOrigin().forward;
                 Vector3 velocity = moveDirection.sqrMagnitude > 0.01f ? moveDirection * force : lookDirection * force;
 
                 if (isAdditive)
                 {
-                    movementController.AddVelocity(velocity);
+                    controller.AddVelocity(velocity);
                 }
                 else
                 {
-                    movementController.SetVelocity(velocity);
+                    controller.SetVelocity(velocity);
                 }
 
                 dashTime = Time.time;                
                 OnStart?.Invoke();
 
-                if (!movementController.CollisionGround)
+                if (!controller.CollisionGround)
                 {
                     dashCount++;
                 }
@@ -118,7 +122,7 @@ namespace Game
                 }
             }
         }
-        public void OnBeforeLook(MovementController controller) { }
+        public void OnBeforeLook() { }
 
         private void OverrideFriction()
         {
@@ -127,8 +131,8 @@ namespace Game
                 return;
             }
 
-            dashFriction = movementController.GetGroundFriction();
-            movementController.SetGroundFriction(movementController.GetGroundFriction() - dashFriction);
+            dashFriction = controller.GetGroundFriction();
+            controller.SetGroundFriction(controller.GetGroundFriction() - dashFriction);
 
             isFrictionOverriden = true;
         }
@@ -139,20 +143,20 @@ namespace Game
                 return;
             }
 
-            dashGravity = movementController.GetGravity();
-            movementController.SetGravity(movementController.GetGravity() - dashGravity);
+            dashGravity = controller.GetGravity();
+            controller.SetGravity(controller.GetGravity() - dashGravity);
 
             isGravityOverriden = true;
         }
         private void ResetFriction()
         {
-            movementController.SetGroundFriction(movementController.GetGroundFriction() + dashFriction);
+            controller.SetGroundFriction(controller.GetGroundFriction() + dashFriction);
 
             isFrictionOverriden = false;
         }
         private void ResetGravity()
         {
-            movementController.SetGravity(movementController.GetGravity() + dashGravity);
+            controller.SetGravity(controller.GetGravity() + dashGravity);
 
             isGravityOverriden = false;
         }

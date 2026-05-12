@@ -118,7 +118,7 @@ namespace Core.Localization.Editor
 
         private void DrawList(Rect rect, SerializedProperty property, SerializedProperty keyProperty, State state)
         {
-            LocalizationDatabaseConfig db = LocalizationUtility.GetDatabase();
+            LocalizationDatabaseConfig db = LocalizationFactory.GetDatabase();
 
             string[] keys = db.Keys;
 

@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using Core;
 using Core.Graphics;
+using UnityEngine.Serialization;
 
 namespace Game
 {
@@ -11,6 +12,7 @@ namespace Game
     public class ImpactData
     {
         [HideInInspector] public string Name;
+        public MaterialID ID => id;
         public ParticleEmitter[] ImpactParticles => particles;
         public AudioClip[] ImpactSounds => sounds;
         public DecalEmitter[] ImpactDecals => decals;
@@ -19,6 +21,7 @@ namespace Game
         public float DecalMinRotation => decalMinRotation;
         public float DecalMaxRotation => decalMaxRotation;
 
+        [SerializeField] private MaterialID id = MaterialID.DEFAULT;
         [SerializeField] private ParticleEmitter[] particles = null;
         [SerializeField] private AudioClip[] sounds = null;
         [SerializeField] private DecalEmitter[] decals = null;
@@ -35,6 +38,7 @@ namespace Game
                 return;
             }
 
+            this.id = data.id;
             this.particles = data.particles;
             this.decals = data.decals;
             this.sounds = data.sounds;
@@ -43,5 +47,9 @@ namespace Game
             this.decalMinRotation = data.decalMinRotation;
             this.decalMaxRotation = data.decalMaxRotation;
         }
+
+#if UNITY_EDITOR
+        public void Validate() => Name = (int)id == -1 ? "EVERYTHING" : ID.ToString();
+#endif
     }
 }

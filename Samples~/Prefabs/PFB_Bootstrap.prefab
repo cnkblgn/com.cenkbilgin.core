@@ -198,6 +198,7 @@ Canvas:
   m_OverridePixelPerfect: 1
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 1
+  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -215,6 +216,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a22eb685acc599478414ac2deb08e8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxSize: 12
   notificationTemplate: {fileID: 3669286827463696143}
   notificationContainer: {fileID: 6578916398245742979}
   yPadding: 16
@@ -306,6 +308,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 1
+  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -408,6 +411,7 @@ Canvas:
   m_OverridePixelPerfect: 1
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 1
+  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -558,6 +562,7 @@ Canvas:
   m_OverridePixelPerfect: 1
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 1
+  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -579,13 +584,13 @@ MonoBehaviour:
   cursorImage: {fileID: 3246808228134059763}
   cursors:
   - Icon: {fileID: 1146021368, guid: 1a0da6d449df88d45a0ba09316b30cc8, type: 3}
-    Type: 0
+    ID: default
   - Icon: {fileID: 829750650, guid: 1a0da6d449df88d45a0ba09316b30cc8, type: 3}
-    Type: 1
+    ID: default
   - Icon: {fileID: 2066158564, guid: 1a0da6d449df88d45a0ba09316b30cc8, type: 3}
-    Type: 2
+    ID: default
   - Icon: {fileID: -171569412, guid: 1a0da6d449df88d45a0ba09316b30cc8, type: 3}
-    Type: 3
+    ID: default
 --- !u!1 &1199917422851808726
 GameObject:
   m_ObjectHideFlags: 0
@@ -1230,6 +1235,7 @@ Canvas:
   m_OverridePixelPerfect: 1
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 1
+  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -1479,6 +1485,7 @@ Canvas:
   m_OverridePixelPerfect: 1
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 1
+  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -1740,6 +1747,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 1
+  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -2314,6 +2322,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 1
+  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -2390,6 +2399,7 @@ Canvas:
   m_OverridePixelPerfect: 1
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 1
+  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -2483,6 +2493,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 1
+  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -2781,7 +2792,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05d6f9a488c58ac4094ddc2664936c9c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  database: {fileID: 4900000, guid: 4c1ca8a1b85ed82408bd6498120e2870, type: 3}
+  database: {fileID: 11400000, guid: faffc8228aaafb9408f3967bfb1fcd92, type: 2}
 --- !u!114 &61607267292666552
 MonoBehaviour:
   m_ObjectHideFlags: 0

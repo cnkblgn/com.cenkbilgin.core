@@ -12,7 +12,7 @@ namespace Core
         {
             if (host == null)
             {
-                throw new ArgumentNullException("TaskInstance() host == null"); 
+                throw new ArgumentNullException(); 
             }
 
             this.host = host;

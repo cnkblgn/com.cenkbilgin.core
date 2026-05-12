@@ -1,47 +1,56 @@
-using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Core
 {
     using static CoreUtility;
 
-    [Serializable]
     public abstract class PoolSystem<T> where T : Component
     {
-        public PoolType Type { get; private set; } = PoolType.RING_BUFFER;
-        public string ID { get; private set; } = STRING_EMPTY;
+        public abstract PoolType Type { get; }
+        public abstract string ID { get; }
+
+        public int TotalCount => thisItems.Length;
+        public int ActiveCount => Type != PoolType.RELEASE ? -1 : TotalCount - availableItems.Count;
+        public int AvailableCount => Type != PoolType.RELEASE ? -1 : availableItems.Count;
 
         protected Transform thisContainer = null;
         private T[] thisItems = new T[0] { };
+        private readonly Queue<T> availableItems = new();
         private int currentIndex = 0;
+        private int currentDirection = 1;
         private bool isInitialized = false;
 
-        public void Initialize(T prefab, Transform container, PoolType type, string id, int count)
+        public void Initialize(T prefab, Transform container, int count)
         {
             if (isInitialized)
             {
                 return;
             }
 
-            this.ID = id;
-            this.Type = type;
-            this.thisContainer = container;
-            this.thisItems = new T[count];
+            count = Type == PoolType.SINGLE ? 1 : count;
 
-            count = type == PoolType.SINGLE ? 1 : count;
+            thisContainer = container;
+            thisItems = new T[count];
 
             for (int i = 0; i < count; i++)
             {
                 T item = GameObject.Instantiate<T>(prefab, container);
+
+                item.gameObject.hideFlags = HideFlags.DontSave | HideFlags.NotEditable;
                 item.gameObject.SetActive(false);
 
                 OnInitialize(item);
+
                 thisItems[i] = item;
+
+                if (Type == PoolType.RELEASE) availableItems.Enqueue(item);
             }
 
             isInitialized = true;
         }
         protected abstract void OnInitialize(T item);
+
         public void Reset()
         {
             if (!isInitialized)
@@ -55,6 +64,39 @@ namespace Core
             }
         }
         protected abstract void OnReset(T item);
+
+        public void Release(T item)
+        {
+            if (!isInitialized)
+            {
+                Debug.LogError($"Pool [{ID}] not initialized");
+                return;
+            }
+
+            if (Type != PoolType.RELEASE)
+            {
+                Debug.LogWarning($"Pool [{ID}] does not support Release()");
+                return;
+            }
+
+            if (item == null)
+            {
+                Debug.LogError($"Pool [{ID}] Release item == null");
+                return;
+            }
+
+            if (availableItems.Contains(item))
+            {
+                Debug.LogWarning($"Pool [{ID}] double release detected on [{item.name}]");
+                return;
+            }
+
+            OnReset(item);
+
+            item.gameObject.SetActive(false);
+
+            availableItems.Enqueue(item);
+        }
 
         protected T GetNext()
         {
@@ -70,8 +112,12 @@ namespace Core
                     return GetSingle();
                 case PoolType.RING_BUFFER:
                     return GetRing();
+                case PoolType.PING_PONG:
+                    return GetPingPong();
+                case PoolType.RELEASE:
+                    return GetRelease();
                 default:
-                    Debug.LogWarning($"PoolSystem.GetNext() [{Type}] not defined");
+                    Debug.LogWarning($"[{Type}] not defined");
                     break;
             }
 
@@ -83,6 +129,46 @@ namespace Core
             T item = thisItems[currentIndex];
 
             currentIndex = (currentIndex + 1) % thisItems.Length;
+
+            return item;
+        }
+        private T GetPingPong()
+        {
+            if (thisItems.Length <= 1)
+            {
+                return thisItems[0];
+            }
+
+            T item = thisItems[currentIndex];
+
+            if (currentIndex == thisItems.Length - 1)
+            {
+                currentDirection = -1;
+            }
+            else if (currentIndex == 0)
+            {
+                currentDirection = 1;
+            }
+
+            currentIndex += currentDirection;
+
+            return item;
+        }
+        private T GetRelease()
+        {
+            if (availableItems.Count == 0)
+            {
+                Debug.LogWarning($"Pool [{ID}] exhausted!");
+                return null;
+            }
+
+            T item = availableItems.Dequeue();
+
+            if (item == null)
+            {
+                Debug.LogError($"Pool [{ID}] item destroyed illegally!");
+                return null;
+            }
 
             return item;
         }

@@ -9,19 +9,14 @@ namespace Core.UI
     public class UIPointerEventTooltipLocalized : MonoBehaviour
     {
         [Header("_")]
-        [SerializeField] private string localizedID = STRING_EMPTY;
+        [SerializeField] private LocalizedString localizedID = default;
 
         private UIPointerEventTooltip thisTooltip = null;
 
         private void Awake() => thisTooltip = GetComponent<UIPointerEventTooltip>();
-        private void OnEnable()
-        {
-            ManagerCoreLocalization.OnLocalizationChanged += OnLocalizationChanged;
-        }
-        private void OnDisable()
-        {
-            ManagerCoreLocalization.OnLocalizationChanged -= OnLocalizationChanged;
-        }
-        private void OnLocalizationChanged(int _) => thisTooltip.Initialize(ManagerCoreLocalization.Instance.Get(localizedID), true);
+        private void Start() => OnLocalizationChanged(-1);
+        private void OnEnable() => ManagerCoreLocalization.OnLocalizationChanged += OnLocalizationChanged;
+        private void OnDisable() => ManagerCoreLocalization.OnLocalizationChanged -= OnLocalizationChanged;
+        private void OnLocalizationChanged(int _) => thisTooltip.Initialize(localizedID.Get(), true);
     }
 }

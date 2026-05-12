@@ -715,7 +715,7 @@ namespace Core
         {
             if (targetMeshFilter == null)
             {
-                Debug.LogError("CoreUtility.BakeToDefault() targetMeshFilter == null");
+                Debug.LogError("targetMeshFilter == null");
                 return;
             }
 
@@ -989,7 +989,7 @@ namespace Core
         {
             if (rootCanvas == null)
             {
-                Debug.LogError("CoreUtility.ClampToView() rootCanvas == null!");
+                Debug.LogError("rootCanvas == null!");
                 return;
             }
 
@@ -997,7 +997,7 @@ namespace Core
 
             if (pivot.x > 0 || pivot.y > 0)
             {
-                Debug.LogWarning("CoreUtility.ClampToView() wrong pivot, pivot must be = (0,0)");
+                Debug.LogWarning("wrong pivot, pivot must be = (0,0)");
             }
 
             Vector2 position = screenPosition / rootCanvas.localScale.x; 
@@ -1307,7 +1307,7 @@ namespace Core
             {
                 if (Count >= items.Length)
                 {
-                    Debug.LogError("SwapBackArray.Add() capacity exceeded!");
+                    Debug.LogError("capacity exceeded!");
                     return;
                 }
 
@@ -1341,8 +1341,7 @@ namespace Core
 
             public IEnumerator<T> GetEnumerator()
             {
-                Debug.LogError("SwapBackArray.GetEnumerator() does not support for each loop!");
-                throw new InvalidOperationException("SwapBackArray.GetEnumerator() does not support for each loop!");
+                throw new InvalidOperationException("does not support for each loop!");
             }
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
@@ -1442,7 +1441,7 @@ namespace Core
                 }
 
 #if UNITY_EDITOR
-                Debug.LogWarning("StackFloat.Apply() not enough space!");
+                Debug.LogWarning("not enough space!");
 #endif
                 return;
             }
@@ -1451,7 +1450,7 @@ namespace Core
                 if (token < 0 || token >= used.Length)
                 {
 #if UNITY_EDITOR
-                    Debug.LogWarning("StackFloat.Revert() token out of range");
+                    Debug.LogWarning("token out of range");
 #endif
                     token = -1;
                     return;
@@ -1460,7 +1459,7 @@ namespace Core
                 if (!used[token])
                 {
 #if UNITY_EDITOR
-                    Debug.LogWarning("StackFloat.Revert() token already released");
+                    Debug.LogWarning("token already released");
 #endif
                     token = -1;
                     return;
@@ -1516,7 +1515,7 @@ namespace Core
                     }
                 }
 #if UNITY_EDITOR
-                Debug.LogWarning("StackInt.Add() not enough space!");
+                Debug.LogWarning("not enough space!");
 #endif
             }
             public void Remove(ref int token)
@@ -1524,7 +1523,7 @@ namespace Core
                 if (token < 0 || token >= used.Length)
                 {
 #if UNITY_EDITOR
-                    Debug.LogWarning("StackInt.Remove() token out of range");
+                    Debug.LogWarning("token out of range");
 #endif
                     token = -1;
                     return;
@@ -1533,7 +1532,7 @@ namespace Core
                 if (!used[token])
                 {
 #if UNITY_EDITOR
-                    Debug.LogWarning("StackInt.Remove() token already released");
+                    Debug.LogWarning("token already released");
 #endif
                     token = -1;
                     return;
@@ -1581,7 +1580,7 @@ namespace Core
                 }
 
 #if UNITY_EDITOR
-                Debug.LogWarning("StackBool.Disable() not enough space!");
+                Debug.LogWarning("not enough space!");
 #endif
             }
             public void Enable(ref int token)
@@ -1589,7 +1588,7 @@ namespace Core
                 if (token < 0 || token >= used.Length)
                 {
 #if UNITY_EDITOR
-                    Debug.LogWarning("StackBool.Enable() token out of range");
+                    Debug.LogWarning("token out of range");
 #endif
                     token = -1;
                     return;
@@ -1598,7 +1597,7 @@ namespace Core
                 if (!used[token])
                 {
 #if UNITY_EDITOR
-                    Debug.LogWarning("StackBool.Enable() token already released");
+                    Debug.LogWarning("token already released");
 #endif
                     token = -1;
                     return;
@@ -1611,7 +1610,7 @@ namespace Core
                 if (disableCount < 0)
                 {
 #if UNITY_EDITOR
-                    Debug.LogError("StackBool.Enable() internal counter underflow");
+                    Debug.LogError("internal counter underflow");
 #endif
                     disableCount = 0;
                 }

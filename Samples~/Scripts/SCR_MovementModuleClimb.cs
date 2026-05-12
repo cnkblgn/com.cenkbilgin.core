@@ -10,7 +10,7 @@ namespace Game
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(MovementController))]
-    public class MovementProcessorClimb : MonoBehaviour, IMovementProcessor
+    public class MovementModuleClimb : MonoBehaviour, IMovementModule
     {
         public event Action<ClimbType> OnStart = null;
         public event Action<ClimbType> OnEnd = null;
@@ -34,7 +34,7 @@ namespace Game
         [SerializeField] private float gravity = -20f;
         [SerializeField] private float maxSpeed = 12f;
 
-        private MovementController movementController = null;
+        private MovementController controller = null;
         private readonly StackBool isEnabled = new(8);
         private Vector3 enterVelocity = Vector3.zero;
         private Vector3 climbVelocity = Vector3.zero;
@@ -48,7 +48,6 @@ namespace Game
         private bool canClimb = false;
         private bool isClimbing = false;
 
-        private void Awake() => movementController = GetComponent<MovementController>();
 #if UNITY_EDITOR
         private void OnDrawGizmos()
         {
@@ -57,7 +56,7 @@ namespace Game
                 return;
             }
 
-            if (movementController == null)
+            if (controller == null)
             {
                 return;
             }
@@ -73,7 +72,16 @@ namespace Game
         }
 #endif
 
-        public void OnBeforeMove(MovementController controller)
+        public void Bind(MovementController controller)
+        {
+            this.controller = controller;
+        }
+        public void Unbind(MovementController controller)
+        {
+
+        }
+
+        public void OnBeforeMove()
         {
             if (ManagerCoreGame.Instance.GetGameState() != GameState.RESUME)
             {
@@ -88,7 +96,7 @@ namespace Game
 
             TryClimb();
         }
-        public void OnBeforeLook(MovementController controller) { }
+        public void OnBeforeLook() { }
 
         private bool TryGetClimbTarget(out Vector3 climbPosition, out float climbHeight)
         {
@@ -101,7 +109,7 @@ namespace Game
             if (Physics.Raycast(rayOrigin, Vector3.down, out climbInfo, rayLength, layer))
             {
                 float climbAngle = Vector3.Angle(climbInfo.normal, Vector3.up);
-                climbHeight = climbInfo.point.y - movementController.GetCharacterOrigin().position.y;
+                climbHeight = climbInfo.point.y - controller.GetCharacterOrigin().position.y;
                 climbPosition = climbInfo.point + Vector3.up * 0.1f;
 
                 if (climbAngle > 5)
@@ -129,24 +137,24 @@ namespace Game
                 return;
             }
 
-            if (movementController.CollisionGround)
+            if (controller.CollisionGround)
             {
                 return;
             }
 
-            if (movementController.CollisionCeiling)
+            if (controller.CollisionCeiling)
             {
                 return;
             }
 
-            Vector3 horizontalVelocity = movementController.GetVelocity().ClearY();
+            Vector3 horizontalVelocity = controller.GetVelocity().ClearY();
 
             if (horizontalVelocity.magnitude < 0.1f)
             {
                 return;
             }
 
-            if (movementController.GetMovementDirectionLocal().z < 0)
+            if (controller.GetMovementDirectionLocal().z < 0)
             {
                 return;
             }    
@@ -166,16 +174,16 @@ namespace Game
             isClimbing = true;
             climbTimer = 0f;
 
-            enterVelocity = movementController.GetVelocity().ClearY();
+            enterVelocity = controller.GetVelocity().ClearY();
 
             this.climbHeight = climbHeight;
             this.climbType = CalculateClimbType(enterVelocity.magnitude, climbHeight);
-            this.climbVelocity = CalculateClimbVelocity(movementController.GetCharacterOrigin().position, climbPosition, duration);
+            this.climbVelocity = CalculateClimbVelocity(controller.GetCharacterOrigin().position, climbPosition, duration);
 
-            if (carryMomentum) climbVelocity += enterVelocity.Clamp(climbType == ClimbType.CLIMB ? 1 : enterVelocity.magnitude) + movementController.GetCharacterOrigin().forward;
+            if (carryMomentum) climbVelocity += enterVelocity.Clamp(climbType == ClimbType.CLIMB ? 1 : enterVelocity.magnitude) + controller.GetCharacterOrigin().forward;
 
-            movementController.DisableMovement(out movementToken);
-            if (disableLook) movementController.DisableLook(out lookToken);
+            controller.DisableMovement(out movementToken);
+            if (disableLook) controller.DisableLook(out lookToken);
 
             this.WaitSeconds(climbCooldown, () => canClimb = true, () => canClimb = false);
             OnStart?.Invoke(climbType);
@@ -186,7 +194,7 @@ namespace Game
 
             climbVelocity.y += gravity * Time.deltaTime;
 
-            movementController.SetVelocity(climbVelocity);
+            controller.SetVelocity(climbVelocity);
 
             if (climbTimer >= duration)
             {
@@ -202,15 +210,15 @@ namespace Game
 
             isClimbing = false;
 
-            movementController.SetVelocity(climbVelocity);
-            movementController.EnableMovement(ref movementToken);
-            if (disableLook) movementController.EnableLook(ref lookToken);
+            controller.SetVelocity(climbVelocity);
+            controller.EnableMovement(ref movementToken);
+            if (disableLook) controller.EnableLook(ref lookToken);
 
             OnEnd?.Invoke(climbType);
         }
 
-        private float GetRayLength() => movementController.GetCharacterHeight() + 0.5f;
-        private Vector3 GetRayOrigin() => movementController.GetCameraOrigin().position + movementController.GetCharacterOrigin().forward * distance;
+        private float GetRayLength() => controller.GetCharacterHeight() + 0.5f;
+        private Vector3 GetRayOrigin() => controller.GetCameraOrigin().position + controller.GetCharacterOrigin().forward * distance;
         private ClimbType CalculateClimbType(float momentum, float height)
         {
             if (height > maxHeight * 0.75f)

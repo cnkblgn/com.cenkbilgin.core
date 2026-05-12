@@ -28,6 +28,17 @@ namespace Core.UI
 
         protected override void Awake()
         {
+            if (mainCanvasController == null) throw new NullReferenceException();
+            if (mainCanvasEvents == null) throw new NullReferenceException();
+            if (cursorController == null) throw new NullReferenceException();
+            if (tooltipController == null) throw new NullReferenceException();
+            if (waypointController == null) throw new NullReferenceException();
+            if (notificationController == null) throw new NullReferenceException();
+            if (messageController == null) throw new NullReferenceException();
+            if (confirmationController == null) throw new NullReferenceException();
+            if (transitionController == null) throw new NullReferenceException();
+            if (keyActionController == null) throw new NullReferenceException();
+
             base.Awake();
 
             SetCursor();

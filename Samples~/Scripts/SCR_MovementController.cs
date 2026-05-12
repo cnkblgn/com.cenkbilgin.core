@@ -60,14 +60,16 @@ namespace Game
         [SerializeField] private float stanceCrouchCameraHeight = 1.000f;
 
         [Header("_")]
-        [SerializeField] private Transform cameraFollow = null;
-        [SerializeField, Required] private Transform cameraPivot = null;
+        [SerializeField, Required] private Transform cameraOrigin = null;
+        [SerializeField, Required] private Transform cameraRoot = null;
         [SerializeField, Range(45, 90)] private float cameraFieldOfView = 60.0f;
         [SerializeField, Min(0)] private float cameraSensitivity = 1.25f;
         [SerializeField, Range(0, 90)] private float cameraPitchClampAngle = 75;
         [SerializeField, Range(0, 90)] private float cameraYawClampAngle = 0;
         [SerializeField, ReadOnly] private float cameraYawClampCenter = 0;
-        [SerializeField, Range(0, 1), Tooltip("Strafe helper on air")] private float cameraStrafeControl = 0;
+        [SerializeField] private float cameraOffsetDistance = 2f;
+        [SerializeField] private float cameraOffsetHeight = 0.25f;
+        [SerializeField] private float cameraOffsetShoulder = 0.33f;
 
         [Header("_")]
         [SerializeField, Min(0)] private float movementGravity = 32.0f;
@@ -113,10 +115,12 @@ namespace Game
         private readonly StackBool isLookEnabled = new(4);
         private readonly StackBool isGravityEnabled = new(4);
         private readonly StackBool isCollidersEnabled = new(4);
-        private IMovementProcessor[] movementProcessors = null;
+        private IMovementModule[] movementModules = null;
         private Vector3 movementDirection = Vector3.zero;
         private Vector3 movementVelocity = Vector3.zero;
-        private Vector3 cameraOffset = Vector3.zero;
+        private Vector3 stanceOffset = Vector3.zero;
+        private Vector3 cameraPosition = Vector3.zero;
+        private Quaternion cameraRotation = Quaternion.identity;
         private LayerMask collisionDefaultMask = -1;
         private RaycastHit collisionGroundInfo = new();
         private RaycastHit collisionSidesInfo = new();
@@ -132,9 +136,12 @@ namespace Game
         private float collisionCeilingRadius = 0;
         private float collisionSidesRadius = 0;
         private float collisionAngle = 0;
-        private float cameraRotationX = 0;
-        private float cameraRotationY = 0;
-        private float cameraRotationZ = 0;
+        private float cameraPitchRaw = 0;
+        private float cameraYawRaw = 0;
+        private float cameraRollRaw = 0;
+        private float cameraPitch = 0;
+        private float cameraYaw = 0;
+        private float cameraRoll = 0;
         private float movementTargetSpeed = 1;
         private float movementCurrentSpeed = 1;
         private float movementNormalizedSpeed = 1;
@@ -159,6 +166,10 @@ namespace Game
         private bool isSprinting = false;
         private bool isWalking = false;
         private bool isStanceOverrided = false;
+        private bool isBodyRotationLocked = false;
+        private bool isCameraYawLocked = false;
+        private bool isCameraPitchLocked = false;
+        private bool isCameraRollLocked = false;
         private bool isFallHeightResolved = false;
         private bool isCollisionClipResolved = false;
         private bool isOnSteepSlope = false;
@@ -168,8 +179,8 @@ namespace Game
         {
             collisionDefaultMask = collisionMask;
 
-            movementProcessors = GetComponents<IMovementProcessor>();
-            Array.Sort(movementProcessors, (a, b) => a.Priority.CompareTo(b.Priority));
+            movementModules = GetComponents<IMovementModule>();
+            Array.Sort(movementModules, (a, b) => a.Priority.CompareTo(b.Priority));
 
             cameraController = GetComponentInChildren<Camera>();
             characterOrigin = GetComponent<Transform>();
@@ -190,11 +201,19 @@ namespace Game
             characterController.includeLayers = collisionDefaultMask;
             characterController.excludeLayers = ~collisionDefaultMask;
             characterController.skinWidth = characterController.radius * 0.1f;
-            cameraOffset = Vector3.up * stanceStandCameraHeight;
+            stanceOffset = Vector3.up * stanceStandCameraHeight;
             cameraController.fieldOfView = cameraFieldOfView;
-            SetLookPitchClamp(cameraPitchClampAngle);
-            SetLookYawClamp(cameraYawClampAngle);
+            SetCameraPitchClamp(cameraPitchClampAngle);
+            SetCameraYawClamp(cameraYawClampAngle);
             this.WaitFrame(() => characterController.enabled = true);
+        }
+        private void OnEnable()
+        {
+            foreach (IMovementModule i in movementModules) i.Bind(this);
+        }
+        private void OnDisable()
+        {
+            foreach (IMovementModule i in movementModules) i.Unbind(this);
         }
         private void Update()
         {
@@ -206,7 +225,7 @@ namespace Game
             UpdateCollision();
             UpdateMovement();
 
-            foreach (IMovementProcessor i in movementProcessors) i.OnBeforeMove(this);
+            foreach (IMovementModule i in movementModules) i.OnBeforeMove();
 
             characterController.Move(movementVelocity * Time.deltaTime);
         }
@@ -214,18 +233,14 @@ namespace Game
         {
             UpdateCamera();
 
-            foreach (IMovementProcessor i in movementProcessors) i.OnBeforeLook(this);
+            foreach (IMovementModule i in movementModules) i.OnBeforeLook();
 
-            characterOrigin.localRotation = Quaternion.Euler(0, cameraRotationY, 0);
+            if (!isBodyRotationLocked)
+            {
+                characterOrigin.rotation = Quaternion.Slerp(characterOrigin.rotation, Quaternion.Euler(0f, cameraYaw, 0f), 7.5f * Time.deltaTime);
+            }
 
-            if (cameraFollow != null)
-            {
-                cameraPivot.SetPositionAndRotation(cameraFollow.position + cameraOffset, cameraFollow.rotation * Quaternion.Euler(cameraRotationX, 0, cameraRotationZ));
-            }
-            else
-            {
-                cameraPivot.SetLocalPositionAndRotation(cameraOffset, Quaternion.Euler(cameraRotationX, 0, cameraRotationZ));
-            }
+            cameraOrigin.SetPositionAndRotation(cameraPosition, cameraRotation);
         }
 
 #if UNITY_EDITOR
@@ -284,15 +299,6 @@ namespace Game
         }
         private void OnValidate()
         {
-            if (cameraFollow != null)
-            {
-                cameraPivot.position = cameraFollow.position;
-            }
-            else if (cameraPivot != null)
-            {
-                cameraPivot.localPosition = Vector3.up * stanceStandCameraHeight;
-            }
-
             if (characterController != null)
             {
                 characterController.minMoveDistance = 0f;
@@ -381,11 +387,6 @@ namespace Game
             }
 
             Vector2 input = GetIsInputEnabled() ? Move.GetAxis() : Vector2.zero;
-
-            if (!CollisionGround && Mathf.Abs(input.x) < 0.01f)
-            {
-                input.x = Mathf.Lerp(input.x, Mathf.Clamp(Look.GetAxis().x * 5f, -1f, 1f), cameraStrafeControl);
-            }
 
             movementDirection = characterOrigin.TransformVector(new(input.x, 0f, input.y));
             movementDirection = movementDirection.normalized;
@@ -522,23 +523,34 @@ namespace Game
         }
         private void UpdateCamera()
         {
-            Vector3 cameraCenter = Vector3.up * (movementCurrentStance == MovementStance.CROUCH ? stanceCrouchCameraHeight : stanceStandCameraHeight);
-
-            float cameraTime = (movementCurrentStance == MovementStance.CROUCH ? stanceCrouchTransitionRoughness : stanceStandTransitionRoughness);
-
-            cameraOffset = Vector3.Lerp(cameraOffset, cameraCenter, Time.deltaTime * cameraTime);
-
             if (GetIsLookEnabled())
             {
-                cameraRotationX -= Look.GetAxis().y * GetSensitivity() * 0.1f;
-                cameraRotationY += Look.GetAxis().x * GetSensitivity() * 0.1f;
-                cameraRotationX = Mathf.Clamp(cameraRotationX, -cameraPitchClampAngle, cameraPitchClampAngle);
+                cameraPitchRaw -= Look.GetAxis().y * GetSensitivity() * 0.1f;
+                cameraYawRaw += Look.GetAxis().x * GetSensitivity() * 0.1f;
+
+                cameraPitchRaw = Mathf.Clamp(cameraPitchRaw, -cameraPitchClampAngle, cameraPitchClampAngle);
 
                 if (cameraYawClampAngle > 0f)
                 {
-                    cameraRotationY = Mathf.Clamp(cameraRotationY, cameraYawClampCenter - cameraYawClampAngle, cameraYawClampCenter + cameraYawClampAngle);
+                    cameraYawRaw = Mathf.Clamp(cameraYawRaw, cameraYawClampCenter - cameraYawClampAngle, cameraYawClampCenter + cameraYawClampAngle);
                 }
             }
+
+            Vector3 stanceCenter = Vector3.up * (movementCurrentStance == MovementStance.CROUCH ? stanceCrouchCameraHeight : stanceStandCameraHeight);
+            float stanceTime = (movementCurrentStance == MovementStance.CROUCH ? stanceCrouchTransitionRoughness : stanceStandTransitionRoughness);
+            stanceOffset = Vector3.Lerp(stanceOffset, stanceCenter, Time.deltaTime * stanceTime);
+
+            cameraPitch = isCameraPitchLocked ? cameraPitch : cameraPitchRaw;
+            cameraYaw = isCameraYawLocked ? cameraYaw : cameraYawRaw;
+            cameraRoll = isCameraRollLocked ? cameraRoll : cameraRollRaw;
+
+            cameraRotation = Quaternion.Euler(cameraPitch, cameraYaw, cameraRoll);
+
+            Vector3 pivot = cameraRoot.position + Vector3.up * cameraOffsetHeight;
+            Vector3 shoulderOffset = Vector3.right * cameraOffsetShoulder;
+            Vector3 backwardOffset = Vector3.forward * cameraOffsetDistance;
+
+            cameraPosition = pivot + stanceOffset + cameraRotation * (shoulderOffset - backwardOffset);
         }
 
         private void MoveAir()
@@ -780,7 +792,38 @@ namespace Game
             return Physics.SphereCast(collisionCeilingPosition, collisionCeilingRadius, Vector3.up, out collisionCeilingInfo, collisionCeilingDirection.y, collisionMask, QueryTriggerInteraction.Ignore);
         }
 
-        public Transform GetCameraOrigin() => cameraPivot;
+        public void UnlockBodyRotation() => isBodyRotationLocked = false;
+        public void LockBodyRotation() => isBodyRotationLocked = true;
+
+        public void UnlockCameraPitch() => isCameraPitchLocked = false;
+        public void LockCameraPitch() => isCameraPitchLocked = true;
+
+        public void UnlockCameraYaw() => isCameraYawLocked = false;
+        public void LockCameraYaw() => isCameraYawLocked = true;
+
+        public void UnlockCameraRoll() => isCameraRollLocked = false;
+        public void LockCameraRoll() => isCameraRollLocked = true;
+
+        public float GetCameraRoll() => cameraRollRaw;
+        public void SetCameraRoll(float value) => cameraRollRaw = value;
+
+        public float GetCameraPitch() => cameraPitchRaw;
+        public void SetCameraPitch(float value) => cameraPitchRaw = value;
+        public void SetCameraPitchClamp(float value) => cameraPitchClampAngle = value;
+
+        public float GetCameraYaw() => cameraYawRaw;
+        public void SetCameraYaw(float value) => cameraYawRaw = value;
+        public void SetCameraYawClamp(float value)
+        {
+            cameraYawClampAngle = Mathf.Max(0f, value);
+
+            if (cameraYawClampAngle > 0f)
+            {
+                cameraYawClampCenter = cameraYawRaw;
+            }
+        }
+
+        public Transform GetCameraOrigin() => cameraOrigin;
 
         public Transform GetCharacterOrigin() => characterOrigin;
         public float GetCharacterHeight() => characterController.height;
@@ -878,7 +921,7 @@ namespace Game
         public float GetAirAcceleration() => movementAirAccelerate;
         public void SetAirAcceleration(float value) => movementAirAccelerate = value;
 
-        public void Enable()
+        public void EnableController()
         {
             if (this.enabled)
             {
@@ -889,7 +932,7 @@ namespace Game
             characterController.enabled = true;
             this.WaitFrame(() => SetVelocity(Vector3.zero));
         }
-        public void Disable()
+        public void DisableController()
         {
             if (!this.enabled)
             {
@@ -936,24 +979,5 @@ namespace Game
         public void DisableColliders(out int token) => isCollidersEnabled.Disable(out token);
         public void EnableColliders(ref int token) => isCollidersEnabled.Enable(ref token);
         public bool GetIsCollidersEnabled() => isCollidersEnabled.IsEnabled && this.enabled;
-
-        public float GetLookRoll() => cameraRotationZ;
-        public void SetLookRoll(float value) => cameraRotationZ = value;
-
-        public float GetLookPitch() => cameraRotationX;
-        public void SetLookPitch(float value) => cameraRotationX = value;
-        public void SetLookPitchClamp(float value) => cameraPitchClampAngle = value;
-
-        public float GetLookYaw() => cameraRotationY;
-        public void SetLookYaw(float value) => cameraRotationY = value;
-        public void SetLookYawClamp(float value)
-        {
-            cameraYawClampAngle = Mathf.Max(0f, value);
-
-            if (cameraYawClampAngle > 0f)
-            {
-                cameraYawClampCenter = cameraRotationY;
-            }
-        }
     }
 }

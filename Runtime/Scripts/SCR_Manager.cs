@@ -16,7 +16,7 @@ namespace Core
             {
                 if (instance == null)
                 {
-                    throw new InvalidOperationException($"Manager() [{typeof(T).Name}] has not been initialized.");
+                    throw new InvalidOperationException($"[{typeof(T).Name}] has not been initialized.");
                 }
 
                 return instance;
@@ -25,6 +25,13 @@ namespace Core
 
         protected virtual void Awake()
         {
+            if (instance != null && instance != this)
+            {
+                Debug.LogError($"Duplicate manager [{nameof(T)}]");
+                Destroy(gameObject);
+                return;
+            }
+
             instance = (T)this;
             DontDestroyOnLoad(gameObject);
         }

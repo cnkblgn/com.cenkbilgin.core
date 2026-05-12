@@ -50,13 +50,13 @@ namespace Core.UI
         {
             if (mainCamera == null)
             {
-                Debug.LogError("UIWaypointController.Show() mainCamera == null!");
+                Debug.LogError("mainCamera == null!");
                 return;
             }
 
             if (waypointTemplate == null)
             {
-                Debug.LogError("UIWaypointController.Show() waypointTemplate == null!");
+                Debug.LogError("waypointTemplate == null!");
                 return;
             }
 

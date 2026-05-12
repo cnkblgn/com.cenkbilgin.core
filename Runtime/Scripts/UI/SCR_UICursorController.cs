@@ -35,7 +35,7 @@ namespace Core.UI
         {
             if (id == null)
             {
-                throw new ArgumentNullException($"UICursorController.TryGetCursor() [{nameof(id)}]");
+                throw new ArgumentNullException($"id == null [{nameof(id)}]");
             }
 
             if (table.TryGetValue(id, out cursor))
@@ -43,7 +43,7 @@ namespace Core.UI
                 return true;
             }
 
-            Debug.LogWarning($"UICursorController.TryGetCursor() [{id}] is not defined");
+            Debug.LogWarning($"[{id}] is not defined");
             return false;
         }
         public void MoveCursor(Vector2 pointerPosition)

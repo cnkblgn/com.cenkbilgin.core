@@ -21,7 +21,7 @@ namespace Core.Graphics
         [SerializeField, Required] private Volume volumeController = default;
 
         [Header("_")]
-        [SerializeField] private PoolGroupDecal[] decalGroup = null;
+        [SerializeField] private DecalGroup[] decalGroup = null;
         [SerializeField, Required] private Transform decalContainer = null;
         [SerializeField, Required] private ParticleEmitter[] particleGroup = null;
         [SerializeField, Required] private Transform particleContainer = null;
@@ -38,6 +38,13 @@ namespace Core.Graphics
 
         protected override void Awake()
         {
+            if (urpPipelineSettings == null) throw new ArgumentNullException();
+            if (urpRendererSettings == null) throw new ArgumentNullException();
+            if (volumeController == null) throw new ArgumentNullException();
+            if (decalContainer == null) throw new ArgumentNullException();
+            if (particleGroup == null) throw new ArgumentNullException();
+            if (particleContainer == null) throw new ArgumentNullException();
+            
             base.Awake();
 
             QualitySettings.maxQueuedFrames = 0;
@@ -85,7 +92,9 @@ namespace Core.Graphics
             foreach (var item in decalGroup)
             {
                 PoolSystemDecal system = new();
-                system.Initialize(item.Prefab, decalContainer, PoolType.RING_BUFFER, item.Prefab.name, item.Count);
+
+                system.Initialize(item.Prefab, decalContainer, item.Count);
+
                 decalPool[item.Prefab.name] = system;
             }
         }
@@ -101,7 +110,9 @@ namespace Core.Graphics
             foreach (var item in particleGroup)
             {
                 PoolSystemParticle system = new();
-                system.Initialize(item, particleContainer, PoolType.SINGLE, item.name, 1);
+
+                system.Initialize(item, particleContainer, 1);
+
                 particlePool[item.name] = system;
             }
         }

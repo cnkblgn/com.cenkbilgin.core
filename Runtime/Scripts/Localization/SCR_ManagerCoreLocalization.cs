@@ -36,7 +36,7 @@ namespace Core.Localization
         {
             if (database == null)
             {
-                throw new NullReferenceException($"ManagerCoreLocalization.SetLanguage() [{nameof(database)}]");
+                throw new NullReferenceException($"[{nameof(database)}]");
             }
 
             languageIndex = languageIndex == -1 ? 0 : languageIndex;
@@ -44,7 +44,7 @@ namespace Core.Localization
 
             if (language == null)
             { 
-                throw new InvalidOperationException($"ManagerCoreLocalization.SetLanguage() language missing for index {languageIndex}.");
+                throw new InvalidOperationException($"Language missing for index {languageIndex}.");
             }
         }
          

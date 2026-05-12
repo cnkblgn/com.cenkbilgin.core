@@ -7,7 +7,7 @@ namespace Core
 {
     using static CoreUtility;
 
-    public static class SerializerObject
+    public static class SerializerSystem
     {
         public static bool Clear(string path, bool useInEditor = false)
         {
@@ -27,7 +27,7 @@ namespace Core
 
             return false;
         }
-        public static bool Save<T>(string path, T Data, bool useInEditor = false, bool useOptimization = true)
+        public static bool Save<T>(string path, T Data, bool useInEditor = false, bool compress = true)
         {
             if (!useInEditor)
             {
@@ -41,16 +41,16 @@ namespace Core
             {
                 if (File.Exists(path))
                 {
-                    Debug.LogWarning($"SerializerObject.Save() File at {path} is exist. Deleting old file!");
+                    Debug.LogWarning($"File at {path} is exist. Deleting old file!");
                     File.Delete(path);
                 }
 
-                File.WriteAllText(path, JsonConvert.SerializeObject(Data, useOptimization ? Formatting.None : Formatting.Indented, SerializerSettings.SETTINGS));
+                File.WriteAllText(path, JsonConvert.SerializeObject(Data, compress ? Formatting.None : Formatting.Indented, SerializerSettings.SETTINGS));
                 return true;
             }
             catch (Exception exception)
             {
-                Debug.LogError($"SerializerObject.Save() Failed to save data: {exception.Message} {exception.StackTrace}");
+                Debug.LogError($"Failed to save data: {exception.Message} {exception.StackTrace}");
                 return false;
             }
         }
@@ -66,7 +66,7 @@ namespace Core
 
             if (!File.Exists(path))
             {
-                Debug.LogError($"SerializerObject.Load() File at {path} not exists!");
+                Debug.LogError($"File at {path} not exists!");
                 return default;
             }
 
@@ -77,7 +77,7 @@ namespace Core
             }
             catch (Exception exception)
             {
-                Debug.LogError($"SerializerObject.Load() Failed to load data: {exception.Message} {exception.StackTrace}");
+                Debug.LogError($"Failed to load data: {exception.Message} {exception.StackTrace}");
                 return default;
             }
         }

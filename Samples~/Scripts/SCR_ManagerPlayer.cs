@@ -10,32 +10,24 @@ namespace Game
 
     [DisallowMultipleComponent]
     public class ManagerPlayer : Manager<ManagerPlayer>
-    {      
+    {
         public static event Action<GameEntity> OnPlayerLoaded = null;
         public static event Action<GameEntity> OnPlayerUnloaded = null;
 
-        public GameEntity Player => playerInstance; 
+        public static GameEntity Player => playerInstance;
 
         [Header("_")]
         [SerializeField, Required] private GameEntity playerPrefab = null;
 
-        private GameEntity playerInstance = null;
+        private static GameEntity playerInstance = null;
 
-        private readonly DebugCommandInstanceBase[] debugCommands = new DebugCommandInstanceBase[]
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void RESET()
         {
-            new DebugCommandInstance($"tcl", $"Toggles Noclip", $"'tcl'", () =>
-            {
-                if (Instance.Player == null)
-                {
-                    return;
-                }
-
-                if (Instance.Player.TryGetComponent(out MovementProcessorNoclip noclip))
-                {
-                    noclip.Toggle();
-                }
-            }),
-        };
+            OnPlayerLoaded = null;
+            OnPlayerUnloaded = null;
+            playerInstance = null;
+        }
 
         private void Update()
         {
@@ -57,24 +49,9 @@ namespace Game
                 }
             }
         }
-        private void OnEnable()
-        {
-            for (int i = 0; i < debugCommands.Length; i++)
-            {
-                DebugCommandData.Insert(debugCommands[i]);
-            }
+        private void OnEnable() => ManagerCoreGame.OnBeforeSceneChanged += OnBeforeSceneChanged;
+        private void OnDisable() => ManagerCoreGame.OnBeforeSceneChanged -= OnBeforeSceneChanged;
 
-            ManagerCoreGame.OnBeforeSceneChanged += OnBeforeSceneChanged;
-        }
-        private void OnDisable()
-        {
-            for (int i = 0; i < debugCommands.Length; i++)
-            {
-                DebugCommandData.Remove(debugCommands[i]);
-            }
-
-            ManagerCoreGame.OnBeforeSceneChanged -= OnBeforeSceneChanged;
-        }
         private void OnBeforeSceneChanged(string scene) => DespawnPlayer();
 
         public GameEntity SpawnPlayer(Vector3 position, Quaternion rotation) => SpawnPlayer(playerPrefab, position, rotation);
@@ -85,10 +62,9 @@ namespace Game
 
             return playerInstance;
         }
-
         private void DespawnPlayer()
         {
-            if (ManagerCoreGame.Instance.IsBootstrapScene() || ManagerCoreGame.Instance.IsStartingScene())
+            if (ManagerCoreGame.Instance.IsBootstrapScene())
             {
                 return;
             }
@@ -100,6 +76,7 @@ namespace Game
             }
 
             OnPlayerUnloaded?.Invoke(playerInstance);
+            playerInstance = null;
         }
     }
 }

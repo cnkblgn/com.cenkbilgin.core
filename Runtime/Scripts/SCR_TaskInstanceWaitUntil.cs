@@ -10,8 +10,8 @@ namespace Core
 
         public TaskInstanceWaitUntil(MonoBehaviour host, Func<bool> predicate, Action callback) : base(host)
         {
-            this.predicate = predicate ?? throw new NullReferenceException("TaskInstanceWaitUntil() predicate == null");
-            this.callback = callback ?? throw new NullReferenceException("TaskInstanceWaitUntil() callback == null");
+            this.predicate = predicate ?? throw new NullReferenceException();
+            this.callback = callback ?? throw new NullReferenceException();
         }
         protected override void OnUpdate()
         {
