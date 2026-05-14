@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+#if UNITY_EDITOR
 using Core.Editor;
+#endif
 
 namespace Core.Localization
 {
@@ -20,6 +22,7 @@ namespace Core.Localization
                 return database;
             }
 
+#if UNITY_EDITOR
             LocalizationDatabaseConfig cfg = EditorUtility.FindAssetByType<LocalizationDatabaseConfig>();
 
             if (cfg == null)
@@ -28,6 +31,8 @@ namespace Core.Localization
             }
 
             database = cfg;
+#endif
+
             return database;
         }
 
