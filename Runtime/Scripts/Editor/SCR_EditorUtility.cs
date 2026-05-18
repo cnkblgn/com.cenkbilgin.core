@@ -19,21 +19,6 @@ namespace Core.Editor
             SceneView.lastActiveSceneView.drawGizmos = !SceneView.lastActiveSceneView.drawGizmos;
             SceneView.RepaintAll();
         }
-        [MenuItem("Tools/Validate All Components", priority = 1)]
-        public static void ValidateComponents()
-        {
-            foreach (GameObject gameObject in GameObject.FindObjectsByType<GameObject>(FindObjectsInactive.Include))
-            {
-                foreach (Component component in gameObject.GetComponentsInChildren<Component>())
-                {
-                    if (component == null)
-                    {
-                        Debug.Log($"Missing script at {gameObject.name}", gameObject);
-                        break;
-                    }
-                }
-            }
-        }
         private static GameObject copiedObject;
         [MenuItem("Tools/Copy All Components", false, 2)]
         private static void CopyComponents()
