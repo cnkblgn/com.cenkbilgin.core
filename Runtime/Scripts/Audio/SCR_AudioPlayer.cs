@@ -67,9 +67,16 @@ namespace Core.Audio
             Play();
         }
 
-        public void Play() => Play(blend);
-        public void Play(float blend)
+        public void Play() => Play(audioClip, blend);
+        public void Play(float blend) => Play(audioClip, blend);
+        public void Play(AudioClip clip, float blend)
         {
+            if (clip == null)
+            {
+                Debug.LogWarning("clip == null!");
+                return;
+            }
+
             if (audioObject == null)
             {
                 if (thisTransform == null)
@@ -77,7 +84,7 @@ namespace Core.Audio
                     thisTransform = GetComponent<Transform>();
                 }
 
-                ManagerCoreAudio.Instance.PlaySound(audioClip, audioGroup, thisTransform.position, blend, volume * (randomizeVolume ? Random.Range(0.75f, 1.15f) : 1), pitch * (randomizePitch ? Random.Range(0.9f, 1.1f) : 1), minDistance, maxDistance, useOcculusion);
+                ManagerCoreAudio.Instance.PlaySound(clip, audioGroup, thisTransform.position, blend, volume * (randomizeVolume ? Random.Range(0.75f, 1.15f) : 1), pitch * (randomizePitch ? Random.Range(0.9f, 1.1f) : 1), minDistance, maxDistance, useOcculusion);
 
                 return;
             }
@@ -98,15 +105,15 @@ namespace Core.Audio
 
             audioObject.Play
             (
-                audioClip, 
+                clip,
                 m.AudioListener,
-                m.GetAudioGroup(audioGroup), 
-                blend, 
-                volume * (randomizeVolume ? Random.Range(0.75f, 1.15f) : 1), 
-                pitch * (randomizePitch ? Random.Range(0.9f, 1.1f) : 1), 
+                m.GetAudioGroup(audioGroup),
+                blend,
+                volume * (randomizeVolume ? Random.Range(0.75f, 1.15f) : 1),
+                pitch * (randomizePitch ? Random.Range(0.9f, 1.1f) : 1),
                 minDistance,
-                maxDistance, 
-                playOnLoop, 
+                maxDistance,
+                playOnLoop,
                 m.OcclusionMask,
                 m.OcclusionAngle,
                 m.OcclusionBlend,
@@ -116,8 +123,6 @@ namespace Core.Audio
 
             SetLowpass(lowpass / 22000f);
             SetResonance(rezonance);
-
-            return;
         }
         public void Stop()
         {
@@ -135,6 +140,9 @@ namespace Core.Audio
                 FadeOut();
             }         
         }
+
+        public AudioClip GetClip() => audioClip;
+        public void SetClip(AudioClip clip) => audioClip = clip;
 
         public float GetVolume() => audioObject.GetVolume();
         public void SetVolume(float value) => audioObject.SetVolume(value);
