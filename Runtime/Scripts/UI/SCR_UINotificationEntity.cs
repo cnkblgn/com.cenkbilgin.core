@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using TMPro;
 
@@ -8,7 +7,7 @@ namespace Core.UI
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(RectTransform))]
-    public class UINotificationElement : MonoBehaviour
+    public class UINotificationEntity : MonoBehaviour
     {
         public bool IsActive => isActive;
         public bool IsInitialized => isInitialized;
@@ -46,7 +45,7 @@ namespace Core.UI
 
             isInitialized = true;
         }
-        public void Dispose()
+        public void Hide()
         {
             thisTween?.Stop();
             isActive = false;
@@ -83,7 +82,7 @@ namespace Core.UI
                 float exitStartX = thisTransform.anchoredPosition.x;
                 float exitEndX = startStartX;
 
-                thisTween = thisTransform.OffsetX(exitStartX, exitEndX, offsetOutDuration, 0, TweenType.SCALED, offsetOutEaseType, Dispose);
+                thisTween = thisTransform.OffsetX(exitStartX, exitEndX, offsetOutDuration, 0, TweenType.SCALED, offsetOutEaseType, Hide);
             });
         }
         public void Offset(Vector2 offset) => thisTransform.anchoredPosition += offset;       

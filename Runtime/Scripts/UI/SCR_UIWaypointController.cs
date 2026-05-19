@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Core.UI
@@ -11,22 +9,32 @@ namespace Core.UI
     [RequireComponent(typeof(Canvas))]
     public class UIWaypointController : MonoBehaviour
     {
+        public static event Action<UIWaypointEntity> OnWaypointAdded = null;
+        public static event Action<UIWaypointEntity> OnWaypointRemoved = null;
+
         [Header("_")]
-        [SerializeField, Required] private UIWaypointElement waypointTemplate = null;
+        [SerializeField, Required] private UIWaypointEntity waypointTemplate = null;
 
         private Canvas thisCanvas = null;
         private RectTransform thisTransform = null;
-        private Camera mainCameraController = null;
-        private Transform mainCameraTransform = null;
-        private readonly List<UIWaypointElement> thisObjects = new(8);
+        private Camera cameraController = null;
+        private Transform cameraTransform = null;
+        private readonly PoolSystemUIWaypoint waypointPool = new();
         private bool isOpened = false;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void RESET()
+        {
+            OnWaypointAdded = null;
+            OnWaypointRemoved = null;
+        }
 
         private void Awake()
         {
             thisCanvas = GetComponent<Canvas>();
             thisTransform = GetComponent<RectTransform>();
-            waypointTemplate.gameObject.SetActive(false);
-        }
+            waypointPool.Initialize(waypointTemplate, thisTransform, 16);
+        }        
         private void Update()
         {
             if (!isOpened)
@@ -34,21 +42,28 @@ namespace Core.UI
                 return;
             }
 
-            for (int i = 0; i < thisObjects.Count; i++)
+            for (int i = 0; i < waypointPool.TotalCount; i++)
             {
-                thisObjects[i].Tick(mainCameraController, mainCameraTransform);
-            }
+                UIWaypointEntity entity = waypointPool.Get(i);
 
-            thisObjects.RemoveAll(e => e.IsFinished);
+                if (!entity.gameObject.activeSelf)
+                {
+                    continue;
+                }
+
+                entity.Tick(cameraController, cameraTransform);
+
+                if (entity.IsCompleted)
+                {
+                    OnWaypointRemoved?.Invoke(entity);
+                    waypointPool.Release(entity);
+                }
+            }
         }
-        public void Show()
+
+        public void Show(Camera camera, Transform target, Vector3 offset, Sprite icon, Color color, string text, float duration, Func<bool> destroyUntil)
         {
-            thisCanvas.Show();
-            isOpened = true;
-        }
-        public void Show(Camera mainCamera, Transform targetTransform, Vector3 targetOffset, Func<bool> destroyUntil, Sprite iconSprite, Color iconColor, string iconText = "", float duration = -1)
-        {
-            if (mainCamera == null)
+            if (camera == null)
             {
                 Debug.LogError("mainCamera == null!");
                 return;
@@ -60,16 +75,18 @@ namespace Core.UI
                 return;
             }
 
-            mainCameraController = mainCamera;
-            mainCameraTransform = mainCamera.transform;
-
-            UIWaypointElement waypointObject = Instantiate(waypointTemplate, thisTransform);
-            waypointObject.Initialize(targetTransform, targetOffset, destroyUntil, iconSprite, iconColor, iconText, duration);
-            waypointObject.gameObject.SetActive(true);
-
-            thisObjects.Add(waypointObject);
+            cameraController = camera;
+            cameraTransform = camera.transform;
+            UIWaypointEntity entity = waypointPool.Spawn(target, offset, icon, color, text, duration, destroyUntil);
 
             Show();
+
+            OnWaypointAdded?.Invoke(entity);
+        }
+        public void Show()
+        {
+            thisCanvas.Show();
+            isOpened = true;
         }
         public void Hide()
         {
@@ -78,13 +95,7 @@ namespace Core.UI
         }
         public void Clear()
         {
-            for (int i = 0; i < thisObjects.Count; i++)
-            {
-                thisObjects[i].Deinitialize();
-            }
-
-            thisObjects.Clear();
-
+            waypointPool.Reset();
             Hide();
         }
     }

@@ -58,9 +58,16 @@ namespace Core
                 return;
             }
 
+            availableItems.Clear();
+
             foreach (T item in thisItems)
             {
                 OnReset(item);
+
+                if (Type == PoolType.RELEASE)
+                {
+                    availableItems.Enqueue(item);
+                }
             }
         }
         protected abstract void OnReset(T item);
@@ -85,11 +92,13 @@ namespace Core
                 return;
             }
 
+#if UNITY_EDITOR
             if (availableItems.Contains(item))
             {
                 Debug.LogWarning($"Pool [{ID}] double release detected on [{item.name}]");
                 return;
             }
+#endif
 
             OnReset(item);
 
@@ -97,6 +106,7 @@ namespace Core
 
             availableItems.Enqueue(item);
         }
+        public T Get(int index) => thisItems[index];
 
         protected T GetNext()
         {

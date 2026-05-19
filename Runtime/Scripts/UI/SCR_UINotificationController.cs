@@ -10,23 +10,33 @@ namespace Core.UI
     [RequireComponent(typeof(Canvas))]
     public class UINotificationController : MonoBehaviour
     {
+        public static event Action<UINotificationEntity> OnNotificationAdded = null;
+        public static event Action<UINotificationEntity> OnNotificationRemoved = null;
+
         [Header("_")]
         [SerializeField, Range(0, 16)] private int maxSize = 12;
-        [SerializeField, Required] private UINotificationElement notificationTemplate = null;
+        [SerializeField, Required] private UINotificationEntity notificationTemplate = null;
         [SerializeField, Required] private RectTransform notificationContainer = null;
 
         [Header("_")]
         [SerializeField, Min(0)] private float yPadding = 16;
 
         private Canvas thisCanvas = null;
-        private List<UINotificationElement> activeElements = new(1);
+        private List<UINotificationEntity> activeEntities = new(1);
         private Vector2 objectOffset = Vector2.zero;
         private Vector2 objectPadding = Vector2.zero;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void RESET()
+        {
+            OnNotificationAdded = null;
+            OnNotificationRemoved = null;
+        }
 
         private void Awake()
         {
             thisCanvas = GetComponent<Canvas>();
-            activeElements = new(maxSize);
+            activeEntities = new(maxSize);
 
             notificationTemplate.gameObject.SetActive(false);
 
@@ -35,10 +45,10 @@ namespace Core.UI
 
             for (int i = 0; i < maxSize; i++)
             {
-                UINotificationElement obj = Instantiate(notificationTemplate, notificationContainer);
+                UINotificationEntity obj = Instantiate(notificationTemplate, notificationContainer);
                 obj.Initialize();
 
-                activeElements.Add(obj);
+                activeEntities.Add(obj);
             }
         }
 
@@ -46,35 +56,35 @@ namespace Core.UI
         {
             thisCanvas.Show();
 
-            UINotificationElement temp = null;
+            UINotificationEntity temp = null;
 
-            foreach (UINotificationElement element in activeElements)
+            foreach (UINotificationEntity active in activeEntities)
             {
-                if (!element.IsActive)
+                if (!active.IsActive)
                 {
-                    temp = element;
+                    temp = active;
                     break;
                 }
             }
 
             if (temp == null)
             {
-                temp = activeElements[0];
-                temp.Dispose();
+                temp = activeEntities[0];
+                Hide(temp);
             }
 
-            activeElements.Remove(temp);
-            activeElements.Add(temp);
+            activeEntities.Remove(temp);
+            activeEntities.Add(temp);
 
-            for (int i = 0; i < activeElements.Count; i++)
+            for (int i = 0; i < activeEntities.Count; i++)
             {
-                if (activeElements[i].IsActive)
+                if (activeEntities[i].IsActive)
                 {
-                    activeElements[i].Offset(-objectOffset - objectPadding);
+                    activeEntities[i].Offset(-objectOffset - objectPadding);
                 }
             }
 
-            temp.Show(text, duration);
+            Show(temp, text, duration);
         }
         public void Hide()
         {
@@ -82,12 +92,33 @@ namespace Core.UI
         }
         public void Clear()
         {
-            foreach (UINotificationElement obj in activeElements)
+            foreach (UINotificationEntity entity in activeEntities)
             {
-                obj.Dispose();
+                Hide(entity);
             }
 
             Hide();
+        }
+
+        private void Show(UINotificationEntity entity, string text, float duration)
+        {
+            if (entity == null)
+            {
+                return;
+            }
+
+            entity.Show(text, duration);
+            OnNotificationAdded?.Invoke(entity);
+        }
+        private void Hide(UINotificationEntity entity)
+        {
+            if (entity == null)
+            {
+                return;
+            }
+
+            entity.Hide();
+            OnNotificationRemoved?.Invoke(entity);
         }
     }
 }

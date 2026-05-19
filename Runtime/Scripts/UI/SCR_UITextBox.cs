@@ -7,6 +7,8 @@ namespace Core.UI
 
     public class UITextBox : MonoBehaviour
     {
+        public string Text { get; private set; } = STRING_EMPTY;
+
         [Header("_")]
         [SerializeField] private RectTransform canvasBounds = null;
 
@@ -15,17 +17,15 @@ namespace Core.UI
         [SerializeField, Required] private TextMeshProUGUI textElement = null;
         [SerializeField] private Vector2 textOffset = new(16, 16);
 
-        private string cachedText = STRING_EMPTY;
-
         private void Awake() => textElement.textWrappingMode = TextWrappingModes.NoWrap;
         public void Set(string value)
         {
-            if (cachedText == value)
+            if (Text == value)
             {
                 return;
             }
 
-            textElement.SetText(cachedText = value);
+            textElement.SetText(Text = value);
             textContainer.sizeDelta = textElement.GetPreferredValues() + textOffset;
             UpdateBounds(textContainer.anchoredPosition);
         } 

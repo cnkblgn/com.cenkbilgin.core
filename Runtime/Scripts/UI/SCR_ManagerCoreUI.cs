@@ -62,10 +62,10 @@ namespace Core.UI
         public void HideNotification() => notificationController.Hide();
         public void ClearNotification() => notificationController.Clear();
 
-        public void ShowWaypoint(Camera camera, Transform targetTransform, Vector3 targetOffset, Func<bool> destroyUntil, Sprite iconSprite, Color iconColor, string iconText = "", float duration = -1) => waypointController.Show(camera, targetTransform, targetOffset, destroyUntil, iconSprite, iconColor, iconText, duration);
-        public void ShowWaypoint() => waypointController.Show();
-        public void HideWaypoint() => waypointController.Hide();
-        public void ClearWaypoint() => waypointController.Clear();
+        public void ShowWaypoint(Camera camera, Transform target, Vector3 offset, Sprite icon, Color color, string text = STRING_EMPTY, float duration = 10, Func<bool> destroyUntil = null) => waypointController.Show(camera, target, offset, icon, color, text, duration, destroyUntil);
+        public void ShowWaypoints() => waypointController.Show();
+        public void HideWaypoints() => waypointController.Hide();
+        public void ClearWaypoints() => waypointController.Clear();
 
         /// <summary> 0 -> 1, fades to black </summary>
         public void ShowTransitionFadeIn(float fadeTime, float waitTime, Action onStartEvent, Action onFinishEvent) => transitionController.FadeIn(fadeTime, waitTime, onStartEvent, onFinishEvent);
@@ -82,7 +82,7 @@ namespace Core.UI
         public void ShowTooltip(string value, Vector2 screenPosition) => tooltipController.Show(value, screenPosition);
         public void HideTooltip() => tooltipController.Hide();
 
-        public void ShowConfirmation(string text, Action onAcceptEvent, Action onCancelEvent) => confirmationController.Show(text, onAcceptEvent, onCancelEvent);
+        public void ShowConfirmation(string text, Action onAccept, Action onCancel) => confirmationController.Show(text, onAccept, onCancel);
         public void HideConfirmation() => confirmationController.Hide();
 
         public void SetEnableAction(bool value)
