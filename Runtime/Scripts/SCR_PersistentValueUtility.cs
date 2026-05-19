@@ -19,7 +19,7 @@ namespace Core
         public static void SetData(this Dictionary<string, PersistentValue> data, string key, Dictionary<string, PersistentValue> value) => data[key] = new PersistentValue { Data = value == null ? new() : new Dictionary<string, PersistentValue>(value) };
         public static int GetInt(this Dictionary<string, PersistentValue> data, string key, int def = 0) => data.TryGetValue(key, out var v) && v.Int.HasValue ? v.Int.Value : def;
         public static float GetFloat(this Dictionary<string, PersistentValue> data, string key, float def = 0f) => data.TryGetValue(key, out var v) && v.Float.HasValue ? v.Float.Value : def;
-        public static float GetLong(this Dictionary<string, PersistentValue> data, string key, long def = 0) => data.TryGetValue(key, out var v) && v.Long.HasValue ? v.Long.Value : def;
+        public static long GetLong(this Dictionary<string, PersistentValue> data, string key, long def = 0) => data.TryGetValue(key, out var v) && v.Long.HasValue ? v.Long.Value : def;
         public static bool GetBool(this Dictionary<string, PersistentValue> data, string key, bool def = false) => data.TryGetValue(key, out var v) && v.Bool.HasValue ? v.Bool.Value : def;
         public static string GetString(this Dictionary<string, PersistentValue> data, string key, string def = "") => data.TryGetValue(key, out var v) && v.String != null ? v.String : def;
         public static Vector3 GetVector3(this Dictionary<string, PersistentValue> data, string key, Vector3 def = default) => data.TryGetValue(key, out var v) && v.Vector3.HasValue ? v.Vector3.Value : def;
