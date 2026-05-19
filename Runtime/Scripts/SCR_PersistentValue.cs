@@ -10,6 +10,7 @@ namespace Core
     public struct PersistentValue
     {
         [JsonProperty("f", NullValueHandling = NullValueHandling.Ignore)] public float? Float;
+        [JsonProperty("l", NullValueHandling = NullValueHandling.Ignore)] public long? Long;
         [JsonProperty("i", NullValueHandling = NullValueHandling.Ignore)] public int? Int;
         [JsonProperty("b", NullValueHandling = NullValueHandling.Ignore)] public bool? Bool;
         [JsonProperty("s", NullValueHandling = NullValueHandling.Ignore)] public string String;
