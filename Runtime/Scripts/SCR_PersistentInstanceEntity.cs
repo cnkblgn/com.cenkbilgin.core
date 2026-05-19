@@ -70,6 +70,7 @@ namespace Core
 
             _instanceID = instanceID.ToString();
         }
+
         public void MarkForDestroy(bool isSilent = false)
         {
             if (isMarkedForDestroy)
@@ -80,8 +81,10 @@ namespace Core
             isMarkedForDestroy = true;
             if (!isSilent) OnMarkedForDestroy?.Invoke(this);
         }
+
         public PersistentInstanceData Export() => new(TypeID, PrefabID, instanceID, isMarkedForDestroy, ExportInternal());
         protected abstract Dictionary<string, PersistentValue> ExportInternal();
+
         public void Import(PersistentInstanceData data)
         {
             instanceID = data.InstanceID;

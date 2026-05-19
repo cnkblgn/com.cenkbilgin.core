@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Core
@@ -22,18 +23,28 @@ namespace Core
             return true;
         }
 
-        public bool TryRegisterObject(GameObject gameObject, out PersistentInstanceEntity persistentObject)
+        public bool IsRegistered(Guid id) => sceneController.IsRegistered(id);
+        public bool TryRegisterEntity(GameObject gameObject, out PersistentInstanceEntity entity)
         {
-            persistentObject = null;
+            entity = null;
 
             if (!IsValid())
             {
                 return false;
             }
 
-            return sceneController.TryRegister(gameObject, out persistentObject);
+            return sceneController.TryRegister(gameObject, out entity);
         }
-        public bool TryUnregisterObject(PersistentInstanceEntity persistentObject)
+        public bool TryRegisterEntity(PersistentInstanceEntity entity)
+        {
+            if (!IsValid())
+            {
+                return false;
+            }
+
+            return sceneController.TryRegister(entity);
+        }
+        public bool TryUnregisterEntity(PersistentInstanceEntity entity)
         {
             if (!IsValid())
             {
@@ -42,20 +53,21 @@ namespace Core
 
             Debug.LogWarning("Warning you are unregistering illegally! are you sure! this should handeld by 'PersistentSceneController'");
 
-            return sceneController.TryUnregister(persistentObject);
+            return sceneController.TryUnregister(entity);
         }
-        public void RegisterController(PersistentSceneController sceneController)
+
+        public void RegisterController(PersistentSceneController controller)
         {
             if (!IsValid())
             {
                 return;
             }
 
-            this.sceneController = sceneController;
+            this.sceneController = controller;
         }
-        public void UnregisterController(PersistentSceneController sceneController)
+        public void UnregisterController(PersistentSceneController controller)
         {
-            if (this.sceneController != sceneController)
+            if (this.sceneController != controller)
             {
                 Debug.LogError("this.sceneController != sceneController");
                 return;
@@ -63,6 +75,7 @@ namespace Core
 
             this.sceneController = null;
         }
+
         public PersistentSceneData Export()
         {
             if (!IsValid())

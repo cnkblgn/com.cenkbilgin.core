@@ -23,13 +23,6 @@ namespace Core
             IsMarkedForDestroy = isMarkedForDestroy;
             Data = data == null ? new() : new(data);
         }
-        public PersistentInstanceData()
-        {
-            TypeID = STRING_EMPTY;
-            PrefabID = STRING_EMPTY;
-            InstanceID = Guid.Empty;
-            IsMarkedForDestroy = false;
-            Data = new();
-        }
+        public PersistentInstanceData() : this(STRING_EMPTY, STRING_EMPTY, Guid.Empty, false, new()) { }
     }
 }

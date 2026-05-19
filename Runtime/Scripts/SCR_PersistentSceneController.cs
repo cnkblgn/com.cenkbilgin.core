@@ -25,10 +25,7 @@ namespace Core
 
             foreach (PersistentInstanceEntity entity in entityList)
             {
-                if (entity == null)
-                {
-                    throw new Exception();
-                }
+                if (entity == null) throw new Exception();
 
                 entityTable[entity.InstanceID] = entity;
             }
@@ -44,25 +41,26 @@ namespace Core
                 ManagerCorePersistent.Instance.UnregisterController(this);
             }         
         }
-        private void OnEntityRequestDestroy(PersistentInstanceEntity entityObject)
+
+        private void OnEntityRequestDestroy(PersistentInstanceEntity entity)
         {
-            if (entityObject == null)
+            if (entity == null)
             {
                 return;
             }
 
-            if (!entityObject.IsMarkedForDestroy)
+            if (!entity.IsMarkedForDestroy)
             {
                 return;
             }
 
-            if (!entityHashset.Contains(entityObject.InstanceID))
+            if (!entityHashset.Contains(entity.InstanceID))
             {
-                entityHashset.Add(entityObject.InstanceID);
+                entityHashset.Add(entity.InstanceID);
             }
 
-            TryUnregister(entityObject);
-            Destroy(entityObject.gameObject);
+            TryUnregister(entity);
+            Destroy(entity.gameObject);
         }
 #if UNITY_EDITOR
         public void Populate()
@@ -93,51 +91,51 @@ namespace Core
             Debug.LogWarning($"Collected {entityList.Count} objects!");
         }
 #endif
-        public bool TryRegister(GameObject gameObject, out PersistentInstanceEntity persistentObject)
+
+        public bool IsRegistered(Guid id) => entityTable.ContainsKey(id);
+        public bool TryRegister(GameObject gameObject, out PersistentInstanceEntity entity)
         {
-            if (!gameObject.TryGetComponent(out persistentObject))
+            if (!gameObject.TryGetComponent(out entity))
             {
                 Debug.LogError($"[{gameObject.name}] has no [PersistentInstanceEntity], Destroying [{gameObject.name}]");
                 Destroy(gameObject);
                 return false;
             }
 
-            persistentObject.GenerateID();
-            TryRegister(persistentObject);
+            entity.GenerateID();
+            return TryRegister(entity);
+        }
+        public bool TryRegister(PersistentInstanceEntity entity)
+        {
+            if (entity == null)
+            {
+                return false;
+            }
 
+            if (IsRegistered(entity.InstanceID))
+            {
+                Debug.LogError($"Trying to duplicate {entity.InstanceID}");
+                return false;
+            }
+
+            entityList.Add(entity);
+            entityTable[entity.InstanceID] = entity;
             return true;
         }
-        public bool TryRegister(PersistentInstanceEntity entityObject)
+        public bool TryUnregister(PersistentInstanceEntity entity)
         {
-            if (entityObject == null)
+            if (entity == null)
             {
                 return false;
             }
 
-            if (entityTable.ContainsKey(entityObject.InstanceID))
-            {
-                Debug.LogError($"Trying to duplicate {entityObject.InstanceID}");
-                return false;
-            }
-
-            entityList.Add(entityObject);
-            entityTable[entityObject.InstanceID] = entityObject;
-            return true;
-        }
-        public bool TryUnregister(PersistentInstanceEntity entityObject)
-        {
-            if (entityObject == null)
+            if (!IsRegistered(entity.InstanceID))
             {
                 return false;
             }
 
-            if (!entityTable.ContainsKey(entityObject.InstanceID))
-            {
-                return false;
-            }
-
-            entityList.Remove(entityObject);
-            entityTable.Remove(entityObject.InstanceID);
+            entityList.Remove(entity);
+            entityTable.Remove(entity.InstanceID);
             return true;
         }
 
@@ -217,8 +215,8 @@ namespace Core
                 }
             }
 
-            // re-populate entity table
             entityTable.Clear();
+
             foreach (PersistentInstanceEntity entity in entityList)
             {
                 if (entity != null)
