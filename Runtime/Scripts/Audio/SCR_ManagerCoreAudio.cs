@@ -598,7 +598,7 @@ namespace Core.Audio
                 return null;
             }
 
-            return PlaySound(clip[Random.Range(0, clip.Length)], group, position, blend, volume, pitch * Random.Range(0.9f, 1.1f), minDistance, maxDistance, occulusion);
+            return PlaySound(clip[Random.Range(0, clip.Length)], group, position, blend, volume, pitch, minDistance, maxDistance, occulusion);
         }
     }
 }
