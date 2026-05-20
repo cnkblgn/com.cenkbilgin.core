@@ -16,13 +16,13 @@ namespace Core.Audio
         {
             get
             {
-                if (audioListenerTransform == null)
+                if (audioListener == null)
                 {
                     AudioListener listener = FindAnyObjectByType<AudioListener>();
 
                     if (listener != null)
                     {
-                        audioListenerTransform = listener.transform;
+                        audioListener = listener.transform;
                     }
                     else
                     {
@@ -30,7 +30,7 @@ namespace Core.Audio
                     }
                 }
 
-                return audioListenerTransform;
+                return audioListener;
             }
         }
 
@@ -93,7 +93,7 @@ namespace Core.Audio
         private readonly PoolSystemAudio audioEmitterPool = new();
         private readonly List<AudioEmitter> audioEmitterCollection = new();
         private readonly Dictionary<string, AudioGroup> audioGroups = new();
-        private Transform audioListenerTransform = null;
+        private Transform audioListener = null;
         private AudioReverbZone audioLastReverbZone = null;
         private Coroutine audioCoroutineReverb = null;
         private Coroutine audioCoroutineLowpassEffects = null;
@@ -472,19 +472,21 @@ namespace Core.Audio
 
             for (float timer = 0; timer < fadeTime; timer += Time.deltaTime)
             {
-                audioMixer.SetFloat(REVERB_LF_REFERENCE, Mathf.Lerp(startLFReference, endLFReference, timer / fadeTime));
-                audioMixer.SetFloat(REVERB_ROOM_LF, Mathf.Lerp(startRoomLF, endRoomLF, timer / fadeTime));
-                audioMixer.SetFloat(REVERB_HF_REFERENCE, Mathf.Lerp(startHFReference, endHFReference, timer / fadeTime));
-                audioMixer.SetFloat(REVERB_ROOM_HF, Mathf.Lerp(startRoomHF, endRoomHF, timer / fadeTime));
-                audioMixer.SetFloat(REVERB_DIFFUSION, Mathf.Lerp(startDiffusion, endDiffusion, timer / fadeTime));
-                audioMixer.SetFloat(REVERB_DENSITY, Mathf.Lerp(startDensity, endDensity, timer / fadeTime));
-                audioMixer.SetFloat(REVERB_DELAY, Mathf.Lerp(startReverbDelay, endReverbDelay, timer / fadeTime));
-                audioMixer.SetFloat(REVERB_POWER, Mathf.Lerp(startReverbLevel, endReverbPower, timer / fadeTime));
-                audioMixer.SetFloat(REVERB_REFLECTION_DELAY, Mathf.Lerp(startReflectionsDelay, endReflectionsDelay, timer / fadeTime));
-                audioMixer.SetFloat(REVERB_REFLECTION_POWER, Mathf.Lerp(startReflectionsLevel, endReflectionsPower, timer / fadeTime));
-                audioMixer.SetFloat(REVERB_DECAY_HF_RATIO, Mathf.Lerp(startDecayHFRatio, endDecayHFRatio, timer / fadeTime));
-                audioMixer.SetFloat(REVERB_DECAY_TIME, Mathf.Lerp(startDecayTime, endDecayTime, timer / fadeTime));
-                audioMixer.SetFloat(REVERB_ROOM, Mathf.Lerp(startRoom, endRoom, timer / fadeTime));
+                float t = timer / fadeTime;
+
+                audioMixer.SetFloat(REVERB_LF_REFERENCE, Mathf.Lerp(startLFReference, endLFReference, t));
+                audioMixer.SetFloat(REVERB_ROOM_LF, Mathf.Lerp(startRoomLF, endRoomLF, t));
+                audioMixer.SetFloat(REVERB_HF_REFERENCE, Mathf.Lerp(startHFReference, endHFReference, t));
+                audioMixer.SetFloat(REVERB_ROOM_HF, Mathf.Lerp(startRoomHF, endRoomHF, t));
+                audioMixer.SetFloat(REVERB_DIFFUSION, Mathf.Lerp(startDiffusion, endDiffusion, t));
+                audioMixer.SetFloat(REVERB_DENSITY, Mathf.Lerp(startDensity, endDensity, t));
+                audioMixer.SetFloat(REVERB_DELAY, Mathf.Lerp(startReverbDelay, endReverbDelay, t));
+                audioMixer.SetFloat(REVERB_POWER, Mathf.Lerp(startReverbLevel, endReverbPower, t));
+                audioMixer.SetFloat(REVERB_REFLECTION_DELAY, Mathf.Lerp(startReflectionsDelay, endReflectionsDelay, t));
+                audioMixer.SetFloat(REVERB_REFLECTION_POWER, Mathf.Lerp(startReflectionsLevel, endReflectionsPower, t));
+                audioMixer.SetFloat(REVERB_DECAY_HF_RATIO, Mathf.Lerp(startDecayHFRatio, endDecayHFRatio, t));
+                audioMixer.SetFloat(REVERB_DECAY_TIME, Mathf.Lerp(startDecayTime, endDecayTime, t));
+                audioMixer.SetFloat(REVERB_ROOM, Mathf.Lerp(startRoom, endRoom, t));
 
                 yield return null;
             }
