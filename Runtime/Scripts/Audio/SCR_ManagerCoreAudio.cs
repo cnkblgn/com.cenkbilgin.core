@@ -319,6 +319,19 @@ namespace Core.Audio
             };
         }
 
+        public float GetLowpass(AudioGroup group)
+        {
+            if (group != AudioGroup.EFFECT || group != AudioGroup.AMBIENT)
+            {
+                return 22000;
+            }
+
+            string name = group == AudioGroup.EFFECT ? LOWPASS_EFFECTS : LOWPASS_AMBIENT;
+
+            audioMixer.GetFloat(name, out float startLowpassFrequency);
+
+            return startLowpassFrequency;
+        }
         public void SetLowpass(float frequency, float fadeTime, AudioGroup group)
         {
             switch (group)
