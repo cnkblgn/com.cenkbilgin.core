@@ -136,5 +136,7 @@ namespace Core.UI
                 }
             }
         }
+
+        public void RegisterColor() => defaultColor = thisImage.color;
     }
 }
