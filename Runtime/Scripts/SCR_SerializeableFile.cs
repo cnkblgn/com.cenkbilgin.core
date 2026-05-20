@@ -37,14 +37,14 @@ namespace Core
 
             isInitialized = true;
         }
-        public void Save(bool useInEditor = false)
+        public void Save(bool useInEditor = false, bool compress = true)
         {
             if (!useInEditor && Application.isEditor)
             {
                 return;
             }
 
-            SerializerSystem.Save(path, Data, useInEditor);
+            SerializerSystem.Save(path, Data, useInEditor, compress);
             isInitialized = true;
         }
         public void Clear()
