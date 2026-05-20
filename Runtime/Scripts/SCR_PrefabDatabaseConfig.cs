@@ -8,7 +8,7 @@ namespace Core
     public class PrefabDatabaseConfig : ScriptableObject
     {
         [Header("_")]
-        [SerializeField] private GameObject[] collection = null;
+        [SerializeField] private List<GameObject> collection = null;
 
         private Dictionary<string, GameObject> table = new();
 
@@ -32,9 +32,9 @@ namespace Core
 
         public void Build()
         {
-            table = new Dictionary<string, GameObject>(collection.Length);
+            table = new Dictionary<string, GameObject>(collection.Count);
 
-            for (int i = 0; i < collection.Length; i++)
+            for (int i = 0; i < collection.Count; i++)
             {
                 GameObject prefab = collection[i];
 
@@ -46,27 +46,41 @@ namespace Core
 
                 string id = prefab.name;
 
+#if UNITY_EDITOR
                 if (table.ContainsKey(id))
                 {
                     Debug.LogError($"duplicate prefab [{i}]");
                     continue;
                 }
+#endif
 
                 table.Add(id, prefab);
             }
         }
 
 #if UNITY_EDITOR
+        public void Insert(GameObject prefab)
+        {
+            if (prefab == null)
+            {
+                throw new ArgumentNullException($"[{nameof(prefab)}]");
+            }
+
+            if (table.ContainsKey(prefab.name))
+            {
+                Debug.LogError($"duplicate prefab [{prefab.name}]");
+                return;
+            }
+
+            collection.Add(prefab);
+
+            Build();
+            return;
+        }
+
         private void OnValidate()
         {
-            try
-            {
-                Build();
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e, this);
-            }
+            Build();
         }
 #endif
     }
