@@ -6,7 +6,7 @@ namespace Core
 {
     using static CoreUtility;
 
-    public class ManagerCorePrefab : Manager<ManagerCorePrefab>
+    public sealed class ManagerCorePrefab : Manager<ManagerCorePrefab>
     {
         [Header("_")]
         [SerializeField, Required] private PrefabDatabaseConfig database = null;

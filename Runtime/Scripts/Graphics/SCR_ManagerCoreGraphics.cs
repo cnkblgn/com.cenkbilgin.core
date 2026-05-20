@@ -9,7 +9,7 @@ namespace Core.Graphics
     using static CoreUtility;
 
     [DisallowMultipleComponent]
-    public class ManagerCoreGraphics : Manager<ManagerCoreGraphics>
+    public sealed class ManagerCoreGraphics : Manager<ManagerCoreGraphics>
     {
         public static event Action<Int2> OnResolutionChanged = null;
 

@@ -6,7 +6,7 @@ namespace Core
     using static CoreUtility;
 
     [DisallowMultipleComponent]
-    public class ManagerCorePersistent : Manager<ManagerCorePersistent>
+    public sealed class ManagerCorePersistent : Manager<ManagerCorePersistent>
     {
         public bool IsLoading => sceneController != null && sceneController.IsLoading;
 

@@ -8,7 +8,7 @@ namespace Core.UI
     using static TaskUtility;
 
     [DisallowMultipleComponent]
-    public class ManagerCoreUI : Manager<ManagerCoreUI>
+    public sealed class ManagerCoreUI : Manager<ManagerCoreUI>
     {
         public Canvas MainCanvasController => mainCanvasController;
 

@@ -11,7 +11,7 @@ namespace Core
     using static CoreUtility;
 
     [DisallowMultipleComponent]
-    public class ManagerCoreGame : Manager<ManagerCoreGame>
+    public sealed class ManagerCoreGame : Manager<ManagerCoreGame>
     {
         public static event Action<GameState> OnGameStateChanged = null;
         public static event Action<float> OnCurrentSceneLoading = null;

@@ -8,7 +8,7 @@ namespace Core.Localization
     using static CoreUtility;
 
     [DisallowMultipleComponent]
-    public class ManagerCoreLocalization : Manager<ManagerCoreLocalization>
+    public sealed class ManagerCoreLocalization : Manager<ManagerCoreLocalization>
     {
         public static event Action<int> OnLocalizationChanged = null;
 
