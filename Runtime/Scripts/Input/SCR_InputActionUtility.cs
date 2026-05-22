@@ -6,7 +6,7 @@ namespace Core.Input
 
     public static class InputActionUtility
     {
-        public static bool GetKeyUp(this InputActionType type)
+        public static bool GetKeyUp(this InputAction type)
         {
             if (ManagerCoreInput.Instance != null)
             {
@@ -15,7 +15,7 @@ namespace Core.Input
 
             return false;
         }
-        public static bool GetKeyDown(this InputActionType type)
+        public static bool GetKeyDown(this InputAction type)
         {
             if (ManagerCoreInput.Instance != null)
             {
@@ -24,7 +24,7 @@ namespace Core.Input
 
             return false;
         }
-        public static bool GetKey(this InputActionType type)
+        public static bool GetKey(this InputAction type)
         {
             if (ManagerCoreInput.Instance != null)
             {
@@ -33,7 +33,7 @@ namespace Core.Input
 
             return false;
         }
-        public static Vector2 GetAxis(this InputActionType type)
+        public static Vector2 GetAxis(this InputAction type)
         {
             if (ManagerCoreInput.Instance != null)
             {

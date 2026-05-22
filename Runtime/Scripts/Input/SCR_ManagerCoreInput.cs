@@ -19,7 +19,7 @@ namespace Core.Input
         private PlayerInput thisInput = null;
         private InputActionAsset thisActions = null;
         private InputActionRebindingExtensions.RebindingOperation actionOperation = null;
-        private readonly Dictionary<string, InputAction> actionLookup = new();
+        private readonly Dictionary<string, UnityEngine.InputSystem.InputAction> actionLookup = new();
         private static readonly Dictionary<string, int> iconLookup = new()
         {
             // mouse
@@ -105,8 +105,8 @@ namespace Core.Input
             thisInput.SwitchCurrentActionMap(name);
         }
         private InputActionMap GetMap(string name) => thisActions.FindActionMap(name, true);
-        private InputAction GetAction(InputActionType type) => GetAction(type.Value);
-        private InputAction GetAction(string path)
+        private UnityEngine.InputSystem.InputAction GetAction(InputAction type) => GetAction(type.path);
+        private UnityEngine.InputSystem.InputAction GetAction(string path)
         {
             if (!actionLookup.TryGetValue(path, out var action))
             {
@@ -116,14 +116,14 @@ namespace Core.Input
 
             return action;
         }
-        public bool GetKey(InputActionType type) => GetAction(type)?.IsPressed() == true;
-        public bool GetKeyDown(InputActionType type) => GetAction(type)?.WasPressedThisFrame() == true;
-        public bool GetKeyUp(InputActionType type) => GetAction(type)?.WasReleasedThisFrame() == true;
-        public Vector2 GetAxis(InputActionType type) => GetAction(type)?.ReadValue<Vector2>() ?? Vector2.zero;
-        public int GetIcon(InputActionType type) => GetIcon(type.Value);
+        public bool GetKey(InputAction type) => GetAction(type)?.IsPressed() == true;
+        public bool GetKeyDown(InputAction type) => GetAction(type)?.WasPressedThisFrame() == true;
+        public bool GetKeyUp(InputAction type) => GetAction(type)?.WasReleasedThisFrame() == true;
+        public Vector2 GetAxis(InputAction type) => GetAction(type)?.ReadValue<Vector2>() ?? Vector2.zero;
+        public int GetIcon(InputAction type) => GetIcon(type.path);
         public int GetIcon(string path)
         {
-            InputAction action = GetAction(path);
+            UnityEngine.InputSystem.InputAction action = GetAction(path);
 
             if (action == null)
             {
@@ -142,10 +142,10 @@ namespace Core.Input
 
             return icon;
         }
-        public string GetDisplay(InputActionType type, int bindingIndex) => GetDisplay(type.Value, bindingIndex);
+        public string GetDisplay(InputAction type, int bindingIndex) => GetDisplay(type.path, bindingIndex);
         public string GetDisplay(string path, int bindingIndex)
         {
-            InputAction action = GetAction(path);
+            UnityEngine.InputSystem.InputAction action = GetAction(path);
 
             if (action == null)
             {
@@ -154,10 +154,10 @@ namespace Core.Input
 
             return action.GetBindingDisplayString(bindingIndex);
         }
-        public void StartRebind(InputActionType type, int bindingIndex, Action onStart, Action onComplete, Action onCancel) => StartRebind(type.Value, bindingIndex, onStart, onComplete, onCancel);
+        public void StartRebind(InputAction type, int bindingIndex, Action onStart, Action onComplete, Action onCancel) => StartRebind(type.path, bindingIndex, onStart, onComplete, onCancel);
         public void StartRebind(string path, int bindingIndex, Action onStart, Action onComplete, Action onCancel)
         {
-            InputAction action = GetAction(path);
+            UnityEngine.InputSystem.InputAction action = GetAction(path);
 
             if (action == null)
             {
@@ -192,10 +192,10 @@ namespace Core.Input
             })
             .Start();
         }
-        public void RevertRebind(InputActionType type, int bindingIndex) => RevertRebind(type.Value, bindingIndex);
+        public void RevertRebind(InputAction type, int bindingIndex) => RevertRebind(type.path, bindingIndex);
         public void RevertRebind(string path, int bindingIndex)
         {
-            InputAction action = GetAction(path);
+            UnityEngine.InputSystem.InputAction action = GetAction(path);
 
             if (action == null)
             {
@@ -205,7 +205,8 @@ namespace Core.Input
 
             action.RemoveBindingOverride(bindingIndex);
         }
-        public void Export()
+
+        public void Export(string name = "inputs.json")
         {
             if (thisActions == null)
             {
@@ -213,18 +214,25 @@ namespace Core.Input
             }
 
             string json = thisActions.SaveBindingOverridesAsJson();
-            string path = Path.Combine(Application.persistentDataPath, "inputs.json");
-            try { File.WriteAllText(path, json); }
-            catch (Exception ex) { Debug.LogError($"ManagerCoreInput.Export() failed [{ex}]"); }
+            string path = Path.Combine(Application.persistentDataPath, name);
+
+            try 
+            { 
+                File.WriteAllText(path, json);
+            }
+            catch (Exception e) 
+            { 
+                Debug.LogError($"failed [{e}]"); 
+            }
         }
-        private void Import()
+        private void Import(string name = "inputs.json")
         {
             if (thisActions == null)
             {
                 return;
             }
 
-            string path = Path.Combine(Application.persistentDataPath, "inputs.json");
+            string path = Path.Combine(Application.persistentDataPath, name);
 
             if (File.Exists(path))
             {
@@ -239,7 +247,7 @@ namespace Core.Input
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"ManagerCoreInput.Export() failed [{ex}]");
+                    Debug.LogError($"failed [{ex}]");
                 }
             }
             else
