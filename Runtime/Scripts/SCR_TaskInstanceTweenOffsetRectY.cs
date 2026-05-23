@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Core
 {
-    public class TaskInstanceTweenOffsetRectY : TaskInstanceTween
+    public sealed class TaskInstanceTweenOffsetRectY : TaskInstanceTween
     {
         private readonly RectTransform thisTransform = null;
         private Vector2 startValue = Vector2.zero;

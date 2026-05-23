@@ -6,7 +6,7 @@ namespace Core
 {
     using static CoreUtility;
 
-    public class TaskInstanceTweenBlinkImage : TaskInstanceTween
+    public sealed class TaskInstanceTweenBlinkImage : TaskInstanceTween
     {
         private readonly Image thisImage = null;
         private Color startValue = COLOR_WHITE;

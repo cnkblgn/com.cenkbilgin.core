@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Core
 {
-    public class TaskInstanceTweenFadeCanvas : TaskInstanceTween
+    public sealed class TaskInstanceTweenFadeCanvas : TaskInstanceTween
     {
         private readonly CanvasGroup thisCanvas = null;
         private float startValue = 0;

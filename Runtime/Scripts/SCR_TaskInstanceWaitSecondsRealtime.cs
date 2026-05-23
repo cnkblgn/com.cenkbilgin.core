@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Core
 {
-    public class TaskInstanceWaitSecondsRealtime : TaskInstance
+    public sealed class TaskInstanceWaitSecondsRealtime : TaskInstance
     {
         private readonly Action callback = default;
         private float time = 0;

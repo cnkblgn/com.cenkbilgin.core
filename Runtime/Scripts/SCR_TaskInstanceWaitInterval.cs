@@ -5,13 +5,14 @@ namespace Core
 {
     using Random = UnityEngine.Random;
 
-    public class TaskInstanceWaitInterval : TaskInstance
+    public sealed class TaskInstanceWaitInterval : TaskInstance
     {
         private readonly Action callback;
         private readonly float minInterval;
         private readonly float maxInterval;
-        private float interval = 0f;
-        private float timer = 0f; 
+        private float interval;
+        private float timer;
+        private readonly bool instant;
 
         public TaskInstanceWaitInterval(Component host, float minInterval, float maxInterval, Action callback) : base(host)
         {
@@ -19,13 +20,19 @@ namespace Core
             this.minInterval = Mathf.Max(0, minInterval);
             this.maxInterval = Mathf.Max(0, maxInterval);
 
+            timer = 0;
             interval = Random.Range(this.minInterval, this.maxInterval);
+            instant = Mathf.Approximately(interval, 0);
         }
         protected override void OnUpdate()
         {
             timer += Time.deltaTime;
 
-            if (timer >= interval)
+            if (instant)
+            {
+                callback.Invoke();
+            } 
+            else if (timer >= interval)
             {
                 callback.Invoke();
 

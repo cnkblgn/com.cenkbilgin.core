@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace Core
 {
-    public class TaskInstanceTweenOffsetLayout : TaskInstanceTween
+    public sealed class TaskInstanceTweenOffsetLayout : TaskInstanceTween
     {
         private readonly LayoutGroup thisLayout = null;
         private readonly RectTransform thisRoot = null;

@@ -6,7 +6,7 @@ namespace Core
 {
     using static CoreUtility;
 
-    public class TaskInstanceTweenFadeImage : TaskInstanceTween
+    public sealed class TaskInstanceTweenFadeImage : TaskInstanceTween
     {
         private readonly Image thisImage = null;
         private Color startValue = COLOR_WHITE;

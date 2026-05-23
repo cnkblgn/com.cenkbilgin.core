@@ -6,7 +6,7 @@ namespace Core
 {
     using static CoreUtility;
 
-    public class TaskInstanceTweenFillImage : TaskInstanceTween
+    public sealed class TaskInstanceTweenFillImage : TaskInstanceTween
     {
         private readonly Image thisImage = null;
         private float startValue = 0;

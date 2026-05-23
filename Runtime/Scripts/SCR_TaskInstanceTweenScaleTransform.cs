@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Core
 {
-    public class TaskInstanceTweenScaleTransform : TaskInstanceTween
+    public sealed class TaskInstanceTweenScaleTransform : TaskInstanceTween
     {
         private readonly Transform thisTransform = null;
         private Vector3 startValue = Vector3.zero;
