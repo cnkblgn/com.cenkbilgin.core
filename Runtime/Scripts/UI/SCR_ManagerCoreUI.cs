@@ -10,11 +10,11 @@ namespace Core.UI
     [DisallowMultipleComponent]
     public sealed class ManagerCoreUI : Manager<ManagerCoreUI>
     {
-        public Canvas MainCanvasController => mainCanvasController;
+        public Canvas Canvas => canvas;
 
         [Header("_")]
-        [SerializeField, Required] private Canvas mainCanvasController = null;
-        [SerializeField, Required] private EventSystem mainCanvasEvents = null;
+        [SerializeField, Required] private Canvas canvas = null;
+        [SerializeField, Required] private EventSystem events = null;
 
         [Header("_")]
         [SerializeField, Required] private UICursorController cursorController = null;
@@ -28,8 +28,8 @@ namespace Core.UI
 
         protected override void Awake()
         {
-            if (mainCanvasController == null) throw new NullReferenceException();
-            if (mainCanvasEvents == null) throw new NullReferenceException();
+            if (canvas == null) throw new NullReferenceException();
+            if (events == null) throw new NullReferenceException();
             if (cursorController == null) throw new NullReferenceException();
             if (tooltipController == null) throw new NullReferenceException();
             if (waypointController == null) throw new NullReferenceException();
@@ -107,7 +107,7 @@ namespace Core.UI
         public void ShowCursor() => cursorController.ShowCursor();
         public void HideCursor() => cursorController.HideCursor();
 
-        public GameObject GetSelectedGameObject() => mainCanvasEvents.currentSelectedGameObject;
-        public void SetSelectedGameObject(GameObject gameObject) => mainCanvasEvents.SetSelectedGameObject(gameObject);
+        public GameObject GetSelectedGameObject() => events.currentSelectedGameObject;
+        public void SetSelectedGameObject(GameObject gameObject) => events.SetSelectedGameObject(gameObject);
     }
 }
