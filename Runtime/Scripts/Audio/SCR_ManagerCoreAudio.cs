@@ -90,7 +90,7 @@ namespace Core.Audio
         [SerializeField, Required] private AudioEmitter audioEmitterPrefab = null;
         [SerializeField, Required] private Transform audioEmitterContainer = null;
 
-        private readonly PoolSystemAudio audioEmitterPool = new();
+        private AudioPool audioEmitterPool = null;
         private readonly List<AudioEmitter> audioEmitterCollection = new();
         private readonly Dictionary<string, AudioGroup> audioGroups = new();
         private Transform audioListener = null;
@@ -289,8 +289,8 @@ namespace Core.Audio
             }
         }
 
-        private void ResetPool() => audioEmitterPool.Reset();
-        private void InitializePool() => audioEmitterPool.Initialize(audioEmitterPrefab, audioEmitterContainer, 128);
+        private void ResetPool() => audioEmitterPool.Pool.Reset(false, true);
+        private void InitializePool() => audioEmitterPool = new(PoolType.RING_BUFFER, audioEmitterPrefab, audioEmitterContainer, 128);
 
         private void InitializeGroups()
         {

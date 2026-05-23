@@ -30,19 +30,19 @@ namespace Core.Graphics
         {
             if (bakeMaterial == null)
             {
-                Debug.LogError("DecalBaker.Bake() bakeMaterial == null");
+                Debug.LogError("bakeMaterial == null");
                 return;
             }
 
             if (!TryGetComponent(out DecalProjector projector))
             {
-                Debug.LogError("DecalBaker.Bake() projector == null");
+                Debug.LogError("projector == null");
                 return;
             }
 
             if (!Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, raycastDistance, raycastMask))
             {
-                Debug.LogError("DecalBaker.Bake() hit == null");
+                Debug.LogError("hit == null");
                 return;
             }
 

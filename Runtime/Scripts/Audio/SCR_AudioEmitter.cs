@@ -9,7 +9,7 @@ namespace Core.Audio
     [DisallowMultipleComponent]
     [RequireComponent(typeof(AudioSource))]
     [RequireComponent(typeof(AudioLowPassFilter))]
-    public class AudioEmitter : MonoBehaviour
+    public sealed class AudioEmitter : MonoBehaviour
     {
         public static event Action<AudioEmitter> OnCreated = null;
         public static event Action<AudioEmitter> OnDestroyed = null;

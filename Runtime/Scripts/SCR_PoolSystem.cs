@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -5,64 +6,40 @@ namespace Core
 {
     using static CoreUtility;
 
-    public abstract class PoolSystem<T> where T : Component
+    public sealed class PoolSystem<T> where T : Component
     {
-        public abstract PoolType Type { get; }
-        public abstract string ID { get; }
+        public string ID { get; }
+        public PoolType Type { get; }
 
-        public int TotalCount => thisItems.Length;
+        public int TotalCount => currentItems.Length;
         public int ActiveCount => Type != PoolType.RELEASE ? -1 : TotalCount - availableItems.Count;
         public int AvailableCount => Type != PoolType.RELEASE ? -1 : availableItems.Count;
 
-        protected Transform thisContainer = null;
-        private T[] thisItems = new T[0] { };
-        private readonly Queue<T> availableItems = new();
+        private readonly IPoolHandler<T> currentHandler;
+        private readonly T[] currentItems;
+        private readonly Queue<T> availableItems;
+        private readonly Transform container;
         private int currentIndex = 0;
         private int currentDirection = 1;
-        private bool isInitialized = false;
 
-        public void Initialize(T prefab, Transform container, int count)
+        public PoolSystem(string id, PoolType type, T prefab, Transform container, int count, IPoolHandler<T> handler)
         {
-            if (isInitialized)
-            {
-                return;
-            }
+            Type = type;
+            ID = id;
 
-            count = Type == PoolType.SINGLE ? 1 : count;
+            currentItems = new T[Type == PoolType.SINGLE ? 1 : count];
+            currentHandler = handler ?? throw new ArgumentNullException(nameof(handler));
+            availableItems = new();
 
-            thisContainer = container;
-            thisItems = new T[count];
+            this.container = container;
 
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < TotalCount; i++)
             {
                 T item = GameObject.Instantiate<T>(prefab, container);
 
-                item.gameObject.hideFlags = HideFlags.DontSave | HideFlags.NotEditable;
-                item.gameObject.SetActive(false);
+                InitializeItem(item);
 
-                OnInitialize(item);
-
-                thisItems[i] = item;
-
-                if (Type == PoolType.RELEASE) availableItems.Enqueue(item);
-            }
-
-            isInitialized = true;
-        }
-        protected abstract void OnInitialize(T item);
-
-        public void Reset()
-        {
-            if (!isInitialized)
-            {
-                return;
-            }
-
-            availableItems.Clear();
-
-            foreach (T item in thisItems)
-            {
-                OnReset(item);
+                currentItems[i] = item;
 
                 if (Type == PoolType.RELEASE)
                 {
@@ -70,19 +47,40 @@ namespace Core
                 }
             }
         }
-        protected abstract void OnReset(T item);
+
+        private void InitializeItem(T item)
+        {
+            item.gameObject.hideFlags = HideFlags.DontSave | HideFlags.NotEditable;
+            item.gameObject.SetActive(false);
+            currentHandler.OnInitialize(item);
+        }
+
+        public void Reset(bool reparent, bool deactivate)
+        {
+            availableItems.Clear();
+
+            foreach (T item in currentItems)
+            {
+                ResetItem(item, reparent, deactivate);
+
+                if (Type == PoolType.RELEASE)
+                {
+                    availableItems.Enqueue(item);
+                }
+            }
+        }
+        private void ResetItem(T item, bool reparent, bool deactivate)
+        {
+            currentHandler.OnReset(item);
+            if (deactivate) item.gameObject.SetActive(false);
+            if (reparent) item.transform.SetParent(container);
+        }
 
         public void Release(T item)
         {
-            if (!isInitialized)
-            {
-                Debug.LogError($"Pool [{ID}] not initialized");
-                return;
-            }
-
             if (Type != PoolType.RELEASE)
             {
-                Debug.LogWarning($"Pool [{ID}] does not support Release()");
+                Debug.LogWarning($"Pool [{ID}] does not support Release");
                 return;
             }
 
@@ -100,22 +98,24 @@ namespace Core
             }
 #endif
 
-            OnReset(item);
-
-            item.gameObject.SetActive(false);
-
+            ResetItem(item, false, true);
             availableItems.Enqueue(item);
         }
-        public T Get(int index) => thisItems[index];
-
-        protected T GetNext()
+        public bool TryGet(int index, out T item)
         {
-            if (!isInitialized)
+            item = null;
+
+            if (index < 0 || index >= TotalCount)
             {
-                Debug.LogError($"PoolSystem.GetNext() pool system is not initialized!");
-                return null;
+                return false;
             }
 
+            item = currentItems[index];
+            return true;
+        }
+
+        public T GetNext()
+        {
             switch (Type)
             {
                 case PoolType.SINGLE:
@@ -133,25 +133,25 @@ namespace Core
 
             return default;
         }
-        private T GetSingle() => thisItems[0];
+        private T GetSingle() => currentItems[0];
         private T GetRing()
         {
-            T item = thisItems[currentIndex];
+            T item = currentItems[currentIndex];
 
-            currentIndex = (currentIndex + 1) % thisItems.Length;
+            currentIndex = (currentIndex + 1) % currentItems.Length;
 
             return item;
         }
         private T GetPingPong()
         {
-            if (thisItems.Length <= 1)
+            if (currentItems.Length <= 1)
             {
-                return thisItems[0];
+                return currentItems[0];
             }
 
-            T item = thisItems[currentIndex];
+            T item = currentItems[currentIndex];
 
-            if (currentIndex == thisItems.Length - 1)
+            if (currentIndex == currentItems.Length - 1)
             {
                 currentDirection = -1;
             }

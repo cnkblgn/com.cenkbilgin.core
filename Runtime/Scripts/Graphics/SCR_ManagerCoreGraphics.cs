@@ -26,8 +26,8 @@ namespace Core.Graphics
         [SerializeField, Required] private ParticleEmitter[] particleGroup = null;
         [SerializeField, Required] private Transform particleContainer = null;
 
-        private readonly Dictionary<string, PoolSystemDecal> decalPool = new();
-        private readonly Dictionary<string, PoolSystemParticle> particlePool = new();
+        private readonly Dictionary<string, DecalPool> decalPool = new();
+        private readonly Dictionary<string, ParticlePool> particlePool = new();
         private VolumeProfile currentVolumeProfile = null;
         private Camera mainCamera = null;
         private Camera defaultCamera = null;
@@ -89,38 +89,30 @@ namespace Core.Graphics
 
         private void InitializeDecalPool()
         {
-            foreach (var item in decalGroup)
+            foreach (DecalGroup group in decalGroup)
             {
-                PoolSystemDecal system = new();
-
-                system.Initialize(item.Prefab, decalContainer, item.Count);
-
-                decalPool[item.Prefab.name] = system;
+                decalPool[group.Prefab.name] = new(PoolType.RING_BUFFER, group.Prefab, decalContainer, group.Count);
             }
         }
         private void ResetDecalPool()
         {
-            foreach (var item in decalPool.Values)
+            foreach (DecalPool pool in decalPool.Values)
             {
-                item.Reset();
+                pool.Pool.Reset(true, true);
             }
         }
         private void InitializeParticlePool()
         {
-            foreach (var item in particleGroup)
+            foreach (ParticleEmitter emitter in particleGroup)
             {
-                PoolSystemParticle system = new();
-
-                system.Initialize(item, particleContainer, 1);
-
-                particlePool[item.name] = system;
+                particlePool[emitter.name] = new(PoolType.SINGLE, emitter, particleContainer, 1);
             }
         }
         private void ResetParticlePool()
         {
-            foreach (var item in particlePool.Values)
+            foreach (ParticlePool pool in particlePool.Values)
             {
-                item.Reset();
+                pool.Pool.Reset(false, true);
             }
         }
 
@@ -128,13 +120,13 @@ namespace Core.Graphics
         {
             if (particle == null)
             {
-                Debug.LogError("ManagerCoreGraphics.SpawnParticle() particle == null");
+                Debug.LogError("particle == null");
                 return null;
             }
 
-            if (!particlePool.TryGetValue(particle.name, out PoolSystemParticle pool))
+            if (!particlePool.TryGetValue(particle.name, out ParticlePool pool))
             {
-                Debug.LogError($"ManagerCoreGraphics.SpawnParticle() [{particle.name}] not found!");
+                Debug.LogError($"[{particle.name}] not found!");
                 return null;
             }
 
@@ -158,13 +150,13 @@ namespace Core.Graphics
         {
             if (decal == null)
             {
-                Debug.LogError("ManagerCoreGraphics.SpawnDecal() decal == null");
+                Debug.LogError("decal == null");
                 return null;
             }
 
-            if (!decalPool.TryGetValue(decal.name, out PoolSystemDecal pool))
+            if (!decalPool.TryGetValue(decal.name, out DecalPool pool))
             {
-                Debug.LogError($"ManagerCoreGraphics.SpawnDecal() [{decal.name}] not found!");
+                Debug.LogError($"[{decal.name}] not found!");
                 return null;
             }
 

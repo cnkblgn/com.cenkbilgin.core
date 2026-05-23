@@ -19,7 +19,7 @@ namespace Core.Graphics
 
             if (thisEmitters == null || thisEmitters.Length == 0)
             {
-                Debug.LogError($"ParticleEmitter.Awake() {gameObject.name} needs [ParticleSystem] component in children!");
+                Debug.LogError($"{gameObject.name} needs [ParticleSystem] component in children!");
                 return;
             }
 

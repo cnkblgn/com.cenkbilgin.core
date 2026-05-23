@@ -19,7 +19,7 @@ namespace Core.UI
         private RectTransform thisTransform = null;
         private Camera cameraController = null;
         private Transform cameraTransform = null;
-        private readonly PoolSystemUIWaypoint waypointPool = new();
+        private UIWaypointPool waypointPool = null;
         private bool isOpened = false;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -33,7 +33,7 @@ namespace Core.UI
         {
             thisCanvas = GetComponent<Canvas>();
             thisTransform = GetComponent<RectTransform>();
-            waypointPool.Initialize(waypointTemplate, thisTransform, 16);
+            waypointPool = new(PoolType.RELEASE, waypointTemplate, thisTransform, 16);
         }        
         private void Update()
         {
@@ -42,11 +42,9 @@ namespace Core.UI
                 return;
             }
 
-            for (int i = 0; i < waypointPool.TotalCount; i++)
+            for (int i = 0; i < waypointPool.Pool.TotalCount; i++)
             {
-                UIWaypointEntity entity = waypointPool.Get(i);
-
-                if (!entity.gameObject.activeSelf)
+                if (waypointPool.Pool.TryGet(i, out UIWaypointEntity entity) && !entity.gameObject.activeSelf)
                 {
                     continue;
                 }
@@ -56,7 +54,7 @@ namespace Core.UI
                 if (entity.IsCompleted)
                 {
                     OnWaypointRemoved?.Invoke(entity);
-                    waypointPool.Release(entity);
+                    waypointPool.Pool.Release(entity);
                 }
             }
         }
@@ -95,7 +93,7 @@ namespace Core.UI
         }
         public void Clear()
         {
-            waypointPool.Reset();
+            waypointPool.Pool.Reset(false, true);
             Hide();
         }
     }

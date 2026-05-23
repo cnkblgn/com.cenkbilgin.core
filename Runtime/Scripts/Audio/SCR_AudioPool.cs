@@ -3,16 +3,14 @@ using UnityEngine.Audio;
 
 namespace Core.Audio
 {
-    public sealed class PoolSystemAudio : PoolSystem<AudioEmitter>
+    public sealed class AudioPool : IPoolHandler<AudioEmitter>
     {
-        public override PoolType Type => PoolType.RING_BUFFER;
-        public override string ID => "AUDIO_POOL";
+        public readonly PoolSystem<AudioEmitter> Pool;
 
         private AudioClip lastEmitterClip = null;
         private int lastEmitterFrame = -1;
 
-        protected sealed override void OnInitialize(AudioEmitter item) { }
-        protected sealed override void OnReset(AudioEmitter item) { }
+        public AudioPool(PoolType type, AudioEmitter prefab, Transform container, int count) => Pool = new("AUDIO_POOL", type, prefab, container, count, this);
 
         private bool TrySpawn(AudioClip clip, Transform listener, Vector3 position, float blend, float maxDistance, out AudioEmitter emitter)
         {
@@ -48,13 +46,12 @@ namespace Core.Audio
                 }
             }
 
-            emitter = GetNext();
+            emitter = Pool.GetNext();
             emitter.gameObject.SetActive(true);
             emitter.SetPosition(position);
 
             return true;
         }
-
         public AudioEmitter Spawn(AudioClip clip, Transform listener, AudioMixerGroup group, Vector3 position, float blend, float volume, float pitch, float minDistance, float maxDistance, LayerMask occlusionMask, float occlusionAngle, float occlusionBlend, AnimationCurve occlusionLowpass, AnimationCurve occlusionVolume)
         {
             if (TrySpawn(clip, listener, position, blend, maxDistance, out AudioEmitter emitter))
@@ -104,5 +101,8 @@ namespace Core.Audio
 
             return null;
         }
+
+        public void OnInitialize(AudioEmitter _) { }
+        public void OnReset(AudioEmitter _) { }
     }
 }
