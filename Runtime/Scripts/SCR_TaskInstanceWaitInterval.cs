@@ -10,35 +10,49 @@ namespace Core
         private readonly Action callback;
         private readonly float minInterval;
         private readonly float maxInterval;
+        private readonly float duration;
         private float interval;
-        private float timer;
-        private readonly bool instant;
+        private float intervalTime;
+        private float totalTime;
+        private readonly bool hasDuration;
 
-        public TaskInstanceWaitInterval(Component host, float minInterval, float maxInterval, Action callback) : base(host)
+        public TaskInstanceWaitInterval(Component host, float minInterval, float maxInterval, float duration, Action callback) : base(host)
         {
             this.callback = callback ?? throw new ArgumentNullException(nameof(callback));
             this.minInterval = Mathf.Max(0, minInterval);
             this.maxInterval = Mathf.Max(0, maxInterval);
+            this.duration = duration;
 
-            timer = 0;
+            intervalTime = 0;
+            totalTime = 0;
             interval = Random.Range(this.minInterval, this.maxInterval);
-            instant = Mathf.Approximately(interval, 0);
+
+            hasDuration = duration > 0f;
+
+            if (Mathf.Approximately(interval, 0)) throw new Exception("interval cannot be 0");
         }
         protected override void OnUpdate()
         {
-            timer += Time.deltaTime;
+            float deltaTime = Time.deltaTime;
 
-            if (instant)
-            {
-                callback.Invoke();
-            } 
-            else if (timer >= interval)
-            {
-                callback.Invoke();
+            totalTime += deltaTime;
 
-                interval = Random.Range(this.minInterval, this.maxInterval);
-                timer = 0;
+            if (hasDuration && totalTime >= duration)
+            {
+                IsCompleted = true;
+                return;
             }
+
+            intervalTime += deltaTime;
+
+            if (intervalTime < interval)
+            {
+                return;
+            }
+
+            callback.Invoke();
+            interval = Random.Range(minInterval, maxInterval);
+            intervalTime = 0f;
         }
     }
 }

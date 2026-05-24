@@ -18,6 +18,7 @@ namespace Core
         [SerializeField] private bool useInterval = false;
         [SerializeField] private float minInterval = 1;
         [SerializeField] private float maxInterval = 5;
+        [SerializeField] private float duration = 0;
 
         private TaskInstanceWaitInterval intervalTask = null;
         private Action callback = default;
@@ -48,6 +49,7 @@ namespace Core
             this.WaitSeconds(actionDelay, callback);
         }
         private void EmitInternal() => actionEvent?.Invoke();
+
         private void StartInterval()
         {
             if (intervalTask != null)
@@ -55,7 +57,7 @@ namespace Core
                 return;
             }
 
-            intervalTask = new TaskInstanceWaitInterval(this, minInterval, maxInterval, callback);
+            intervalTask = new TaskInstanceWaitInterval(this, minInterval, maxInterval, duration, callback);
             TaskSystem.TryCreate(intervalTask);
         }
     }
