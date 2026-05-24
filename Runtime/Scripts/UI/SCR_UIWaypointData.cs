@@ -9,21 +9,30 @@ namespace Core.UI
         public readonly Transform Target;
         public readonly Sprite Icon;
         public readonly Color Color;
+        public readonly Vector3 Position;
         public readonly string Text;
         public readonly float Duration;
 
-        public UIWaypointData(int id, Transform target, Sprite icon, Color color, Vector3 offset, string text, float duration)
+        public UIWaypointData(int id, Sprite icon, Color color, string text, float duration)
         {
-            if (target == null) throw new ArgumentNullException(nameof(target));
             if (icon == null) throw new ArgumentNullException(nameof(icon));
             if (text == null) throw new ArgumentNullException(nameof(text));
 
             ID = id;
-            Target = target;
             Icon = icon;
             Color = color;
             Text = text;
             Duration = duration;
+        }
+        public UIWaypointData(int id, Transform target, Sprite icon, Color color, string text, float duration) : this (id, icon, color, text, duration)
+        {
+            if (target == null) throw new ArgumentNullException(nameof(target));
+
+            Target = target;
+        }
+        public UIWaypointData(int id, Vector3 target, Sprite icon, Color color, string text, float duration) : this (id, icon, color, text, duration)
+        {
+            Position = target;
         }
     }
 }

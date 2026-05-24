@@ -11,7 +11,7 @@ namespace Core.UI
     [RequireComponent(typeof(RectTransform))]
     public class UIWaypointEntity : MonoBehaviour
     {
-        public Transform Target => targetTransform;
+        public Vector3 Target => targetTransform != null ? targetTransform.position : targetPosition;
         public Sprite Icon => waypointImage.sprite;
         public Color Color => waypointImage.color;
         public bool IsCompleted { get; private set; }
@@ -24,6 +24,7 @@ namespace Core.UI
         private Transform targetTransform = null;
         private Func<bool> destroyUntil = null;
         private Action completeCallback = null;
+        private Vector3 targetPosition = Vector3.zero;
         private Vector3 targetOffset = Vector3.zero;
         private float tickDuration = -1;
         private float tickTimer = 0;
@@ -31,27 +32,28 @@ namespace Core.UI
         private float cachedHeight = 0;
         private bool isInitialized = false;
         private bool isActive = false;
+        private bool hasTarget = false;
 
-        public void Tick(Camera mainCameraController, Transform mainCameraTransform)
+        public void Tick(Camera cameraController, Transform cameraTransform)
         {
             if (!isActive)
             {
                 return;
             }
 
-            if (mainCameraController == null)
+            if (cameraController == null)
             {
                 Complete();
                 return; 
             }
 
-            if (mainCameraTransform == null)
+            if (cameraTransform == null)
             {
                 Complete();
                 return;
             }
 
-            if (targetTransform == null)
+            if (targetTransform == null && hasTarget)
             {
                 Complete();
                 return;
@@ -80,9 +82,9 @@ namespace Core.UI
             float minY = cachedHeight;
             float maxY = Screen.height - minY;
 
-            Vector2 position = mainCameraController.WorldToScreenPoint(targetTransform.position + targetOffset);
+            Vector2 position = cameraController.WorldToScreenPoint(Target + targetOffset);
 
-            if (Vector3.Dot((targetTransform.position - mainCameraTransform.position), mainCameraTransform.forward) < 0)
+            if (Vector3.Dot((Target - cameraTransform.position), cameraTransform.forward) < 0)
             {
                 position.x *= -1;
             }
@@ -119,6 +121,19 @@ namespace Core.UI
 
         public void Show(Transform target, Vector3 offset, Sprite icon, Color color, string text, float duration, Func<bool> destroyUntil)
         {
+            hasTarget = true;
+            this.targetTransform = target;
+            this.targetOffset = offset;
+            Show(icon, color, text, duration, destroyUntil);
+        }
+        public void Show(Vector3 target, Sprite icon, Color color, string text, float duration, Func<bool> destroyUntil)
+        {
+            hasTarget = false;
+            targetPosition = target;
+            Show(icon, color, text, duration, destroyUntil);
+        }
+        private void Show(Sprite icon, Color color, string text, float duration, Func<bool> destroyUntil)
+        {
             if (!isInitialized)
             {
                 return;
@@ -130,8 +145,6 @@ namespace Core.UI
             IsCompleted = false;
             tickTimer = 0;
 
-            this.targetTransform = target;
-            this.targetOffset = offset;
             this.tickDuration = duration;
             this.destroyUntil = destroyUntil;
 

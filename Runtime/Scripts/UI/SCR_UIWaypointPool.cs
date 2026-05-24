@@ -11,15 +11,27 @@ namespace Core.UI
 
         public UIWaypointEntity Spawn(Transform target, Vector3 offset, Sprite sprite, Color color, string text, float duration, Func<bool> destroyUntil)
         {
-            UIWaypointEntity waypointObject = Pool.GetNext();
+            UIWaypointEntity entity = Pool.GetNext();
 
-            if (waypointObject == null)
+            if (entity == null)
             {
                 return null;
             }
 
-            waypointObject.Show(target, offset, sprite, color, text, duration, destroyUntil);
-            return waypointObject;
+            entity.Show(target, offset, sprite, color, text, duration, destroyUntil);
+            return entity;
+        }
+        public UIWaypointEntity Spawn(Vector3 target, Sprite sprite, Color color, string text, float duration, Func<bool> destroyUntil)
+        {
+            UIWaypointEntity entity = Pool.GetNext();
+
+            if (entity == null)
+            {
+                return null;
+            }
+
+            entity.Show(target, sprite, color, text, duration, destroyUntil);
+            return entity;
         }
 
         public void OnInitialize(UIWaypointEntity entity) => entity.Initialize();

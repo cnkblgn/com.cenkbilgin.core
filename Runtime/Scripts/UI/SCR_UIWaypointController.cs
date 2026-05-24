@@ -61,6 +61,22 @@ namespace Core.UI
 
         public void Show(Camera camera, Transform target, Vector3 offset, Sprite icon, Color color, string text, float duration, Func<bool> destroyUntil)
         {
+            UIWaypointEntity entity = waypointPool.Spawn(target, offset, icon, color, text, duration, destroyUntil);
+            Show(camera, entity);
+        }
+        public void Show(Camera camera, Vector3 target, Sprite icon, Color color, string text, float duration, Func<bool> destroyUntil)
+        {
+            UIWaypointEntity entity = waypointPool.Spawn(target, icon, color, text, duration, destroyUntil);
+            Show(camera, entity);
+        }
+        private void Show(Camera camera, UIWaypointEntity entity)
+        {
+            if (entity == null)
+            {
+                Debug.LogError("entity == null!");
+                return;
+            }
+
             if (camera == null)
             {
                 Debug.LogError("mainCamera == null!");
@@ -75,11 +91,9 @@ namespace Core.UI
 
             cameraController = camera;
             cameraTransform = camera.transform;
-            UIWaypointEntity entity = waypointPool.Spawn(target, offset, icon, color, text, duration, destroyUntil);
+            OnWaypointAdded?.Invoke(entity);
 
             Show();
-
-            OnWaypointAdded?.Invoke(entity);
         }
         public void Show()
         {
