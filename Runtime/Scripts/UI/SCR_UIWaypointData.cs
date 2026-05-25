@@ -8,9 +8,10 @@ namespace Core.UI
     public readonly struct UIWaypointData
     {
         public static readonly UIWaypointData Empty = new(-1);
+
         public readonly Vector3 Position => TargetTransform != null ? TargetTransform.position : TargetPosition;
 
-        public readonly int ID;
+        public readonly Guid ID;
         public readonly Transform TargetTransform;
         public readonly Sprite Icon;
         public readonly Vector3 TargetPosition;
@@ -19,9 +20,9 @@ namespace Core.UI
         public readonly float Duration;
         public readonly bool HasTarget;
 
-        public UIWaypointData(int id)
+        public UIWaypointData(int _)
         {
-            ID = id;
+            ID = Guid.Empty;
             TargetTransform = null;
             Icon = null;
             Color = COLOR_WHITE;
@@ -30,7 +31,7 @@ namespace Core.UI
             Duration = 0;
             HasTarget = false;
         }
-        public UIWaypointData(int id, Sprite icon, Color color, string text, float duration)
+        private UIWaypointData(Sprite icon, Color color, string text, float duration)
         {
             if (icon == null) throw new ArgumentNullException(nameof(icon));
             if (text == null) throw new ArgumentNullException(nameof(text));
@@ -38,21 +39,21 @@ namespace Core.UI
             TargetTransform = null;
             TargetPosition = Vector3.zero;
 
-            ID = id;
+            ID = Guid.NewGuid();
             Icon = icon;
             Color = color;
             Text = text;
             Duration = duration;
             HasTarget = false;
         }
-        public UIWaypointData(int id, Transform target, Sprite icon, Color color, string text, float duration) : this (id, icon, color, text, duration)
+        public UIWaypointData(Transform target, Sprite icon, Color color, string text, float duration) : this (icon, color, text, duration)
         {
             if (target == null) throw new ArgumentNullException(nameof(target));
 
             TargetTransform = target;
             HasTarget = true;
         }
-        public UIWaypointData(int id, Vector3 target, Sprite icon, Color color, string text, float duration) : this (id, icon, color, text, duration)
+        public UIWaypointData(Vector3 target, Sprite icon, Color color, string text, float duration) : this (icon, color, text, duration)
         {
             TargetPosition = target;
         }
