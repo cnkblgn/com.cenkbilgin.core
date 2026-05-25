@@ -31,7 +31,7 @@ namespace Core.UI
             Duration = 0;
             HasTarget = false;
         }
-        private UIWaypointData(Sprite icon, Color color, string text, float duration)
+        private UIWaypointData(Guid id, Sprite icon, Color color, string text, float duration)
         {
             if (icon == null) throw new ArgumentNullException(nameof(icon));
             if (text == null) throw new ArgumentNullException(nameof(text));
@@ -39,21 +39,21 @@ namespace Core.UI
             TargetTransform = null;
             TargetPosition = Vector3.zero;
 
-            ID = Guid.NewGuid();
+            ID = id;
             Icon = icon;
             Color = color;
             Text = text;
             Duration = duration;
             HasTarget = false;
         }
-        public UIWaypointData(Transform target, Sprite icon, Color color, string text, float duration) : this (icon, color, text, duration)
+        public UIWaypointData(Guid id, Transform target, Sprite icon, Color color, string text, float duration) : this (id, icon, color, text, duration)
         {
             if (target == null) throw new ArgumentNullException(nameof(target));
 
             TargetTransform = target;
             HasTarget = true;
         }
-        public UIWaypointData(Vector3 target, Sprite icon, Color color, string text, float duration) : this (icon, color, text, duration)
+        public UIWaypointData(Guid id, Vector3 target, Sprite icon, Color color, string text, float duration) : this (id, icon, color, text, duration)
         {
             TargetPosition = target;
         }

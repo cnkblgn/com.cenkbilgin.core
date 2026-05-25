@@ -115,7 +115,7 @@ namespace Core.UI
             IsCompleted = false;
         }
 
-        public void Show(UIWaypointData data, Vector3 offset, Func<bool> destroyUntil)
+        public void Show(in UIWaypointData data, Vector3 offset, Func<bool> destroyUntil)
         {
             if (!isInitialized)
             {

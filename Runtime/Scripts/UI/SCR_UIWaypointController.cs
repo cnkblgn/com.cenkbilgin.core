@@ -59,7 +59,7 @@ namespace Core.UI
             }
         }
 
-        public void Show(UIWaypointData data, Vector3 offset, Camera camera, Func<bool> destroyUntil)
+        public void Show(in UIWaypointData data, Vector3 offset, Camera camera, Func<bool> destroyUntil)
         {
             UIWaypointEntity entity = waypointPool.Spawn(data, offset, destroyUntil);
 

@@ -62,7 +62,7 @@ namespace Core.UI
         public void HideNotification() => notificationController.Hide();
         public void ClearNotification() => notificationController.Clear();
 
-        public void ShowWaypoint(UIWaypointData data, Vector3 offset, Camera camera, Func<bool> destroyUntil = null) => waypointController.Show(data, offset, camera, destroyUntil);
+        public void ShowWaypoint(in UIWaypointData data, Vector3 offset, Camera camera, Func<bool> destroyUntil = null) => waypointController.Show(data, offset, camera, destroyUntil);
         public void ShowWaypoints() => waypointController.Show();
         public void HideWaypoints() => waypointController.Hide();
         public void ClearWaypoints() => waypointController.Clear();
