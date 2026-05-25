@@ -11,9 +11,7 @@ namespace Core.UI
     [RequireComponent(typeof(RectTransform))]
     public class UIWaypointEntity : MonoBehaviour
     {
-        public Vector3 Target => targetTransform != null ? targetTransform.position : targetPosition;
-        public Sprite Icon => waypointImage.sprite;
-        public Color Color => waypointImage.color;
+        public UIWaypointData Data { get; private set; }
         public bool IsCompleted { get; private set; }
 
         [Header("_")]
@@ -21,18 +19,15 @@ namespace Core.UI
         [SerializeField, Required] private TextMeshProUGUI waypointText = null;
 
         private RectTransform thisTransform = null;
-        private Transform targetTransform = null;
         private Func<bool> destroyUntil = null;
         private Action completeCallback = null;
-        private Vector3 targetPosition = Vector3.zero;
-        private Vector3 targetOffset = Vector3.zero;
+        private Vector3 offset = Vector3.zero;
         private float tickDuration = -1;
         private float tickTimer = 0;
         private float cachedWidth = 0;
         private float cachedHeight = 0;
         private bool isInitialized = false;
         private bool isActive = false;
-        private bool hasTarget = false;
 
         public void Tick(Camera cameraController, Transform cameraTransform)
         {
@@ -53,7 +48,7 @@ namespace Core.UI
                 return;
             }
 
-            if (targetTransform == null && hasTarget)
+            if (Data.HasTarget && Data.TargetTransform == null)
             {
                 Complete();
                 return;
@@ -82,16 +77,17 @@ namespace Core.UI
             float minY = cachedHeight;
             float maxY = Screen.height - minY;
 
-            Vector2 position = cameraController.WorldToScreenPoint(Target + targetOffset);
+            Vector3 worldPosition = Data.Position + offset;
+            Vector2 screenPosition = cameraController.WorldToScreenPoint(worldPosition);
 
-            if (Vector3.Dot((Target - cameraTransform.position), cameraTransform.forward) < 0)
+            if (Vector3.Dot((worldPosition - cameraTransform.position), cameraTransform.forward) < 0)
             {
-                position.x *= -1;
+                screenPosition.x *= -1;
             }
 
-            position.x = Mathf.Clamp(position.x, minX, maxX);
-            position.y = Mathf.Clamp(position.y, minY, maxY);
-            thisTransform.position = position;
+            screenPosition.x = Mathf.Clamp(screenPosition.x, minX, maxX);
+            screenPosition.y = Mathf.Clamp(screenPosition.y, minY, maxY);
+            thisTransform.position = screenPosition;
         }
 
         public void Initialize()
@@ -119,25 +115,14 @@ namespace Core.UI
             IsCompleted = false;
         }
 
-        public void Show(Transform target, Vector3 offset, Sprite icon, Color color, string text, float duration, Func<bool> destroyUntil)
-        {
-            hasTarget = true;
-            this.targetTransform = target;
-            this.targetOffset = offset;
-            Show(icon, color, text, duration, destroyUntil);
-        }
-        public void Show(Vector3 target, Sprite icon, Color color, string text, float duration, Func<bool> destroyUntil)
-        {
-            hasTarget = false;
-            targetPosition = target;
-            Show(icon, color, text, duration, destroyUntil);
-        }
-        private void Show(Sprite icon, Color color, string text, float duration, Func<bool> destroyUntil)
+        public void Show(UIWaypointData data, Vector3 offset, Func<bool> destroyUntil)
         {
             if (!isInitialized)
             {
                 return;
             }
+
+            Data = data;
 
             gameObject.SetActive(true);
 
@@ -145,12 +130,13 @@ namespace Core.UI
             IsCompleted = false;
             tickTimer = 0;
 
-            this.tickDuration = duration;
+            tickDuration = Data.Duration;
+            this.offset = offset;
             this.destroyUntil = destroyUntil;
 
-            waypointText.text = text;
-            waypointImage.color = color;
-            waypointImage.sprite = icon != null ? icon : waypointImage.sprite;
+            waypointText.text = Data.Text;
+            waypointImage.color = Data.Color;
+            waypointImage.sprite = Data.Icon != null ? Data.Icon : waypointImage.sprite;
 
             thisTransform.localScale = Vector3.zero;
             thisTransform.Scale(Vector3.one, 0.25f);

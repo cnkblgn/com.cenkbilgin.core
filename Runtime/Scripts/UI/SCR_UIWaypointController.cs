@@ -9,8 +9,8 @@ namespace Core.UI
     [RequireComponent(typeof(Canvas))]
     public class UIWaypointController : MonoBehaviour
     {
-        public static event Action<UIWaypointEntity> OnWaypointAdded = null;
-        public static event Action<UIWaypointEntity> OnWaypointRemoved = null;
+        public static event Action<UIWaypointData> OnWaypointAdded = null;
+        public static event Action<UIWaypointData> OnWaypointRemoved = null;
 
         [Header("_")]
         [SerializeField, Required] private UIWaypointEntity waypointTemplate = null;
@@ -53,27 +53,19 @@ namespace Core.UI
 
                 if (entity.IsCompleted)
                 {
-                    OnWaypointRemoved?.Invoke(entity);
+                    OnWaypointRemoved?.Invoke(entity.Data);
                     waypointPool.Pool.Release(entity);
                 }
             }
         }
 
-        public void Show(Camera camera, Transform target, Vector3 offset, Sprite icon, Color color, string text, float duration, Func<bool> destroyUntil)
+        public void Show(UIWaypointData data, Vector3 offset, Camera camera, Func<bool> destroyUntil)
         {
-            UIWaypointEntity entity = waypointPool.Spawn(target, offset, icon, color, text, duration, destroyUntil);
-            Show(camera, entity);
-        }
-        public void Show(Camera camera, Vector3 target, Sprite icon, Color color, string text, float duration, Func<bool> destroyUntil)
-        {
-            UIWaypointEntity entity = waypointPool.Spawn(target, icon, color, text, duration, destroyUntil);
-            Show(camera, entity);
-        }
-        private void Show(Camera camera, UIWaypointEntity entity)
-        {
+            UIWaypointEntity entity = waypointPool.Spawn(data, offset, destroyUntil);
+
             if (entity == null)
             {
-                Debug.LogError("entity == null!");
+                Debug.LogError("UIWaypointEntity == null!");
                 return;
             }
 
@@ -91,7 +83,7 @@ namespace Core.UI
 
             cameraController = camera;
             cameraTransform = camera.transform;
-            OnWaypointAdded?.Invoke(entity);
+            OnWaypointAdded?.Invoke(data);
 
             Show();
         }
