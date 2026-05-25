@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Core.UI
@@ -20,6 +21,7 @@ namespace Core.UI
         private Camera cameraController = null;
         private Transform cameraTransform = null;
         private UIWaypointPool waypointPool = null;
+        private readonly Dictionary<Guid, UIWaypointEntity> waypointTable = new();
         private bool isOpened = false;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -63,6 +65,8 @@ namespace Core.UI
         {
             UIWaypointEntity entity = waypointPool.Spawn(data, offset, destroyUntil);
 
+            Guid id = data.ID;
+
             if (entity == null)
             {
                 Debug.LogError("UIWaypointEntity == null!");
@@ -81,18 +85,37 @@ namespace Core.UI
                 return;
             }
 
+            if (waypointTable.ContainsKey(id))
+            {
+                Debug.LogError($"duplicate waypoint [{id}]");
+                return;
+            }
+
             cameraController = camera;
             cameraTransform = camera.transform;
             OnWaypointAdded?.Invoke(data);
 
-            Show();
+            waypointTable.Add(id, entity);
+
+            ShowAll();
         }
-        public void Show()
+        public void ShowAll()
         {
             thisCanvas.Show();
             isOpened = true;
         }
-        public void Hide()
+        public void Hide(in Guid id)
+        {
+            if (!waypointTable.TryGetValue(id, out UIWaypointEntity entity))
+            {
+                Debug.Log($"waypoint [{id}] not found!");
+                return;
+            }
+
+            entity.Hide();
+            waypointTable.Remove(id);
+        }
+        public void HideAll()
         {
             thisCanvas.Hide();
             isOpened = false;
@@ -100,7 +123,7 @@ namespace Core.UI
         public void Clear()
         {
             waypointPool.Pool.Reset(false, true);
-            Hide();
+            HideAll();
         }
     }
 }

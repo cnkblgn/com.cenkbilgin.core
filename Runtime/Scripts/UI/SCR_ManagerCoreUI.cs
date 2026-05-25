@@ -55,7 +55,7 @@ namespace Core.UI
             ManagerCoreGame.OnAfterSceneChanged -= OnAfterSceneChanged;
         }
 
-        private void OnAfterSceneChanged(string _) => waypointController.Hide();
+        private void OnAfterSceneChanged(string _) => waypointController.HideAll();
         private void OnBeforeSceneChanged(string _) => notificationController.Hide();
 
         public void ShowNotification(string text, float duration = 5) => notificationController.Show(text, duration);
@@ -63,8 +63,9 @@ namespace Core.UI
         public void ClearNotification() => notificationController.Clear();
 
         public void ShowWaypoint(in UIWaypointData data, Vector3 offset, Camera camera, Func<bool> destroyUntil = null) => waypointController.Show(data, offset, camera, destroyUntil);
-        public void ShowWaypoints() => waypointController.Show();
-        public void HideWaypoints() => waypointController.Hide();
+        public void ShowWaypoints() => waypointController.ShowAll();
+        public void HideWaypoint(in Guid id) => waypointController.Hide(id);
+        public void HideWaypoints() => waypointController.HideAll();
         public void ClearWaypoints() => waypointController.Clear();
 
         /// <summary> 0 -> 1, fades to black </summary>
