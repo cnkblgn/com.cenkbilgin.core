@@ -13,17 +13,17 @@ namespace Core
         public bool IsLoading => isLoading;
 
         [Header("_")]
-        [SerializeField, Required] private List<PersistentInstanceEntity> entityList = new();
+        [SerializeField, Required] private List<PersistentEntity> entityList = new();
 
-        private readonly Dictionary<Guid, PersistentInstanceEntity> entityTable = new();
+        private readonly Dictionary<Guid, PersistentEntity> entityTable = new();
         private readonly HashSet<Guid> entityHashset = new();
         private bool isLoading = false;
 
         private void Awake()
         {
-            PersistentInstanceEntity.OnMarkedForDestroy += OnEntityRequestDestroy;
+            PersistentEntity.OnMarkedForDestroy += OnEntityRequestDestroy;
 
-            foreach (PersistentInstanceEntity entity in entityList)
+            foreach (PersistentEntity entity in entityList)
             {
                 if (entity == null) throw new Exception();
 
@@ -34,7 +34,7 @@ namespace Core
         }
         private void OnDisable()
         {
-            PersistentInstanceEntity.OnMarkedForDestroy -= OnEntityRequestDestroy;
+            PersistentEntity.OnMarkedForDestroy -= OnEntityRequestDestroy;
 
             if (ManagerCorePersistent.HasInstance)
             {
@@ -42,7 +42,7 @@ namespace Core
             }         
         }
 
-        private void OnEntityRequestDestroy(PersistentInstanceEntity entity)
+        private void OnEntityRequestDestroy(PersistentEntity entity)
         {
             if (entity == null)
             {
@@ -65,7 +65,7 @@ namespace Core
 #if UNITY_EDITOR
         public void Populate()
         {
-            entityList = GetComponentsInChildren<PersistentInstanceEntity>(true).ToList();
+            entityList = GetComponentsInChildren<PersistentEntity>(true).ToList();
             var duplicatedGroups = entityList.GroupBy(e => e.InstanceID).Where(g => g.Count() > 1).ToList();
 
             foreach (var entity in entityList)
@@ -93,7 +93,7 @@ namespace Core
 #endif
 
         public bool IsRegistered(Guid id) => entityTable.ContainsKey(id);
-        public bool TryRegister(GameObject gameObject, out PersistentInstanceEntity entity)
+        public bool TryRegister(GameObject gameObject, out PersistentEntity entity)
         {
             if (!gameObject.TryGetComponent(out entity))
             {
@@ -105,7 +105,7 @@ namespace Core
             entity.GenerateID();
             return TryRegister(entity);
         }
-        public bool TryRegister(PersistentInstanceEntity entity)
+        public bool TryRegister(PersistentEntity entity)
         {
             if (entity == null)
             {
@@ -122,7 +122,7 @@ namespace Core
             entityTable[entity.InstanceID] = entity;
             return true;
         }
-        public bool TryUnregister(PersistentInstanceEntity entity)
+        public bool TryUnregister(PersistentEntity entity)
         {
             if (entity == null)
             {
@@ -143,7 +143,7 @@ namespace Core
         {
             PersistentSceneData sceneData = new(ManagerCoreGame.Instance.GetCurrentScene(), new(), new());
 
-            foreach (PersistentInstanceEntity entityObject in entityList)
+            foreach (PersistentEntity entityObject in entityList)
             {
                 if (entityObject == null || entityObject.IsMarkedForDestroy)
                 {
@@ -168,7 +168,7 @@ namespace Core
             entityHashset.UnionWith(sceneData.Hashset);
 
             // Iterate snapshot to allow safe removal
-            foreach (PersistentInstanceEntity entityObject in new List<PersistentInstanceEntity>(entityList))
+            foreach (PersistentEntity entityObject in new List<PersistentEntity>(entityList))
             {
                 Guid id = entityObject.InstanceID;
 
@@ -199,7 +199,7 @@ namespace Core
 
                 if (ManagerCorePrefab.Instance.TrySpawn(remainingData.Value.PrefabID, Vector3.zero, Quaternion.identity, null, out GameObject gameObject))
                 {
-                    if (gameObject.TryGetComponent(out PersistentInstanceEntity entityObject))
+                    if (gameObject.TryGetComponent(out PersistentEntity entityObject))
                     {
                         entityObject.Import(remainingData.Value);
                         TryRegister(entityObject);
@@ -217,7 +217,7 @@ namespace Core
 
             entityTable.Clear();
 
-            foreach (PersistentInstanceEntity entity in entityList)
+            foreach (PersistentEntity entity in entityList)
             {
                 if (entity != null)
                 {

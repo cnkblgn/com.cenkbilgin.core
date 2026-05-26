@@ -24,7 +24,7 @@ namespace Core
         }
 
         public bool IsRegistered(Guid id) => sceneController.IsRegistered(id);
-        public bool TryRegisterEntity(GameObject gameObject, out PersistentInstanceEntity entity)
+        public bool TryRegisterEntity(GameObject gameObject, out PersistentEntity entity)
         {
             entity = null;
 
@@ -35,7 +35,7 @@ namespace Core
 
             return sceneController.TryRegister(gameObject, out entity);
         }
-        public bool TryRegisterEntity(PersistentInstanceEntity entity)
+        public bool TryRegisterEntity(PersistentEntity entity)
         {
             if (!IsValid())
             {
@@ -44,7 +44,7 @@ namespace Core
 
             return sceneController.TryRegister(entity);
         }
-        public bool TryUnregisterEntity(PersistentInstanceEntity entity)
+        public bool TryUnregisterEntity(PersistentEntity entity)
         {
             if (!IsValid())
             {

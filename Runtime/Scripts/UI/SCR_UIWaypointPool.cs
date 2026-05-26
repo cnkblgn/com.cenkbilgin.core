@@ -3,15 +3,15 @@ using UnityEngine;
 
 namespace Core.UI
 {
-    public sealed class UIWaypointPool : IPoolHandler<UIWaypointEntity>
+    public sealed class UIWaypointPool : IPoolHandler<UIWaypoint>
     {
-        public readonly PoolSystem<UIWaypointEntity> Pool;
+        public readonly PoolSystem<UIWaypoint> Pool;
 
-        public UIWaypointPool(PoolType type, UIWaypointEntity prefab, Transform container, int count) => Pool = new("UI_WAYPOINT_POOL", type, prefab, container, count, this);
+        public UIWaypointPool(PoolType type, UIWaypoint prefab, Transform container, int count) => Pool = new("UI_WAYPOINT_POOL", type, prefab, container, count, this);
          
-        public UIWaypointEntity Spawn(in UIWaypointData data, Vector3 offset, Func<bool> destroyUntil)
+        public UIWaypoint Spawn(in UIWaypointData data, Vector3 offset, Func<bool> destroyUntil)
         {
-            UIWaypointEntity entity = Pool.GetNext();
+            UIWaypoint entity = Pool.GetNext();
 
             if (entity == null)
             {
@@ -23,7 +23,7 @@ namespace Core.UI
             return entity;
         }
 
-        public void OnInitialize(UIWaypointEntity entity) => entity.Initialize();
-        public void OnReset(UIWaypointEntity entity) => entity.Deinitialize();
+        public void OnInitialize(UIWaypoint entity) => entity.Initialize();
+        public void OnReset(UIWaypoint entity) => entity.Deinitialize();
     }
 }

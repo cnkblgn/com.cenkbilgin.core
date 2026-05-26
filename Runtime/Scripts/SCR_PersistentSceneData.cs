@@ -12,10 +12,10 @@ namespace Core
     {
         [Header("_")]
         [JsonProperty("0")] public string ID = STRING_NULL;
-        [JsonProperty("1")] public Dictionary<Guid, PersistentInstanceData> Database = new();
+        [JsonProperty("1")] public Dictionary<Guid, PersistentEntityData> Database = new();
         [JsonProperty("2")] public HashSet<Guid> Hashset = new();
 
-        [JsonConstructor] public PersistentSceneData([JsonProperty("0")] string id, [JsonProperty("1")] Dictionary<Guid, PersistentInstanceData> database, [JsonProperty("2")] HashSet<Guid> hashset)
+        [JsonConstructor] public PersistentSceneData([JsonProperty("0")] string id, [JsonProperty("1")] Dictionary<Guid, PersistentEntityData> database, [JsonProperty("2")] HashSet<Guid> hashset)
         {
             ID = id ?? STRING_NULL;
             Database = new();

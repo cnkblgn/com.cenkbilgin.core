@@ -7,9 +7,9 @@ namespace Core
     using static CoreUtility;
 
     [DisallowMultipleComponent]
-    public abstract class PersistentInstanceEntity : MonoBehaviour
+    public abstract class PersistentEntity : MonoBehaviour
     {
-        public static event Action<PersistentInstanceEntity> OnMarkedForDestroy;
+        public static event Action<PersistentEntity> OnMarkedForDestroy;
 
         public abstract string TypeID { get; }
         public abstract string PrefabID { get; }
@@ -82,10 +82,10 @@ namespace Core
             if (!isSilent) OnMarkedForDestroy?.Invoke(this);
         }
 
-        public PersistentInstanceData Export() => new(TypeID, PrefabID, instanceID, isMarkedForDestroy, ExportInternal());
+        public PersistentEntityData Export() => new(TypeID, PrefabID, instanceID, isMarkedForDestroy, ExportInternal());
         protected abstract Dictionary<string, PersistentValue> ExportInternal();
 
-        public void Import(PersistentInstanceData data)
+        public void Import(PersistentEntityData data)
         {
             instanceID = data.InstanceID;
             isMarkedForDestroy = data.IsMarkedForDestroy;

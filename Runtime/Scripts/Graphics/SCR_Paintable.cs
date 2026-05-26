@@ -8,7 +8,7 @@ namespace Core.Graphics
     [DisallowMultipleComponent]
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(Renderer))]
-    public class PaintableEntity : MonoBehaviour
+    public class Paintable : MonoBehaviour
     {
         [Header("_")]
         [SerializeField] private bool showGizmosCells = false;
@@ -50,17 +50,17 @@ namespace Core.Graphics
 
             if (thisFilter.sharedMesh == null)
             {
-                throw new MissingReferenceException($"PaintableEntity.Awake() [{nameof(PaintableEntity)}]");
+                throw new MissingReferenceException($"PaintableEntity.Awake() [{nameof(Paintable)}]");
             }
 
             if (computeShader == null)
             {
-                throw new MissingReferenceException($"PaintableEntity.Awake() [{nameof(PaintableEntity)}]");
+                throw new MissingReferenceException($"PaintableEntity.Awake() [{nameof(Paintable)}]");
             }
 
             if (targetMaterial == null)
             {
-                throw new MissingReferenceException($"PaintableEntity.Awake() [{nameof(PaintableEntity)}]");
+                throw new MissingReferenceException($"PaintableEntity.Awake() [{nameof(Paintable)}]");
             }
 
             Create();

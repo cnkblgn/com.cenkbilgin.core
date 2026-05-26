@@ -9,7 +9,7 @@ namespace Core.UI
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(RectTransform))]
-    public class UIWaypointEntity : MonoBehaviour
+    public class UIWaypoint : MonoBehaviour
     {
         public UIWaypointData Data { get; private set; }
         public bool IsCompleted { get; private set; }
