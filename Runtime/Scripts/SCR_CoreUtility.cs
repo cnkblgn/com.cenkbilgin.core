@@ -652,7 +652,7 @@ namespace Core
 
             return currentPosition;
         }
-        public static Vector3 GetPositionOnFieldofView(Vector3 targetPosition, Vector3 targetForward, float radius, float fov = 90)
+        public static Vector3 GetPositionOnFOV(Vector3 targetPosition, Vector3 targetForward, float radius, float fov = 90)
         {
             float angle = UnityEngine.Random.Range(-fov / 2, fov / 2);
 
@@ -661,21 +661,23 @@ namespace Core
             return targetPosition + targetDirection * radius;
         }
 
-        public static bool IsWithinFOV(Transform observer, Transform target, float fovAngle)
+        public static bool IsWithinFOV(Transform observer, Transform target, float fov) => IsWithinFOV(observer.position, observer.forward, target.position, fov);
+        public static bool IsWithinFOV(Vector3 observerPos, Vector3 observerFwd, Vector3 targetPos, float fov)
         {
-            Vector3 direction = (target.position - observer.position).normalized;
+            Vector3 direction = (targetPos - observerPos).normalized;
 
-            float dot = Vector3.Dot(observer.forward, direction);
+            float dot = Vector3.Dot(observerFwd, direction);
 
-            float threshold = Mathf.Cos(fovAngle * 0.5f * Mathf.Deg2Rad);
+            float threshold = Mathf.Cos(fov * 0.5f * Mathf.Deg2Rad);
 
             return dot >= threshold;
         }
-        public static bool IsFacingDot(Transform observer, Transform target, float threshold = 0.1f)
+        public static bool IsFacingDot(Transform observer, Transform target, float threshold = 0.1f) => IsFacingDot(observer.position, observer.forward, target.position, threshold);
+        public static bool IsFacingDot(Vector3 observerPos, Vector3 observerFwd, Vector3 targetPos, float threshold = 0.1f)
         {
-            Vector3 direction = (target.position - observer.position).normalized;
+            Vector3 direction = (observerPos - targetPos).normalized;
 
-            return Vector3.Dot(observer.forward, direction) >= threshold;
+            return Vector3.Dot(observerFwd, direction) >= threshold;
         }
         public static bool CheckVisiblityEachOther(Transform a, Transform b, float threshold = 0.1f) => CheckVisiblityEachOther(a.position, b.position, a.forward, b.forward, threshold);
         public static bool CheckVisiblityEachOther(Vector3 aPos, Vector3 bPos, Vector3 aFwd, Vector3 bFwd, float threshold = 0.1f)
