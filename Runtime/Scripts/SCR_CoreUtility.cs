@@ -660,6 +660,31 @@ namespace Core
 
             return targetPosition + targetDirection * radius;
         }
+
+        public static bool IsWithinFOV(Transform observer, Transform target, float fovAngle)
+        {
+            Vector3 direction = (target.position - observer.position).normalized;
+
+            float dot = Vector3.Dot(observer.forward, direction);
+
+            float threshold = Mathf.Cos(fovAngle * 0.5f * Mathf.Deg2Rad);
+
+            return dot >= threshold;
+        }
+        public static bool IsFacingDot(Transform observer, Transform target, float threshold = 0.1f)
+        {
+            Vector3 direction = (target.position - observer.position).normalized;
+
+            return Vector3.Dot(observer.forward, direction) >= threshold;
+        }
+        public static bool CheckVisiblityEachOther(Transform a, Transform b, float threshold = 0.1f) => CheckVisiblityEachOther(a.position, b.position, a.forward, b.forward, threshold);
+        public static bool CheckVisiblityEachOther(Vector3 aPos, Vector3 bPos, Vector3 aFwd, Vector3 bFwd, float threshold = 0.1f)
+        {
+            Vector3 aToB = (bPos - aPos).normalized;
+            Vector3 bToA = -aToB;
+
+            return Vector3.Dot(aFwd, aToB) >= threshold && Vector3.Dot(bFwd, bToA) >= threshold;
+        }
         #endregion
 
         #region GAMEOBJECT
