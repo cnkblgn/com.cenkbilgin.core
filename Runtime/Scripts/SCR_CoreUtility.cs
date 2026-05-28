@@ -679,8 +679,8 @@ namespace Core
 
             return Vector3.Dot(observerFwd, direction) >= threshold;
         }
-        public static bool CheckVisiblityEachOther(Transform a, Transform b, float threshold = 0.1f) => CheckVisiblityEachOther(a.position, b.position, a.forward, b.forward, threshold);
-        public static bool CheckVisiblityEachOther(Vector3 aPos, Vector3 bPos, Vector3 aFwd, Vector3 bFwd, float threshold = 0.1f)
+        public static bool IsFacingEachOther(Transform a, Transform b, float threshold = 0.1f) => IsFacingEachOther(a.position, b.position, a.forward, b.forward, threshold);
+        public static bool IsFacingEachOther(Vector3 aPos, Vector3 bPos, Vector3 aFwd, Vector3 bFwd, float threshold = 0.1f)
         {
             Vector3 aToB = (bPos - aPos).normalized;
             Vector3 bToA = -aToB;
