@@ -39,7 +39,7 @@ namespace Core
         private string activeScene = STRING_EMPTY;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void RESET()
+        private static void OnRuntimeInitialize()
         {
             OnGameStateChanged = null;
             OnCurrentSceneLoading = null;

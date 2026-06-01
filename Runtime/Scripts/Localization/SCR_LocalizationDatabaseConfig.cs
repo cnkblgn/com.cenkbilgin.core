@@ -18,10 +18,9 @@ namespace Core.Localization
         [SerializeField, HideInInspector] private string[] languages = Array.Empty<string>();
         [SerializeField, HideInInspector] private string[] keys = Array.Empty<string>();
         [SerializeField, HideInInspector] private bool isParsed = false;
-
         [NonSerialized] private Dictionary<string, string>[] database = null;
-         
-        public Dictionary<string, string> GetLanguage(int index)
+
+        internal Dictionary<string, string> GetLanguage(int index)
         {
             if (!IsParsed)
             {

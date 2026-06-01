@@ -36,13 +36,13 @@ namespace Core.Localization
             return database;
         }
 
-        public static Dictionary<string, string> Parse(string csvFile, int languageIndex, char separator, out string[] languages, out string[] keys)
+        internal static Dictionary<string, string> Parse(string csvFile, int languageIndex, char separator, out string[] languages, out string[] keys)
         {
             Dictionary<string, string>[] database = ParseAll(csvFile, separator, out languages, out keys);
 
             return database[languageIndex];        
         }
-        public static Dictionary<string, string>[] ParseAll(string csvFile, char separator, out string[] languages, out string[] keys)
+        internal static Dictionary<string, string>[] ParseAll(string csvFile, char separator, out string[] languages, out string[] keys)
         {
             List<string> lines = Read(csvFile).ToList();
 

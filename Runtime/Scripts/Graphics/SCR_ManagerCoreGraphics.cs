@@ -34,7 +34,7 @@ namespace Core.Graphics
         private bool isCameraInitialized = false;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void RESET() => OnResolutionChanged = null;
+        private static void OnRuntimeInitialize() => OnResolutionChanged = null;
 
         protected override void Awake()
         {
