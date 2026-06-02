@@ -97,7 +97,7 @@ namespace Core.Input
         public void Disable() => thisInput.DeactivateInput();
         public void SwitchMap(string name)
         {
-            if (thisInput.currentActionMap.name == name)
+            if (thisInput.currentActionMap != null && thisInput.currentActionMap.name == name)
             {
                 return;
             }
