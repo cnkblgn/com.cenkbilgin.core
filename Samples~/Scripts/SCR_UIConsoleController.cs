@@ -10,7 +10,7 @@ using Core.Input;
 namespace Game
 {
     using static CoreUtility;
-    using static InputActionDatabase;
+    using static InputDatabase;
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Canvas))]

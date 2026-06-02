@@ -4,7 +4,7 @@ using Core.UI;
 
 namespace Game
 {
-    using static InputActionDatabase;
+    using static InputDatabase;
 
     public class MovementModuleNoclip : MonoBehaviour, IMovementModule
     {

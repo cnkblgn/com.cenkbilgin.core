@@ -25,6 +25,7 @@ namespace Core.UI
         [SerializeField, Required] private UIConfirmationController confirmationController = null;
         [SerializeField, Required] private UITransitionController transitionController = null;
         [SerializeField, Required] private UIKeyActionController keyActionController = null;
+        [SerializeField, Required] private UISubtitleController subtitleController = null;
 
         protected override void Awake()
         {
@@ -55,8 +56,15 @@ namespace Core.UI
             ManagerCoreGame.OnAfterSceneChanged -= OnAfterSceneChanged;
         }
 
-        private void OnAfterSceneChanged(string _) => waypointController.HideAll();
-        private void OnBeforeSceneChanged(string _) => notificationController.Hide();
+        private void OnAfterSceneChanged(string _)
+        {
+            HideWaypoints();
+        }
+        private void OnBeforeSceneChanged(string _)
+        {
+            HideNotification();
+            HideSubtitle();
+        }
 
         public void ShowNotification(string text, float duration = 5) => notificationController.Show(text, duration);
         public void HideNotification() => notificationController.Hide();
@@ -102,6 +110,9 @@ namespace Core.UI
         public void HideAction(UIKeyActionType keyActionType) => keyActionController.Hide(keyActionType);
         public void InsertAction(UIKeyActionType keyActionType, KeyActionData[] data) => keyActionController.Insert(keyActionType, data);
         public void RemoveAction(UIKeyActionType keyActionType) => keyActionController.Remove(keyActionType);
+
+        public void ShowSubtitle(string text) => subtitleController.Show(text);
+        public void HideSubtitle() => subtitleController.Hide();
 
         public void MoveCursor(Vector2 pointerPosition) => cursorController.MoveCursor(pointerPosition);
         public void SetCursor(string id = "default") => cursorController.SetCursor(id);

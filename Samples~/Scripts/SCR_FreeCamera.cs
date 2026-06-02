@@ -3,7 +3,7 @@ using Core.Input;
 
 namespace Game
 {
-    using static InputActionDatabase;
+    using static InputDatabase;
 
     [DisallowMultipleComponent]   
     public class FreeCamera : MonoBehaviour

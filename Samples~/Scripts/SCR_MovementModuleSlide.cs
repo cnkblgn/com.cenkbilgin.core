@@ -7,7 +7,7 @@ namespace Game
 {
     using static CoreUtility;
     using static TaskUtility;
-    using static InputActionDatabase;
+    using static InputDatabase;
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(MovementController))]
