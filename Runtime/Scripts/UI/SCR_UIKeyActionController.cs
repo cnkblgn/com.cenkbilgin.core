@@ -10,11 +10,11 @@ namespace Core.UI
     public class UIKeyActionController : MonoBehaviour
     {
         [Header("_")]
-        [SerializeField, Required] private UIKeyActionElement actionTemplate = null;
-        [SerializeField, Required] private RectTransform actionContainer = null;
+        [SerializeField, Required] private UITextView viewTemplate = null;
+        [SerializeField, Required] private RectTransform viewContainer = null;
 
         private Canvas thisCanvas = null;
-        private readonly Dictionary<UIKeyActionType, List<UIKeyActionElement>> instanceTable = new();
+        private readonly Dictionary<UIKeyActionType, List<UITextView>> instanceTable = new();
         private readonly Dictionary<UIKeyActionType, KeyActionData[]> dataTable = new();
         private bool isEnabled = true;
 
@@ -40,12 +40,12 @@ namespace Core.UI
 
             thisCanvas.Show();
 
-            List<UIKeyActionElement> instances = new(keys.Length);
+            List<UITextView> instances = new(keys.Length);
 
             for (int i = 0; i < keys.Length; i++)
             {
-                UIKeyActionElement instance = Instantiate(actionTemplate, actionContainer);
-                instance.Initialize(keys[i].Icon, keys[i].Description);
+                UITextView instance = Instantiate(viewTemplate, viewContainer);
+                instance.Set($"{GetSprite(keys[i].Icon)}: {keys[i].Description}");
                 instance.gameObject.SetActive(true);
                 instances.Add(instance);
             }

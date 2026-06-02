@@ -9,22 +9,12 @@ namespace Core.UI
     [RequireComponent(typeof(Canvas))]
     public class UIMessageController : MonoBehaviour
     {
-        public static event Action<string> OnMessageShow = null;
-        public static event Action<string> OnMessageHide = null;
-
         [Header("_")]
         [SerializeField, Required] private CanvasGroup textCanvas = null;
         [SerializeField, Required] private UITextBox textBox = null;
 
         private Canvas thisCanvas = null;
         private TaskInstanceTweenFadeCanvas thisTween = null;
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void RESET()
-        {
-            OnMessageShow = null;
-            OnMessageHide = null;
-        }
 
         private void Awake() => thisCanvas = GetComponent<Canvas>();
         private void Start() { thisCanvas.Hide(); textCanvas.Hide(); }
@@ -48,8 +38,6 @@ namespace Core.UI
             }
 
             textBox.Set(text);
-
-            OnMessageShow?.Invoke(text);
         }
         public void Hide()
         {
@@ -57,8 +45,6 @@ namespace Core.UI
         }
         public void Clear()
         {
-            OnMessageHide?.Invoke(textBox.Text);
-
             thisTween?.Stop();
             thisTween = null;
 

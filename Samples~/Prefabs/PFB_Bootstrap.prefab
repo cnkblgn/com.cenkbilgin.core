@@ -429,8 +429,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3aac517daa339c41870aed01d3e7f9f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  actionTemplate: {fileID: 363097130533615431}
-  actionContainer: {fileID: 6549757914171013821}
+  viewTemplate: {fileID: 4913686617223177434}
+  viewContainer: {fileID: 6549757914171013821}
 --- !u!1 &787794468245462497
 GameObject:
   m_ObjectHideFlags: 0
@@ -715,7 +715,7 @@ GameObject:
   - component: {fileID: 1624094159469976002}
   - component: {fileID: 3669286827463696143}
   m_Layer: 5
-  m_Name: UINotificationTemplate
+  m_Name: NotificationTemplate
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1724,7 +1724,7 @@ GameObject:
   - component: {fileID: 8909895819121079065}
   - component: {fileID: 3322080894181222010}
   - component: {fileID: 1576115794781761199}
-  - component: {fileID: 363097130533615431}
+  - component: {fileID: 4913686617223177434}
   m_Layer: 5
   m_Name: Template
   m_TagString: Untagged
@@ -1790,7 +1790,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &363097130533615431
+--- !u!114 &4913686617223177434
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1799,10 +1799,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 4662158032871736740}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b9b18b3bed87a8b47b0689614d627f74, type: 3}
+  m_Script: {fileID: 11500000, guid: cb4cabb3383017b4abb57cfc45bf1284, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
-  thisText: {fileID: 3558500424914416688}
+  m_EditorClassIdentifier: ASM_CoreUI::Core.UI.UITextView
+  text: {fileID: 3558500424914416688}
 --- !u!1 &5111138635790731509
 GameObject:
   m_ObjectHideFlags: 0
@@ -2151,7 +2151,7 @@ GameObject:
   - component: {fileID: 1893193446746965912}
   - component: {fileID: 1249853062163756977}
   m_Layer: 5
-  m_Name: UIWaypointTemplate
+  m_Name: WaypointTemplate
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3254,7 +3254,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 109770324596266902, guid: e02da7727e6862b48b776764ce282796, type: 3}
       propertyPath: m_Name
-      value: UILabelValueText
+      value: MessageText
       objectReference: {fileID: 0}
     - target: {fileID: 4791421286178374225, guid: e02da7727e6862b48b776764ce282796, type: 3}
       propertyPath: m_Pivot.x
@@ -3399,7 +3399,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 173907917810324361, guid: f0a6018cd119f914eb592b20bd9d377f, type: 3}
       propertyPath: m_Name
-      value: ConsoleHistoryRect
+      value: HistoryRect
       objectReference: {fileID: 0}
     - target: {fileID: 863211806323262453, guid: f0a6018cd119f914eb592b20bd9d377f, type: 3}
       propertyPath: m_SizeDelta.y
@@ -3424,6 +3424,10 @@ PrefabInstance:
     - target: {fileID: 6151238747133182241, guid: f0a6018cd119f914eb592b20bd9d377f, type: 3}
       propertyPath: m_AnchoredPosition.x
       value: -28
+      objectReference: {fileID: 0}
+    - target: {fileID: 6263749583662128474, guid: f0a6018cd119f914eb592b20bd9d377f, type: 3}
+      propertyPath: m_Name
+      value: Scrollbar
       objectReference: {fileID: 0}
     - target: {fileID: 8064952614087056323, guid: f0a6018cd119f914eb592b20bd9d377f, type: 3}
       propertyPath: m_Content
@@ -3511,7 +3515,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9188893038715722533, guid: f0a6018cd119f914eb592b20bd9d377f, type: 3}
       propertyPath: m_Size
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9188893038715722533, guid: f0a6018cd119f914eb592b20bd9d377f, type: 3}
       propertyPath: m_Value
@@ -3658,7 +3662,7 @@ PrefabInstance:
       objectReference: {fileID: 1879156630, guid: 1a0da6d449df88d45a0ba09316b30cc8, type: 3}
     - target: {fileID: 7280432338578308545, guid: b1db284d7f2c7ec4cacd957c77d94d69, type: 3}
       propertyPath: m_Name
-      value: UIConfirmationCancelButton
+      value: ConfirmationCancelButton
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4135,7 +4139,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 109770324596266902, guid: e02da7727e6862b48b776764ce282796, type: 3}
       propertyPath: m_Name
-      value: ConsoleHistoryText
+      value: HistoryText
       objectReference: {fileID: 0}
     - target: {fileID: 4791421286178374225, guid: e02da7727e6862b48b776764ce282796, type: 3}
       propertyPath: m_Pivot.x
@@ -4298,7 +4302,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 109770324596266902, guid: e02da7727e6862b48b776764ce282796, type: 3}
       propertyPath: m_Name
-      value: UIConfirmationValueText
+      value: ConfirmationText
       objectReference: {fileID: 0}
     - target: {fileID: 4791421286178374225, guid: e02da7727e6862b48b776764ce282796, type: 3}
       propertyPath: m_Pivot.x
@@ -4564,7 +4568,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 109770324596266902, guid: e02da7727e6862b48b776764ce282796, type: 3}
       propertyPath: m_Name
-      value: PFB_UITextTemplate_01
+      value: Text
       objectReference: {fileID: 0}
     - target: {fileID: 109770324596266902, guid: e02da7727e6862b48b776764ce282796, type: 3}
       propertyPath: m_IsActive
@@ -4813,7 +4817,7 @@ PrefabInstance:
       objectReference: {fileID: -474261839, guid: 1a0da6d449df88d45a0ba09316b30cc8, type: 3}
     - target: {fileID: 7280432338578308545, guid: b1db284d7f2c7ec4cacd957c77d94d69, type: 3}
       propertyPath: m_Name
-      value: UIConfirmationAcceptButton
+      value: ConfirmationAcceptButton
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4874,7 +4878,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 109770324596266902, guid: e02da7727e6862b48b776764ce282796, type: 3}
       propertyPath: m_Name
-      value: UIWaypointObjectValueText
+      value: WaypointText
       objectReference: {fileID: 0}
     - target: {fileID: 4791421286178374225, guid: e02da7727e6862b48b776764ce282796, type: 3}
       propertyPath: m_Pivot.x
@@ -5011,7 +5015,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 109770324596266902, guid: e02da7727e6862b48b776764ce282796, type: 3}
       propertyPath: m_Name
-      value: UINotificationValueText
+      value: NotificationText
       objectReference: {fileID: 0}
     - target: {fileID: 4791421286178374225, guid: e02da7727e6862b48b776764ce282796, type: 3}
       propertyPath: m_Pivot.x

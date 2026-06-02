@@ -10,9 +10,6 @@ namespace Core.UI
     [RequireComponent(typeof(Canvas))]
     public class UIWaypointController : MonoBehaviour
     {
-        public static event Action<UIWaypointData> OnWaypointAdded = null;
-        public static event Action<UIWaypointData> OnWaypointRemoved = null;
-
         [Header("_")]
         [SerializeField, Required] private UIWaypoint waypointTemplate = null;
 
@@ -23,13 +20,6 @@ namespace Core.UI
         private UIWaypointPool waypointPool = null;
         private readonly Dictionary<Guid, UIWaypoint> waypointTable = new();
         private bool isOpened = false;
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void RESET()
-        {
-            OnWaypointAdded = null;
-            OnWaypointRemoved = null;
-        }
 
         private void Awake()
         {
@@ -55,7 +45,6 @@ namespace Core.UI
 
                 if (entity.IsCompleted)
                 {
-                    OnWaypointRemoved?.Invoke(entity.Data);
                     waypointPool.Pool.Release(entity);
                 }
             }
@@ -93,7 +82,6 @@ namespace Core.UI
 
             cameraController = camera;
             cameraTransform = camera.transform;
-            OnWaypointAdded?.Invoke(data);
 
             waypointTable.Add(id, entity);
 

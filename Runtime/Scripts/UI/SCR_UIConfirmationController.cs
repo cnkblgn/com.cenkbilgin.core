@@ -12,9 +12,6 @@ namespace Core.UI
     [RequireComponent(typeof(GraphicRaycaster))]
     public class UIConfirmationController : MonoBehaviour
     {
-        public static event Action<string> OnConfirmationShow = null;
-        public static event Action<string> OnConfirmationHide = null;
-
         [Header("_")]
         [SerializeField] private TextMeshProUGUI confirmationText = null;
 
@@ -26,13 +23,6 @@ namespace Core.UI
         private Action onAcceptEvent = null;
         private Action onCancelEvent = null;
         private bool isOpened = false;
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void RESET()
-        {
-            OnConfirmationShow = null;
-            OnConfirmationHide = null;
-        }
 
         private void Awake()
         {
@@ -81,8 +71,6 @@ namespace Core.UI
             onCancelEvent = onCancel;
             confirmationText.text = text;
             isOpened = true;
-
-            OnConfirmationShow?.Invoke(text);
         }
         public void Hide()
         {
@@ -90,8 +78,6 @@ namespace Core.UI
             {
                 ManagerCoreUI.Instance.HideCursor();
             }
-
-            OnConfirmationHide?.Invoke(confirmationText.text);
 
             thisCanvas.Hide();
             onAcceptEvent = null;

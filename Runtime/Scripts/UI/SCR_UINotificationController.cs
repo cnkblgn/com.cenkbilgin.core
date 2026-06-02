@@ -10,9 +10,6 @@ namespace Core.UI
     [RequireComponent(typeof(Canvas))]
     public class UINotificationController : MonoBehaviour
     {
-        public static event Action<UINotification> OnNotificationAdded = null;
-        public static event Action<UINotification> OnNotificationRemoved = null;
-
         [Header("_")]
         [SerializeField, Range(0, 16)] private int maxSize = 12;
         [SerializeField, Required] private UINotification notificationTemplate = null;
@@ -25,13 +22,6 @@ namespace Core.UI
         private List<UINotification> activeEntities = new(1);
         private Vector2 objectOffset = Vector2.zero;
         private Vector2 objectPadding = Vector2.zero;
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void RESET()
-        {
-            OnNotificationAdded = null;
-            OnNotificationRemoved = null;
-        }
 
         private void Awake()
         {
@@ -108,7 +98,6 @@ namespace Core.UI
             }
 
             entity.Show(text, duration);
-            OnNotificationAdded?.Invoke(entity);
         }
         private void Hide(UINotification entity)
         {
@@ -118,7 +107,6 @@ namespace Core.UI
             }
 
             entity.Hide();
-            OnNotificationRemoved?.Invoke(entity);
         }
     }
 }
