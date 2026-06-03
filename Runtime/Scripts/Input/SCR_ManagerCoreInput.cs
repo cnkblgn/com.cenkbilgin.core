@@ -112,6 +112,7 @@ namespace Core.Input
             SwitchMap(map.name);
         }
         public InputActionMap GetMap(string name) => thisActions.FindActionMap(name);
+        public string GetMap() => thisInput.currentActionMap != null ? thisInput.currentActionMap.name : STRING_NULL;
         private UnityEngine.InputSystem.InputAction GetAction(InputAction type) => GetAction(type.path);
         private UnityEngine.InputSystem.InputAction GetAction(string path)
         {
