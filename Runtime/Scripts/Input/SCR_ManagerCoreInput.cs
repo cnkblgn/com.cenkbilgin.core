@@ -78,8 +78,6 @@ namespace Core.Input
             }
 
             Import();
-            GetMap("Global").Enable();
-            SwitchMap("Gameplay");
         }
         private void Update()
         {
@@ -93,7 +91,7 @@ namespace Core.Input
 
         private void OnControlsChanged(PlayerInput input) => IsGamepadActive = input.currentControlScheme == "Gamepad";
 
-        public void Enable() { thisInput.ActivateInput(); GetMap("Global").Enable(); }
+        public void Enable() => thisInput.ActivateInput();
         public void Disable() => thisInput.DeactivateInput();
         public void SwitchMap(string name)
         {
@@ -104,7 +102,16 @@ namespace Core.Input
 
             thisInput.SwitchCurrentActionMap(name);
         }
-        private InputActionMap GetMap(string name) => thisActions.FindActionMap(name, true);
+        public void SwitchMap(InputActionMap map)
+        {
+            if (map == null)
+            {
+                return;
+            }
+
+            SwitchMap(map.name);
+        }
+        public InputActionMap GetMap(string name) => thisActions.FindActionMap(name);
         private UnityEngine.InputSystem.InputAction GetAction(InputAction type) => GetAction(type.path);
         private UnityEngine.InputSystem.InputAction GetAction(string path)
         {
