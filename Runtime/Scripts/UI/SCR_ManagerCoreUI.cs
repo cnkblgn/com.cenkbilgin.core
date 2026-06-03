@@ -114,7 +114,7 @@ namespace Core.UI
         public void ShowSubtitle(string text) => subtitleController.Show(text);
         public void HideSubtitle() => subtitleController.Hide();
 
-        public void MoveCursor(Vector2 pointerPosition) => cursorController.MoveCursor(pointerPosition);
+        public void MoveCursor(Vector2 screenPosition) => cursorController.MoveCursor(screenPosition);
         public void SetCursor(string id = "default") => cursorController.SetCursor(id);
         public void ShowCursor() => cursorController.ShowCursor();
         public void HideCursor() => cursorController.HideCursor();

@@ -4,7 +4,7 @@ namespace Core.Input
 {
     using static CoreUtility;
 
-    public static class InputActionUtility
+    public static class InputUtility
     {
         public static bool GetKeyUp(this InputAction type)
         {

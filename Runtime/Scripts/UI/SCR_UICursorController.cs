@@ -20,6 +20,7 @@ namespace Core.UI
 
         private readonly Dictionary<string, UICursorData> table = new();
         private Canvas thisCanvas = null;
+        private bool hasMoved = false;
 
         private void Awake()
         {
@@ -31,6 +32,16 @@ namespace Core.UI
                 table[cursor.ID] = cursor;
             }
         }
+#if UNITY_EDITOR
+        private void LateUpdate()
+        {
+            if (!hasMoved)
+            {
+                Debug.LogWarning("Please update cursor position by calling MoveCursor()");
+            }
+        }
+#endif
+
         private bool TryGetCursor(string id, out UICursorData cursor)
         {
             if (id == null)
@@ -46,16 +57,17 @@ namespace Core.UI
             Debug.LogWarning($"[{id}] is not defined");
             return false;
         }
-        public void MoveCursor(Vector2 pointerPosition)
+        public void MoveCursor(Vector2 screenPosition)
         {
             if (Cursor.lockState != CursorLockMode.Confined)
             {
                 return;
             }
 
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(thisCanvas.transform as RectTransform, pointerPosition, null, out Vector2 position);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(thisCanvas.transform as RectTransform, screenPosition, null, out Vector2 position);
 
             cursorTransform.localPosition = position;
+            hasMoved = true;
         }
         public void SetCursor(string id)
         {

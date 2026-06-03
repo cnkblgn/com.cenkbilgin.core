@@ -58,13 +58,17 @@ namespace Core.Input
             { "leftShoulder", -1 },
             { "rightShoulder", -1 },
         };
+        private static readonly InputMap defaultMap = new("Global");
 
         protected override void Awake()
         {
             base.Awake();
 
             thisInput = GetComponent<PlayerInput>();           
+            thisInput.neverAutoSwitchControlSchemes = true;
+            thisInput.defaultActionMap = defaultMap.name;
             thisInput.onControlsChanged += OnControlsChanged;
+
             thisActions = thisInput.actions;
 
             actionLookup.Clear();
@@ -78,6 +82,7 @@ namespace Core.Input
             }
 
             Import();
+            EnableMap(defaultMap);
         }
         private void Update()
         {
@@ -93,8 +98,11 @@ namespace Core.Input
 
         public void Enable() => thisInput.ActivateInput();
         public void Disable() => thisInput.DeactivateInput();
-        public void SwitchMap(string name)
+
+        private void SwitchMap(string name)
         {
+            EnableMap(defaultMap);
+
             if (thisInput.currentActionMap != null && thisInput.currentActionMap.name == name)
             {
                 return;
@@ -102,16 +110,10 @@ namespace Core.Input
 
             thisInput.SwitchCurrentActionMap(name);
         }
-        public void SwitchMap(InputActionMap map)
-        {
-            if (map == null)
-            {
-                return;
-            }
-
-            SwitchMap(map.name);
-        }
-        public InputActionMap GetMap(string name) => thisActions.FindActionMap(name);
+        public void SwitchMap(InputMap map) => SwitchMap(map.name);
+        public void EnableMap(InputMap map) => GetMap(map.name)?.Enable();
+        public void DisableMap(InputMap map) => GetMap(map.name)?.Disable();
+        private InputActionMap GetMap(string name) => thisActions.FindActionMap(name);
         public string GetMap() => thisInput.currentActionMap != null ? thisInput.currentActionMap.name : STRING_NULL;
         private UnityEngine.InputSystem.InputAction GetAction(InputAction type) => GetAction(type.path);
         private UnityEngine.InputSystem.InputAction GetAction(string path)
