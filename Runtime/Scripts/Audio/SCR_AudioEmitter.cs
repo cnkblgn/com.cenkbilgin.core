@@ -19,7 +19,7 @@ namespace Core.Audio
         private const float OCCLUSION_INTERVAL = 0.25F;
         private const float MAX_CUTOFF = 22000f;
 
-        public string AudioGroup => thisAudioGroup.name;
+        public string AudioGroup => thisAudioGroup != null ? thisAudioGroup.name : STRING_NULL;
         public bool IsPlaying => isPlaying; 
         public bool IsPaused => isPaused; 
 
