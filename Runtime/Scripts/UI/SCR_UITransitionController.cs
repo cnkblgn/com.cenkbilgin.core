@@ -55,7 +55,11 @@ namespace Core.UI
                 if (!thisTween.IsCompleted)
                 {
                     onStartAction?.Invoke();
-                    this.WaitFrame(onFinishAction);
+
+                    if (onFinishAction != null)
+                    {
+                        this.WaitFrame(onFinishAction);
+                    }
                     return;
                 }
             }
