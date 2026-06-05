@@ -10,7 +10,7 @@ namespace Core
 
         public TaskInstanceWaitFrame(MonoBehaviour host, Action callback) : base(host)
         {
-            this.callback = callback ?? throw new NullReferenceException();
+            this.callback = callback ?? throw new NullReferenceException(nameof(callback));
             this.frame = Time.frameCount + 1;
         }
         protected override void OnUpdate()

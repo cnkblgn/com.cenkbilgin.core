@@ -27,7 +27,11 @@ namespace Core.UI
                 if (!thisTween.IsCompleted)
                 {
                     onStartAction?.Invoke();
-                    this.WaitFrame(onFinishAction);
+
+                    if (onFinishAction != null)
+                    {
+                        this.WaitFrame(onFinishAction);
+                    }                   
                     return;
                 }
             }
@@ -66,6 +70,7 @@ namespace Core.UI
                 onFinishAction?.Invoke();
             });
         }
+
         public void Hide()
         {
             thisCanvas.Hide();
