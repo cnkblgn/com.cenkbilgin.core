@@ -25,6 +25,8 @@ namespace Core.UI
         {
             thisCanvas = GetComponent<Canvas>();
             thisTransform = GetComponent<RectTransform>();
+
+            waypointTemplate.gameObject.SetActive(false);
             waypointPool = new(PoolType.RELEASE, waypointTemplate, thisTransform, 16);
         }        
         private void Update()
