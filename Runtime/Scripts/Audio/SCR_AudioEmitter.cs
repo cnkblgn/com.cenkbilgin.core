@@ -153,15 +153,20 @@ namespace Core.Audio
         {
             Play(clip, listener, group, blend, volume, pitch, minDistance, maxDistance, loop);
 
+            occlusionEnabled = blend >= 1;
+
+            if (!occlusionEnabled)
+            {
+                return;
+            }
+
             this.occlusionMask = occlusionMask;
             this.occlusionLowpassCurve = occlusionLowpass;
             this.occlusionVolumeCurve = occlusionVolume;
             this.occlusionBlend = occlusionBlend;
             this.occlusionAngle = occlusionAngle;
-
-            occlusionEnabled = blend >= 1;
+            
             occlusionUpdateTime = 0f;
-
             Occlude(true);
         }
         public void Play(AudioClip clip, Transform listener, AudioMixerGroup group, float blend, float volume, float pitch, float minDistance, float maxDistance, bool loop)
