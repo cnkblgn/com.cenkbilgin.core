@@ -115,7 +115,31 @@ namespace Core.Input
         public void DisableMap(InputMap map) => GetMap(map.name)?.Disable();
         private InputActionMap GetMap(string name) => thisActions.FindActionMap(name);
         public string GetMap() => thisInput.currentActionMap != null ? thisInput.currentActionMap.name : STRING_NULL;
-        private UnityEngine.InputSystem.InputAction GetAction(InputAction type) => GetAction(type.path);
+        public string GetName(InputAction action)
+        {
+            UnityEngine.InputSystem.InputAction input = GetAction(action);
+
+            if (input == null)
+            {
+                Debug.LogError($"action [{action.path}] not found in inputs!");
+                return STRING_NULL;
+            }
+
+            return input.activeControl != null ? input.activeControl.name : STRING_NULL;
+        }
+        public string GetPath(InputAction action)
+        {
+            UnityEngine.InputSystem.InputAction input = GetAction(action);
+
+            if (input == null)
+            {
+                Debug.LogError($"action [{action.path}] not found in inputs!");
+                return STRING_NULL;
+            }
+
+            return input.activeControl != null ? input.activeControl.path : STRING_NULL;
+        }
+        private UnityEngine.InputSystem.InputAction GetAction(InputAction action) => GetAction(action.path);
         private UnityEngine.InputSystem.InputAction GetAction(string path)
         {
             if (!actionLookup.TryGetValue(path, out var action))
@@ -126,11 +150,11 @@ namespace Core.Input
 
             return action;
         }
-        public bool GetKey(InputAction type) => GetAction(type)?.IsPressed() == true;
-        public bool GetKeyDown(InputAction type) => GetAction(type)?.WasPressedThisFrame() == true;
-        public bool GetKeyUp(InputAction type) => GetAction(type)?.WasReleasedThisFrame() == true;
-        public Vector2 GetAxis(InputAction type) => GetAction(type)?.ReadValue<Vector2>() ?? Vector2.zero;
-        public int GetIcon(InputAction type) => GetIcon(type.path);
+        public bool GetKey(InputAction action) => GetAction(action)?.IsPressed() == true;
+        public bool GetKeyDown(InputAction action) => GetAction(action)?.WasPressedThisFrame() == true;
+        public bool GetKeyUp(InputAction action) => GetAction(action)?.WasReleasedThisFrame() == true;
+        public Vector2 GetAxis(InputAction action) => GetAction(action)?.ReadValue<Vector2>() ?? Vector2.zero;
+        public int GetIcon(InputAction action) => GetIcon(action.path);
         public int GetIcon(string path)
         {
             UnityEngine.InputSystem.InputAction action = GetAction(path);
@@ -152,7 +176,7 @@ namespace Core.Input
 
             return icon;
         }
-        public string GetDisplay(InputAction type, int bindingIndex) => GetDisplay(type.path, bindingIndex);
+        public string GetDisplay(InputAction action, int bindingIndex) => GetDisplay(action.path, bindingIndex);
         public string GetDisplay(string path, int bindingIndex)
         {
             UnityEngine.InputSystem.InputAction action = GetAction(path);
@@ -164,7 +188,7 @@ namespace Core.Input
 
             return action.GetBindingDisplayString(bindingIndex);
         }
-        public void StartRebind(InputAction type, int bindingIndex, Action onStart, Action onComplete, Action onCancel) => StartRebind(type.path, bindingIndex, onStart, onComplete, onCancel);
+        public void StartRebind(InputAction action, int bindingIndex, Action onStart, Action onComplete, Action onCancel) => StartRebind(action.path, bindingIndex, onStart, onComplete, onCancel);
         public void StartRebind(string path, int bindingIndex, Action onStart, Action onComplete, Action onCancel)
         {
             UnityEngine.InputSystem.InputAction action = GetAction(path);
@@ -202,7 +226,7 @@ namespace Core.Input
             })
             .Start();
         }
-        public void RevertRebind(InputAction type, int bindingIndex) => RevertRebind(type.path, bindingIndex);
+        public void RevertRebind(InputAction action, int bindingIndex) => RevertRebind(action.path, bindingIndex);
         public void RevertRebind(string path, int bindingIndex)
         {
             UnityEngine.InputSystem.InputAction action = GetAction(path);
