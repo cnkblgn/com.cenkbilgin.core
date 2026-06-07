@@ -38,6 +38,7 @@ namespace Core.Audio
 
         private Transform thisTransform = null;
         private Coroutine thisCoroutine = null;
+        private bool hasPlayedOnce = false;
 
 #if UNITY_EDITOR
         private void OnValidate()
@@ -57,16 +58,28 @@ namespace Core.Audio
             audioObject.GetComponent<AudioSource>().maxDistance = maxDistance;
         }
 #endif
-        private void OnEnable()
+        private void Start()
         {
             if (!playOnEnable)
             {
                 return;
             }
 
+            hasPlayedOnce = true;
             Play();
         }
 
+#if UNITY_EDITOR
+        private void OnEnable()
+        {
+            if (!playOnEnable || !hasPlayedOnce)
+            {
+                return;
+            }
+
+            Play();
+        }
+#endif
         public void Play() => Play(audioClip, blend);
         public void Play(float blend) => Play(audioClip, blend);
         public void Play(AudioClip clip, float blend)
