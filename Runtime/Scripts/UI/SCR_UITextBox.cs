@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Core.UI
 {
@@ -33,6 +34,7 @@ namespace Core.UI
         {
             if (canvasBounds == null)
             {
+                textContainer.anchoredPosition = desiredPosition;
                 return;
             }
 

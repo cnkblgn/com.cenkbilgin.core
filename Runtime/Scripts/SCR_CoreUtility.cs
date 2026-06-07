@@ -1028,7 +1028,9 @@ namespace Core
             }
 
             Vector2 position = screenPosition / rootCanvas.localScale.x; 
-            Rect rootRect = rootCanvas.rect; Rect thisRect = thisTransform.rect; 
+
+            Rect rootRect = rootCanvas.rect; 
+            Rect thisRect = thisTransform.rect; 
 
             if (position.x + thisRect.width > rootRect.width) position.x = rootRect.width - thisRect.width;
             if (position.y + thisRect.height > rootRect.height) position.y = rootRect.height - thisRect.height;

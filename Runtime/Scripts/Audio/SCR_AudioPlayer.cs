@@ -65,7 +65,6 @@ namespace Core.Audio
                 return;
             }
 
-            hasPlayedOnce = true;
             Play();
         }
 
@@ -89,6 +88,8 @@ namespace Core.Audio
                 Debug.LogWarning("clip == null!");
                 return;
             }
+
+            hasPlayedOnce = true;
 
             if (audioObject == null)
             {
