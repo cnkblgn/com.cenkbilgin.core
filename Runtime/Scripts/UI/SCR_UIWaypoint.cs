@@ -15,8 +15,9 @@ namespace Core.UI
         public bool IsCompleted { get; private set; }
 
         [Header("_")]
-        [SerializeField, Required] private Image waypointImage = null;
-        [SerializeField, Required] private TextMeshProUGUI waypointText = null;
+        [SerializeField, Required] private Image iconImage = null;
+        [SerializeField, Required] private TextMeshProUGUI nameText = null;
+        [SerializeField, Required] private TextMeshProUGUI distanceText = null;
 
         private RectTransform thisTransform = null;
         private Func<bool> destroyUntil = null;
@@ -24,6 +25,7 @@ namespace Core.UI
         private Vector3 offset = Vector3.zero;
         private float tickDuration = -1;
         private float tickTimer = 0;
+        private float textTimer = 0;
         private float cachedWidth = 0;
         private float cachedHeight = 0;
         private bool isInitialized = false;
@@ -69,6 +71,15 @@ namespace Core.UI
                 }
 
                 tickTimer += Time.deltaTime;
+            }
+
+            textTimer += Time.deltaTime;
+
+            if (textTimer >= 0.5f)
+            {
+                float distance = Vector3.Distance(Data.Position, cameraTransform.position);
+                distanceText.text = $"{(int)distance} m";
+                textTimer = 0;
             }
 
             float minX = cachedWidth;
@@ -134,9 +145,9 @@ namespace Core.UI
             this.offset = offset;
             this.destroyUntil = destroyUntil;
 
-            waypointText.text = Data.Text;
-            waypointImage.color = Data.Color;
-            waypointImage.sprite = Data.Icon != null ? Data.Icon : waypointImage.sprite;
+            nameText.text = Data.Text;
+            iconImage.color = Data.Color;
+            iconImage.sprite = Data.Icon != null ? Data.Icon : iconImage.sprite;
 
             thisTransform.localScale = Vector3.zero;
             thisTransform.Scale(Vector3.one, 0.25f);
