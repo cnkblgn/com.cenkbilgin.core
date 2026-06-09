@@ -50,7 +50,6 @@ namespace Core
 
         private void InitializeItem(T item)
         {
-            item.gameObject.hideFlags = HideFlags.DontSave | HideFlags.NotEditable;
             item.gameObject.SetActive(false);
             currentHandler.OnInitialize(item);
         }
