@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using TextMateSharp.Registry;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
@@ -1437,213 +1438,115 @@ namespace Core
                 count = 0;
             }
         }
-        public class StackFloat
+        public sealed class StackMult
         {
-            public float CurrentValue => currentValue;
+            public float CurrentValue { get; private set; } = 1;
 
-            private float currentValue = 1;
+            private readonly Dictionary<object, float> stack = new();
             private readonly float baseValue = 1;
-            private readonly float[] multipliers = null;
-            private readonly bool[] used = null;
 
-            public StackFloat(float baseValue, uint capacity)
-            {
-                this.baseValue = baseValue;
-                this.currentValue = baseValue;
-                this.multipliers = new float[capacity];
-                this.used = new bool[capacity];
-            }
-            public void Apply(float multiplier, out int token)
-            {
-                token = -1;
+            public StackMult(int baseValue) => this.baseValue = baseValue;
 
-                for (int i = 0; i < used.Length; i++)
+            public void Apply(object obj, float value)
+            {
+                if (stack.ContainsKey(obj))
                 {
-                    if (!used[i])
-                    {
-                        multipliers[i] = multiplier;
-                        used[i] = true;
-                        token = i;
-                        Recalculate();
-                        return;
-                    }
-                }
-
-#if UNITY_EDITOR
-                Debug.LogWarning("not enough space!");
-#endif
-                return;
-            }
-            public void Revert(ref int token)
-            {
-                if (token < 0 || token >= used.Length)
-                {
-#if UNITY_EDITOR
-                    Debug.LogWarning("token out of range");
-#endif
-                    token = -1;
+                    Debug.LogWarning($"Stack contains {nameof(obj)}");
                     return;
                 }
 
-                if (!used[token])
+                stack.Add(obj, value);
+
+                Recalculate();
+            }
+            public void Revert(object obj)
+            {
+                if (!stack.ContainsKey(obj))
                 {
-#if UNITY_EDITOR
-                    Debug.LogWarning("token already released");
-#endif
-                    token = -1;
+                    Debug.LogWarning($"Stack does not contain {nameof(obj)}");
                     return;
                 }
 
-                multipliers[token] = 0;
-                used[token] = false;
-                token = -1;
+                stack.Remove(obj);
+
+                Recalculate();
+            }
+            public void Reset()
+            {
+                stack.Clear();
+
                 Recalculate();
             }
             private void Recalculate()
             {
-                currentValue = baseValue;
+                CurrentValue = baseValue;
 
-                for (int i = 0; i < used.Length; i++)
+                foreach (float value in stack.Values)
                 {
-                    if (used[i])
-                    {
-                        currentValue *= multipliers[i];
-                    }
+                    CurrentValue *= value;
                 }
             }
+
         }
-        public class StackInt
+        public sealed class StackAdd
         {
-            public int CurrentValue => currentValue;
+            public float CurrentValue { get; private set; } = 1;
 
-            private int currentValue = 1;
-            private readonly int baseValue = 1;
-            private readonly int[] values = null;
-            private readonly bool[] used = null;
+            private readonly Dictionary<object, float> stack = new();
+            private readonly float baseValue = 1;
 
-            public StackInt(int baseValue, uint capacity)
+            public StackAdd(int baseValue) => this.baseValue = baseValue;
+
+            public void Add(object obj, float value)
             {
-                this.baseValue = baseValue;
-                this.currentValue = baseValue;
-                this.values = new int[capacity];
-                this.used = new bool[capacity];
-            }
-            public void Add(int value, out int token)
-            {
-                token = -1;
-
-                for (int i = 0; i < used.Length; i++)
+                if (stack.ContainsKey(obj))
                 {
-                    if (!used[i])
-                    {
-                        values[i] = value;
-                        used[i] = true;
-                        token = i;
-                        Recalculate();
-                        return;
-                    }
-                }
-#if UNITY_EDITOR
-                Debug.LogWarning("not enough space!");
-#endif
-            }
-            public void Remove(ref int token)
-            {
-                if (token < 0 || token >= used.Length)
-                {
-#if UNITY_EDITOR
-                    Debug.LogWarning("token out of range");
-#endif
-                    token = -1;
+                    Debug.LogWarning($"Stack contains {nameof(obj)}");
                     return;
                 }
 
-                if (!used[token])
+                stack.Add(obj, value);
+
+                Recalculate();
+            }
+            public void Remove(object obj)
+            {
+                if (!stack.ContainsKey(obj))
                 {
-#if UNITY_EDITOR
-                    Debug.LogWarning("token already released");
-#endif
-                    token = -1;
+                    Debug.LogWarning($"Stack does not contain {nameof(obj)}");
                     return;
                 }
 
-                values[token] = 0;
-                used[token] = false;
-                token = -1;
+                stack.Remove(obj);
+
+                Recalculate();
+            }
+            public void Reset()
+            {
+                stack.Clear();
+
                 Recalculate();
             }
             private void Recalculate()
             {
-                currentValue = baseValue;
+                CurrentValue = baseValue;
 
-                for (int i = 0; i < used.Length; i++)
+                foreach (float value in stack.Values)
                 {
-                    if (used[i])
-                    {
-                        currentValue += values[i];
-                    }
+                    CurrentValue *= value;
                 }
             }
+
         }
-        public class StackBool
+        public sealed class StackBool
         {
-            public bool IsEnabled => disableCount == 0;
+            public bool IsEnabled => blocker.Count == 0;
 
-            private int disableCount = 0;
-            private readonly bool[] used = null;
-
-            public StackBool(uint capacity) => used = new bool[capacity];
-            public void Disable(out int token)
-            {
-                token = -1;
-
-                for (int i = 0; i < used.Length; i++)
-                {
-                    if (!used[i])
-                    {
-                        used[i] = true;
-                        disableCount++;
-                        token = i;
-                        return;
-                    }
-                }
-
-#if UNITY_EDITOR
-                Debug.LogWarning("not enough space!");
-#endif
-            }
-            public void Enable(ref int token)
-            {
-                if (token < 0 || token >= used.Length)
-                {
-#if UNITY_EDITOR
-                    Debug.LogWarning("token out of range");
-#endif
-                    token = -1;
-                    return;
-                }
-
-                if (!used[token])
-                {
-#if UNITY_EDITOR
-                    Debug.LogWarning("token already released");
-#endif
-                    token = -1;
-                    return;
-                }
-
-                used[token] = false;
-                token = -1;
-                disableCount--;
-
-                if (disableCount < 0)
-                {
-#if UNITY_EDITOR
-                    Debug.LogError("internal counter underflow");
-#endif
-                    disableCount = 0;
-                }
-            }
+            private readonly HashSet<object> blocker = new();
+           
+            public void Disable(object obj) => blocker.Add(obj);
+            public void Enable(object obj) => blocker.Remove(obj);
+            public void Reset() => blocker.Clear();
         }
         #endregion
 
