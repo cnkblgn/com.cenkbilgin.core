@@ -1544,8 +1544,24 @@ namespace Core
 
             private readonly HashSet<object> blocker = new();
            
-            public void Disable(object obj) => blocker.Add(obj);
-            public void Enable(object obj) => blocker.Remove(obj);
+            public void Disable(object obj)
+            {
+                if (blocker.Contains(obj))
+                {
+                    return;
+                }
+
+                blocker.Add(obj);
+            }
+            public void Enable(object obj)
+            {
+                if (!blocker.Contains(obj))
+                {
+                    return;
+                }
+
+                blocker.Remove(obj);
+            }
             public void Reset() => blocker.Clear();
         }
         #endregion
