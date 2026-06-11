@@ -6,13 +6,13 @@ using UnityEngine;
 namespace Core
 {
     [Serializable]
-    public sealed class SaveFile
+    public sealed class DataFile
     {
         public Dictionary<string, DataNode> Data { get; private set; }
 
         private readonly string path;
 
-        public SaveFile(string fileName)
+        public DataFile(string fileName)
         {
             path = Path.Combine(Application.persistentDataPath, $"{fileName}.dat");
             Data = new Dictionary<string, DataNode>();
