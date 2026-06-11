@@ -10,16 +10,18 @@ namespace Core
     {
         public Dictionary<string, DataNode> Data { get; private set; }
 
-        private readonly string path;
+        private readonly string name;
 
-        public DataFile(string fileName)
+        public DataFile(string name)
         {
-            path = Path.Combine(Application.persistentDataPath, $"{fileName}.dat");
+            this.name = name;
             Data = new Dictionary<string, DataNode>();
         }
 
         public void Load()
         {
+            string path = Path.Combine(Application.persistentDataPath, $"{name}.dat");
+
             try
             {
                 if (!File.Exists(path))
@@ -40,6 +42,8 @@ namespace Core
         }
         public void Save()
         {
+            string path = Path.Combine(Application.persistentDataPath, $"{name}.dat");
+
             try
             {
                 string directory = Path.GetDirectoryName(path);
@@ -69,6 +73,8 @@ namespace Core
         }
         public void Clear()
         {
+            string path = Path.Combine(Application.persistentDataPath, $"{name}.dat");
+
             try
             {
                 if (File.Exists(path))
