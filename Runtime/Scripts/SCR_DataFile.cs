@@ -18,8 +18,10 @@ namespace Core
             Data = new Dictionary<string, DataNode>();
         }
 
-        public void Load()
+        public void Load(out bool hasPath)
         {
+            hasPath = false;
+
             string path = Path.Combine(Application.persistentDataPath, $"{name}.dat");
 
             try
@@ -33,6 +35,8 @@ namespace Core
 
                 byte[] bytes = File.ReadAllBytes(path);
                 Data = DataSerializer.Deserialize(bytes);
+
+                hasPath = true;
             }
             catch (Exception e)
             {
