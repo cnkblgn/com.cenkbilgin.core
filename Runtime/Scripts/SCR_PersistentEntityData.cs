@@ -1,21 +1,20 @@
 using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 
 namespace Core
 {
     using static CoreUtility;
 
     [Serializable]
-    public class PersistentEntityData
+    public sealed class PersistentEntityData
     {
-        [JsonProperty("0")] public readonly string TypeID = STRING_EMPTY;
-        [JsonProperty("1")] public readonly string PrefabID = STRING_EMPTY;
-        [JsonProperty("2")] public readonly Guid InstanceID = Guid.Empty;
-        [JsonProperty("3")] public bool IsMarkedForDestroy = false;
-        [JsonProperty("4")] public readonly Dictionary<string, PersistentValue> Data = new();
+        public readonly string TypeID;
+        public readonly string PrefabID;
+        public readonly Guid InstanceID;
+        public bool IsMarkedForDestroy;
+        public readonly Dictionary<string, DataNode> Data;
 
-        [JsonConstructor] public PersistentEntityData([JsonProperty("0")] string typeID, [JsonProperty("1")] string prefabID, [JsonProperty("2")] Guid instanceID, [JsonProperty("3")] bool isMarkedForDestroy, [JsonProperty("4")] Dictionary<string, PersistentValue> data)
+        public PersistentEntityData(string typeID, string prefabID, Guid instanceID, bool isMarkedForDestroy, Dictionary<string, DataNode> data)
         {
             TypeID = typeID;
             PrefabID = prefabID;

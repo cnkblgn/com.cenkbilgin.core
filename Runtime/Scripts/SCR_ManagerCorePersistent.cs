@@ -8,13 +8,13 @@ namespace Core
     [DisallowMultipleComponent]
     public sealed class ManagerCorePersistent : Manager<ManagerCorePersistent>
     {
-        public bool IsLoading => sceneController != null && sceneController.IsLoading;
+        public bool IsLoading => scene != null && scene.IsLoading;
 
-        private PersistentSceneController sceneController = null;
+        private PersistentScene scene = null;
 
         private bool IsValid()
         {
-            if (sceneController == null)
+            if (scene == null)
             {
                 Debug.LogError("sceneController == null");
                 return false;
@@ -23,7 +23,7 @@ namespace Core
             return true;
         }
 
-        public bool IsRegistered(Guid id) => sceneController.IsRegistered(id);
+        public bool IsRegistered(Guid id) => scene.IsRegistered(id);
         public bool TryRegisterEntity(GameObject gameObject, out PersistentEntity entity)
         {
             entity = null;
@@ -33,7 +33,7 @@ namespace Core
                 return false;
             }
 
-            return sceneController.TryRegister(gameObject, out entity);
+            return scene.TryRegister(gameObject, out entity);
         }
         public bool TryRegisterEntity(PersistentEntity entity)
         {
@@ -42,7 +42,7 @@ namespace Core
                 return false;
             }
 
-            return sceneController.TryRegister(entity);
+            return scene.TryRegister(entity);
         }
         public bool TryUnregisterEntity(PersistentEntity entity)
         {
@@ -53,27 +53,27 @@ namespace Core
 
             Debug.LogWarning("Warning you are unregistering illegally! are you sure! this should handeld by 'PersistentSceneController'");
 
-            return sceneController.TryUnregister(entity);
+            return scene.TryUnregister(entity);
         }
 
-        public void RegisterController(PersistentSceneController controller)
+        public void RegisterScene(PersistentScene scene)
         {
             if (!IsValid())
             {
                 return;
             }
 
-            this.sceneController = controller;
+            this.scene = scene;
         }
-        public void UnregisterController(PersistentSceneController controller)
+        public void UnregisterScene(PersistentScene scene)
         {
-            if (this.sceneController != controller)
+            if (this.scene != scene)
             {
-                Debug.LogError("this.sceneController != sceneController");
+                Debug.LogError("this.scene != scene");
                 return;
             }
 
-            this.sceneController = null;
+            this.scene = null;
         }
 
         public PersistentSceneData Export()
@@ -83,7 +83,7 @@ namespace Core
                 return null;
             }
 
-            return sceneController.Export();
+            return scene.Export();
         }
         public void Import(PersistentSceneData sceneData)
         {
@@ -92,7 +92,7 @@ namespace Core
                 return;
             }
 
-            sceneController.Import(sceneData);
+            scene.Import(sceneData);
         }
     }
 }

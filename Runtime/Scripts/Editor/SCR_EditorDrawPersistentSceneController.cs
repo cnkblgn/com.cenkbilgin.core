@@ -3,7 +3,7 @@ using UnityEditor;
 
 namespace Core.Editor
 {
-    [CustomEditor(typeof(PersistentSceneController))]
+    [CustomEditor(typeof(PersistentScene))]
     public class EditorDrawPersistentSceneController : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
@@ -16,7 +16,7 @@ namespace Core.Editor
 
             if (GUILayout.Button("Populate"))
             {
-                PersistentSceneController controller = (PersistentSceneController)target;
+                PersistentScene controller = (PersistentScene)target;
 
                 Undo.RecordObject(controller, "Populate Persistent Objects");
 

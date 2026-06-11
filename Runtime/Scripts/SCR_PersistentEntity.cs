@@ -82,8 +82,8 @@ namespace Core
             if (!isSilent) OnMarkedForDestroy?.Invoke(this);
         }
 
-        public PersistentEntityData Export() => new(TypeID, PrefabID, instanceID, isMarkedForDestroy, ExportInternal());
-        protected abstract Dictionary<string, PersistentValue> ExportInternal();
+        public PersistentEntityData Export() => new(TypeID, PrefabID, instanceID, isMarkedForDestroy, ExportTo());
+        protected abstract Dictionary<string, DataNode> ExportTo();
 
         public void Import(PersistentEntityData data)
         {
@@ -93,8 +93,8 @@ namespace Core
 #if UNITY_EDITOR
             _instanceID = instanceID.ToString();
 #endif
-            ImportInternal(data.Data);
+            ImportFrom(data.Data);
         }
-        protected abstract void ImportInternal(Dictionary<string, PersistentValue> data);
+        protected abstract void ImportFrom(Dictionary<string, DataNode> data);
     }
 }

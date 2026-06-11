@@ -8,7 +8,7 @@ namespace Core
     using static CoreUtility;
 
     [DisallowMultipleComponent]
-    public class PersistentSceneController : MonoBehaviour
+    public class PersistentScene : MonoBehaviour
     {
         public bool IsLoading => isLoading;
 
@@ -16,7 +16,7 @@ namespace Core
         [SerializeField, Required] private List<PersistentEntity> entityList = new();
 
         private readonly Dictionary<Guid, PersistentEntity> entityTable = new();
-        private readonly HashSet<Guid> entityHashset = new();
+        private readonly HashSet<Guid> deletedEntities = new();
         private bool isLoading = false;
 
         private void Awake()
@@ -30,7 +30,7 @@ namespace Core
                 entityTable[entity.InstanceID] = entity;
             }
 
-            ManagerCorePersistent.Instance.RegisterController(this);
+            ManagerCorePersistent.Instance.RegisterScene(this);
         }
         private void OnDisable()
         {
@@ -38,7 +38,7 @@ namespace Core
 
             if (ManagerCorePersistent.HasInstance)
             {
-                ManagerCorePersistent.Instance.UnregisterController(this);
+                ManagerCorePersistent.Instance.UnregisterScene(this);
             }         
         }
 
@@ -54,9 +54,9 @@ namespace Core
                 return;
             }
 
-            if (!entityHashset.Contains(entity.InstanceID))
+            if (!deletedEntities.Contains(entity.InstanceID))
             {
-                entityHashset.Add(entity.InstanceID);
+                deletedEntities.Add(entity.InstanceID);
             }
 
             TryUnregister(entity);
@@ -91,7 +91,6 @@ namespace Core
             Debug.LogWarning($"Collected {entityList.Count} objects!");
         }
 #endif
-
         public bool IsRegistered(Guid id) => entityTable.ContainsKey(id);
         public bool TryRegister(GameObject gameObject, out PersistentEntity entity)
         {
@@ -141,7 +140,7 @@ namespace Core
 
         public PersistentSceneData Export()
         {
-            PersistentSceneData sceneData = new(ManagerCoreGame.Instance.GetCurrentScene(), new(), new());
+            PersistentSceneData sceneData = new(ManagerCoreGame.Instance.GetCurrentScene());
 
             foreach (PersistentEntity entityObject in entityList)
             {
@@ -150,12 +149,12 @@ namespace Core
                     continue;
                 }
 
-                sceneData.Database[entityObject.InstanceID] = entityObject.Export();
+                sceneData.AvailableEntities[entityObject.InstanceID] = entityObject.Export();
             }
 
-            foreach (Guid id in entityHashset)
+            foreach (Guid id in deletedEntities)
             {
-                sceneData.Hashset.Add(id);
+                sceneData.DeletedEntities.Add(id);
             }
 
             return sceneData;
@@ -164,16 +163,14 @@ namespace Core
         {
             isLoading = true;
 
-            entityHashset.Clear();
-            entityHashset.UnionWith(sceneData.Hashset);
+            deletedEntities.Clear();
+            deletedEntities.UnionWith(sceneData.DeletedEntities);
 
-            // Iterate snapshot to allow safe removal
             foreach (PersistentEntity entityObject in new List<PersistentEntity>(entityList))
             {
                 Guid id = entityObject.InstanceID;
 
-                // Silinmişse
-                if (entityHashset.Contains(id))
+                if (deletedEntities.Contains(id))
                 {
                     entityObject.MarkForDestroy(true);
                     TryUnregister(entityObject);
@@ -181,8 +178,7 @@ namespace Core
                     continue;
                 }
 
-                // Save'de varsa yükle
-                if (sceneData.Database.TryGetValue(id, out var incomingData))
+                if (sceneData.AvailableEntities.TryGetValue(id, out var incomingData))
                 {
                     entityObject.Import(incomingData);
                 }
@@ -190,7 +186,7 @@ namespace Core
             }
 
             // Save’de var ama sahnede yok → dinamik spawn
-            foreach (var remainingData in sceneData.Database)
+            foreach (var remainingData in sceneData.AvailableEntities)
             {
                 if (entityTable.ContainsKey(remainingData.Key))
                 {

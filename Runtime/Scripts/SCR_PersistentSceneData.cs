@@ -1,40 +1,23 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
-using Newtonsoft.Json;
 
 namespace Core
 {
     using static CoreUtility;
 
     [Serializable]
-    public class PersistentSceneData
+    public sealed class PersistentSceneData
     {
-        [Header("_")]
-        [JsonProperty("0")] public string ID = STRING_NULL;
-        [JsonProperty("1")] public Dictionary<Guid, PersistentEntityData> Database = new();
-        [JsonProperty("2")] public HashSet<Guid> Hashset = new();
+        public string ID;
+        public Dictionary<Guid, PersistentEntityData> AvailableEntities;
+        public HashSet<Guid> DeletedEntities;
 
-        [JsonConstructor] public PersistentSceneData([JsonProperty("0")] string id, [JsonProperty("1")] Dictionary<Guid, PersistentEntityData> database, [JsonProperty("2")] HashSet<Guid> hashset)
+        public PersistentSceneData(string id)
         {
             ID = id ?? STRING_NULL;
-            Database = new();
-
-            if (database != null)
-            {
-                foreach (var item in database)
-                {
-                    Database[item.Key] = new(item.Value.TypeID, item.Value.PrefabID, item.Value.InstanceID, item.Value.IsMarkedForDestroy, item.Value.Data);
-                }
-            }
-
-            Hashset = hashset ?? new();
+            AvailableEntities = new();
+            DeletedEntities = new();
         }
-        public PersistentSceneData()
-        {
-            ID = STRING_NULL;
-            Database = new();
-            Hashset = new();
-        }      
+        public PersistentSceneData() : this(STRING_NULL) { }
     }
 }
