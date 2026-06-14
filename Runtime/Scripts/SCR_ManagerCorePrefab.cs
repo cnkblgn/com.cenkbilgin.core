@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Core
@@ -16,9 +15,12 @@ namespace Core
             base.Awake();
 
             if (database == null) throw new NullReferenceException($"[{nameof(database)}]");
+
+            database.Build();
         }
 
-        public bool TrySpawn(string id, Vector3 position, Quaternion rotation, Transform parent, out GameObject gameObject)
+        public bool TryGet(PrefabID id, out GameObject prefab) => database.TryGet(id, out prefab);
+        public bool TrySpawn(PrefabID id, Vector3 position, Quaternion rotation, Transform parent, out GameObject gameObject)
         {
             gameObject = null;
 
@@ -30,6 +32,5 @@ namespace Core
 
             return false;
         }
-        public IReadOnlyCollection<string> Get() => database.Get();
     }
 }

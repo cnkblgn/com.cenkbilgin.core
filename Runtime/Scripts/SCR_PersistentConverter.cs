@@ -37,7 +37,7 @@ namespace Core
             return new
             (
                 data.GetString(KEY_TYPE),
-                data.GetString(KEY_PREFAB),
+                new(data.GetString(KEY_PREFAB)),
                 data.GetGuid(KEY_ID),
                 data.GetBool(KEY_DESTROYED),
                 data.GetData(KEY_DATA)

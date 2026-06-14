@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Core.Localization
 {
-    public static class LocalizationDatabase
+    internal static class LocalizationDatabase
     {
         private static string[] languages = Array.Empty<string>();
         private static string[] keys = Array.Empty<string>();

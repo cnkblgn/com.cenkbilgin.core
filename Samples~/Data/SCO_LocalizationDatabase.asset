@@ -12,7 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 65d3f51205c6d214d827e5676aea5ed6, type: 3}
   m_Name: SCO_LocalizationDatabase
   m_EditorClassIdentifier: ASM_CoreLocalization::Core.Localization.LocalizationDatabaseConfig
-  file: {fileID: 0}
-  languages: []
-  keys: []
-  isParsed: 0
+  file: {fileID: 4900000, guid: 4c1ca8a1b85ed82408bd6498120e2870, type: 3}

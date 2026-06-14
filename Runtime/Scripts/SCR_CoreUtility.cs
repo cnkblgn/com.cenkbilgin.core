@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using TextMateSharp.Registry;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Core
 { 
@@ -528,6 +526,32 @@ namespace Core
 
             return Vector3.Dot(aFwd, aToB) >= threshold && Vector3.Dot(bFwd, bToA) >= threshold;
         }
+        #endregion
+
+        #region MATH
+        public static Vector3 Clamp(this Vector3 a, float length)
+        {
+            a.x = Mathf.Clamp(a.x, -length, length);
+            a.y = Mathf.Clamp(a.y, -length, length);
+            a.z = Mathf.Clamp(a.z, -length, length);
+
+            return a;
+        }
+        public static Vector2 Clamp(this Vector2 a, float length)
+        {
+            a.x = Mathf.Clamp(a.x, -length, length);
+            a.y = Mathf.Clamp(a.y, -length, length);
+
+            return a;
+        }
+        public static Vector3 Multiply(this Vector3 a, Vector3 b) => new(a.x * b.x, a.y * b.y, a.z * b.z);
+        public static Vector2 Multiply(this Vector2 a, Vector2 b) => new(a.x * b.x, a.y * b.y);
+        public static Vector3 ClearX(this Vector3 a) { a.x = 0; return a; }
+        public static Vector3 ClearY(this Vector3 a) { a.y = 0; return a; }
+        public static Vector3 ClearZ(this Vector3 a) { a.z = 0; return a; }
+        public static Vector3 ClearX(this Vector3Int a) { a.x = 0; return a; }
+        public static Vector3 ClearY(this Vector3Int a) { a.y = 0; return a; }
+        public static Vector3 ClearZ(this Vector3Int a) { a.z = 0; return a; }
         #endregion
 
         #region GAMEOBJECT

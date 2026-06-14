@@ -2,7 +2,7 @@ using Core.Editor;
 
 namespace Core.Localization.Editor
 {
-    public static class EditorUtilityLocalization
+    internal static class EditorUtilityLocalization
     {
         private const string DEFAULT_PATH = "Assets/LocalizationDatabase.asset";
 

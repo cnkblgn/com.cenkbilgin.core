@@ -193,7 +193,7 @@ namespace Core
                     continue;
                 }
 
-                if (ManagerCorePrefab.Instance.TrySpawn(remainingData.Value.PrefabID, Vector3.zero, Quaternion.identity, null, out GameObject gameObject))
+                if (ManagerCorePrefab.Instance.TrySpawn(new PrefabID(remainingData.Value.PrefabID), Vector3.zero, Quaternion.identity, null, out GameObject gameObject))
                 {
                     if (gameObject.TryGetComponent(out PersistentEntity entityObject))
                     {
