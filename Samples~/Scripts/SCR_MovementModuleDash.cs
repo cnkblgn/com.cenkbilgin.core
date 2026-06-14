@@ -26,7 +26,7 @@ namespace Game
         [SerializeField, Min(0.1f)] private float cooldown = 2.5f;
 
         private MovementController controller = null;
-        private readonly StackBool isEnabled = new(8);
+        private readonly StackBool isEnabled = new();
         private TaskInstance frictionTask = null;
         private TaskInstance gravityTask = null;
         private Action overrideFriction = null;
@@ -50,15 +50,16 @@ namespace Game
 
             resetFriction = ResetFriction;
             resetGravity = ResetGravity;
-
-            this.controller.OnLand += OnLand;
         }
-        public void Unbind(MovementController controller)
+        public void Unbind(MovementController controller) { }
+
+        public void OnStateChanged(MovementContext ctx)
         {
-            this.controller.OnLand -= OnLand;
-        }
-
-        private void OnLand(float arg1, float arg2, float arg3) => dashCount = Mathf.Max(0, dashCount - 1);
+            if (ctx.State == MovementState.LAND)
+            {
+                dashCount = Mathf.Max(0, dashCount - 1);
+            }
+        }        
         public void OnBeforeMove() 
         {
             if (!GetIsEnabled())
@@ -162,7 +163,7 @@ namespace Game
         }
 
         public bool GetIsEnabled() => isEnabled.IsEnabled;
-        public void Disable(out int token) => isEnabled.Disable(out token);
-        public void Enable(ref int token) => isEnabled.Enable(ref token);
+        public void Disable(object obj) => isEnabled.Disable(obj);
+        public void Enable(object obj) => isEnabled.Enable(obj);
     }
 }

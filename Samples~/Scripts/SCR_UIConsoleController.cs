@@ -46,6 +46,7 @@ namespace Game
         private string lastCommand = STRING_EMPTY;
         private string lastLog = STRING_EMPTY;
         private string lastInput = STRING_EMPTY;
+        private string previousInputMap = InputDatabase.UIMap;
         private int lastLogCount = 0;
         private int suggestionIndex = -1;
         private bool requestSuggestionDraw = false;
@@ -170,7 +171,7 @@ namespace Game
         private void OnBeforeSceneChanged(string scene) => Hide();
         private void OnCommandLogCleared() => Clear();
         private void OnCommandLogReceived(string value) => Log(value);
-        private void OnUnityLogReceived(string value, string stackTrace, LogType type)
+        private void OnUnityLogReceived(string value, string stackTrace, UnityEngine.LogType type)
         {
             if (Application.platform == RuntimePlatform.WindowsEditor)
             {
@@ -179,10 +180,10 @@ namespace Game
 
             switch (type)
             {
-                case LogType.Error:
-                case LogType.Exception: Log(value.ToRed()); break;
-                case LogType.Warning:
-                case LogType.Assert: Log(value.ToYellow()); break;
+                case UnityEngine.LogType.Error:
+                case UnityEngine.LogType.Exception: Log(value.ToRed()); break;
+                case UnityEngine.LogType.Warning:
+                case UnityEngine.LogType.Assert: Log(value.ToYellow()); break;
                 default: Log(value); break;
             }
         }
@@ -221,7 +222,9 @@ namespace Game
             thisCanvas.Show();
             consoleInputField.ActivateInputField();
 
-            ManagerCoreInput.Instance.SwitchMap("UI");
+            previousInputMap = ManagerCoreInput.Instance.GetMap();
+            ManagerCoreInput.Instance.SwitchMap(InputDatabase.UIMap);
+
             OnOpened?.Invoke();
         }
         public void Hide()
@@ -233,7 +236,8 @@ namespace Game
             requestSuggestionDraw = false;
             ClearSuggestion();
 
-            ManagerCoreInput.Instance.SwitchMap("Gameplay");
+            if (!string.IsNullOrEmpty(previousInputMap)) ManagerCoreInput.Instance.SwitchMap(new(previousInputMap));
+
             OnClosed?.Invoke();
         }
         private void Clear()

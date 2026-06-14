@@ -37,7 +37,7 @@ namespace Game
         [SerializeField, Min(0)] private float ejectUpWeight = 0.75f;
 
         private MovementController controller;
-        private readonly StackBool isEnabled = new(8);
+        private readonly StackBool isEnabled = new();
         private Collider wallCollider = null;
         private RaycastHit wallInfo = new();
         private Vector3 wallVelocity = Vector3.zero;
@@ -50,7 +50,6 @@ namespace Game
         private bool isWallRunning = false;
         private bool hasWallLeft = false;
         private bool hasWallRight = false;
-        private int movementToken = 0;
 
         private void OnDrawGizmos()
         { 
@@ -82,6 +81,7 @@ namespace Game
 
         }
 
+        public void OnStateChanged(MovementContext ctx) { }
         public void OnBeforeMove() => UpdateWallRun();
         public void OnBeforeLook() { }
 
@@ -219,7 +219,7 @@ namespace Game
             wallVelocity.y = Mathf.Max(0, wallVelocity.y);
 
             controller.SetVelocity(wallVelocity);
-            controller.DisableMovement(out movementToken);
+            controller.DisableMovement(this);
 
             OnStart?.Invoke();
         }
@@ -235,7 +235,7 @@ namespace Game
             wallLastTime = Time.time;
             wallCollider = wallInfo.collider;
 
-            controller.EnableMovement(ref movementToken);
+            controller.EnableMovement(this);
             controller.SetVelocity(wallVelocity);
 
             OnEnd?.Invoke();
@@ -252,11 +252,11 @@ namespace Game
                 magnitude * ejectNormalWeight * wallSmoothNormal;
 
             controller.SetVelocity(Vector3.ClampMagnitude(velocity, magnitude * 1.1f));
-            controller.RegisterJump();
+            controller.SetState(MovementState.JUMP);
         }
 
         public bool GetIsEnabled() => isEnabled.IsEnabled;
-        public void Disable(out int token) => isEnabled.Disable(out token);
-        public void Enable(ref int token) => isEnabled.Enable(ref token);
+        public void Disable(object obj) => isEnabled.Disable(obj);
+        public void Enable(object obj) => isEnabled.Enable(obj);
     }
 }

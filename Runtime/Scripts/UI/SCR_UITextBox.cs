@@ -1,6 +1,5 @@
-using TMPro;
 using UnityEngine;
-using UnityEngine.UIElements;
+using TMPro;
 
 namespace Core.UI
 {
@@ -11,14 +10,22 @@ namespace Core.UI
         public string Text { get; private set; } = STRING_EMPTY;
 
         [Header("_")]
-        [SerializeField] private RectTransform canvasBounds = null;
+        [SerializeField] private bool overrideWrapping = true;
 
         [Header("_")]
+        [SerializeField] private RectTransform canvasBounds = null;
         [SerializeField, Required] private RectTransform textContainer = null;
         [SerializeField, Required] private TextMeshProUGUI textElement = null;
         [SerializeField] private Vector2 textOffset = new(16, 16);
 
-        private void Awake() => textElement.textWrappingMode = TextWrappingModes.NoWrap;
+        private void Awake()
+        {
+            if (overrideWrapping)
+            {
+                textElement.textWrappingMode = TextWrappingModes.NoWrap;
+            }
+        }
+
         public void Set(string value)
         {
             if (Text == value)
@@ -26,9 +33,13 @@ namespace Core.UI
                 return;
             }
 
-            textElement.SetText(Text = value);
-            textContainer.sizeDelta = textElement.GetPreferredValues() + textOffset;
-            UpdateBounds(textContainer.anchoredPosition);
+            textElement.text = Text = value;
+
+            if (overrideWrapping)
+            {
+                textContainer.sizeDelta = textElement.GetPreferredValues() + textOffset;
+                UpdateBounds(textContainer.anchoredPosition);
+            }
         } 
         public void UpdateBounds(Vector2 desiredPosition)
         {

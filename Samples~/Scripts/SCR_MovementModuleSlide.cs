@@ -27,11 +27,10 @@ namespace Game
         [SerializeField, Min(1)] private float acceleration = 8f;
 
         private MovementController controller = null;
-        private readonly StackBool isEnabled = new(8);
+        private readonly StackBool isEnabled = new();
         private Vector3 slideDirection = Vector3.zero;
         private Vector3 slideVelocity = Vector3.zero;
         private float slideTimer = 0f;
-        private int movementToken = 0;
         private bool isSliding = false;
         private bool canSlide = true;
 
@@ -44,6 +43,7 @@ namespace Game
 
         }
 
+        public void OnStateChanged(MovementContext ctx) { }
         public void OnBeforeMove() => UpdateSlide();
         public void OnBeforeLook() { }
 
@@ -166,7 +166,7 @@ namespace Game
             slideVelocity = Vector3.ProjectOnPlane(slideVelocity, controller.GetGroundCollisionInfo().normal);
 
             controller.SetVelocity(slideVelocity);
-            controller.DisableMovement(out movementToken);
+            controller.DisableMovement(this);
             controller.OverrideMovementStance(MovementStance.CROUCH, true);
 
             OnStart?.Invoke();
@@ -182,7 +182,7 @@ namespace Game
             slideTimer = 0f;
 
             controller.SetVelocity(slideVelocity);
-            controller.EnableMovement(ref movementToken);
+            controller.EnableMovement(this);
             controller.OverrideMovementStance(MovementStance.CROUCH, false);
 
             this.WaitSeconds(cooldown, () => canSlide = false, () => canSlide = true);
@@ -198,11 +198,11 @@ namespace Game
 
             EndSlide();
 
-            controller.RegisterJump();
+            controller.SetState(MovementState.JUMP);
         }
 
         public bool GetIsEnabled() => isEnabled.IsEnabled;
-        public void Disable(out int token) => isEnabled.Disable(out token);
-        public void Enable(ref int token) => isEnabled.Enable(ref token);
+        public void Disable(object obj) => isEnabled.Disable(obj);
+        public void Enable(object obj) => isEnabled.Enable(obj);
     }
 }

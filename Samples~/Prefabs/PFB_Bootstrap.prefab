@@ -429,7 +429,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3aac517daa339c41870aed01d3e7f9f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  viewTemplate: {fileID: 4913686617223177434}
+  viewTemplate: {fileID: 4840996806606554041}
   viewContainer: {fileID: 6549757914171013821}
 --- !u!1 &787794468245462497
 GameObject:
@@ -887,6 +887,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5417dfae982c6440b8767a571868eca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ASM_CoreUI::Core.UI.UITextBox
+  overrideWrapping: 1
   canvasBounds: {fileID: 8374580545085360702}
   textContainer: {fileID: 5768772198323992064}
   textElement: {fileID: 8395976565726668787}
@@ -1724,7 +1725,7 @@ GameObject:
   - component: {fileID: 8909895819121079065}
   - component: {fileID: 3322080894181222010}
   - component: {fileID: 1576115794781761199}
-  - component: {fileID: 4913686617223177434}
+  - component: {fileID: 4840996806606554041}
   m_Layer: 5
   m_Name: Template
   m_TagString: Untagged
@@ -1790,7 +1791,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &4913686617223177434
+--- !u!114 &4840996806606554041
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1799,10 +1800,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 4662158032871736740}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cb4cabb3383017b4abb57cfc45bf1284, type: 3}
+  m_Script: {fileID: 11500000, guid: e5417dfae982c6440b8767a571868eca, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: ASM_CoreUI::Core.UI.UITextView
-  text: {fileID: 3558500424914416688}
+  m_EditorClassIdentifier: ASM_CoreUI::Core.UI.UITextBox
+  overrideWrapping: 0
+  canvasBounds: {fileID: 0}
+  textContainer: {fileID: 8909895819121079065}
+  textElement: {fileID: 3558500424914416688}
+  textOffset: {x: 16, y: 16}
 --- !u!1 &5111138635790731509
 GameObject:
   m_ObjectHideFlags: 0
@@ -2190,8 +2195,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28876d39d470be84ebb20296c99ea685, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  waypointImage: {fileID: 1776559539877681963}
-  waypointText: {fileID: 3247210042812331926}
+  iconImage: {fileID: 0}
+  nameText: {fileID: 0}
+  distanceText: {fileID: 0}
 --- !u!1 &6135056256536108835
 GameObject:
   m_ObjectHideFlags: 0
@@ -2784,7 +2790,6 @@ GameObject:
   - component: {fileID: 5931266737367869336}
   - component: {fileID: 8255596714321742728}
   - component: {fileID: 7834018784526591675}
-  - component: {fileID: 375827010561854307}
   m_Layer: 5
   m_Name: PFB_Bootstrap
   m_TagString: GameController
@@ -2946,13 +2951,49 @@ MonoBehaviour:
     m_Bits: 1
   occlusionLowpass:
     serializedVersion: 2
-    m_Curve: []
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: -0.0024108887
+      inSlope: 2.7173727
+      outSlope: 2.7173727
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.0407911
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
   occlusionVolume:
     serializedVersion: 2
-    m_Curve: []
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
@@ -2995,19 +3036,6 @@ MonoBehaviour:
   transitionController: {fileID: 5179845256394817781}
   keyActionController: {fileID: 6622408536256203102}
   subtitleController: {fileID: 2505508692240594247}
---- !u!114 &375827010561854307
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8094654647307156075}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 71843a33cfb7f66448cb9999b16a2062, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ASM_CoreMisc::Core.Misc.ManagerPlayer
-  playerPrefab: {fileID: 4835313064386267604, guid: 2f2e51e7e29159e4da46c3ca172f3e69, type: 3}
 --- !u!1 &8311073698981540904
 GameObject:
   m_ObjectHideFlags: 0
@@ -3110,6 +3138,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5417dfae982c6440b8767a571868eca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ASM_CoreUI::Core.UI.UITextBox
+  overrideWrapping: 1
   canvasBounds: {fileID: 0}
   textContainer: {fileID: 3196796920805865405}
   textElement: {fileID: 6682723323833652731}
@@ -4989,17 +5018,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e02da7727e6862b48b776764ce282796, type: 3}
---- !u!114 &3247210042812331926 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6604963300386185422, guid: e02da7727e6862b48b776764ce282796, type: 3}
-  m_PrefabInstance: {fileID: 8555119058061252440}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!224 &3803130674114860297 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 4791421286178374225, guid: e02da7727e6862b48b776764ce282796, type: 3}

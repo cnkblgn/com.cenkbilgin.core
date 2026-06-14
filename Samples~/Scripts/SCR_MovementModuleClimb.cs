@@ -35,7 +35,7 @@ namespace Game
         [SerializeField] private float maxSpeed = 12f;
 
         private MovementController controller = null;
-        private readonly StackBool isEnabled = new(8);
+        private readonly StackBool isEnabled = new();
         private Vector3 enterVelocity = Vector3.zero;
         private Vector3 climbVelocity = Vector3.zero;
         private RaycastHit climbInfo = new();
@@ -43,8 +43,6 @@ namespace Game
         private float climbHeight = 0f;
         private float climbTimer = 0f;
         private readonly float climbCooldown = 0.2f;
-        private int movementToken = 0;
-        private int lookToken = 0;
         private bool canClimb = false;
         private bool isClimbing = false;
 
@@ -81,6 +79,7 @@ namespace Game
 
         }
 
+        public void OnStateChanged(MovementContext ctx) { }
         public void OnBeforeMove()
         {
             if (ManagerCoreGame.Instance.GetGameState() != GameState.RESUME)
@@ -182,8 +181,8 @@ namespace Game
 
             if (carryMomentum) climbVelocity += enterVelocity.Clamp(climbType == ClimbType.CLIMB ? 1 : enterVelocity.magnitude) + controller.GetCharacterOrigin().forward;
 
-            controller.DisableMovement(out movementToken);
-            if (disableLook) controller.DisableLook(out lookToken);
+            controller.DisableMovement(this);
+            if (disableLook) controller.DisableLook(this);
 
             this.WaitSeconds(climbCooldown, () => canClimb = true, () => canClimb = false);
             OnStart?.Invoke(climbType);
@@ -211,8 +210,8 @@ namespace Game
             isClimbing = false;
 
             controller.SetVelocity(climbVelocity);
-            controller.EnableMovement(ref movementToken);
-            if (disableLook) controller.EnableLook(ref lookToken);
+            controller.EnableMovement(this);
+            if (disableLook) controller.EnableLook(this);
 
             OnEnd?.Invoke(climbType);
         }
@@ -245,7 +244,7 @@ namespace Game
         }
 
         public bool GetIsEnabled() => isEnabled.IsEnabled;
-        public void Disable(out int token) => isEnabled.Disable(out token);
-        public void Enable(ref int token) => isEnabled.Enable(ref token);
+        public void Disable(object obj) => isEnabled.Disable(obj);
+        public void Enable(object obj) => isEnabled.Enable(obj);
     }
 }

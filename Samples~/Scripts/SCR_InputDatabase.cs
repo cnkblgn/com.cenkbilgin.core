@@ -2,6 +2,9 @@ using Core.Input;
 
 public static class InputDatabase
 {
+    public static readonly InputMap GameplayMap = new("Gameplay");
+    public static readonly InputMap UIMap = new("UI");
+
     // ===== GLOBAL (ALWAYS ENABLED) =====
     public static readonly InputAction Any = new("Global.Any");
     public static readonly InputAction Menu = new("Global.Menu");

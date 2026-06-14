@@ -17,9 +17,9 @@ namespace Game
         private MovementController controller = null;
         private float targetSpeed = 0;
         private int targetIndex = 7;
-        private int movementToken = 0;
         private bool isActive = false;
 
+        public void OnStateChanged(MovementContext ctx) { }
         public void Bind(MovementController controller)
         {
             this.controller = controller;
@@ -61,14 +61,14 @@ namespace Game
 
             if (isActive)
             {
-                controller.DisableMovement(out movementToken);
+                controller.DisableMovement(this);
                 controller.SetCollisionMask(0);
                 controller.SetVelocity(Vector3.zero);
             }
             else
             {
 
-                controller.EnableMovement(ref movementToken);
+                controller.EnableMovement(this);
                 controller.ResetCollisionMask();
             }
         }
