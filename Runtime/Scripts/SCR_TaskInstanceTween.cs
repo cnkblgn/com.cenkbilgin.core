@@ -6,14 +6,14 @@ namespace Core
     public enum TweenType : byte { SCALED, UNSCALED }
     public abstract class TaskInstanceTween : TaskInstance
     {
-        private readonly Action onComplete = null;
-        private readonly EaseType easeType = EaseType.LINEAR;
-        private readonly TweenType tweenType = TweenType.SCALED;
-        private readonly float fadeSeconds = 0;
-        private readonly float waitSeconds = 0;
-        private float fadeTimer = 0;
-        private float waitTimer = 0;
-        private bool isFaded = false;
+        private readonly Action onComplete;
+        private readonly EaseType easeType;
+        private readonly TweenType tweenType;
+        private readonly float fadeSeconds;
+        private readonly float waitSeconds;
+        private float fadeTimer;
+        private float waitTimer;
+        private bool isFaded;
 
         public TaskInstanceTween(Component host, float fadeSeconds, float waitSeconds, TweenType tweenType, EaseType easeType, Action onComplete) : base(host)
         {

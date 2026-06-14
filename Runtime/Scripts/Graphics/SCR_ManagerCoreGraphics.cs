@@ -11,7 +11,7 @@ namespace Core.Graphics
     [DisallowMultipleComponent]
     public sealed class ManagerCoreGraphics : Manager<ManagerCoreGraphics>
     {
-        public static event Action<Int2> OnResolutionChanged = null;
+        public static event Action<Vector2> OnResolutionChanged = null;
 
         [Header("_")]
         [SerializeField, Required] private UniversalRenderPipelineAsset urpPipelineSettings = null;

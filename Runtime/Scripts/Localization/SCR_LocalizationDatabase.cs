@@ -3,39 +3,59 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-#if UNITY_EDITOR
-using Core.Editor;
-#endif
 
 namespace Core.Localization
 {
-    public static class LocalizationFactory
+    public static class LocalizationDatabase
     {
-        private const string DEFAULT_PATH = "Assets/LocalizationDatabase.asset";
+        private static string[] languages = Array.Empty<string>();
+        private static string[] keys = Array.Empty<string>();
+        private static Dictionary<string, string>[] database = null;
 
-        private static LocalizationDatabaseConfig database = null;
+        internal static bool GetIsParsed() => database != null;
+        internal static string[] GetKeys() => keys;
+        internal static string[] GetLanguages() => languages;
 
-        public static LocalizationDatabaseConfig GetDatabase()
+        internal static Dictionary<string, string> GetLanguage(int index)
         {
-            if (database != null)
+            if (!GetIsParsed())
             {
-                return database;
+                throw new InvalidOperationException($"Database is not parsed!");
             }
 
-#if UNITY_EDITOR
-            LocalizationDatabaseConfig cfg = EditorUtility.FindAssetByType<LocalizationDatabaseConfig>();
-
-            if (cfg == null)
+            if (index < 0 || index >= database.Length)
             {
-                cfg = EditorUtility.CreateAsset<LocalizationDatabaseConfig>(DEFAULT_PATH);
+                throw new ArgumentOutOfRangeException($"Invalid access [{index}]");
             }
 
-            database = cfg;
-#endif
-
-            return database;
+            return database[index];
         }
 
+        internal static bool TryParse(TextAsset file)
+        {
+            if (file == null)
+            {
+                Debug.LogError("Localization parse failed! file == null");
+                return false;
+            }
+
+            try
+            {
+                database = ParseAll(file.text, ',', out languages, out keys);
+
+                Debug.Log($"Localization parse successfull!");
+            }
+            catch (Exception e)
+            {
+                database = null;
+                keys = Array.Empty<string>();
+                languages = Array.Empty<string>();
+
+                Debug.LogError($"Localization parse failed: {e.Message}");
+            }
+
+            return GetIsParsed();
+        }
         internal static Dictionary<string, string> Parse(string csvFile, int languageIndex, char separator, out string[] languages, out string[] keys)
         {
             Dictionary<string, string>[] database = ParseAll(csvFile, separator, out languages, out keys);
@@ -100,6 +120,7 @@ namespace Core.Localization
             keys = keyCache.ToArray();
             return result;
         }
+
         private static List<string> Split(string line, char seperator)
         {
             List<string> stringCells = new();

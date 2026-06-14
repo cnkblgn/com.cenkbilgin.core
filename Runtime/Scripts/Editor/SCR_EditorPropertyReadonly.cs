@@ -7,7 +7,7 @@ namespace Core.Editor
     using static CoreUtility;
 
     [CustomPropertyDrawer(typeof(ReadOnly))]
-    public class EditorPropertyReadonly : PropertyDrawer
+    public class EditorDrawReadonly : PropertyDrawer
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {

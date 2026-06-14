@@ -7,7 +7,7 @@ namespace Core.Editor
     using static CoreUtility;
 
     [CustomPropertyDrawer(typeof(Required))]
-    public class EditorPropertyRequired : PropertyDrawer
+    public class EditorDrawRequired : PropertyDrawer
     {
         private static Texture2D iconTexture = null;
         private readonly string iconName = "TEX_IconWarning";

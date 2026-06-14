@@ -391,166 +391,6 @@ namespace Core
         }
         #endregion
 
-        #region MATH
-        [Serializable]
-        public readonly struct Float3 : IEquatable<Float3>
-        {
-            public bool IsZero => x == 0f && y == 0f && z == 0f;
-            public bool IsValid => float.IsFinite(x) && float.IsFinite(y) && float.IsFinite(z);
-
-            public readonly float x;
-            public readonly float y;
-            public readonly float z;
-
-            public static readonly Float3 one = new(1, 1, 1);
-            public static readonly Float3 zero = new(0, 0, 0);
-
-            public Float3(float x, float y, float z) => (this.x, this.y, this.z) = (x, y, z);
-            public static Float3 operator +(Float3 a, Float3 b) => new(a.x + b.x, a.y + b.y, a.z + b.z);
-            public static Float3 operator -(Float3 a, Float3 b) => new(a.x - b.x, a.y - b.y, a.z - b.z);
-            public static Float3 operator *(Float3 a, Float3 b) => new(a.x * b.x, a.y * b.y, a.z * b.z);
-            public static Float3 operator /(Float3 a, Float3 b) => new(a.x / b.x, a.y / b.y, a.z / b.z);
-            public static Float3 operator *(Float3 a, float s) => new(a.x * s, a.y * s, a.z * s);
-            public static Float3 operator /(Float3 a, float s) => new(a.x / s, a.y / s, a.z / s);
-
-            public static bool operator ==(Float3 a, Float3 b) => a.Equals(b);
-            public static bool operator !=(Float3 a, Float3 b) => !a.Equals(b);
-
-            public static implicit operator Vector3(Float3 b) => new(b.x, b.y, b.z);
-            public static explicit operator Float3(Vector3 b) => new(b.x, b.y, b.z);
-            public static explicit operator Int3(Float3 b) => new((int)b.x, (int)b.y, (int)b.z);
-
-            public bool Equals(Float3 other) => x == other.x && y == other.y && z == other.z;
-            public override bool Equals(object obj) => obj is Float3 other && Equals(other);
-            public override readonly int GetHashCode() => x.GetHashCode() ^ (y.GetHashCode() << 2) ^ (z.GetHashCode() >> 2);
-            public override string ToString() => $"({x},{y},{z})";
-        }
-        [Serializable]
-        public readonly struct Float2 : IEquatable<Float2>
-        {
-            public bool IsZero => x == 0f && y == 0f;
-            public bool IsValid => float.IsFinite(x) && float.IsFinite(y);
-
-            public readonly float x;
-            public readonly float y;
-
-            public static readonly Float2 one = new(1, 1);
-            public static readonly Float2 zero = new(0, 0);
-
-            public Float2(float x, float y) => (this.x, this.y) = (x, y);
-            public static Float2 operator +(Float2 a, Float2 b) => new(a.x + b.x, a.y + b.y);
-            public static Float2 operator -(Float2 a, Float2 b) => new(a.x - b.x, a.y - b.y);
-            public static Float2 operator *(Float2 a, Float2 b) => new(a.x * b.x, a.y * b.y);
-            public static Float2 operator /(Float2 a, Float2 b) => new(a.x / b.x, a.y / b.y);
-            public static Float2 operator *(Float2 a, float s) => new(a.x * s, a.y * s);
-            public static Float2 operator /(Float2 a, float s) => new(a.x / s, a.y / s);
-
-            public static bool operator ==(Float2 a, Float2 b) => a.Equals(b);
-            public static bool operator !=(Float2 a, Float2 b) => !a.Equals(b);
-
-            public static implicit operator Vector2(Float2 b) => new(b.x, b.y);
-            public static explicit operator Float2(Vector2 b) => new(b.x, b.y);
-            public static explicit operator Int2(Float2 b) => new((int)b.x, (int)b.y);
-
-            public bool Equals(Float2 other) => x == other.x && y == other.y;
-            public override bool Equals(object obj) => obj is Float2 other && Equals(other);
-            public override readonly int GetHashCode() => x.GetHashCode() ^ (y.GetHashCode() << 2);
-            public override string ToString() => $"({x},{y})";
-        }
-        [Serializable]
-        public readonly struct Int3 : IEquatable<Int3>
-        {
-            public readonly int x;
-            public readonly int y;
-            public readonly int z;
-
-            public static readonly Int3 one = new(1, 1, 1);
-            public static readonly Int3 zero = new(0, 0, 0);
-
-            public Int3(int x, int y, int z) => (this.x, this.y, this.z) = (x, y, z);
-            public static Int3 operator +(Int3 a, Int3 b) => new(a.x + b.x, a.y + b.y, a.z + b.z);
-            public static Int3 operator -(Int3 a, Int3 b) => new(a.x - b.x, a.y - b.y, a.z - b.z);
-            public static Int3 operator *(Int3 a, Int3 b) => new(a.x * b.x, a.y * b.y, a.z * b.z);
-            public static Int3 operator *(Int3 a, int s) => new(a.x * s, a.y * s, a.z * s);
-            public static Int3 operator /(Int3 a, int s) => new(a.x / s, a.y / s, a.z / s);
-
-            public static bool operator ==(Int3 a, Int3 b) => a.Equals(b);
-            public static bool operator !=(Int3 a, Int3 b) => !a.Equals(b);
-
-            public static implicit operator Vector3Int(Int3 b) => new(b.x, b.y, b.z);
-            public static explicit operator Int3(Vector3Int b) => new(b.x, b.y, b.z);
-            public static implicit operator Float3(Int3 b) => new(b.x, b.y, b.z);
-
-            public bool Equals(Int3 other) => x == other.x && y == other.y && z == other.z;
-            public override bool Equals(object obj) => obj is Int3 other && Equals(other);
-            public override int GetHashCode()
-            {
-                unchecked
-                {
-                    return x ^ (y << 2) ^ (z >> 2);
-                }
-            }
-            public override string ToString() => $"({x},{y},{z})";
-        }
-        [Serializable]
-        public readonly struct Int2 : IEquatable<Int2>
-        {
-            public readonly int x;
-            public readonly int y;
-
-            public static readonly Int2 one = new(1, 1);
-            public static readonly Int2 zero = new(0, 0);
-
-            public Int2(int x, int y) => (this.x, this.y) = (x, y);
-            public static Int2 operator +(Int2 a, Int2 b) => new(a.x + b.x, a.y + b.y);
-            public static Int2 operator -(Int2 a, Int2 b) => new(a.x - b.x, a.y - b.y);
-            public static Int2 operator *(Int2 a, Int2 b) => new(a.x * b.x, a.y * b.y);
-            public static Int2 operator /(Int2 a, Int2 b) => new(a.x / b.x, a.y / b.y);
-            public static Int2 operator *(Int2 a, int s) => new(a.x * s, a.y * s);
-            public static Int2 operator /(Int2 a, int s) => new(a.x / s, a.y / s);
-
-            public static bool operator ==(Int2 a, Int2 b) => a.Equals(b);
-            public static bool operator !=(Int2 a, Int2 b) => !a.Equals(b);
-
-            public static implicit operator Vector2Int(Int2 b) => new(b.x, b.y);
-            public static explicit operator Int2(Vector2Int b) => new(b.x, b.y);
-            public static implicit operator Float2(Int2 b) => new(b.x, b.y);
-
-            public bool Equals(Int2 other) => x == other.x && y == other.y;
-            public override bool Equals(object obj) => obj is Int2 other && Equals(other);
-            public override readonly int GetHashCode()
-            {
-                unchecked
-                {
-                    return x ^ (y << 16);
-                }
-            }
-
-            public override string ToString() => $"({x},{y})";
-        }
-
-        public static Vector3 Clamp(this Vector3 a, float length)
-        {
-            a.x = Mathf.Clamp(a.x, -length, length);
-            a.y = Mathf.Clamp(a.y, -length, length);
-            a.z = Mathf.Clamp(a.z, -length, length);
-
-            return a;
-        }
-        public static Vector2 Clamp(this Vector2 a, float length)
-        {
-            a.x = Mathf.Clamp(a.x, -length, length);
-            a.y = Mathf.Clamp(a.y, -length, length);
-
-            return a;
-        }
-        public static Vector3 Multiply(this Vector3 a, Vector3 b) => new(a.x * b.x, a.y * b.y, a.z * b.z);
-        public static Vector2 Multiply(this Vector2 a, Vector2 b) => new(a.x * b.x, a.y * b.y);
-        public static Vector3 ClearX(this Vector3 a) { a.x = 0; return a; }
-        public static Vector3 ClearY(this Vector3 a) { a.y = 0; return a; }
-        public static Vector3 ClearZ(this Vector3 a) { a.z = 0; return a; }
-        #endregion
-
         #region PHYSICS
         public static Vector3 GetRequiredLaunchVelocity(Vector3 targetPosition, Vector3 launchPosition, float forceMax)
         {
@@ -983,245 +823,6 @@ namespace Core
         }
         #endregion
 
-        #region UI
-        public static void ScrollToView(this RectTransform thisTransform, ScrollRect scrollRect)
-        {
-            Rect rect = scrollRect.GetComponent<RectTransform>().rect;
-            RectTransform content = scrollRect.content;
-
-            // The position of the selected UI element is the absolute anchor position,
-            // ie. the local position within the scroll rect + its height if we're
-            // scrolling down. If we're scrolling up it's just the absolute anchor position.
-            float selectedPositionY = Mathf.Abs(thisTransform.anchoredPosition.y) + thisTransform.rect.height;
-            // The upper bound of the scroll view is the anchor position of the content we're scrolling.
-            float scrollViewMinY = content.anchoredPosition.y;
-            // The lower bound is the anchor position + the height of the scroll rect.
-            float scrollViewMaxY = content.anchoredPosition.y + rect.height;
-            // If the selected position is below the current lower bound of the scroll view we scroll down.
-            if (selectedPositionY > scrollViewMaxY)
-            {
-                float newY = selectedPositionY - rect.height;
-                content.anchoredPosition = new Vector2(content.anchoredPosition.x, newY);
-            }
-            // If the selected position is above the current upper bound of the scroll view we scroll up.
-            else if (Mathf.Abs(thisTransform.anchoredPosition.y) < scrollViewMinY)
-            {
-                content.anchoredPosition = new Vector2(content.anchoredPosition.x, Mathf.Abs(thisTransform.anchoredPosition.y + thisTransform.sizeDelta.y / 2));
-            }
-        }
-        public static void ClampToView(this RectTransform thisTransform, RectTransform rootCanvas)
-        {
-            ClampToView(thisTransform, rootCanvas, thisTransform.anchoredPosition);
-        }
-        public static void ClampToView(this RectTransform thisTransform, RectTransform rootCanvas, Vector2 screenPosition)
-        {
-            if (rootCanvas == null)
-            {
-                Debug.LogError("rootCanvas == null!");
-                return;
-            }
-
-            Vector2 pivot = thisTransform.pivot;
-
-            if (pivot.x > 0 || pivot.y > 0)
-            {
-                Debug.LogWarning("wrong pivot, pivot must be = (0,0)");
-            }
-
-            Vector2 position = screenPosition / rootCanvas.localScale.x; 
-
-            Rect rootRect = rootCanvas.rect; 
-            Rect thisRect = thisTransform.rect; 
-
-            if (position.x + thisRect.width > rootRect.width) position.x = rootRect.width - thisRect.width;
-            if (position.y + thisRect.height > rootRect.height) position.y = rootRect.height - thisRect.height;
-
-            thisTransform.anchoredPosition = position;
-        }
-
-        public static void BindSelectable(this Button thisButton, Selectable selectableUp, Selectable selectableDown, Selectable selectableLeft, Selectable selectableRight)
-        {
-            Navigation navigationData = thisButton.navigation;
-
-            if (selectableUp != null)
-            {
-                navigationData.selectOnUp = selectableUp;
-            }
-
-            if (selectableDown != null)
-            {
-                navigationData.selectOnDown = selectableDown;
-            }
-
-            if (selectableLeft != null)
-            {
-                navigationData.selectOnLeft = selectableLeft;
-            }
-
-            if (selectableRight != null)
-            {
-                navigationData.selectOnRight = selectableRight;
-            }
-
-            thisButton.navigation = navigationData;
-        }
-
-        public static void AlignTopLeft(this RectTransform rectTransform, Vector2 offset = default)
-        {
-            rectTransform.anchorMin = new Vector2(0, 1);
-            rectTransform.anchorMax = new Vector2(0, 1);
-            rectTransform.pivot = new(0, 1);
-            rectTransform.anchoredPosition = offset;
-        }
-        public static void AlignTopCenter(this RectTransform rectTransform, Vector2 offset = default)
-        {
-            rectTransform.anchorMin = new Vector2(0.5f, 1);
-            rectTransform.anchorMax = new Vector2(0.5f, 1);
-            rectTransform.pivot = new Vector2(0.5f, 1);
-            rectTransform.anchoredPosition = offset;
-        }
-        public static void AlignTopRight(this RectTransform rectTransform, Vector2 offset = default)
-        {
-            rectTransform.anchorMin = new Vector2(1, 1);
-            rectTransform.anchorMax = new Vector2(1, 1);
-            rectTransform.pivot = new Vector2(1, 1);
-            rectTransform.anchoredPosition = offset;
-        }
-        public static void AlignMiddleLeft(this RectTransform rectTransform, Vector2 offset = default)
-        {
-            rectTransform.anchorMin = new Vector2(0, 0.5f);
-            rectTransform.anchorMax = new Vector2(0, 0.5f);
-            rectTransform.pivot = new Vector2(0, 0.5f);
-            rectTransform.anchoredPosition = offset;
-        }
-        public static void AlignMiddleCenter(this RectTransform rectTransform, Vector2 offset = default)
-        {
-            rectTransform.pivot = new(0.5f, 0.5f);
-            rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
-            rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
-            rectTransform.anchoredPosition = offset;
-        }
-        public static void AlignMiddleRight(this RectTransform rectTransform, Vector2 offset = default)
-        {
-            rectTransform.anchorMin = new Vector2(1, 0.5f);
-            rectTransform.anchorMax = new Vector2(1, 0.5f);
-            rectTransform.pivot = new Vector2(1, 0.5f);
-            rectTransform.anchoredPosition = offset;
-        }
-        public static void AlignBottomLeft(this RectTransform rectTransform, Vector2 offset = default)
-        {
-            rectTransform.anchorMin = new Vector2(0, 0);
-            rectTransform.anchorMax = new Vector2(0, 0);
-            rectTransform.pivot = new Vector2(0, 0);
-            rectTransform.anchoredPosition = offset;
-        }
-        public static void AlignBottomCenter(this RectTransform rectTransform, Vector2 offset = default)
-        {
-            rectTransform.anchorMin = new Vector2(0.5f, 0);
-            rectTransform.anchorMax = new Vector2(0.5f, 0);
-            rectTransform.pivot = new Vector2(0.5f, 0);
-            rectTransform.anchoredPosition = offset;
-        }
-        public static void AlignBottomRight(this RectTransform rectTransform, Vector2 offset = default)
-        {
-            rectTransform.anchorMin = new Vector2(1, 0);
-            rectTransform.anchorMax = new Vector2(1, 0);
-            rectTransform.pivot = new Vector2(1, 0);
-            rectTransform.anchoredPosition = offset;
-        }
-        public static void AlignStretch(this RectTransform rectTransform, Vector2 offsetMin = default, Vector2 offsetMax = default)
-        {
-            rectTransform.pivot = new(0.5f, 0.5f);
-            rectTransform.anchorMin = new Vector2(0, 0);
-            rectTransform.anchorMax = new Vector2(1, 1);
-            rectTransform.offsetMin = offsetMin;
-            rectTransform.offsetMax = offsetMax;
-        }
-
-        public static void Hide(this CanvasGroup canvasGroup)
-        {
-            if (canvasGroup == null)
-            {
-                return;
-            }
-
-            if (canvasGroup.alpha == 0 && !canvasGroup.interactable && !canvasGroup.blocksRaycasts)
-            {
-                return;
-            }
-
-            canvasGroup.alpha = 0;
-            canvasGroup.interactable = false;
-            canvasGroup.blocksRaycasts = false;
-        }
-        public static void Show(this CanvasGroup canvasGroup)
-        {
-            if (canvasGroup == null)
-            {
-                return;
-            }
-
-            if (canvasGroup.alpha == 1 && canvasGroup.interactable && canvasGroup.blocksRaycasts)
-            {
-                return;
-            }
-
-            canvasGroup.alpha = 1;
-            canvasGroup.interactable = true;
-            canvasGroup.blocksRaycasts = true;
-        }
-        public static void Show(this CanvasGroup canvasGroup, bool isInteractable, bool isBlockRaycast)
-        {
-            if (canvasGroup == null)
-            {
-                return;
-            }
-
-            if (canvasGroup.alpha == 1 && canvasGroup.interactable == isInteractable && canvasGroup.blocksRaycasts == isBlockRaycast)
-            {
-                return;
-            }
-
-            canvasGroup.alpha = 1;
-            canvasGroup.interactable = isInteractable;
-            canvasGroup.blocksRaycasts = isBlockRaycast;
-        }
-        public static void Hide(this Canvas canvas)
-        {
-            if (canvas == null)
-            {
-                return;
-            }
-
-            if (!canvas.enabled)
-            {
-                return;
-            }
-
-            canvas.enabled = false;
-        }
-        public static void Show(this Canvas canvas)
-        {
-            if (canvas == null)
-            {
-                return;
-            }
-
-            if (canvas.enabled)
-            {
-                return;
-            }
-
-            canvas.enabled = true;
-        }
-
-        /// <summary> It Does not cause rebuild mesh </summary> ///
-        public static void SetCanvasColor(this Image image, Color color) => image.canvasRenderer.SetColor(color);
-        /// <summary> It Does not cause rebuild mesh </summary> ///
-        public static float GetCanvasAlpha(this Image image) => image.canvasRenderer.GetAlpha();        
-        public static void SetCanvasAlpha(this Image image, float alpha) => image.canvasRenderer.SetAlpha(alpha);        
-        #endregion
-
         #region STRING
         public const string STRING_FORMAT_0 = "0";
         public const string STRING_FORMAT_00 = "0.0";
@@ -1304,6 +905,7 @@ namespace Core
                 (collection[randomIndex], collection[i]) = (collection[i], collection[randomIndex]);
             }
         }
+
         public class SwapBackArray<T> : IEnumerable<T>
         {
             public T this[int index]
@@ -1568,13 +1170,30 @@ namespace Core
 
         #region ATTRIBUTES
         [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
-        public class Required : PropertyAttribute { }
+        public class Required : PropertyAttribute 
+        { 
+
+        }
 
         [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
-        public class ReadOnly : PropertyAttribute { }
+        public class ReadOnly : PropertyAttribute 
+        {
+
+        }
 
         [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
-        public class Tag : PropertyAttribute { }
+        public class Tag : PropertyAttribute 
+        {
+
+        }
+
+        [AttributeUsage(AttributeTargets.Method)]
+        public class EditorButton : PropertyAttribute
+        {
+            public string Label;
+
+            public EditorButton(string label = null) => this.Label = label;
+        }
         #endregion
 
         #region TRANSFORM

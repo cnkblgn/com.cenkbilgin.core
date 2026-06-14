@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Core
 {
@@ -36,85 +35,33 @@ namespace Core
 
             TaskSystem.TryCreate(task);
         }
-        public static void Schedule(this TaskInstanceTweenFadeCanvas task, float startValue, float targetValue)
+
+        public static void Schedule(this TaskInstanceTweenTranslate task, Space space, Vector3 start, Vector3 target)
         {
             task.Reset();
 
-            task.OverrideStartValue(startValue);
-            task.OverrideTargetValue(targetValue);
+            task.OverrideSpace(space);
+            task.OverrideStart(start);
+            task.OverrideTarget(target);
 
             TaskSystem.TryCreate(task);
         }
-        public static void Schedule(this TaskInstanceTweenFillImage task, float startValue, float targetValue)
+        public static void Schedule(this TaskInstanceTweenRotate task, Space space, Quaternion start, Quaternion target)
         {
             task.Reset();
 
-            task.OverrideStartValue(startValue);
-            task.OverrideTargetValue(targetValue);
+            task.OverrideSpace(space);
+            task.OverrideStart(start);
+            task.OverrideTarget(target);
 
             TaskSystem.TryCreate(task);
         }
-        public static void Schedule(this TaskInstanceTweenFadeImage task, Color startValue, Color targetValue, float startAlpha, float targetAlpha)
+        public static void Schedule(this TaskInstanceTweenScale task, Vector3 start, Vector3 target)
         {
             task.Reset();
 
-            task.OverrideStartValue(startValue, startAlpha);
-            task.OverrideTargetValue(targetValue, targetAlpha);
-
-            TaskSystem.TryCreate(task);
-        }
-        public static void Schedule(this TaskInstanceTweenBlinkImage task, Color startValue, Color targetValue, float interval)
-        {
-            task.Reset();
-
-            task.OverrideInterval(interval);
-            task.OverrideStartValue(startValue);
-            task.OverrideTargetValue(targetValue);
-
-            TaskSystem.TryCreate(task);
-        }
-        public static void Schedule(this TaskInstanceTweenOffsetLayout task, RectOffset startValue, RectOffset targetValue)
-        {
-            task.Reset();
-
-            task.OverrideStartValue(startValue);
-            task.OverrideTargetValue(targetValue);
-
-            TaskSystem.TryCreate(task);
-        }
-        public static void Schedule(this TaskInstanceTweenOffsetRect task, Vector2 startValue, Vector2 targetValue)
-        {
-            task.Reset();
-
-            task.OverrideStartValue(startValue);
-            task.OverrideTargetValue(targetValue);
-
-            TaskSystem.TryCreate(task);
-        }
-        public static void Schedule(this TaskInstanceTweenOffsetRectX task, Vector2 startValue, Vector2 targetValue)
-        {
-            task.Reset();
-
-            task.OverrideStartValue(startValue);
-            task.OverrideTargetValue(targetValue);
-
-            TaskSystem.TryCreate(task);
-        }
-        public static void Schedule(this TaskInstanceTweenOffsetRectY task, Vector2 startValue, Vector2 targetValue)
-        {
-            task.Reset();
-
-            task.OverrideStartValue(startValue);
-            task.OverrideTargetValue(targetValue);
-
-            TaskSystem.TryCreate(task);
-        }
-        public static void Schedule(this TaskInstanceTweenScaleTransform task, Vector3 startValue, Vector3 targetValue)
-        {
-            task.Reset();
-
-            task.OverrideStartValue(startValue);
-            task.OverrideTargetValue(targetValue);
+            task.OverrideStart(start);
+            task.OverrideTarget(target);
 
             TaskSystem.TryCreate(task);
         }
@@ -262,68 +209,29 @@ namespace Core
             TaskSystem.TryCreate(new TaskInstanceWaitFrame(host, onComplete));
         }
 
-        public static TaskInstanceTweenOffsetLayout Offset(this LayoutGroup layoutGroup, RectOffset startValue, RectOffset targetValue, float fadeSeconds, float waitSeconds = 0, TweenType tweenType = TweenType.UNSCALED, EaseType easeType = EaseType.LINEAR, Action onComplete = null)
+        public static TaskInstanceTweenTranslate Translate(this Transform transform, Space space, Vector3 target, float fadeSeconds, float waitSeconds = 0, TweenType tweenType = TweenType.SCALED, EaseType easeType = EaseType.LINEAR, Action onComplete = null)
         {
-            TaskInstanceTweenOffsetLayout tweenObject = new(layoutGroup, startValue, targetValue, fadeSeconds, waitSeconds, tweenType, easeType, onComplete);
-            TaskSystem.TryCreate(tweenObject);
+            TaskInstanceTweenTranslate obj = new(transform, space, target, fadeSeconds, waitSeconds, tweenType, easeType, onComplete);
 
-            return tweenObject;
+            TaskSystem.TryCreate(obj);
+
+            return obj;
         }
-        public static TaskInstanceTweenOffsetRect Offset(this RectTransform rectTransform, Vector2 startValue, Vector2 targetValue, float fadeSeconds, float waitSeconds = 0, TweenType tweenType = TweenType.UNSCALED, EaseType easeType = EaseType.LINEAR, Action onComplete = null)
+        public static TaskInstanceTweenRotate Rotate(this Transform transform, Space space, Quaternion target, float fadeSeconds, float waitSeconds = 0, TweenType tweenType = TweenType.SCALED, EaseType easeType = EaseType.LINEAR, Action onComplete = null)
         {
-            TaskInstanceTweenOffsetRect tweenObject = new(rectTransform, startValue, targetValue, fadeSeconds, waitSeconds, tweenType, easeType, onComplete);
-            TaskSystem.TryCreate(tweenObject);
+            TaskInstanceTweenRotate obj = new(transform, space, target, fadeSeconds, waitSeconds, tweenType, easeType, onComplete);
 
-            return tweenObject;
+            TaskSystem.TryCreate(obj);
+
+            return obj;
         }
-        public static TaskInstanceTweenOffsetRectX OffsetX(this RectTransform rectTransform, float startValue, float targetValue, float fadeSeconds, float waitSeconds = 0, TweenType tweenType = TweenType.UNSCALED, EaseType easeType = EaseType.LINEAR, Action onComplete = null)
+        public static TaskInstanceTweenScale Scale(this Transform transform, Vector3 target, float fadeSeconds, float waitSeconds = 0, TweenType tweenType = TweenType.SCALED, EaseType easeType = EaseType.LINEAR, Action onComplete = null)
         {
-            TaskInstanceTweenOffsetRectX tweenObject = new(rectTransform, startValue, targetValue, fadeSeconds, waitSeconds, tweenType, easeType, onComplete);
-            TaskSystem.TryCreate(tweenObject);
+            TaskInstanceTweenScale obj = new(transform, target, fadeSeconds, waitSeconds, tweenType, easeType, onComplete);
 
-            return tweenObject;
-        }
-        public static TaskInstanceTweenOffsetRectY OffsetY(this RectTransform rectTransform, float startValue, float targetValue, float fadeSeconds, float waitSeconds = 0, TweenType tweenType = TweenType.UNSCALED, EaseType easeType = EaseType.LINEAR, Action onComplete = null)
-        {
-            TaskInstanceTweenOffsetRectY tweenObject = new(rectTransform, startValue, targetValue, fadeSeconds, waitSeconds, tweenType, easeType, onComplete);
-            TaskSystem.TryCreate(tweenObject);
+            TaskSystem.TryCreate(obj);
 
-            return tweenObject;
-        }
-        public static TaskInstanceTweenFadeCanvas Fade(this CanvasGroup canvasGroup, float targetValue, float fadeSeconds, float waitSeconds = 0, TweenType tweenType = TweenType.UNSCALED, EaseType easeType = EaseType.LINEAR, Action onComplete = null)
-        {
-            TaskInstanceTweenFadeCanvas tweenObject = new(canvasGroup, targetValue, fadeSeconds, waitSeconds, tweenType, easeType, onComplete);
-            TaskSystem.TryCreate(tweenObject);
-
-            return tweenObject;
-        }
-        public static TaskInstanceTweenFadeImage Fade(this Image image, Color targetValue, float targetAlpha, float fadeSeconds, float waitSeconds = 0, TweenType tweenType = TweenType.UNSCALED, EaseType easeType = EaseType.LINEAR, Action onComplete = null)
-        {
-            TaskInstanceTweenFadeImage tweenObject = new(image, targetValue, targetAlpha, fadeSeconds, waitSeconds, tweenType, easeType, onComplete);
-            TaskSystem.TryCreate(tweenObject);
-
-            return tweenObject;
-        }
-        public static TaskInstanceTweenBlinkImage Blink(this Image image, Color startColor, Color targetColor, float interval, float fadeSeconds, float waitSeconds = 0, TweenType tweenType = TweenType.UNSCALED, EaseType easeType = EaseType.LINEAR, Action onComplete = null)
-        {
-            TaskInstanceTweenBlinkImage tweenObject = new(image, startColor, targetColor, interval, fadeSeconds, waitSeconds, tweenType, easeType, onComplete);
-            TaskSystem.TryCreate(tweenObject);
-
-            return tweenObject;
-        }
-        public static TaskInstanceTweenFillImage Fill(this Image image, float targetValue, float fadeSeconds, float waitSeconds = 0, TweenType tweenType = TweenType.UNSCALED, EaseType easeType = EaseType.LINEAR, Action onComplete = null)
-        {
-            TaskInstanceTweenFillImage tweenObject = new(image, targetValue, fadeSeconds, waitSeconds, tweenType, easeType, onComplete);
-            TaskSystem.TryCreate(tweenObject);
-
-            return tweenObject;
-        }
-        public static TaskInstanceTweenScaleTransform Scale(this Transform transform, Vector3 targetValue, float fadeSeconds, float waitSeconds = 0, TweenType tweenType = TweenType.UNSCALED, EaseType easeType = EaseType.LINEAR, Action onComplete = null)
-        {
-            TaskInstanceTweenScaleTransform tweenObject = new(transform, targetValue, fadeSeconds, waitSeconds, tweenType, easeType, onComplete);
-            TaskSystem.TryCreate(tweenObject);
-
-            return tweenObject;
+            return obj;
         }
     }
 }

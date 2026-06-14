@@ -20,7 +20,7 @@ namespace Core.UI
         [SerializeField, Range(-1.0f, 1.0f)] private float onHoverScalePower = 0f;
 
         private RectTransform thisTransform = null;
-        private TaskInstanceTweenScaleTransform thisTween = null;
+        private TaskInstanceTweenScale thisTween = null;
         private Vector3 defaultScale = Vector3.one;
 
         private void Awake()

@@ -9,7 +9,7 @@ namespace Core.Editor
     using static EditorUtility;
 
     [CustomPropertyDrawer(typeof(Scene))]
-    public class EditorPropertyScene : PropertyDrawer
+    public class EditorDrawScene : PropertyDrawer
     {
         private SerializedProperty scenePath = null;
         private SerializedProperty sceneName = null;

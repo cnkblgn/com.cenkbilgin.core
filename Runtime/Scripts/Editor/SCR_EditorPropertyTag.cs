@@ -6,7 +6,7 @@ namespace Core.Editor
     using static CoreUtility;
 
     [CustomPropertyDrawer(typeof(Tag))]
-    public class EditorPropertyTag : PropertyDrawer
+    public class EditorDrawTag : PropertyDrawer
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {

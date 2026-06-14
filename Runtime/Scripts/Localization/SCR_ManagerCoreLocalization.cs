@@ -29,6 +29,8 @@ namespace Core.Localization
                 throw new NullReferenceException($"[{nameof(database)}]");
             }
 
+            database.TryParse();
+
             languageIndex = languageIndex == -1 ? 0 : languageIndex;
             language = database.GetLanguage(languageIndex);
 
@@ -38,11 +40,11 @@ namespace Core.Localization
             }
         }
 
-        public IReadOnlyCollection<string> GetLanguages() => database.Languages;
-        public string GetLanguage() => database.Languages[languageIndex];
+        public IReadOnlyCollection<string> GetLanguages() => database.GetLanguages();
+        public string GetLanguage() => database.GetLanguages()[languageIndex];
         public void SetLanguage(int index)
         {
-            if (this.languageIndex == index || index < 0 || index >= database.Languages.Length)
+            if (this.languageIndex == index || index < 0 || index >= database.GetLanguages().Length)
             {
                 return;
             }
