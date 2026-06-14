@@ -9,15 +9,12 @@ namespace Core
     [RequireComponent(typeof(Collider))]
     public class TriggerZone : MonoBehaviour
     {
-        public event Action<Collider> OnEnter = null;
-        public event Action<Collider> OnExit = null;
+        public event Action<TriggerContext> OnStateChanged = null;
 
         [Header("_")]
         [SerializeField] private LayerMask collisionMask = 0;
-
-        [Header("_")]
         [SerializeField] private bool debugMode = false;
-        [SerializeField] private bool triggerOnlyOnce = false;
+        [SerializeField] private bool onlyOnce = false;
 
         [Header("_")]
         [SerializeField] private UnityEvent onEnter = null;
@@ -45,12 +42,10 @@ namespace Core
 
             thisCollider.enabled = true;
         }
-#if UNITY_EDITOR
-        private void Reset() => gameObject.SetLayer(LayerMask.NameToLayer("Trigger"));
-#endif
+
         private void OnTriggerEnter(Collider other)
         {
-            if (triggerOnlyOnce)
+            if (onlyOnce)
             {
                 if (isVisited)
                 {
@@ -61,7 +56,7 @@ namespace Core
             isVisited = true;
 
             onEnter?.Invoke();
-            OnEnter?.Invoke(other);
+            OnStateChanged?.Invoke(new(TriggerState.ENTERED, other));
 
             if (debugMode)
             {
@@ -71,19 +66,12 @@ namespace Core
         private void OnTriggerExit(Collider other)
         {
             onExit?.Invoke();
-            OnExit?.Invoke(other);
+            OnStateChanged?.Invoke(new(TriggerState.EXITED, other));
 
             if (debugMode)
             {
                 Debug.Log("TriggerZoneExit: " + other.gameObject.name);
             }
-        }
-        private void OnDestroy()
-        {
-            onEnter = null;
-            onExit = null;
-            OnEnter = null;
-            OnExit = null;
         }
 
         public bool GetIsVisited() => isVisited;
