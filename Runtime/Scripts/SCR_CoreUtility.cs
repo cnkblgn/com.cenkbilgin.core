@@ -1212,11 +1212,11 @@ namespace Core
         }
 
         [AttributeUsage(AttributeTargets.Method)]
-        public class EditorButton : PropertyAttribute
+        public class Clickable : PropertyAttribute
         {
             public string Label;
 
-            public EditorButton(string label = null) => this.Label = label;
+            public Clickable(string label = null) => this.Label = label;
         }
         #endregion
 

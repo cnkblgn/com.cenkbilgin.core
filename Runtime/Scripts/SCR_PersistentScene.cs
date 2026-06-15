@@ -63,6 +63,7 @@ namespace Core
             Destroy(entity.gameObject);
         }
 #if UNITY_EDITOR
+        [Clickable("Populate")]
         public void Populate()
         {
             entityList = GetComponentsInChildren<PersistentEntity>(true).ToList();

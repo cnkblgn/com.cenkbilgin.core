@@ -39,7 +39,7 @@ namespace Core.Localization
             return LocalizationDatabase.GetLanguage(index);
         }
 
-        [EditorButton("Parse")]
+        [Clickable("Parse")]
         public bool TryParse() => LocalizationDatabase.TryParse(file);
     }
 }

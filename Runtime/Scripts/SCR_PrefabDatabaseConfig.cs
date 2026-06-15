@@ -29,7 +29,7 @@ namespace Core
             return PrefabDatabase.GetKeys();
         }
 
-        [EditorButton("Build")]
+        [Clickable("Build")]
         public void Build() => PrefabDatabase.Build(collection);
     }
 }
