@@ -23,6 +23,13 @@ namespace Core
         private bool isQuitting = false;
         private bool isMarkedForDestroy = false;
 
+        protected virtual void Start()
+        {
+            if (instanceID == Guid.Empty)
+            {
+                Debug.LogError($"InstanceID missing for {gameObject.name}", gameObject);
+            }
+        }
         private void OnApplicationQuit() => isQuitting = true;
         private void OnDestroy()
         {
@@ -36,13 +43,7 @@ namespace Core
                 Debug.LogError($"[{name}] destroyed without persistence or destroyed illegally");
             }
         }
-        protected virtual void Start()
-        {
-            if (instanceID == Guid.Empty)
-            {
-                Debug.LogError($"InstanceID missing for {gameObject.name}", gameObject);
-            }
-        }
+
 #if UNITY_EDITOR
         private void OnValidate()
         {
@@ -79,11 +80,19 @@ namespace Core
             }
 
             isMarkedForDestroy = true;
+
             if (!isSilent) OnMarkedForDestroy?.Invoke(this);
         }
 
-        public PersistentEntityData Export() => new(TypeID, PrefabID, instanceID, isMarkedForDestroy, ExportTo());
-        protected abstract Dictionary<string, DataNode> ExportTo();
+        public PersistentEntityData Export()
+        {
+            Dictionary<string, DataNode> data = new();
+
+            OnExported(data);
+
+            return new(TypeID, PrefabID, instanceID, isMarkedForDestroy, data);
+        }
+        protected abstract void OnExported(Dictionary<string, DataNode> data);
 
         public void Import(PersistentEntityData data)
         {
@@ -93,8 +102,8 @@ namespace Core
 #if UNITY_EDITOR
             _instanceID = instanceID.ToString();
 #endif
-            ImportFrom(data.Data);
+            OnImported(data.Data);
         }
-        protected abstract void ImportFrom(Dictionary<string, DataNode> data);
+        protected abstract void OnImported(Dictionary<string, DataNode> data);
     }
 }

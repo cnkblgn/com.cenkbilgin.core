@@ -16,7 +16,7 @@ namespace Core
         {
             if (scene == null)
             {
-                Debug.LogError("sceneController == null");
+                Debug.LogError("persistent scene is not found! please add to scene!");
                 return false;
             }
 
@@ -69,7 +69,7 @@ namespace Core
         {
             if (this.scene != scene)
             {
-                Debug.LogError("this.scene != scene");
+                Debug.LogError("invalid persistent scene!");
                 return;
             }
 

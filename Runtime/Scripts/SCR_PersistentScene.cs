@@ -62,6 +62,7 @@ namespace Core
             TryUnregister(entity);
             Destroy(entity.gameObject);
         }
+
 #if UNITY_EDITOR
         [Clickable("Populate")]
         public void Populate()
@@ -97,8 +98,8 @@ namespace Core
         {
             if (!gameObject.TryGetComponent(out entity))
             {
-                Debug.LogError($"[{gameObject.name}] has no [PersistentInstanceEntity], Destroying [{gameObject.name}]");
-                Destroy(gameObject);
+                Debug.LogError($"Trying to register [{gameObject.name}] but has no [PersistentEntity] component", gameObject);
+
                 return false;
             }
 
@@ -109,6 +110,7 @@ namespace Core
         {
             if (entity == null)
             {
+                Debug.LogError($"Trying to register null persistent entity!");
                 return false;
             }
 
@@ -126,6 +128,7 @@ namespace Core
         {
             if (entity == null)
             {
+                Debug.LogError($"Trying to unregister null persistent entity!");
                 return false;
             }
 
