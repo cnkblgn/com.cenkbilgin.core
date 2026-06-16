@@ -11,14 +11,8 @@ namespace Core.Editor
         {
             serializedObject.Update();
 
-            DrawClickableMethods();
+            DrawDefaultInspector();
 
-            DrawPropertiesExcluding(serializedObject, "m_Script");
-
-            serializedObject.ApplyModifiedProperties();
-        }
-        private void DrawClickableMethods()
-        {
             MethodInfo[] methods = target.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
             foreach (MethodInfo method in methods)
@@ -32,13 +26,21 @@ namespace Core.Editor
 
                 string label = string.IsNullOrEmpty(attribute.Label) ? method.Name : attribute.Label;
 
-                if (GUILayout.Button(label))
-                {
-                    method.Invoke(target, null);
+                EditorGUILayout.Space(5);
 
-                    UnityEditor.EditorUtility.SetDirty(target);
+                GUILayout.BeginVertical(EditorStyles.helpBox);
+                {
+                    if (GUILayout.Button(label))
+                    {
+                        method.Invoke(target, null);
+
+                        UnityEditor.EditorUtility.SetDirty(target);
+                    }
                 }
+                GUILayout.EndVertical();
             }
+
+            serializedObject.ApplyModifiedProperties();
         }
     }
 }
