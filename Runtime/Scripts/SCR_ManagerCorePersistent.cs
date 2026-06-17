@@ -58,7 +58,7 @@ namespace Core
 
         public void RegisterScene(PersistentScene scene)
         {
-            if (IsValid())
+            if (this.scene != null)
             {
                 Debug.LogError("trying to register duplicate persistent scene!");
                 return;
