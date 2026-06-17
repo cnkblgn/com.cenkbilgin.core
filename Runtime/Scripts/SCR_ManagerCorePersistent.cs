@@ -14,13 +14,13 @@ namespace Core
 
         private bool IsValid()
         {
-            if (scene == null)
+            if (scene != null)
             {
-                Debug.LogError("persistent scene is not found! please add to scene!");
-                return false;
+                return true;
             }
 
-            return true;
+            Debug.LogError("persistent scene is not found! please add to scene!");
+            return false;
         }
 
         public bool IsRegistered(Guid id) => scene.IsRegistered(id);
