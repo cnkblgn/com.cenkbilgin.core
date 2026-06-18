@@ -25,16 +25,11 @@ namespace Core.Graphics
 
             emitterCounts = new int[thisEmitters.Length];
 
-            for (int i = 0; i < emitterCounts.Length; i++)
+            for (int i = 0; i < thisEmitters.Length; i++)
             {
                 ParticleSystem.EmissionModule m = thisEmitters[i].emission;
 
-                if (m.burstCount <= 0)
-                {
-                    return;
-                }
-
-                emitterCounts[i] = (int)m.GetBurst(0).count.Evaluate(0, Random.value);
+                emitterCounts[i] = m.burstCount <= 0 ? 0 : (int)m.GetBurst(0).count.constant;
             }
         }
 
