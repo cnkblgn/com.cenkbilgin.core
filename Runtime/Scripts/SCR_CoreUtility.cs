@@ -282,7 +282,7 @@ namespace Core
                     targetValue.y = float.IsNaN(y) ? 0 : y;
                     targetValue.z = float.IsNaN(z) ? 0 : z;
 
-                    return currentValue = Vector3.SmoothDamp(currentValue, targetValue, ref currentVelocity, config.Smoothness * deltaTime);
+                    return currentValue = Vector3.SmoothDamp(currentValue, targetValue, ref currentVelocity, config.Smoothness, float.PositiveInfinity, deltaTime);
                 }
             }
         }
@@ -304,26 +304,24 @@ namespace Core
                 private Vector3 currentValue = Vector3.zero;
                 private Vector3 targetValue = Vector3.zero;
 
-                public Vector3 Update(Config config, float deltaTime, float strength = 1, bool update = true)
+                public Vector3 Update(Config config, float deltaTime, float strength = 1)
                 {
                     if (config == null)
                     {
                         return Vector3.zero;
                     }
 
-                    float xTime = Mathf.Cos(Time.time * config.Frequency.x / 2.0f) * (update ? 1 : 0);
-                    float yTime = Mathf.Sin(Time.time * config.Frequency.y) * (update ? 1 : 0);
-                    float zTime = Mathf.Sin(Time.time * config.Frequency.z) * (update ? 1 : 0);
-
-                    float x = config.Amplitude.x * xTime;
-                    float y = config.Amplitude.y * yTime;
-                    float z = config.Amplitude.z * zTime;
+                    float x = config.Amplitude.x * Mathf.Cos(Time.time * config.Frequency.x * Mathf.PI * 2f * 0.5f);
+                    float y = config.Amplitude.y * Mathf.Sin(Time.time * config.Frequency.y * Mathf.PI * 2f);
+                    float z = config.Amplitude.z * Mathf.Sin(Time.time * config.Frequency.z * Mathf.PI * 2f);
 
                     targetValue.x = Mathf.Clamp(x * strength, -config.Clamp.x, config.Clamp.x);
                     targetValue.y = Mathf.Clamp(y * strength, -config.Clamp.y, config.Clamp.y);
                     targetValue.z = Mathf.Clamp(z * strength, -config.Clamp.z, config.Clamp.z);
 
-                    return currentValue = Vector3.Lerp(currentValue, targetValue, config.Roughness * deltaTime);
+                    float t = 1f - Mathf.Exp(-config.Roughness * deltaTime);
+
+                    return currentValue = Vector3.Lerp(currentValue, targetValue, t);
                 }
             }
         }
@@ -345,10 +343,10 @@ namespace Core
                 {
                     if (target == null)
                     {
-                        return Vector3.SmoothDamp(from, Vector3.zero, ref currentVelocity, 2.5f, 100, deltaTime * 10);
+                        return Vector3.SmoothDamp(from, Vector3.zero, ref currentVelocity, 2.5f, float.PositiveInfinity, deltaTime);
                     }
 
-                    return Vector3.SmoothDamp(from, target.Target, ref currentVelocity, target.Smoothness, 100, deltaTime * 10);
+                    return Vector3.SmoothDamp(from, target.Target, ref currentVelocity, target.Smoothness, float.PositiveInfinity, deltaTime);
                 }
             }
         }
@@ -372,11 +370,11 @@ namespace Core
                 private float time = 0f;
                 private float velocity = 0f;
 
-                public Vector3 Update(Config config, float value)
+                public Vector3 Update(Config config, float value, float deltaTime)
                 {
                     float t = Mathf.Clamp01(Mathf.InverseLerp(config.MinThreshold, config.MaxThreshold, value));
 
-                    time = Mathf.SmoothDamp(time, t, ref velocity, config.Smoothness);
+                    time = Mathf.SmoothDamp(time, t, ref velocity, config.Smoothness, float.PositiveInfinity, deltaTime);
 
                     float magnitude = Mathf.Clamp(config.BaseMagnitude * time, 0f, config.MaxMagnitude);
                     float x = (Mathf.PerlinNoise(Time.time * config.Speed, 0f) - 0.5f) * 2f * magnitude;
