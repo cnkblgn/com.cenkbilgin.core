@@ -19,7 +19,7 @@ namespace Core
         {
             new DebugCommandInstance($"help", $"Reveals console commands", $"'help'", CMDHelp),
             new DebugCommandInstance($"clear", $"Clears console commands", $"'clear'", CMDClear),
-            new DebugCommandInstance<float, float>($"set_timescale", $"Sets timescale", $"'set_timescale <float = scale, float = duration>'", CMDTimescale)
+            new DebugCommandInstance<float>($"set_timescale", $"Sets timescale", $"'set_timescale <float>'", CMDTimescale)
         };
 
         public static bool Execute(string commandInput)
@@ -197,9 +197,9 @@ namespace Core
         {
             DebugCommandLogger.Clear();
         }
-        private static void CMDTimescale(float scale, float duration)
+        private static void CMDTimescale(float scale)
         {
-            ManagerCoreGame.Instance.WaitUntil(WaitResume, () => ManagerCoreGame.Instance.SetTimeScale(scale, duration));
+            ManagerCoreGame.Instance.WaitUntil(WaitResume, () => ManagerCoreGame.Instance.SetTimeScale(scale));
             DebugCommandLogger.Log($"Current Timescale: {scale.ToString().ToYellow()}");
         }
     }

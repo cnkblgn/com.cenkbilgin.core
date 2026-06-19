@@ -102,7 +102,7 @@ namespace Core.Audio
             return null;
         }
 
-        public void OnInitialize(AudioEmitter _) { }
-        public void OnReset(AudioEmitter _) { }
+        public void HandleInitialization(AudioEmitter _) { }
+        public void HandleReset(AudioEmitter _) { }
     }
 }

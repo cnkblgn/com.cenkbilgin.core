@@ -23,7 +23,7 @@ namespace Core.UI
             return entity;
         }
 
-        public void OnInitialize(UIWaypoint entity) => entity.Initialize();
-        public void OnReset(UIWaypoint entity) => entity.Deinitialize();
+        public void HandleInitialization(UIWaypoint entity) => entity.Initialize();
+        public void HandleReset(UIWaypoint entity) => entity.Deinitialize();
     }
 }

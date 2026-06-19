@@ -24,7 +24,7 @@ namespace Core.Graphics
             return decalEmitter;
         }
 
-        public void OnInitialize(DecalEmitter item) { }
-        public void OnReset(DecalEmitter item) { }
+        public void HandleInitialization(DecalEmitter item) { }
+        public void HandleReset(DecalEmitter item) { }
     }
 }

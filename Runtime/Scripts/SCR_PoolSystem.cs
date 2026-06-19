@@ -51,7 +51,7 @@ namespace Core
         private void InitializeItem(T item)
         {
             item.gameObject.SetActive(false);
-            currentHandler.OnInitialize(item);
+            currentHandler.HandleInitialization(item);
         }
 
         public void Reset(bool reparent, bool deactivate)
@@ -70,7 +70,7 @@ namespace Core
         }
         private void ResetItem(T item, bool reparent, bool deactivate)
         {
-            currentHandler.OnReset(item);
+            currentHandler.HandleReset(item);
             if (deactivate) item.gameObject.SetActive(false);
             if (reparent) item.transform.SetParent(container);
         }

@@ -32,11 +32,8 @@ namespace Core
         [SerializeField, ReadOnly] private string[] buildScenes = null;
 
         private readonly List<IGameStateHandler> thisHandlers = new();
-        private Coroutine sceneCoroutine = null;
-        private Coroutine timeCoroutine = null;
-        private bool timeCoroutinePause = false;
-        private bool isLoading = false;
         private string activeScene = STRING_EMPTY;
+        private bool isLoading = false;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void OnRuntimeInitialize()
@@ -48,24 +45,9 @@ namespace Core
             OnTimeScaleChanged = null;
         }
 
-        protected override void Awake()
-        {
-            base.Awake();
-        
-            OnAfterSceneChanged += OnAfterSceneChangedInternal;
-            OnGameStateChanged += OnGameStateChangedInternal;
-        }
         private void Start() => SetCurrentScene(startingScene.Name, LoadSceneMode.Single);
-        private void OnEnable()
-        {
-            SceneManager.activeSceneChanged += InitializeActiveScene;
-        }
-        private void OnDisable()
-        {
-            SceneManager.activeSceneChanged -= InitializeActiveScene;
-            OnAfterSceneChanged -= OnAfterSceneChangedInternal;
-            OnGameStateChanged -= OnGameStateChangedInternal;
-        }
+        private void OnEnable() => SceneManager.activeSceneChanged += OnActiveSceneChanged;
+        private void OnDisable() => SceneManager.activeSceneChanged -= OnActiveSceneChanged;
 
 #if UNITY_EDITOR
         private void OnValidate()
@@ -98,24 +80,9 @@ namespace Core
         }
 #endif
 
-        private void InitializeActiveScene(UnityEngine.SceneManagement.Scene oldScene, UnityEngine.SceneManagement.Scene newScene) => activeScene = newScene.name;
-        private void OnAfterSceneChangedInternal(string scene) => SetGameState(GameState.RESUME, true);
-        private void OnGameStateChangedInternal(GameState gameState)
-        {
-            switch (gameState)
-            {
-                case GameState.RESUME:
-                    SetTimeScale(1, -1);
-                    timeCoroutinePause = false;
-                    break;
-                case GameState.PAUSE:
-                    timeCoroutinePause = true;
-                    SetTimeScale(0, -1);
-                    break;
-            }
-        }
+        private void OnActiveSceneChanged(UnityEngine.SceneManagement.Scene oldScene, UnityEngine.SceneManagement.Scene newScene) => activeScene = newScene.name;
 
-        public void InstertStateHandler(IGameStateHandler value)
+        public void BindHandler(IGameStateHandler value)
         {
             if (thisHandlers.Contains(value))
             {
@@ -124,7 +91,7 @@ namespace Core
 
             thisHandlers.Add(value);
         }
-        public void RemoveStateHandler(IGameStateHandler value)
+        public void UnbindHandler(IGameStateHandler value)
         {
             if (!thisHandlers.Contains(value))
             {
@@ -143,7 +110,7 @@ namespace Core
 
             for (int i = thisHandlers.Count - 1; i >= 0; i--)
             {
-                if (!thisHandlers[i].OnTryResumeGame())
+                if (!thisHandlers[i].HandleCanResumeGame())
                 {
                     return;
                 }
@@ -160,7 +127,7 @@ namespace Core
 
             for (int i = thisHandlers.Count - 1; i >= 0; i--)
             {
-                if (!thisHandlers[i].OnTryPauseGame())
+                if (!thisHandlers[i].HandleCanPauseGame())
                 {
                     return;
                 }
@@ -181,74 +148,34 @@ namespace Core
         }
 
         public GameState GetGameState() => currentState;
-        private void SetGameState(GameState gameState, bool isOverride = false)
+        private void SetGameState(GameState gameState, bool @override = false)
         {
-            if (isOverride)
+            if (currentState != gameState || @override)
             {
                 currentState = gameState;
                 OnGameStateChanged?.Invoke(currentState);
-                return;
-            }
 
-            if (currentState != gameState)
-            {
-                currentState = gameState;
-                OnGameStateChanged?.Invoke(currentState);
+                switch (gameState)
+                {
+                    case GameState.RESUME:
+                        SetTimeScale(1);
+                        break;
+                    case GameState.PAUSE:
+                        SetTimeScale(0);
+                        break;
+                }
             }
         }
-        public void SetTimeScale(float value, float duration)
+
+        public void SetTimeScale(float value)
         {
-            if (duration < 0)
-            {
-                Time.timeScale = value;
-                OnTimeScaleChanged?.Invoke(Time.timeScale);
-                return;
-            }
-
-            if (timeCoroutine != null)
-            {
-                StopCoroutine(timeCoroutine);
-                timeCoroutine = null;
-            }
-
-            timeCoroutine = StartCoroutine(SetTimeScaleInternal(value, duration));
+            Time.timeScale = value;
+            OnTimeScaleChanged?.Invoke(Time.timeScale);
         }
-        private IEnumerator SetTimeScaleInternal(float value, float duration)
-        {
-            float timeElapsed = 0;
-            float timeDuration = Mathf.Max(0, duration);
 
-            while (true)
-            {
-                if (timeCoroutinePause)
-                {
-                    yield return null;
-                    continue;
-                }
-
-                if (timeElapsed >= timeDuration)
-                {
-                    break;
-                }
-
-                if (Time.timeScale != value)
-                {
-                    Time.timeScale = value;
-                    OnTimeScaleChanged?.Invoke(Time.timeScale);
-                }
-
-                timeElapsed += Time.unscaledDeltaTime;
-
-                yield return null;
-            }
-
-            SetTimeScale(1, -1);
-            timeCoroutine = null;
-            yield break;
-        }
         public string[] GetAllScenes() => playableScenes;
         public string GetStartingScene() => startingScene.Name;
-        public string GetCurrentScene() => activeScene;
+        public string GetCurrentScene() => activeScene;    
         public void SetCurrentScene(string scene) => SetCurrentScene(scene, LoadSceneMode.Single);
         public void SetCurrentScene(string scene, Action onStartAction = null, Action onFinishAction = null) => SetCurrentScene(scene, LoadSceneMode.Single, onStartAction, onFinishAction);
         public void SetCurrentScene(string scene, LoadSceneMode mode, Action onStartAction = null, Action onFinishAction = null)
@@ -258,20 +185,18 @@ namespace Core
                 return;
             }
 
-            if (sceneCoroutine != null)
+            if (isLoading)
             {
                 return;
             }
 
             SetGameState(GameState.NULL, true);
-            sceneCoroutine = StartCoroutine(SetCurrentSceneInternal(scene, mode, onStartAction, onFinishAction));
+            StartCoroutine(SetCurrentSceneInternal(scene, mode, onStartAction, onFinishAction));
         }
         private IEnumerator SetCurrentSceneInternal(string scene, LoadSceneMode mode, Action onStartAction = null, Action onFinishAction = null)
         {
             isLoading = true;
-
             onStartAction?.Invoke();
-
             OnBeforeSceneChanged?.Invoke(GetCurrentScene());
 
             AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(scene, mode);
@@ -291,11 +216,11 @@ namespace Core
             }
 
             isLoading = false;
-            sceneCoroutine = null;
-
             onFinishAction?.Invoke();
             OnAfterSceneChanged?.Invoke(scene);
+            SetGameState(GameState.RESUME, true);
         }
+
         public bool IsValidScene(string scene) => buildScenes.Any(s => s == scene);
         public bool IsStartingScene() => GetCurrentScene() == GetStartingScene();
         public bool IsBootstrapScene() => GetCurrentScene() == CoreBootstrapper.SCENE_NAME;

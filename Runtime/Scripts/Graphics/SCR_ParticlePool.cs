@@ -16,7 +16,7 @@ namespace Core.Graphics
             return emitter;
         }
 
-        public void OnInitialize(ParticleEmitter emitter) 
+        public void HandleInitialization(ParticleEmitter emitter) 
         {
             ParticleSystem[] emitters = emitter.GetComponentsInChildren<ParticleSystem>();
 
@@ -27,7 +27,7 @@ namespace Core.Graphics
                 mainModule.simulationSpace = ParticleSystemSimulationSpace.World;
             }
         }
-        public void OnReset(ParticleEmitter emitter) 
+        public void HandleReset(ParticleEmitter emitter) 
         {
             emitter.Clear();
         }
