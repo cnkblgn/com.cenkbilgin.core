@@ -268,7 +268,9 @@ namespace Core.UI
                 ExecuteEvents.Execute(currentDraggedObject, eventData, ExecuteEvents.endDragHandler);
             }
 
+            eventData.position = Vector2.zero;
             eventData.delta = Vector2.zero;
+            pointerPosition = Vector2.zero;
             lastPixelPosition = Vector2.zero;
             currentPressedObject = null;
             currentDraggedObject = null;
