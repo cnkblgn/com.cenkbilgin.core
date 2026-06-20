@@ -23,6 +23,7 @@ namespace Core.UI
         [Header("_")]
         [SerializeField, Required] private string id = string.Empty;
         [SerializeField, Required] private RenderTexture renderTexture = null;
+        [SerializeField, Range(0, 120)] private float rendererFPS = 59;
 
         [Header("_")]
         [SerializeField] private bool canvasInput = false;
@@ -42,6 +43,8 @@ namespace Core.UI
         private bool isInitialized = false;
         private bool isRendering = false;
         private bool isActive = false;
+        private float renderTime = 0;
+        private float renderInterval = 1;
 
         private void OnEnable()
         {
@@ -85,7 +88,17 @@ namespace Core.UI
 
             OnTick();
         }
-        internal void Render() => OnRender();
+        internal void Render()
+        {
+            renderTime += Time.deltaTime;
+
+            if (renderTime > renderInterval)
+            {
+                renderTime = 0;
+
+                OnRender();
+            }
+        }
 
         protected void EnableInput() => canvasInput = true;
         protected void DisableInput() => canvasInput = false;
@@ -273,6 +286,9 @@ namespace Core.UI
 
             isInitialized = true;
 
+            renderTime = 0f;
+            renderInterval = 1 / rendererFPS;
+
             Canvas[] canvases = GetComponentsInChildren<Canvas>();
             data = new UIViewportCanvas[canvases.Length];
 
@@ -369,6 +385,23 @@ namespace Core.UI
             isActive = false;
         }
 
-        public bool CheckVisibility(Transform target, float minDistance) => renderer.CheckVisibility(target, minDistance);
+        internal void TryCull(Transform target, float distance)
+        {
+            if (!IsActive)
+            {
+                return;
+            }
+
+            bool isInView = renderer.CheckVisibility(target, distance);
+
+            if (!isInView)
+            {
+                HideRenderer();
+            }
+            else
+            {
+                ShowRenderer();
+            }
+        }
     }
 }

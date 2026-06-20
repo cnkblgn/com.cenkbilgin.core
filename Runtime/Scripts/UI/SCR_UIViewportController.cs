@@ -10,7 +10,6 @@ namespace Core.UI
     {
         [Header("_")]
         [SerializeField, Required] private Camera rendererCamera = null;
-        [SerializeField, Range(0, 120)] private float rendererFPS = 59;
         [SerializeField, Min(0)] private float cullingDistance = 16;
 
         [Header("_")]
@@ -25,11 +24,7 @@ namespace Core.UI
         private void Start()
         {
             rendererCamera.enabled = false;
-
             mask = LayerMask.GetMask("Viewport");
-
-            time = 0f;
-            interval = 1 / rendererFPS;
         }
         private void OnEnable() => GameManager.OnBeforeSceneChanged += OnBeforeSceneChanged;
         private void OnDisable() => GameManager.OnBeforeSceneChanged -= OnBeforeSceneChanged;
@@ -43,21 +38,10 @@ namespace Core.UI
                 return;
             }
 
-            time += Time.deltaTime;
-
             for (int i = 0; i < viewports.Count; i++)
             {
                 UpdateTick(viewports[i], in ctx);
-            }
-
-            if (time > interval)
-            {
-                time = 0;
-
-                for (int i = 0; i < viewports.Count; i++)
-                {
-                    UpdateRender(viewports[i]);
-                }
+                UpdateRender(viewports[i]);
             }
 
             CullRender(ctx.Camera);
@@ -132,22 +116,7 @@ namespace Core.UI
         {
             for (int i = 0; i < viewports.Count; i++)
             {
-                UIViewportView view = viewports[i];
-
-                if (!view.IsActive)
-                {
-                    continue;
-                }
-
-                bool isInView = view.CheckVisibility(camera.transform, cullingDistance);
-
-                if (!isInView)
-                {
-                    view.HideRenderer();
-                    continue;
-                }
-
-                view.ShowRenderer();
+                viewports[i].TryCull(camera.transform, cullingDistance);
             }
         }
 
