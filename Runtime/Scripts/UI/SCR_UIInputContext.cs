@@ -13,7 +13,7 @@ namespace Core.UI
 
         public UIInputContext(Camera camera, Vector2 pointerPosition, Vector2 pointerScroll, bool keyDown, bool keyUp)
         {
-            Camera = camera != null ? camera : throw new ArgumentNullException($"[{nameof(camera)}] Camera cannot be null in input context!");
+            Camera = camera;
             PointerPosition = pointerPosition;
             PointerScroll = pointerScroll;
             KeyDown = keyDown;
