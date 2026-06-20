@@ -10,7 +10,6 @@ namespace Core.UI
     {
         [Header("_")]
         [SerializeField, Required] private Camera rendererCamera = null;
-        [SerializeField] private LayerMask rendererMask = ~0;
         [SerializeField, Range(0, 120)] private float rendererFPS = 59;
         [SerializeField, Min(0)] private float cullingDistance = 16;
 
@@ -19,12 +18,15 @@ namespace Core.UI
 
         private readonly List<string> ids = new(4);
         private readonly List<UIViewportView> viewports = new(4);
+        private int mask = -1;
         private float time = 0;
         private float interval = 1;
 
         private void Start()
         {
             rendererCamera.enabled = false;
+
+            mask = LayerMask.GetMask("Viewport");
 
             time = 0f;
             interval = 1 / rendererFPS;
@@ -72,7 +74,7 @@ namespace Core.UI
             Vector2 screenPosition = Vector2.zero;
             ViewportRenderer renderer = null;
 
-            if (Physics.Raycast(ray, out RaycastHit hit, 5.0f, rendererMask, QueryTriggerInteraction.Ignore))
+            if (Physics.Raycast(ray, out RaycastHit hit, 5.0f, mask, QueryTriggerInteraction.Ignore))
             {
                 renderer = hit.collider.GetComponent<ViewportRenderer>();
                 screenPosition = hit.textureCoord;

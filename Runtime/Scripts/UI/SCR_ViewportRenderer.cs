@@ -27,7 +27,7 @@ namespace Core.UI
         {
             renderer = GetComponent<MeshRenderer>();
 
-            gameObject.SetLayer(LayerMask.NameToLayer("Screen"));
+            gameObject.SetLayer(LayerMask.NameToLayer("Viewport"));
 
             id = prefab.ID;
         }
