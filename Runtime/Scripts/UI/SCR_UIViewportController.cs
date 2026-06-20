@@ -18,8 +18,6 @@ namespace Core.UI
         private readonly List<string> ids = new(4);
         private readonly List<UIViewportView> viewports = new(4);
         private int mask = -1;
-        private float time = 0;
-        private float interval = 1;
 
         private void Start()
         {
@@ -34,6 +32,11 @@ namespace Core.UI
         public void Tick(in UIInputContext ctx)
         {
             if (GameManager.Instance.GetGameState() != GameState.RESUME)
+            {
+                return;
+            }
+
+            if (ctx.Camera == null)
             {
                 return;
             }

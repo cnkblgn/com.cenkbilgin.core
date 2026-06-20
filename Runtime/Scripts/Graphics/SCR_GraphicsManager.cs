@@ -28,8 +28,6 @@ namespace Core.Graphics
         private readonly Dictionary<string, ParticlePool> particlePool = new();
         private VolumeProfile currentVolumeProfile = null;
         private Camera mainCamera = null;
-        private Camera defaultCamera = null;
-        private bool isCameraInitialized = false;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void OnRuntimeInitialize() => OnResolutionChanged = null;
@@ -252,100 +250,69 @@ namespace Core.Graphics
             OnResolutionChanged?.Invoke(new(width, height));
         }
 
-        private void InitializeMainCamera()
+        public Camera GetMainCamera() => mainCamera;
+        public void SetMainCamera(Camera target)
         {
-            isCameraInitialized = true;
-
-            mainCamera = Camera.main;
-
-            if (mainCamera == null)
+            if (target == null)
             {
-                AudioListener mainListener = FindAnyObjectByType<AudioListener>();
-
-                if (mainListener != null)
-                {
-                    mainListener.TryGetComponent(out mainCamera);
-                }
+                throw new ArgumentNullException(nameof(target));
             }
 
-            defaultCamera = mainCamera;
-        }
-        public Camera GetMainCamera()
-        {
-            if (!isCameraInitialized)
-            {
-                InitializeMainCamera();
-            }
-
-            return mainCamera;
-        }
-        public void SetMainCamera(Camera targetCamera)
-        {
-            if (!isCameraInitialized)
-            {
-                InitializeMainCamera();
-            }
-
-            if (targetCamera == mainCamera)
+            if (target == mainCamera)
             {
                 return;
-            }
-
-            if (targetCamera == null)
-            {
-                targetCamera = defaultCamera;
             }
 
             DisableCamera(mainCamera);
 
-            CopyCameraSettings(defaultCamera, targetCamera);
+            CopyCameraSettings(mainCamera, target);
 
-            EnableCamera(targetCamera);
+            EnableCamera(target);
 
-            mainCamera = targetCamera;
+            mainCamera = target;
         }
-        private void EnableCamera(Camera targetCamera)
+        private void EnableCamera(Camera target)
         {
-            if (targetCamera == null)
+            if (target == null)
             {
                 return;
             }    
 
-            if (targetCamera.TryGetComponent(out AudioListener listener))
+            if (target.TryGetComponent(out AudioListener listener))
             {
                 listener.enabled = true;
             }
 
-            targetCamera.enabled = true;
+            target.enabled = true;
         }
-        private void DisableCamera(Camera targetCamera)
+        private void DisableCamera(Camera target)
         {
-            if (targetCamera == null)
+            if (target == null)
             {
                 return;
             }
 
-            if (targetCamera.TryGetComponent(out AudioListener listener))
+            if (target.TryGetComponent(out AudioListener listener))
             {
                 listener.enabled = false;
             }
 
-            targetCamera.enabled = false;
+            target.enabled = false;
         }
-        private void CopyCameraSettings(Camera sourceCamera, Camera targetCamera)
+        private void CopyCameraSettings(Camera source, Camera target)
         {
-            if (sourceCamera == null || targetCamera == null)
+            if (source == null || target == null)
             {
                 return;
             }
 
-            targetCamera.useOcclusionCulling = sourceCamera.useOcclusionCulling;
-            targetCamera.cullingMask = sourceCamera.cullingMask;
-            targetCamera.clearFlags = sourceCamera.clearFlags;
-            targetCamera.backgroundColor = sourceCamera.backgroundColor;
+            target.useOcclusionCulling = source.useOcclusionCulling;
+            target.cullingMask = source.cullingMask;
+            target.clearFlags = source.clearFlags;
+            target.backgroundColor = source.backgroundColor;
 
-            UniversalAdditionalCameraData sourceData = sourceCamera.GetUniversalAdditionalCameraData();
-            UniversalAdditionalCameraData targetData = targetCamera.GetUniversalAdditionalCameraData();
+            UniversalAdditionalCameraData sourceData = source.GetUniversalAdditionalCameraData();
+            UniversalAdditionalCameraData targetData = target.GetUniversalAdditionalCameraData();
 
             targetData.renderPostProcessing = sourceData.renderPostProcessing;
             targetData.antialiasing = sourceData.antialiasing;
