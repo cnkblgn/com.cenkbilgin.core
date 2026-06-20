@@ -101,7 +101,16 @@ namespace Core.UI
         }
 
         protected void EnableInput() => canvasInput = true;
-        protected void DisableInput() => canvasInput = false;
+        protected void DisableInput() 
+        {
+            if (!canvasInput)
+            {
+                return;
+            }
+
+            canvasInput = false; 
+            ClearInput();
+        }
         private void UpdateInput(Vector2 screenPosition, Vector2 scrollDelta, bool keyDown, bool keyUp)
         {
             float renderWidth = Texture.width;
@@ -383,7 +392,7 @@ namespace Core.UI
 
             OnHide();
             HideRenderer();
-   
+
             isActive = false;
         }
 
