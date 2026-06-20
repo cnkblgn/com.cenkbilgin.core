@@ -9,7 +9,7 @@ namespace Core.UI
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Canvas))]
-    public class UICursorController : MonoBehaviour
+    internal sealed class UICursorController : MonoBehaviour
     {
         [Header("_")]
         [SerializeField, Required] private RectTransform cursorTransform = null;

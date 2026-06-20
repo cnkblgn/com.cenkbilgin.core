@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Core.Graphics
 {
-    public sealed class ParticlePool : IPoolHandler<ParticleEmitter>
+    internal sealed class ParticlePool : IPoolHandler<ParticleEmitter>
     {
         public readonly PoolSystem<ParticleEmitter> Pool;
 

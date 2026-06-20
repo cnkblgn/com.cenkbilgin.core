@@ -11,7 +11,7 @@ namespace Core
 #if UNITY_EDITOR
     [InitializeOnLoad]
 #endif
-    public class CoreBootstrapper
+    internal static class CoreBootstrapper
     {
         public const string SCENE_NAME = "SCN_Bootstrap";
         public static string SCENE_GUID = STRING_NULL;
@@ -20,6 +20,7 @@ namespace Core
         private static SceneAsset sceneAsset = null;
 
         static CoreBootstrapper() => EditorApplication.playModeStateChanged += OnPlay;
+
         private static void OnPlay(PlayModeStateChange state)
         {
             if (state != PlayModeStateChange.EnteredPlayMode)

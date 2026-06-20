@@ -9,9 +9,9 @@ namespace Core
         public readonly static Func<bool> WaitResume = WaitResumeInternal;
         public readonly static Func<bool> WaitPause = WaitPauseInternal;
 
-        private static bool WaitGameInternal() => ManagerCoreGame.HasInstance;
-        private static bool WaitResumeInternal() => ManagerCoreGame.HasInstance && ManagerCoreGame.Instance.GetGameState() == GameState.RESUME;
-        private static bool WaitPauseInternal() => ManagerCoreGame.HasInstance && ManagerCoreGame.Instance.GetGameState() == GameState.PAUSE;
+        private static bool WaitGameInternal() => GameManager.HasInstance;
+        private static bool WaitResumeInternal() => GameManager.HasInstance && GameManager.Instance.GetGameState() == GameState.RESUME;
+        private static bool WaitPauseInternal() => GameManager.HasInstance && GameManager.Instance.GetGameState() == GameState.PAUSE;
 
         public static void Schedule(this TaskInstanceWaitFrame task)
         {

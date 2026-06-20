@@ -5,7 +5,7 @@ namespace Core.UI
 {
     using static CoreUtility;
 
-    public class UIPointerEventCursor : UIPointerEvent
+    public sealed class UIPointerEventCursor : UIPointerEvent
     {
         [Header("_")]
         [SerializeField, Required] private string id = "default";
@@ -14,13 +14,13 @@ namespace Core.UI
         {
             base.OnPointerEnterInternal(eventData);
 
-            ManagerCoreUI.Instance.SetCursor(id);
+            UIManager.Instance.SetCursor(id);
         }
         protected override void OnPointerExitInternal(PointerEventData eventData)
         {
             base.OnPointerExitInternal(eventData);
 
-            ManagerCoreUI.Instance.SetCursor();
+            UIManager.Instance.SetCursor();
         }
     }
 }

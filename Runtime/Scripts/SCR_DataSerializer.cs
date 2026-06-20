@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Core
 {
-    public class DataSerializer : MonoBehaviour
+    internal sealed class DataSerializer
     {
         private const int VERSION = 1;
 

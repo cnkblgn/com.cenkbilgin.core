@@ -33,16 +33,16 @@ namespace Game
             revertButton.onClick.RemoveListener(OnRevert);
         }
 
-        private void OnClick() => ManagerCoreInput.Instance.StartRebind(inputPath, 0, OnRebindStart, OnRebindComplete, OnRebindCancel);
+        private void OnClick() => InputManager.Instance.StartRebind(inputPath, 0, OnRebindStart, OnRebindComplete, OnRebindCancel);
         private void OnRevert()
         {
             OnRebindCancel();
 
-            ManagerCoreInput.Instance.RevertRebind(inputPath, 0);
+            InputManager.Instance.RevertRebind(inputPath, 0);
 
-            displayText.text = ManagerCoreInput.Instance.GetDisplay(inputPath, 0);
+            displayText.text = InputManager.Instance.GetDisplay(inputPath, 0);
 
-            ManagerCoreInput.Instance.Export();
+            InputManager.Instance.Export();
         }
         private void OnRebindStart()
         {
@@ -51,9 +51,9 @@ namespace Game
         }
         private void OnRebindComplete()
         {
-            displayText.text = ManagerCoreInput.Instance.GetDisplay(inputPath, 0);
+            displayText.text = InputManager.Instance.GetDisplay(inputPath, 0);
 
-            ManagerCoreInput.Instance.Export();
+            InputManager.Instance.Export();
             displayVisualDefault.SetActive(true);
             displayVisualWaitInput.SetActive(false);
         }

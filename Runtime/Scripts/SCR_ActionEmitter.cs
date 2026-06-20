@@ -5,14 +5,14 @@ using UnityEngine.Events;
 namespace Core
 {
     [DisallowMultipleComponent]
-    public class ActionEmitter : MonoBehaviour
+    public sealed class ActionEmitter : MonoBehaviour
     {
         [Header("_")]
         [SerializeField] private bool emitOnStart = false;
 
         [Header("_")]
-        [SerializeField] private UnityEvent actionEvent = null;
-        [SerializeField, Min(0)] private float actionDelay = 0;
+        [SerializeField] private UnityEvent @event = null;
+        [SerializeField, Min(0)] private float delay = 0;
 
         [Header("_")]
         [SerializeField] private bool useInterval = false;
@@ -40,15 +40,15 @@ namespace Core
                 return;
             }
 
-            if (actionDelay <= 0)
+            if (delay <= 0)
             {
                 callback();
                 return;
             }
 
-            this.WaitSeconds(actionDelay, callback);
+            this.WaitSeconds(delay, callback);
         }
-        private void EmitInternal() => actionEvent?.Invoke();
+        private void EmitInternal() => @event?.Invoke();
 
         private void StartInterval()
         {

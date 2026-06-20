@@ -7,7 +7,7 @@ namespace Core.UI
     using static CoreUtility;
 
     [DisallowMultipleComponent]
-    public class UITextSlider : MonoBehaviour
+    public sealed class UITextSlider : MonoBehaviour
     {
         [Header("_")]
         [SerializeField, Required] private Image slider = null;

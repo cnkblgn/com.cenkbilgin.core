@@ -11,8 +11,8 @@ namespace Core.Audio
     [RequireComponent(typeof(AudioLowPassFilter))]
     public sealed class AudioEmitter : MonoBehaviour
     {
-        public static event Action<AudioEmitter> OnCreated = null;
-        public static event Action<AudioEmitter> OnDestroyed = null;
+        internal static event Action<AudioEmitter> OnCreated = null;
+        internal static event Action<AudioEmitter> OnDestroyed = null;
 
         private const float OCCLUSION_DEPTH = 2;
         private const float OCCLUSION_FACTOR = 1 / (OCCLUSION_DEPTH * 3);
@@ -64,11 +64,7 @@ namespace Core.Audio
         private bool hasFocus = true;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void RESET()
-        {
-            OnCreated = null;
-            OnDestroyed = null;
-        }
+        private static void OnRuntimeInitialize() { OnCreated = null; OnDestroyed = null; }
 
         private void Start() => OnCreated?.Invoke(this);
         private void OnDestroy() => OnDestroyed?.Invoke(this);

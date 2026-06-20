@@ -10,7 +10,7 @@ namespace Core.UI
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Canvas))]
     [RequireComponent(typeof(GraphicRaycaster))]
-    public class UIConfirmationController : MonoBehaviour
+    internal sealed class UIConfirmationController : MonoBehaviour
     {
         [Header("_")]
         [SerializeField] private TextMeshProUGUI confirmationText = null;
@@ -23,6 +23,7 @@ namespace Core.UI
         private Action onAcceptEvent = null;
         private Action onCancelEvent = null;
         private bool isOpened = false;
+        private bool hideCursor = true;
 
         private void Awake()
         {
@@ -39,6 +40,7 @@ namespace Core.UI
             acceptButton.onClick.RemoveListener(OnAcceptButtonClicked);
             cancelButton.onClick.RemoveListener(OnCancelButtonClicked);
         }
+
         private void OnAcceptButtonClicked()
         {
             onAcceptEvent?.Invoke();
@@ -51,32 +53,28 @@ namespace Core.UI
 
             Hide();
         }
-        public void Show(string text, Action onAccept, Action onCancel)
-        {
-            if (onAccept == null)
-            {
-                Debug.LogError("Missing accept event");
-                return;
-            }
 
+        public void Show(in UIConfirmationContext ctx)
+        {
             if (isOpened)
             {
                 return;
             }
 
-            ManagerCoreUI.Instance.ShowCursor();
+            UIManager.Instance.ShowCursor();
 
             thisCanvas.Show();
-            onAcceptEvent = onAccept;
-            onCancelEvent = onCancel;
-            confirmationText.text = text;
+            onAcceptEvent = ctx.OnAccept;
+            onCancelEvent = ctx.OnCancel;
+            confirmationText.text = ctx.Text;
+            hideCursor = ctx.HideCursor;
             isOpened = true;
         }
         public void Hide()
         {
-            if (!ManagerCoreGame.Instance.IsStartingScene() && !ManagerCoreGame.Instance.IsBootstrapScene() && ManagerCoreGame.Instance.GetGameState() != GameState.PAUSE)
+            if (hideCursor)
             {
-                ManagerCoreUI.Instance.HideCursor();
+                UIManager.Instance.HideCursor();
             }
 
             thisCanvas.Hide();

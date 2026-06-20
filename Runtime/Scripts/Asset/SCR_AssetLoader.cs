@@ -5,7 +5,7 @@ namespace Game
 {
     using static CoreUtility;
 
-    public abstract class AssetLoaderMultiple<TDatabase> : MonoBehaviour where TDatabase : ScriptableObject
+    public abstract class AssetLoader<TDatabase> : MonoBehaviour where TDatabase : ScriptableObject
     {
         public abstract string Path { get; }
 

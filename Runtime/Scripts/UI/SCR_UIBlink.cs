@@ -5,7 +5,7 @@ namespace Game
 {
     [DisallowMultipleComponent]
     [RequireComponent(typeof(CanvasGroup))]
-    public class UIBlink : MonoBehaviour
+    public sealed class UIBlink : MonoBehaviour
     {
         [Header("_")]
         [SerializeField] private bool startOnAwake = false;
@@ -30,7 +30,7 @@ namespace Game
                 return;
             }
 
-            if (ManagerCoreGame.Instance.GetGameState() != GameState.RESUME)
+            if (GameManager.Instance.GetGameState() != GameState.RESUME)
             {
                 return;
             }

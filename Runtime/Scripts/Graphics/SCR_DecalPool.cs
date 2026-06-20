@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Core.Graphics
 {
-    public sealed class DecalPool : IPoolHandler<DecalEmitter>
+    internal sealed class DecalPool : IPoolHandler<DecalEmitter>
     {
         public readonly PoolSystem<DecalEmitter> Pool;
   

@@ -35,7 +35,7 @@ namespace Core
 
             if (ACTIVE_TASK_OBJECT == null)
             {
-                ACTIVE_TASK_OBJECT = new GameObject("TASK_UPDATER");
+                ACTIVE_TASK_OBJECT = new GameObject("[Task Updater]") { hideFlags = HideFlags.NotEditable };
                 ACTIVE_TASK_UPDATER = ACTIVE_TASK_OBJECT.AddComponent<Updater>();
                 UnityEngine.Object.DontDestroyOnLoad(ACTIVE_TASK_OBJECT);
             }
@@ -73,7 +73,7 @@ namespace Core
             return true;
         }
 
-        private class Updater : MonoBehaviour
+        private sealed class Updater : MonoBehaviour
         {
             [Header("_")]
 #pragma warning disable CS0414

@@ -4,7 +4,7 @@ namespace Core
 {
     [DisallowMultipleComponent]
     [RequireComponent(typeof(GameEntity))]
-    public class GameEntityEventEmitter : MonoBehaviour
+    public sealed class GameEntityEventEmitter : MonoBehaviour
     {
         private const float EMIT_INTERVAL = 1F;
 

@@ -82,7 +82,7 @@ namespace Game
         public void OnStateChanged(MovementContext ctx) { }
         public void OnBeforeMove()
         {
-            if (ManagerCoreGame.Instance.GetGameState() != GameState.RESUME)
+            if (GameManager.Instance.GetGameState() != GameState.RESUME)
             {
                 return;
             }

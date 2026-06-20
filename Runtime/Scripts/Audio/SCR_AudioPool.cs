@@ -3,7 +3,7 @@ using UnityEngine.Audio;
 
 namespace Core.Audio
 {
-    public sealed class AudioPool : IPoolHandler<AudioEmitter>
+    internal sealed class AudioPool : IPoolHandler<AudioEmitter>
     {
         public readonly PoolSystem<AudioEmitter> Pool;
 

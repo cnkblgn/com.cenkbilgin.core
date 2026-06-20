@@ -15,8 +15,8 @@ namespace Core.UI
 
         private void Awake() => thisTooltip = GetComponent<UIPointerEventTooltip>();
         private void Start() => OnLocalizationChanged(-1);
-        private void OnEnable() => ManagerCoreLocalization.OnLocalizationChanged += OnLocalizationChanged;
-        private void OnDisable() => ManagerCoreLocalization.OnLocalizationChanged -= OnLocalizationChanged;
+        private void OnEnable() => LocalizationDatabase.OnLocalizationChanged += OnLocalizationChanged;
+        private void OnDisable() => LocalizationDatabase.OnLocalizationChanged -= OnLocalizationChanged;
         private void OnLocalizationChanged(int _) => thisTooltip.Initialize(localizedID.Get(), true);
     }
 }

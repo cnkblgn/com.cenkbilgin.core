@@ -6,35 +6,35 @@ namespace Core.Audio
     using static CoreUtility;
 
     [DisallowMultipleComponent]
-    public class AudioPlayer : MonoBehaviour
+    public sealed class AudioPlayer : MonoBehaviour
     {
         public bool IsPlaying => audioObject.IsPlaying;
         public bool IsFading => thisCoroutine != null;
 
         [Header("_")]
-        [SerializeField] protected AudioEmitter audioObject = null;
+        [SerializeField] private AudioEmitter audioObject = null;
 
         [Header("_")]
-        [SerializeField, Required] protected AudioClip audioClip = null;
-        [SerializeField] protected AudioGroup audioGroup = AudioGroup.EFFECT;
+        [SerializeField, Required] private AudioClip audioClip = null;
+        [SerializeField] private AudioGroup audioGroup = AudioGroup.EFFECT;
 
         [Header("_")]
-        [SerializeField] protected bool playOnEnable = false;
-        [SerializeField] protected bool playOnLoop = false;
-        [SerializeField] protected bool useOcculusion = true;
-        [SerializeField] protected bool randomizePitch = false;
-        [SerializeField] protected bool randomizeVolume = false;
+        [SerializeField] private bool playOnEnable = false;
+        [SerializeField] private bool playOnLoop = false;
+        [SerializeField] private bool useOcculusion = true;
+        [SerializeField] private bool randomizePitch = false;
+        [SerializeField] private bool randomizeVolume = false;
 
         [Header("_")]
-        [SerializeField, Range(0, 1), Tooltip("0 - 2D, 1 - 3D")] protected float blend = 1;
-        [SerializeField, Range(0, 1)] protected float volume = 1;
-        [SerializeField, Range(-3, 3)] protected float pitch = 1;
-        [SerializeField, Min(0)] protected float minDistance = 1;
-        [SerializeField, Min(0)] protected float maxDistance = 500;
-        [SerializeField, Min(0)] protected float fadeIn = 0;
-        [SerializeField, Min(0)] protected float fadeOut = 0;
-        [SerializeField, Range(1, 22000f)] protected float lowpass = 22000f;
-        [SerializeField, Range(0, 5)] protected float rezonance = 1;
+        [SerializeField, Range(0, 1), Tooltip("0 - 2D, 1 - 3D")] private float blend = 1;
+        [SerializeField, Range(0, 1)] private float volume = 1;
+        [SerializeField, Range(-3, 3)] private float pitch = 1;
+        [SerializeField, Min(0)] private float minDistance = 1;
+        [SerializeField, Min(0)] private float maxDistance = 500;
+        [SerializeField, Min(0)] private float fadeIn = 0;
+        [SerializeField, Min(0)] private float fadeOut = 0;
+        [SerializeField, Range(1, 22000f)] private float lowpass = 22000f;
+        [SerializeField, Range(0, 5)] private float rezonance = 1;
 
         private Transform thisTransform = null;
         private Coroutine thisCoroutine = null;
@@ -98,7 +98,7 @@ namespace Core.Audio
                     thisTransform = GetComponent<Transform>();
                 }
 
-                ManagerCoreAudio.Instance.PlaySound(clip, audioGroup, thisTransform.position, blend, volume * (randomizeVolume ? Random.Range(0.75f, 1.15f) : 1), pitch * (randomizePitch ? Random.Range(0.9f, 1.1f) : 1), minDistance, maxDistance, useOcculusion);
+                AudioManager.Instance.PlaySound(clip, audioGroup, thisTransform.position, blend, volume * (randomizeVolume ? Random.Range(0.75f, 1.15f) : 1), pitch * (randomizePitch ? Random.Range(0.9f, 1.1f) : 1), minDistance, maxDistance, useOcculusion);
 
                 return;
             }
@@ -115,7 +115,7 @@ namespace Core.Audio
                 FadeIn();
             }
 
-            ManagerCoreAudio m = ManagerCoreAudio.Instance;
+            AudioManager m = AudioManager.Instance;
 
             audioObject.Play
             (

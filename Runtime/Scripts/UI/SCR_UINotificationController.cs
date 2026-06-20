@@ -8,7 +8,7 @@ namespace Core.UI
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Canvas))]
-    public class UINotificationController : MonoBehaviour
+    internal sealed class UINotificationController : MonoBehaviour
     {
         [Header("_")]
         [SerializeField, Range(0, 16)] private int maxSize = 12;
@@ -90,23 +90,23 @@ namespace Core.UI
             Hide();
         }
 
-        private void Show(UINotification entity, string text, float duration)
+        private void Show(UINotification notification, string text, float duration)
         {
-            if (entity == null)
+            if (notification == null)
             {
                 return;
             }
 
-            entity.Show(text, duration);
+            notification.Show(text, duration);
         }
-        private void Hide(UINotification entity)
+        private void Hide(UINotification notification)
         {
-            if (entity == null)
+            if (notification == null)
             {
                 return;
             }
 
-            entity.Hide();
+            notification.Hide();
         }
     }
 }

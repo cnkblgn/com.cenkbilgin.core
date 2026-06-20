@@ -9,15 +9,13 @@ namespace Core.Graphics
     using static CoreUtility;
 
     [DisallowMultipleComponent]
-    public sealed class ManagerCoreGraphics : Manager<ManagerCoreGraphics>
+    public sealed class GraphicsManager : Manager<GraphicsManager>
     {
         public static event Action<Vector2> OnResolutionChanged = null;
 
         [Header("_")]
         [SerializeField, Required] private UniversalRenderPipelineAsset urpPipelineSettings = null;
-#pragma warning disable 0414
         [SerializeField, Required] private UniversalRendererData urpRendererSettings = default;
-#pragma warning restore 0414
         [SerializeField, Required] private Volume volumeController = default;
 
         [Header("_")]
@@ -59,62 +57,28 @@ namespace Core.Graphics
         }
         private void OnEnable()
         {
-            ManagerCoreGame.OnBeforeSceneChanged += OnBeforeSceneChanged;
-            ManagerCoreGame.OnAfterSceneChanged += OnAfterSceneChanged;
+            GameManager.OnBeforeSceneChanged += OnBeforeSceneChanged;
+            GameManager.OnAfterSceneChanged += OnAfterSceneChanged;
         }
         private void OnDisable()
         {
-            ManagerCoreGame.OnBeforeSceneChanged -= OnBeforeSceneChanged;
-            ManagerCoreGame.OnAfterSceneChanged -= OnAfterSceneChanged;
+            GameManager.OnBeforeSceneChanged -= OnBeforeSceneChanged;
+            GameManager.OnAfterSceneChanged -= OnAfterSceneChanged;
         }
-        private void OnApplicationQuit() => urpPipelineSettings.renderScale = 1;
 
 #if UNITY_EDITOR
+        private void OnApplicationQuit() => SetRenderScale(1);
         private void OnValidate()
         {
-            foreach (var item in decalGroup)
+            foreach (DecalGroup group in decalGroup)
             {
-                if (item.Prefab == null)
-                {
-                    continue;
-                }
-
-                item.Name = item.Prefab.name;
+                group.Validate();
             }
         }
 #endif
 
         private void OnBeforeSceneChanged(string scene) { ResetDecalPool(); ResetParticlePool(); }
         private void OnAfterSceneChanged(string scene) { }
-
-        private void InitializeDecalPool()
-        {
-            foreach (DecalGroup group in decalGroup)
-            {
-                decalPool[group.Prefab.name] = new(PoolType.RING_BUFFER, group.Prefab, decalContainer, group.Count);
-            }
-        }
-        private void ResetDecalPool()
-        {
-            foreach (DecalPool pool in decalPool.Values)
-            {
-                pool.Pool.Reset(true, true);
-            }
-        }
-        private void InitializeParticlePool()
-        {
-            foreach (ParticleEmitter emitter in particleGroup)
-            {
-                particlePool[emitter.name] = new(PoolType.SINGLE, emitter, particleContainer, 1);
-            }
-        }
-        private void ResetParticlePool()
-        {
-            foreach (ParticlePool pool in particlePool.Values)
-            {
-                pool.Pool.Reset(false, true);
-            }
-        }
 
         public ParticleEmitter SpawnParticle(ParticleEmitter particle, Vector3 position, Vector3 direction)
         {
@@ -146,6 +110,21 @@ namespace Core.Graphics
 
             return SpawnParticle(particle[UnityEngine.Random.Range(0, particle.Length)], position, direction);
         }
+        private void InitializeParticlePool()
+        {
+            foreach (ParticleEmitter emitter in particleGroup)
+            {
+                particlePool[emitter.name] = new(PoolType.SINGLE, emitter, particleContainer, 1);
+            }
+        }
+        private void ResetParticlePool()
+        {
+            foreach (ParticlePool pool in particlePool.Values)
+            {
+                pool.Pool.Reset(false, true);
+            }
+        }
+
         public DecalEmitter SpawnDecal(DecalEmitter decal, Transform parent, Vector3 position, Quaternion rotation, float scale)
         {
             if (decal == null)
@@ -175,6 +154,20 @@ namespace Core.Graphics
             }
 
             return SpawnDecal(decal[UnityEngine.Random.Range(0, decal.Length)], parent, position, rotation, scale);
+        }
+        private void InitializeDecalPool()
+        {
+            foreach (DecalGroup group in decalGroup)
+            {
+                decalPool[group.Prefab.name] = new(PoolType.RING_BUFFER, group.Prefab, decalContainer, group.Count);
+            }
+        }
+        private void ResetDecalPool()
+        {
+            foreach (DecalPool pool in decalPool.Values)
+            {
+                pool.Pool.Reset(true, true);
+            }
         }
 
         public bool GetVolumeComponent<T>(out T component) where T : VolumeComponent => volumeController.profile.TryGet(typeof(T), out component);

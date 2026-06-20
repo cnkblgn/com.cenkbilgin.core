@@ -197,7 +197,7 @@ namespace Game
         }
         private void Update()
         {
-            if (ManagerCoreGame.Instance.GetGameState() != GameState.RESUME)
+            if (GameManager.Instance.GetGameState() != GameState.RESUME)
             {
                 return;
             }

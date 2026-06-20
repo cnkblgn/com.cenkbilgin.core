@@ -7,7 +7,7 @@ namespace Core.UI
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(RectTransform))]
-    public class UINotification : MonoBehaviour
+    internal sealed class UINotification : MonoBehaviour
     {
         public bool IsActive => isActive;
         public bool IsInitialized => isInitialized;

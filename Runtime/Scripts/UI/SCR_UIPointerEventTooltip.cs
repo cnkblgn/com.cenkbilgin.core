@@ -68,7 +68,7 @@ namespace Core.UI
                 return;
             }
 
-            ManagerCoreUI.Instance.MoveTooltip(eventData.position);
+            UIManager.Instance.MoveTooltip(eventData.position);
         }
         private Vector3 GetPosition()
         {
@@ -101,7 +101,7 @@ namespace Core.UI
                 return;
             }
 
-            ManagerCoreUI.Instance.ShowTooltip(baseText + runtimeText, position ?? GetPosition());
+            UIManager.Instance.ShowTooltip(baseText + runtimeText, position ?? GetPosition());
             isOpened = true;
         }
         public virtual void Hide()
@@ -111,7 +111,7 @@ namespace Core.UI
                 return;
             }
 
-            ManagerCoreUI.Instance.HideTooltip();
+            UIManager.Instance.HideTooltip();
             isOpened = false;
         }
     }

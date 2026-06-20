@@ -15,18 +15,9 @@ namespace Core.Localization
 
         public LocalizedString(string key) => this.key = key;
 
-        public readonly string Get()
-        {
-            return ManagerCoreLocalization.HasInstance ? ManagerCoreLocalization.Instance.Get(key) : STRING_NULL;
-        }
-        public readonly string Get(string arg0)
-        {
-            return ManagerCoreLocalization.HasInstance ? ManagerCoreLocalization.Instance.Get(key, arg0) : STRING_NULL;
-        }
-        public readonly string Get(params object[] args)
-        {
-            return ManagerCoreLocalization.HasInstance ? ManagerCoreLocalization.Instance.Get(key, args) : STRING_NULL;
-        }
+        public readonly string Get() => LocalizationDatabase.GetString(key);
+        public readonly string Get(string arg0) => LocalizationDatabase.GetString(key, arg0);
+        public readonly string Get(params object[] args) => LocalizationDatabase.GetString(key, args);
 
         public readonly override string ToString() => Get();
     }

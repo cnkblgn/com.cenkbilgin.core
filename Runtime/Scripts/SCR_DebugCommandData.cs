@@ -199,7 +199,7 @@ namespace Core
         }
         private static void CMDTimescale(float scale)
         {
-            ManagerCoreGame.Instance.WaitUntil(WaitResume, () => ManagerCoreGame.Instance.SetTimeScale(scale));
+            GameManager.Instance.WaitUntil(WaitResume, () => GameManager.Instance.SetTimeScale(scale));
             DebugCommandLogger.Log($"Current Timescale: {scale.ToString().ToYellow()}");
         }
     }

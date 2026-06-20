@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 
 namespace Core.UI
 {
-    public class UIPointerEventExecuteParent : UIPointerEvent
+    public sealed class UIPointerEventExecuteParent : UIPointerEvent
     {
         [Header("_")]
         [SerializeField] private GameObject targetObject = null;

@@ -11,7 +11,7 @@ namespace Core
     using static CoreUtility;
 
     [DisallowMultipleComponent]
-    public sealed class ManagerCoreGame : Manager<ManagerCoreGame>
+    public sealed class GameManager : Manager<GameManager>
     {
         public static event Action<GameState> OnGameStateChanged = null;
         public static event Action<float> OnCurrentSceneLoading = null;
@@ -173,14 +173,15 @@ namespace Core
             OnTimeScaleChanged?.Invoke(Time.timeScale);
         }
 
-        public string[] GetAllScenes() => playableScenes;
+        private bool GetIsValidScene(string scene) => buildScenes.Any(s => s == scene);
+        public string[] GetScenes() => playableScenes;
         public string GetStartingScene() => startingScene.Name;
         public string GetCurrentScene() => activeScene;    
         public void SetCurrentScene(string scene) => SetCurrentScene(scene, LoadSceneMode.Single);
         public void SetCurrentScene(string scene, Action onStartAction = null, Action onFinishAction = null) => SetCurrentScene(scene, LoadSceneMode.Single, onStartAction, onFinishAction);
         public void SetCurrentScene(string scene, LoadSceneMode mode, Action onStartAction = null, Action onFinishAction = null)
         {
-            if (!IsValidScene(scene))
+            if (!GetIsValidScene(scene))
             {
                 return;
             }
@@ -220,9 +221,5 @@ namespace Core
             OnAfterSceneChanged?.Invoke(scene);
             SetGameState(GameState.RESUME, true);
         }
-
-        public bool IsValidScene(string scene) => buildScenes.Any(s => s == scene);
-        public bool IsStartingScene() => GetCurrentScene() == GetStartingScene();
-        public bool IsBootstrapScene() => GetCurrentScene() == CoreBootstrapper.SCENE_NAME;
     }
 }

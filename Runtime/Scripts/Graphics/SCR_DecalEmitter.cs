@@ -8,7 +8,7 @@ namespace Core.Graphics
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(DecalProjector))]
-    public class DecalEmitter : MonoBehaviour
+    public sealed class DecalEmitter : MonoBehaviour
     {
         public DecalProjector ThisProjector => thisProjector;
         public Transform ThisTransform => thisTransform;

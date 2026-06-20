@@ -69,7 +69,7 @@ namespace Game
         }
         private void Update()
         {
-            if (ManagerCoreGame.Instance.IsLoading)
+            if (GameManager.Instance.IsLoading)
             {
                 return;
             }
@@ -153,7 +153,7 @@ namespace Game
             Application.logMessageReceived += OnUnityLogReceived;
             DebugCommandLogger.OnLogReceived += OnCommandLogReceived;
             DebugCommandLogger.OnLogCleared += OnCommandLogCleared;
-            ManagerCoreGame.OnBeforeSceneChanged += OnBeforeSceneChanged;
+            GameManager.OnBeforeSceneChanged += OnBeforeSceneChanged;
 
             consoleInputField.onSubmit.AddListener(OnSubmit);
             consoleInputField.onValueChanged.AddListener(OnInput);
@@ -163,7 +163,7 @@ namespace Game
             Application.logMessageReceived -= OnUnityLogReceived;
             DebugCommandLogger.OnLogReceived -= OnCommandLogReceived;
             DebugCommandLogger.OnLogCleared -= OnCommandLogCleared;
-            ManagerCoreGame.OnBeforeSceneChanged -= OnBeforeSceneChanged;
+            GameManager.OnBeforeSceneChanged -= OnBeforeSceneChanged;
 
             consoleInputField.onSubmit.RemoveListener(OnSubmit);
             consoleInputField.onValueChanged.RemoveListener(OnInput);
@@ -223,8 +223,8 @@ namespace Game
             thisCanvas.Show();
             consoleInputField.ActivateInputField();
 
-            previousInputMap = ManagerCoreInput.Instance.GetMap();
-            ManagerCoreInput.Instance.SwitchMap(InputDatabase.UIMap);
+            previousInputMap = InputManager.Instance.GetMap();
+            InputManager.Instance.SwitchMap(InputDatabase.UIMap);
 
             OnOpened?.Invoke();
         }
@@ -237,7 +237,7 @@ namespace Game
             requestSuggestionDraw = false;
             ClearSuggestion();
 
-            if (!string.IsNullOrEmpty(previousInputMap)) ManagerCoreInput.Instance.SwitchMap(new(previousInputMap));
+            if (!string.IsNullOrEmpty(previousInputMap)) InputManager.Instance.SwitchMap(new(previousInputMap));
 
             OnClosed?.Invoke();
         }

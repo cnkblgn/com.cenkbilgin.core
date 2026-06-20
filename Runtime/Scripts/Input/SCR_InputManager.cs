@@ -10,7 +10,7 @@ namespace Core.Input
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(PlayerInput))]
-    public sealed class ManagerCoreInput : Manager<ManagerCoreInput>
+    public sealed class InputManager : Manager<InputManager>
     {
         public Vector3 PointerPosition { get; private set; } = Vector3.zero;
         public Vector2 PointerScroll { get; private set; } = Vector3.zero;

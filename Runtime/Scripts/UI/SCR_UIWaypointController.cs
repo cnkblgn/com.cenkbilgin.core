@@ -8,17 +8,17 @@ namespace Core.UI
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Canvas))]
-    public class UIWaypointController : MonoBehaviour
+    internal sealed class UIWaypointController : MonoBehaviour
     {
         [Header("_")]
-        [SerializeField, Required] private UIWaypoint waypointTemplate = null;
+        [SerializeField, Required] private UIWaypointView waypointTemplate = null;
 
         private Canvas thisCanvas = null;
         private RectTransform thisTransform = null;
         private Camera cameraController = null;
         private Transform cameraTransform = null;
         private UIWaypointPool waypointPool = null;
-        private readonly Dictionary<Guid, UIWaypoint> waypointTable = new();
+        private readonly Dictionary<Guid, UIWaypointView> waypointTable = new();
         private bool isOpened = false;
 
         private void Awake()
@@ -38,7 +38,7 @@ namespace Core.UI
 
             for (int i = 0; i < waypointPool.Pool.TotalCount; i++)
             {
-                if (waypointPool.Pool.TryGet(i, out UIWaypoint entity) && !entity.gameObject.activeSelf)
+                if (waypointPool.Pool.TryGet(i, out UIWaypointView entity) && !entity.gameObject.activeSelf)
                 {
                     continue;
                 }
@@ -54,7 +54,7 @@ namespace Core.UI
 
         public void Show(in UIWaypointData data, Vector3 offset, Camera camera, Func<bool> destroyUntil)
         {
-            UIWaypoint entity = waypointPool.Spawn(data, offset, destroyUntil);
+            UIWaypointView entity = waypointPool.Spawn(data, offset, destroyUntil);
 
             Guid id = data.ID;
 
@@ -96,7 +96,7 @@ namespace Core.UI
         }
         public void Hide(in Guid id)
         {
-            if (!waypointTable.TryGetValue(id, out UIWaypoint entity))
+            if (!waypointTable.TryGetValue(id, out UIWaypointView entity))
             {
                 Debug.Log($"waypoint [{id}] not found!");
                 return;

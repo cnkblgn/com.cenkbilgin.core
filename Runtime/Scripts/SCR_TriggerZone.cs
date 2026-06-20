@@ -7,7 +7,7 @@ namespace Core
 {
     [SelectionBase]
     [RequireComponent(typeof(Collider))]
-    public class TriggerZone : MonoBehaviour
+    public sealed class TriggerZone : MonoBehaviour
     {
         public event Action<TriggerContext> OnStateChanged = null;
 

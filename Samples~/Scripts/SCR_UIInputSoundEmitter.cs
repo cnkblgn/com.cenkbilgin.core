@@ -25,7 +25,7 @@ namespace Game
         {
             if (Time.time - lastTime >= cooldown)
             {
-                ManagerCoreAudio.Instance.PlaySound(sounds, AudioGroup.MASTER, Vector3.zero, 0, 1, 1, 1, 10, false);
+                AudioManager.Instance.PlaySound(sounds, AudioGroup.MASTER, Vector3.zero, 0, 1, 1, 1, 10, false);
                 lastTime = Time.time;
             }
         }

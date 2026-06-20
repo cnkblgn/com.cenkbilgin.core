@@ -8,7 +8,7 @@ namespace Core.Graphics
     [DisallowMultipleComponent]
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(Renderer))]
-    public class Paintable : MonoBehaviour
+    public sealed class Paintable : MonoBehaviour
     {
         [Header("_")]
         [SerializeField] private bool showGizmosCells = false;

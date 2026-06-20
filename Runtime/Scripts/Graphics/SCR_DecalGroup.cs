@@ -6,10 +6,11 @@ namespace Core.Graphics
     using static CoreUtility;
 
     [Serializable]
-    public class DecalGroup
+    internal sealed class DecalGroup
     {
 #if UNITY_EDITOR
-        [field: SerializeField, HideInInspector] public string Name { get; set; } = "Object";
+        [field: SerializeField, HideInInspector] private string Name { get; set; } = "Object";
+        public void Validate() => Name = Prefab != null ? Prefab.name : STRING_NULL;
 #endif
 
         [Required] public DecalEmitter Prefab = null;

@@ -243,8 +243,6 @@ namespace Core.UI
         public static float GetCanvasAlpha(this Image image) => image.canvasRenderer.GetAlpha();
         public static void SetCanvasAlpha(this Image image, float alpha) => image.canvasRenderer.SetAlpha(alpha);
 
-
-
         public static void Schedule(this TaskInstanceTweenFadeCanvas task, float start, float target)
         {
             task.Reset();

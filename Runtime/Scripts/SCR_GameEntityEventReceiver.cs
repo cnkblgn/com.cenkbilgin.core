@@ -5,7 +5,7 @@ namespace Core
 {
     [DisallowMultipleComponent]
     [RequireComponent(typeof(GameEntity))]
-    public class GameEntityEventReceiver : MonoBehaviour
+    public sealed class GameEntityEventReceiver : MonoBehaviour
     {
         public event Action<GameEntityEventEmitter> OnEventReceived = null;
 

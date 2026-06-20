@@ -7,7 +7,7 @@ namespace Core.UI
     using static CoreUtility;
 
     [RequireComponent(typeof(Image))]
-    public class UIPointerEventHighlight : UIPointerEvent
+    public sealed class UIPointerEventHighlight : UIPointerEvent
     {
         [Header("_")]
         [SerializeField] private Color highlightColor = COLOR_YELLOW;

@@ -70,7 +70,7 @@ namespace Game
                 return;
             }
 
-            ManagerCoreAudio.Instance.PlaySound(clip, AudioGroup.MASTER, Vector3.zero, 0, 1, 1, 1, 1, false);
+            AudioManager.Instance.PlaySound(clip, AudioGroup.MASTER, Vector3.zero, 0, 1, 1, 1, 1, false);
         }
     }
 }

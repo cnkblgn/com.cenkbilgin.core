@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Core.Audio
 {
-    public class SetAudioVolume : MonoBehaviour
+    public sealed class SetAudioVolume : MonoBehaviour
     {
         [Header("_")]
         [SerializeField] private AudioGroup group = AudioGroup.GAME;
@@ -47,28 +47,13 @@ namespace Core.Audio
 
         private float Get()
         {
-            return group switch
-            {
-                AudioGroup.MASTER => ManagerCoreAudio.Instance.GetMasterVolumeMult(),
-                AudioGroup.MISC => ManagerCoreAudio.Instance.GetMiscVolumeMult(),
-                AudioGroup.EFFECT => ManagerCoreAudio.Instance.GetEffectsVolumeMult(),
-                AudioGroup.AMBIENT => ManagerCoreAudio.Instance.GetAmbientVolumeMult(),
-                AudioGroup.MUSIC => ManagerCoreAudio.Instance.GetMusicVolumeMult(),
-                AudioGroup.GAME => ManagerCoreAudio.Instance.GetGameVolumeMult(),
-                _ => 1,
-            };
+            AudioManager.Instance.GetVolume(group, out float _, out float _, out float multiplier);
+
+            return multiplier;
         }
         private void Set(float value)
         {
-            switch (group)
-            {
-                case AudioGroup.MASTER: ManagerCoreAudio.Instance.SetMasterVolumeMult(value); break;
-                case AudioGroup.MISC: ManagerCoreAudio.Instance.SetMiscVolumeMult(value); break;
-                case AudioGroup.EFFECT: ManagerCoreAudio.Instance.SetEffectsVolumeMult(value); break;
-                case AudioGroup.AMBIENT: ManagerCoreAudio.Instance.SetAmbientVolumeMult(value); break;
-                case AudioGroup.MUSIC: ManagerCoreAudio.Instance.SetMusicVolumeMult(value); break;
-                case AudioGroup.GAME: ManagerCoreAudio.Instance.SetGameVolumeMult(value); break;
-            }
+            AudioManager.Instance.SetVolumeMult(group, value);
         }
     }
 }

@@ -5,7 +5,7 @@ namespace Core.UI
 {
     using static CoreUtility;
 
-    public class UITextBox : MonoBehaviour
+    public sealed class UITextBox : MonoBehaviour
     {
         public string Text { get; private set; } = STRING_EMPTY;
 

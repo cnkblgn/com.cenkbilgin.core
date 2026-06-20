@@ -10,7 +10,7 @@ namespace Core.Audio
     using Random = UnityEngine.Random;
 
     [DisallowMultipleComponent]
-    public class ManagerCoreAudio : Manager<ManagerCoreAudio>
+    public class AudioManager : Manager<AudioManager>
     {
         public Transform AudioListener
         {
@@ -34,8 +34,24 @@ namespace Core.Audio
             }
         }
 
+        private const string LOWPASS_MASTER = "MasterLowpassFrequency";
+        private const string LOWPASS_GAME = "GaöeLowpassFrequency";
+        private const string LOWPASS_MUSIC = "MusicLowpassFrequency";
+        private const string LOWPASS_MISC = "MiscLowpassFrequency";
+        private const string LOWPASS_EFFECT = "EffectLowpassFrequency";
         private const string LOWPASS_AMBIENT = "AmbientLowpassFrequency";
-        private const string LOWPASS_EFFECTS = "EffectLowpassFrequency";
+        private const string VOLUME_MASTER = "MasterVolume";
+        private const string VOLUME_GAME = "GameVolume";
+        private const string VOLUME_MUSIC = "MusicVolume";
+        private const string VOLUME_MISC = "MiscVolume";
+        private const string VOLUME_EFFECT = "EffectVolume";
+        private const string VOLUME_AMBIENT = "AmbientVolume";
+        private const string PITCH_MASTER = "MasterPitch";
+        private const string PITCH_GAME = "GamePitch";
+        private const string PITCH_MUSIC = "MusicPitch";
+        private const string PITCH_MISC = "MiscPitch";
+        private const string PITCH_EFFECT = "EffectPitch";
+        private const string PITCH_AMBIENT = "AmbientPitch";
         private const string REVERB_LF_REFERENCE = "EffectReverbLFReference";
         private const string REVERB_ROOM_LF = "EffectReverbRoomLF";
         private const string REVERB_HF_REFERENCE = "EffectReverbHFReference";
@@ -49,18 +65,6 @@ namespace Core.Audio
         private const string REVERB_DECAY_HF_RATIO = "EffectReverbDecayHFRatio";
         private const string REVERB_DECAY_TIME = "EffectReverbDecayTime";
         private const string REVERB_ROOM = "EffectReverbRoom";
-        private const string VOLUME_MASTER = "MasterVolume";
-        private const string VOLUME_GAME = "GameVolume";
-        private const string VOLUME_MUSIC = "MusicVolume";
-        private const string VOLUME_MISC = "MiscVolume";
-        private const string VOLUME_EFFECT = "EffectVolume";
-        private const string VOLUME_AMBIENT = "AmbientVolume";
-        private const string PITCH_MASTER = "MasterPitch";
-        private const string PITCH_GAME = "GamePitch";
-        private const string PITCH_MUSIC = "MusicPitch";
-        private const string PITCH_MISC = "MiscPitch";
-        private const string PITCH_EFFECT = "EffectPitch";
-        private const string PITCH_AMBIENT = "AmbientPitch";
 
         public AnimationCurve OcclusionLowpass => occlusionLowpass;
         public AnimationCurve OcclusionVolume => occlusionVolume;
@@ -96,32 +100,36 @@ namespace Core.Audio
         private Transform audioListener = null;
         private AudioReverbZone audioLastReverbZone = null;
         private Coroutine audioCoroutineReverb = null;
-        private Coroutine audioCoroutineLowpassEffects = null;
-        private Coroutine audioCoroutineLowpassAmbient = null;
         private float masterVolumeBase = 1;
         private float masterVolumeMult = 1;
         private float masterPitchBase = 1;
         private float masterPitchMult = 1;
+        private float masterLowpass = 22000f;
         private float gameVolumeBase = 1;
         private float gameVolumeMult = 1;
         private float gamePitchBase = 1;
         private float gamePitchMult = 1;
+        private float gameLowpass = 22000f;
         private float musicVolumeBase = 1;
         private float musicVolumeMult = 1;
         private float musicPitchBase = 1;
         private float musicPitchMult = 1;
+        private float musicLowpass = 22000f;
         private float miscVolumeBase = 1;
         private float miscVolumeMult = 1;
         private float miscPitchBase = 1;
         private float miscPitchMult = 1;
+        private float miscLowpass = 22000f;
         private float effectsVolumeBase = 1;
         private float effectsVolumeMult = 1;
         private float effectsPitchBase = 1;
         private float effectsPitchMult = 1;
+        private float effectsLowpass = 22000f;
         private float ambientVolumeBase = 1;
         private float ambientVolumeMult = 1;
         private float ambientPitchBase = 1;
         private float ambientPitchMult = 1;
+        private float ambientLowpass = 22000f;
         private int updateEmitterIndex = 0;
 
         protected override void Awake()
@@ -172,20 +180,20 @@ namespace Core.Audio
             AudioEmitter.OnCreated += OnEmitterCreated;
             AudioEmitter.OnDestroyed += OnEmitterDestroyed;
 
-            ManagerCoreGame.OnGameStateChanged += OnGameStateChanged;
-            ManagerCoreGame.OnBeforeSceneChanged += OnBeforeSceneChanged;
-            ManagerCoreGame.OnAfterSceneChanged += OnAfterSceneChanged;
-            ManagerCoreGame.OnTimeScaleChanged += OnTimeScaleChanged;
+            GameManager.OnGameStateChanged += OnGameStateChanged;
+            GameManager.OnBeforeSceneChanged += OnBeforeSceneChanged;
+            GameManager.OnAfterSceneChanged += OnAfterSceneChanged;
+            GameManager.OnTimeScaleChanged += OnTimeScaleChanged;
         }
         private void OnDisable()
         {
             AudioEmitter.OnCreated -= OnEmitterCreated;
             AudioEmitter.OnDestroyed -= OnEmitterDestroyed;
 
-            ManagerCoreGame.OnGameStateChanged -= OnGameStateChanged;
-            ManagerCoreGame.OnBeforeSceneChanged -= OnBeforeSceneChanged;
-            ManagerCoreGame.OnAfterSceneChanged -= OnAfterSceneChanged;
-            ManagerCoreGame.OnTimeScaleChanged -= OnTimeScaleChanged;
+            GameManager.OnGameStateChanged -= OnGameStateChanged;
+            GameManager.OnBeforeSceneChanged -= OnBeforeSceneChanged;
+            GameManager.OnAfterSceneChanged -= OnAfterSceneChanged;
+            GameManager.OnTimeScaleChanged -= OnTimeScaleChanged;
         }
 
         private void OnEmitterCreated(AudioEmitter emitter)
@@ -225,30 +233,34 @@ namespace Core.Audio
         {
             ResetPool();
 
-            SetMasterPitchMult(1);
-            SetGamePitchMult(1);
-            SetMusicPitchMult(1);
-            SetEffectsPitchMult(1);
-            SetMiscPitchMult(1);
-            SetAmbientPitchMult(1);
+            SetPitchMult(AudioGroup.MASTER, 1);
+            SetPitchMult(AudioGroup.GAME, 1);
+            SetPitchMult(AudioGroup.MUSIC, 1);
+            SetPitchMult(AudioGroup.EFFECT, 1);
+            SetPitchMult(AudioGroup.MISC, 1);
+            SetPitchMult(AudioGroup.AMBIENT, 1);
 
-            SetMasterVolumeMult(1);
-            SetGameVolumeMult(1);
-            SetMusicVolumeMult(1);
-            SetEffectsVolumeMult(1);
-            SetMiscVolumeMult(1);
-            SetAmbientVolumeMult(1);
+            SetVolumeMult(AudioGroup.MASTER, 1);
+            SetVolumeMult(AudioGroup.GAME, 1);
+            SetVolumeMult(AudioGroup.MUSIC, 1);
+            SetVolumeMult(AudioGroup.EFFECT, 1);
+            SetVolumeMult(AudioGroup.MISC, 1);
+            SetVolumeMult(AudioGroup.AMBIENT, 1);
 
-            SetLowpassEffects(22000f, 0);
-            SetLowpassAmbient(22000f, 0);
+            SetLowpass(AudioGroup.MASTER, 22000f);
+            SetLowpass(AudioGroup.GAME, 22000f);
+            SetLowpass(AudioGroup.MUSIC, 22000f);
+            SetLowpass(AudioGroup.EFFECT, 22000f);
+            SetLowpass(AudioGroup.MISC, 22000f);
+            SetLowpass(AudioGroup.AMBIENT, 22000f);
         }
         private void OnAfterSceneChanged(string scene) { }
         private void OnTimeScaleChanged(float timeScale)
         {
-            switch (ManagerCoreGame.Instance.GetGameState())
+            switch (GameManager.Instance.GetGameState())
             {
                 case GameState.RESUME:
-                    SetEffectsPitchMult(timeScale);
+                    SetPitchMult(AudioGroup.EFFECT, timeScale);
                     break;
                 case GameState.PAUSE:
                     break;
@@ -303,7 +315,7 @@ namespace Core.Audio
         }
         public AudioGroup GetAudioGroup(string group)
         {
-            return audioGroups.TryGetValue(group, out AudioGroup val) ? val : AudioGroup.MASTER;
+            return audioGroups.TryGetValue(group, out AudioGroup value) ? value : AudioGroup.MASTER;
         }
         public AudioMixerGroup GetAudioGroup(AudioGroup group)
         {
@@ -319,81 +331,328 @@ namespace Core.Audio
             };
         }
 
-        public float GetLowpass(AudioGroup group)
+        public void GetLowpass(AudioGroup group, out float current)
         {
-            if (group != AudioGroup.EFFECT || group != AudioGroup.AMBIENT)
+            current = group switch
             {
-                return 22000;
+                AudioGroup.MASTER => masterLowpass,
+                AudioGroup.MISC => miscLowpass,
+                AudioGroup.EFFECT => effectsLowpass,
+                AudioGroup.AMBIENT => ambientLowpass,
+                AudioGroup.MUSIC => musicLowpass,
+                AudioGroup.GAME => gameLowpass,
+                _ => 1,
+            };
+        }
+        public void SetLowpass(AudioGroup group, float value)
+        {
+            string target = STRING_NULL;
+            float frequency = 1;
+
+            switch (group)
+            {
+                case AudioGroup.MASTER:
+                    target = LOWPASS_MASTER;
+                    frequency = masterLowpass = value;
+                    break;
+                case AudioGroup.MISC:
+                    target = LOWPASS_MISC;
+                    frequency = miscLowpass = value;
+                    break;
+                case AudioGroup.EFFECT:
+                    target = LOWPASS_EFFECT;
+                    frequency = effectsLowpass = value;
+                    break;
+                case AudioGroup.AMBIENT:
+                    target = LOWPASS_AMBIENT;
+                    frequency = ambientLowpass = value;
+                    break;
+                case AudioGroup.MUSIC:
+                    target = LOWPASS_MUSIC;
+                    frequency = musicLowpass = value;
+                    break;
+                case AudioGroup.GAME:
+                    target = LOWPASS_GAME;
+                    frequency = gameLowpass = value;
+                    break;
+                default:
+                    break;
             }
 
-            string name = group == AudioGroup.EFFECT ? LOWPASS_EFFECTS : LOWPASS_AMBIENT;
-
-            audioMixer.GetFloat(name, out float startLowpassFrequency);
-
-            return startLowpassFrequency;
+            audioMixer.SetFloat(target, Mathf.Clamp(frequency, 0, 22000.00f));
         }
-        public void SetLowpass(float frequency, float fadeTime, AudioGroup group)
+
+        public void GetPitch(AudioGroup group, out float current, out float @base, out float multiplier)
         {
             switch (group)
             {
                 case AudioGroup.MASTER:
+                    current = masterPitchBase * masterPitchMult;
+                    @base = masterPitchBase;
+                    multiplier = masterPitchMult;
+                    break;
+                case AudioGroup.MISC:
+                    current = miscPitchBase * miscPitchMult;
+                    @base = miscPitchBase;
+                    multiplier = miscPitchMult;
                     break;
                 case AudioGroup.EFFECT:
-                    SetLowpassEffects(frequency, fadeTime);
+                    current = effectsPitchBase * effectsPitchMult;
+                    @base = effectsPitchBase;
+                    multiplier = effectsPitchMult;
                     break;
                 case AudioGroup.AMBIENT:
-                    SetLowpassAmbient(frequency, fadeTime);
+                    current = ambientPitchBase * ambientPitchMult;
+                    @base = ambientPitchBase;
+                    multiplier = ambientPitchMult;
                     break;
                 case AudioGroup.MUSIC:
+                    current = musicPitchBase * musicPitchMult;
+                    @base = musicPitchBase;
+                    multiplier = musicPitchMult;
+                    break;
+                case AudioGroup.GAME:
+                    current = gamePitchBase * gamePitchMult;
+                    @base = gamePitchBase;
+                    multiplier = gamePitchMult;
+                    break;
+                default:
+                    current = 1;
+                    @base = 1;
+                    multiplier = 1;
                     break;
             }
         }
-        private IEnumerator SetLowpassInternal(string name, float frequency, float fadeTime)
+        public float GetPitch(string group)
         {
-            float endLowpassFrequency = frequency;
+            audioMixer.GetFloat(group, out float pitch);
 
-            audioMixer.GetFloat(name, out float startLowpassFrequency);
+            return pitch;
+        }
+        private void SetPitch(string group, float value) => audioMixer.SetFloat(group, value);
+        public void SetPitchBase(AudioGroup group, float value)
+        {
+            string target = STRING_NULL;
+            float @base = 1;
+            float mult = 1;
 
-            for (float timer = 0; timer < fadeTime; timer += Time.deltaTime)
+            switch (group)
             {
-                audioMixer.SetFloat(name, Mathf.Lerp(startLowpassFrequency, endLowpassFrequency, timer / fadeTime));
-                yield return null;
+                case AudioGroup.MASTER:
+                    target = PITCH_MASTER;
+                    @base = masterPitchBase = value;
+                    mult = masterPitchMult;
+                    break;
+                case AudioGroup.MISC:
+                    target = PITCH_MISC;
+                    @base = miscPitchBase = value;
+                    mult = miscPitchMult;
+                    break;
+                case AudioGroup.EFFECT:
+                    target = PITCH_EFFECT;
+                    @base = effectsPitchBase = value;
+                    mult = effectsPitchMult;
+                    break;
+                case AudioGroup.AMBIENT:
+                    target = PITCH_AMBIENT;
+                    @base = ambientPitchBase = value;
+                    mult = ambientPitchMult;
+                    break;
+                case AudioGroup.MUSIC:
+                    target = PITCH_MUSIC;
+                    @base = musicPitchBase = value;
+                    mult = musicPitchMult;
+                    break;
+                case AudioGroup.GAME:
+                    target = PITCH_GAME;
+                    @base = gamePitchBase = value;
+                    mult = gamePitchMult;
+                    break;
+                default:
+                    break;
             }
 
-            audioMixer.SetFloat(name, Mathf.Clamp(endLowpassFrequency, 0, 22000.00f));
+            SetPitch(target, @base * mult);
+        }
+        public void SetPitchMult(AudioGroup group, float value)
+        {
+            string target = STRING_NULL;
+            float @base = 1;
+            float mult = 1;
+
+            switch (group)
+            {
+                case AudioGroup.MASTER:
+                    target = PITCH_MASTER;
+                    @base = masterPitchBase;
+                    mult = masterPitchMult = value;
+                    break;
+                case AudioGroup.MISC:
+                    target = PITCH_MISC;
+                    @base = miscPitchBase;
+                    mult = miscPitchMult = value;
+                    break;
+                case AudioGroup.EFFECT:
+                    target = PITCH_EFFECT;
+                    @base = effectsPitchBase;
+                    mult = effectsPitchMult = value;
+                    break;
+                case AudioGroup.AMBIENT:
+                    target = PITCH_AMBIENT;
+                    @base = ambientPitchBase;
+                    mult = ambientPitchMult = value;
+                    break;
+                case AudioGroup.MUSIC:
+                    target = PITCH_MUSIC;
+                    @base = musicPitchBase;
+                    mult = musicPitchMult = value;
+                    break;
+                case AudioGroup.GAME:
+                    target = PITCH_GAME;
+                    @base = gamePitchBase;
+                    mult = gamePitchMult = value;
+                    break;
+                default:
+                    break;
+            }
+
+            SetPitch(target, @base * mult);
         }
 
-        private void SetLowpassAmbient(float frequency, float fadeTime)
+        public void GetVolume(AudioGroup group, out float current, out float @base, out float multiplier)
         {
-            if (audioCoroutineLowpassAmbient != null)
+            switch (group)
             {
-                StopCoroutine(audioCoroutineLowpassAmbient);
-                audioCoroutineLowpassAmbient = null;
+                case AudioGroup.MASTER:
+                    current = masterVolumeBase * masterVolumeMult;
+                    @base = masterVolumeBase;
+                    multiplier = masterVolumeMult;
+                    break;
+                case AudioGroup.MISC:
+                    current = miscVolumeBase * miscVolumeMult;
+                    @base = miscVolumeBase;
+                    multiplier = miscVolumeMult;
+                    break;
+                case AudioGroup.EFFECT:
+                    current = effectsVolumeBase * effectsVolumeMult;
+                    @base = effectsVolumeBase;
+                    multiplier = effectsVolumeMult;
+                    break;
+                case AudioGroup.AMBIENT:
+                    current = ambientVolumeBase * ambientVolumeMult;
+                    @base = ambientVolumeBase;
+                    multiplier = ambientVolumeMult;
+                    break;
+                case AudioGroup.MUSIC:
+                    current = musicVolumeBase * musicVolumeMult;
+                    @base = musicVolumeBase;
+                    multiplier = musicVolumeMult;
+                    break;
+                case AudioGroup.GAME:
+                    current = gameVolumeBase * gameVolumeMult;
+                    @base = gameVolumeBase;
+                    multiplier = gameVolumeMult;
+                    break;
+                default:
+                    current = 1;
+                    @base = 1;
+                    multiplier = 1;
+                    break;
             }
-
-            if (fadeTime <= 0)
-            {
-                audioMixer.SetFloat(LOWPASS_AMBIENT, Mathf.Clamp(frequency, 0, 22000.00f));
-                return;
-            }
-
-            audioCoroutineLowpassAmbient = StartCoroutine(SetLowpassInternal(LOWPASS_AMBIENT, frequency, fadeTime));
         }
-        private void SetLowpassEffects(float frequency, float fadeTime)
+        public float GetVolume(string group)
+        { 
+            audioMixer.GetFloat(group, out float volume);
+            return Mathf.Pow(10, (volume / 20)); 
+        }
+        private void SetVolume(string group, float volume) => audioMixer.SetFloat(group, Mathf.Log10(Mathf.Max(0.0001f, volume)) * 20);
+        public void SetVolumeBase(AudioGroup group, float value)
         {
-            if (audioCoroutineLowpassEffects != null)
+            string target = STRING_NULL;
+            float @base = 1;
+            float mult = 1;
+
+            switch (group)
             {
-                StopCoroutine(audioCoroutineLowpassEffects);
-                audioCoroutineLowpassEffects = null;
+                case AudioGroup.MASTER:
+                    target = VOLUME_MASTER;
+                    @base = masterVolumeBase = value;
+                    mult = masterVolumeMult;
+                    break;
+                case AudioGroup.MISC:
+                    target = VOLUME_MISC;
+                    @base = miscVolumeBase = value;
+                    mult = miscVolumeMult;
+                    break;
+                case AudioGroup.EFFECT:
+                    target = VOLUME_EFFECT;
+                    @base = effectsVolumeBase = value;
+                    mult = effectsVolumeMult;
+                    break;
+                case AudioGroup.AMBIENT:
+                    target = VOLUME_AMBIENT;
+                    @base = ambientVolumeBase = value;
+                    mult = ambientVolumeMult;
+                    break;
+                case AudioGroup.MUSIC:
+                    target = VOLUME_MUSIC;
+                    @base = musicVolumeBase = value;
+                    mult = musicVolumeMult;
+                    break;
+                case AudioGroup.GAME:
+                    target = VOLUME_GAME;
+                    @base = gameVolumeBase = value;
+                    mult = gameVolumeMult;
+                    break;
+                default:
+                    break;
             }
 
-            if (fadeTime <= 0)
+            SetVolume(target, @base * mult);
+        }
+        public void SetVolumeMult(AudioGroup group, float value)
+        {
+            string target = STRING_NULL;
+            float @base = 1;
+            float mult = 1;
+
+            switch (group)
             {
-                audioMixer.SetFloat(LOWPASS_EFFECTS, Mathf.Clamp(frequency, 0, 22000.00f));
-                return;
+                case AudioGroup.MASTER:
+                    target = VOLUME_MASTER;
+                    @base = masterVolumeBase;
+                    mult = masterVolumeMult = value;
+                    break;
+                case AudioGroup.MISC:
+                    target = VOLUME_MISC;
+                    @base = miscVolumeBase;
+                    mult = miscVolumeMult = value;
+                    break;
+                case AudioGroup.EFFECT:
+                    target = VOLUME_EFFECT;
+                    @base = effectsVolumeBase;
+                    mult = effectsVolumeMult = value;
+                    break;
+                case AudioGroup.AMBIENT:
+                    target = VOLUME_AMBIENT;
+                    @base = ambientVolumeBase;
+                    mult = ambientVolumeMult = value;
+                    break;
+                case AudioGroup.MUSIC:
+                    target = VOLUME_MUSIC;
+                    @base = musicVolumeBase;
+                    mult = musicVolumeMult = value;
+                    break;
+                case AudioGroup.GAME:
+                    target = VOLUME_GAME;
+                    @base = gameVolumeBase;
+                    mult = gameVolumeMult = value;
+                    break;
+                default:
+                    break;
             }
 
-            audioCoroutineLowpassEffects = StartCoroutine(SetLowpassInternal(LOWPASS_EFFECTS, frequency, fadeTime));
+            SetVolume(target, @base * mult);
         }
 
         private void ClearReverb()
@@ -411,7 +670,7 @@ namespace Core.Audio
             audioMixer.SetFloat(REVERB_DECAY_HF_RATIO, 1.00f);
             audioMixer.SetFloat(REVERB_DECAY_TIME, 1.00f);
             audioMixer.SetFloat(REVERB_ROOM, -10000.00f);
-        }      
+        }
         public void RevertReverb(float fadeTime)
         {
             if (audioCoroutineReverb != null)
@@ -505,74 +764,6 @@ namespace Core.Audio
             audioMixer.SetFloat(REVERB_DECAY_TIME, endDecayTime);
             audioMixer.SetFloat(REVERB_ROOM, endRoom);
         }
-
-        private void SetPitch(string group, float pitch) => audioMixer.SetFloat(group, pitch);
-        private float GetPitch(string group) { audioMixer.GetFloat(group, out float pitch); return pitch; }
-
-        public float GetMasterPitch() => masterPitchBase * masterPitchMult;
-        public float GetMasterPitchBase() => masterPitchBase;
-        public float GetMasterPitchMult() => masterPitchMult;
-        public void SetMasterPitchBase(float value) { masterPitchBase = value; SetPitch(PITCH_MASTER, masterPitchBase * masterPitchMult); }
-        public void SetMasterPitchMult(float value) { masterPitchMult = value; SetPitch(PITCH_MASTER, masterPitchBase * masterPitchMult); }
-        public float GetGamePitch() => gamePitchBase * gamePitchMult;
-        public float GetGamePitchBase() => gamePitchBase;
-        public float GetGamePitchMult() => gamePitchMult;
-        public void SetGamePitchBase(float value) { gamePitchBase = value; SetPitch(PITCH_GAME, gamePitchBase * gamePitchMult); }
-        public void SetGamePitchMult(float value) { gamePitchMult = value; SetPitch(PITCH_GAME, gamePitchBase * gamePitchMult); }
-        public float GetMusicPitch() => musicPitchBase * musicPitchMult;
-        public float GetMusicPitchBase() => musicPitchBase;
-        public float GetMusicPitchMult() => musicPitchMult;
-        public void SetMusicPitchBase(float value) { musicPitchBase = value; SetPitch(PITCH_MUSIC, musicPitchBase * musicPitchMult); }
-        public void SetMusicPitchMult(float value) { musicPitchMult = value; SetPitch(PITCH_MUSIC, musicPitchBase * musicPitchMult); }
-        public float GetMiscPitch() => miscPitchBase * miscPitchMult;
-        public float GetMiscPitchBase() => miscPitchBase;
-        public float GetMiscPitchMult() => miscPitchMult;
-        public void SetMiscPitchBase(float value) { miscPitchBase = value; SetPitch(PITCH_MISC, miscPitchBase * miscPitchMult); }
-        public void SetMiscPitchMult(float value) { miscPitchMult = value; SetPitch(PITCH_MISC, miscPitchBase * miscPitchMult); }
-        public float GetEffectsPitch() => effectsPitchBase * effectsPitchMult;
-        public float GetEffectsPitchBase() => effectsPitchBase;
-        public float GetEffectsPitchMult() => effectsPitchMult;
-        public void SetEffectsPitchBase(float value) { effectsPitchBase = value; SetPitch(PITCH_EFFECT, effectsPitchBase * effectsPitchMult); }
-        public void SetEffectsPitchMult(float value) { effectsPitchMult = value; SetPitch(PITCH_EFFECT, effectsPitchBase * effectsPitchMult); }
-        public float GetAmbientPitch() => ambientPitchBase * ambientPitchMult;
-        public float GetAmbientPitchBase() => ambientPitchBase;
-        public float GetAmbientPitchMult() => ambientPitchMult;
-        public void SetAmbientPitchBase(float value) { ambientPitchBase = value; SetPitch(PITCH_AMBIENT, ambientPitchBase * ambientPitchMult); }
-        public void SetAmbientPitchMult(float value) { ambientPitchMult = value; SetPitch(PITCH_AMBIENT, ambientPitchBase * ambientPitchMult); }
-
-        private void SetVolume(string group, float volume) => audioMixer.SetFloat(group, Mathf.Log10(Mathf.Max(0.0001f, volume)) * 20);
-        private float GetVolume(string group) { audioMixer.GetFloat(group, out float volume); return Mathf.Pow(10, (volume / 20)); }
-
-        public float GetMasterVolume() => masterVolumeBase * masterVolumeMult;
-        public float GetMasterVolumeBase() => masterVolumeBase;
-        public float GetMasterVolumeMult() => masterVolumeMult;
-        public void SetMasterVolumeBase(float value) { masterVolumeBase = value; SetVolume(VOLUME_MASTER, masterVolumeBase * masterVolumeMult); }
-        public void SetMasterVolumeMult(float value) { masterVolumeMult = value; SetVolume(VOLUME_MASTER, masterVolumeBase * masterVolumeMult); }
-        public float GetGameVolume() => gameVolumeBase * gameVolumeMult;
-        public float GetGameVolumeBase() => gameVolumeBase;
-        public float GetGameVolumeMult() => gameVolumeMult;
-        public void SetGameVolumeBase(float value) { gameVolumeBase = value; SetVolume(VOLUME_GAME, gameVolumeBase * gameVolumeMult); }
-        public void SetGameVolumeMult(float value) { gameVolumeMult = value; SetVolume(VOLUME_GAME, gameVolumeBase * gameVolumeMult); }
-        public float GetMusicVolume() => musicVolumeBase * musicVolumeMult;
-        public float GetMusicVolumeBase() => musicVolumeBase;
-        public float GetMusicVolumeMult() => musicVolumeMult;
-        public void SetMusicVolumeBase(float value) { musicVolumeBase = value; SetVolume(VOLUME_MUSIC, musicVolumeBase * musicVolumeMult); }
-        public void SetMusicVolumeMult(float value) { musicVolumeMult = value; SetVolume(VOLUME_MUSIC, musicVolumeBase * musicVolumeMult); }
-        public float GetMiscVolume() => miscVolumeBase * miscVolumeMult;
-        public float GetMiscVolumeBase() => miscVolumeBase;
-        public float GetMiscVolumeMult() => miscVolumeMult;
-        public void SetMiscVolumeBase(float value) { miscVolumeBase = value; SetVolume(VOLUME_MISC, miscVolumeBase * miscVolumeMult); }
-        public void SetMiscVolumeMult(float value) { miscVolumeMult = value; SetVolume(VOLUME_MISC, miscVolumeBase * miscVolumeMult); }
-        public float GetEffectsVolume() => effectsVolumeBase * effectsVolumeMult;
-        public float GetEffectsVolumeBase() => effectsVolumeBase;
-        public float GetEffectsVolumeMult() => effectsVolumeMult;
-        public void SetEffectsVolumeBase(float value) { effectsVolumeBase = value; SetVolume(VOLUME_EFFECT, effectsVolumeBase * effectsVolumeMult); }
-        public void SetEffectsVolumeMult(float value) { effectsVolumeMult = value; SetVolume(VOLUME_EFFECT, effectsVolumeBase * effectsVolumeMult); }
-        public float GetAmbientVolume() => ambientVolumeBase * ambientVolumeMult;
-        public float GetAmbientVolumeBase() => ambientVolumeBase;
-        public float GetAmbientVolumeMult() => ambientVolumeMult;
-        public void SetAmbientVolumeBase(float value) { ambientVolumeBase = value; SetVolume(VOLUME_AMBIENT, ambientVolumeBase * ambientVolumeMult); }
-        public void SetAmbientVolumeMult(float value) { ambientVolumeMult = value; SetVolume(VOLUME_AMBIENT, ambientVolumeBase * ambientVolumeMult); }
 
         public AudioEmitter PlaySound(AudioClip clip, AudioGroup group, Vector3 position, float blend, float volume, float pitch, float minDistance, float maxDistance, bool occulusion)
         {

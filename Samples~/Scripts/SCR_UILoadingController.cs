@@ -22,13 +22,13 @@ namespace Game
         }
         private void OnEnable()
         {
-            ManagerCoreGame.OnBeforeSceneChanged += OnBeforeSceneChanged;
-            ManagerCoreGame.OnAfterSceneChanged += OnAfterSceneChanged;
+            GameManager.OnBeforeSceneChanged += OnBeforeSceneChanged;
+            GameManager.OnAfterSceneChanged += OnAfterSceneChanged;
         }
         private void OnDisable()
         {
-            ManagerCoreGame.OnBeforeSceneChanged -= OnBeforeSceneChanged;
-            ManagerCoreGame.OnAfterSceneChanged -= OnAfterSceneChanged;
+            GameManager.OnBeforeSceneChanged -= OnBeforeSceneChanged;
+            GameManager.OnAfterSceneChanged -= OnAfterSceneChanged;
         }
 
         private void OnBeforeSceneChanged(string _)
@@ -38,7 +38,7 @@ namespace Game
         private void OnAfterSceneChanged(string _)
         {
             thisCanvas.Hide();
-            ManagerCoreUI.Instance.ShowTransitionFadeOut(1f, 0f, null, null);
+            UIManager.Instance.ShowTransitionFadeOut(new(1f, 0f));
         }
     }
 }

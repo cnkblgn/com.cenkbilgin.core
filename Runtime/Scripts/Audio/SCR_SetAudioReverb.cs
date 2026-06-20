@@ -4,7 +4,7 @@ namespace Core.Audio
 {
     using static CoreUtility;
 
-    public class SetAudioReverb : MonoBehaviour
+    public sealed class SetAudioReverb : MonoBehaviour
     {
         [Header("_")]
         [SerializeField] private float fade = 0;
@@ -34,7 +34,7 @@ namespace Core.Audio
             reverbZone.reverbPreset = preset;
         }
 #endif
-        public void Revert() => ManagerCoreAudio.Instance.RevertReverb(fade);
-        public void Fade() => ManagerCoreAudio.Instance.SetReverb(reverbZone, fade);
+        public void Revert() => AudioManager.Instance.RevertReverb(fade);
+        public void Fade() => AudioManager.Instance.SetReverb(reverbZone, fade);
     }
 }

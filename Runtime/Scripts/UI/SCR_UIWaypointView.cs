@@ -1,7 +1,7 @@
 using System;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace Core.UI
 {
@@ -9,7 +9,7 @@ namespace Core.UI
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(RectTransform))]
-    public class UIWaypoint : MonoBehaviour
+    internal sealed class UIWaypointView : MonoBehaviour
     {
         public UIWaypointData Data { get; private set; }
         public bool IsCompleted { get; private set; }

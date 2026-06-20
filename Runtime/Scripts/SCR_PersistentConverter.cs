@@ -6,11 +6,9 @@ namespace Core
     public static class PersistentConverter
     {
         private const string KEY_ID = "id";
-        private const string KEY_TYPE = "type";
         private const string KEY_PREFAB = "prefab";
         private const string KEY_DESTROYED = "destroyed";
         private const string KEY_DATA = "data";
-
         private const string KEY_AVAILABLE_ENTITIES = "availableEntities";
         private const string KEY_DELETED_ENTITIES = "deletedEntities";
 
@@ -21,8 +19,7 @@ namespace Core
                 throw new ArgumentNullException(nameof(data));
             }
 
-            data.SetString(KEY_TYPE, entity.TypeID);
-            data.SetString(KEY_PREFAB, entity.PrefabID);
+            data.SetString(KEY_PREFAB, entity.PrefabID.Key);
             data.SetGuid(KEY_ID, entity.InstanceID);
             data.SetBool(KEY_DESTROYED, entity.IsMarkedForDestroy);
             data.SetData(KEY_DATA, entity.Data);
@@ -36,7 +33,6 @@ namespace Core
 
             return new
             (
-                data.GetString(KEY_TYPE),
                 new(data.GetString(KEY_PREFAB)),
                 data.GetGuid(KEY_ID),
                 data.GetBool(KEY_DESTROYED),

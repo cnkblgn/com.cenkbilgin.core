@@ -6,31 +6,68 @@ using UnityEngine;
 
 namespace Core.Localization
 {
-    internal static class LocalizationDatabase
+    public static class LocalizationDatabase
     {
+        public static event Action<int> OnLocalizationChanged = null;
+        internal static bool IsParsed => database != null;
+
         private static string[] languages = Array.Empty<string>();
         private static string[] keys = Array.Empty<string>();
         private static Dictionary<string, string>[] database = null;
 
-        internal static bool GetIsParsed() => database != null;
-        internal static string[] GetKeys() => keys;
-        internal static string[] GetLanguages() => languages;
+        private static Dictionary<string, string> currentLanguageData = null;
+        private static int currentLanguageIndex = 0;
 
-        internal static Dictionary<string, string> GetLanguage(int index)
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void OnRuntimeInitialize() => OnLocalizationChanged = null;
+
+        internal static string GetString(string key)
         {
-            if (!GetIsParsed())
+            TryGet(key, out string value);
+
+            return value;
+        }
+        internal static string GetString(string key, string arg0)
+        {
+            if (TryGet(key, out string value))
             {
-                throw new InvalidOperationException($"Database is not parsed!");
+                if (!string.IsNullOrEmpty(value))
+                {
+                    return string.Format(value, arg0);
+                }
             }
 
-            if (index < 0 || index >= database.Length)
+            return value;
+        }
+        internal static string GetString(string key, params object[] args)
+        {
+            if (TryGet(key, out string value))
             {
-                throw new ArgumentOutOfRangeException($"Invalid access [{index}]");
+                if (!string.IsNullOrEmpty(value))
+                {
+                    return args.Length > 0 ? string.Format(value, args) : value;
+                }
             }
 
-            return database[index];
+            return value;
         }
 
+        private static bool TryGet(string key, out string value)
+        {
+            if (!IsParsed)
+            {
+                throw new InvalidOperationException($"Localization database is not parsed!");
+            }
+
+            if (currentLanguageData.TryGetValue(key, out value))
+            {
+                return true;
+            }
+
+            Debug.LogWarning($"Missing localization for '{key}' in '{GetLanguage()}'");
+            value = $"[{key}]";
+            return false;
+        }
         internal static bool TryParse(TextAsset file)
         {
             if (file == null)
@@ -43,6 +80,9 @@ namespace Core.Localization
             {
                 database = ParseAll(file.text, ',', out languages, out keys);
 
+                currentLanguageIndex = 0;
+                currentLanguageData = GetLanguage(currentLanguageIndex);
+
                 Debug.Log($"Localization parse successfull!");
             }
             catch (Exception e)
@@ -54,7 +94,7 @@ namespace Core.Localization
                 Debug.LogError($"Localization parse failed: {e.Message}");
             }
 
-            return GetIsParsed();
+            return IsParsed;
         }
         internal static Dictionary<string, string> Parse(string csvFile, int languageIndex, char separator, out string[] languages, out string[] keys)
         {
@@ -189,6 +229,35 @@ namespace Core.Localization
             {
                 yield return stringBuilder.ToString();
             }
+        }
+
+        public static string[] GetKeys() => keys;
+        public static string[] GetLanguages() => languages;
+        public static string GetLanguage() => GetLanguages()[currentLanguageIndex];
+        public static void SetLanguage(int index)
+        {
+            if (currentLanguageIndex == index || index < 0 || index >= GetLanguages().Length)
+            {
+                return;
+            }
+
+            currentLanguageIndex = index;
+            currentLanguageData = GetLanguage(currentLanguageIndex);
+            OnLocalizationChanged?.Invoke(currentLanguageIndex);
+        }
+        public static Dictionary<string, string> GetLanguage(int index)
+        {
+            if (!IsParsed)
+            {
+                throw new InvalidOperationException($"Localization database is not parsed!");
+            }
+
+            if (index < 0 || index >= database.Length)
+            {
+                throw new ArgumentOutOfRangeException($"Invalid access [{index}]");
+            }
+
+            return database[index];
         }
     }
 }

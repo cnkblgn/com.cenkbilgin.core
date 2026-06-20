@@ -4,10 +4,9 @@ using UnityEngine;
 namespace Core.Graphics
 {
     using static CoreUtility;
-    using Style = LightStyle;
 
     [DisallowMultipleComponent]
-    public class LightEmitter : MonoBehaviour
+    public sealed class LightEmitter : MonoBehaviour
     {
         public bool IsActive => thisLight.isActiveAndEnabled;
         public float Brightness => currentBrightness;
@@ -22,7 +21,7 @@ namespace Core.Graphics
 
         [Header("_")]
         [SerializeField] private bool updateAlways = false;
-        [SerializeField] private Style.ID animationStyle = Style.ID.DEFAULT;
+        [SerializeField] private LightAnimation animationStyle = LightAnimation.DEFAULT;
         [SerializeField, Range(10, 60)] private float animationRate = 1;
 
         private float defaultIntensity = 1;
@@ -35,12 +34,12 @@ namespace Core.Graphics
         }
         private void Update()
         {
-            if (!updateAlways && animationStyle == Style.ID.DEFAULT)
+            if (!updateAlways && animationStyle == LightAnimation.DEFAULT)
             {
                 return;
             }
 
-            currentBrightness = Style.Calculate(animationStyle, animationRate);
+            currentBrightness = LightAnimator.Calculate(animationStyle, animationRate);
 
             if (thisLight != null)
             {
@@ -80,10 +79,10 @@ namespace Core.Graphics
                 UpdateMesh();
             }
         }
-        public void Enable(Style.ID animationStyle, float animationRate)
+        public void Enable(LightAnimation id, float rate)
         {
-            this.animationStyle = animationStyle;
-            this.animationRate = Mathf.Clamp(animationRate, 10, 60);
+            this.animationStyle = id;
+            this.animationRate = Mathf.Clamp(rate, 10, 60);
 
             Enable();
         }

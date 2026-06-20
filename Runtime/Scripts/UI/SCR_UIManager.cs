@@ -8,7 +8,7 @@ namespace Core.UI
     using static TaskUtility;
 
     [DisallowMultipleComponent]
-    public sealed class ManagerCoreUI : Manager<ManagerCoreUI>
+    public sealed class UIManager : Manager<UIManager>
     {
         public Canvas Canvas => canvas;
 
@@ -21,47 +21,32 @@ namespace Core.UI
         [SerializeField, Required] private UITooltipController tooltipController = null;
         [SerializeField, Required] private UIWaypointController waypointController = null;
         [SerializeField, Required] private UINotificationController notificationController = null;
-        [SerializeField, Required] private UIMessageController messageController = null;
         [SerializeField, Required] private UIConfirmationController confirmationController = null;
         [SerializeField, Required] private UITransitionController transitionController = null;
-        [SerializeField, Required] private UIKeyActionController keyActionController = null;
         [SerializeField, Required] private UISubtitleController subtitleController = null;
 
         protected override void Awake()
         {
+            base.Awake();
+
             if (canvas == null) throw new NullReferenceException();
             if (events == null) throw new NullReferenceException();
             if (cursorController == null) throw new NullReferenceException();
             if (tooltipController == null) throw new NullReferenceException();
             if (waypointController == null) throw new NullReferenceException();
             if (notificationController == null) throw new NullReferenceException();
-            if (messageController == null) throw new NullReferenceException();
             if (confirmationController == null) throw new NullReferenceException();
             if (transitionController == null) throw new NullReferenceException();
-            if (keyActionController == null) throw new NullReferenceException();
-
-            base.Awake();
 
             SetCursor();
             HideCursor();
         }
-        private void OnEnable()
-        {
-            ManagerCoreGame.OnBeforeSceneChanged += OnBeforeSceneChanged;
-            ManagerCoreGame.OnAfterSceneChanged += OnAfterSceneChanged;
-        }
-        private void OnDisable()
-        {
-            ManagerCoreGame.OnBeforeSceneChanged -= OnBeforeSceneChanged;
-            ManagerCoreGame.OnAfterSceneChanged -= OnAfterSceneChanged;
-        }
+        private void OnEnable() => GameManager.OnBeforeSceneChanged += OnBeforeSceneChanged;
+        private void OnDisable() => GameManager.OnBeforeSceneChanged -= OnBeforeSceneChanged;
 
-        private void OnAfterSceneChanged(string _)
-        {
-            HideWaypoints();
-        }
         private void OnBeforeSceneChanged(string _)
         {
+            HideWaypoints();
             HideNotification();
             HideSubtitle();
         }
@@ -77,39 +62,17 @@ namespace Core.UI
         public void ClearWaypoints() => waypointController.Clear();
 
         /// <summary> 0 -> 1, fades to black </summary>
-        public void ShowTransitionFadeIn(float fadeTime, float waitTime, Action onStartEvent, Action onFinishEvent) => transitionController.FadeIn(fadeTime, waitTime, onStartEvent, onFinishEvent);
+        public void ShowTransitionFadeIn(UITransitionContext ctx) => transitionController.FadeIn(ctx);
         /// <summary> 1 -> 0, fades to white </summary>
-        public void ShowTransitionFadeOut(float fadeTime, float waitTime, Action onStartEvent, Action onFinishEvent) => transitionController.FadeOut(fadeTime, waitTime, onStartEvent, onFinishEvent);
+        public void ShowTransitionFadeOut(UITransitionContext ctx) => transitionController.FadeOut(ctx);
         public void HideTransition() => transitionController.Hide();
-
-        public void ShowMessage(string text, float duration = 2.5f) => messageController.Show(text, duration);
-        public void ShowMessage() => messageController.Show();
-        public void HideMessage() => messageController.Hide();
-        public void ClearMessage() => messageController.Clear();
 
         public void MoveTooltip(Vector2 screenPosition) => tooltipController.Move(screenPosition);
         public void ShowTooltip(string value, Vector2 screenPosition) => tooltipController.Show(value, screenPosition);
         public void HideTooltip() => tooltipController.Hide();
 
-        public void ShowConfirmation(string text, Action onAccept, Action onCancel) => confirmationController.Show(text, onAccept, onCancel);
+        public void ShowConfirmation(in UIConfirmationContext ctx) => confirmationController.Show(in ctx);
         public void HideConfirmation() => confirmationController.Hide();
-
-        public void SetEnableAction(bool value)
-        {
-            if (value)
-            {
-                keyActionController.Enable();
-            }
-            else
-            {
-                keyActionController.Disable();
-            }
-        }
-        public bool IsActionActive(UIKeyActionType keyActionType) => keyActionController.IsActive(keyActionType);
-        public void ShowAction(UIKeyActionType keyActionType) => keyActionController.Show(keyActionType);
-        public void HideAction(UIKeyActionType keyActionType) => keyActionController.Hide(keyActionType);
-        public void InsertAction(UIKeyActionType keyActionType, KeyActionData[] data) => keyActionController.Insert(keyActionType, data);
-        public void RemoveAction(UIKeyActionType keyActionType) => keyActionController.Remove(keyActionType);
 
         public void ShowSubtitle(string text) => subtitleController.Show(text);
         public void HideSubtitle() => subtitleController.Hide();

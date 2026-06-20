@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Core.Audio
 {
-    public class SetAudioPitch : MonoBehaviour
+    public sealed class SetAudioPitch : MonoBehaviour
     {
         [Header("_")]
         [SerializeField] private AudioGroup group = AudioGroup.GAME;
@@ -47,28 +47,13 @@ namespace Core.Audio
 
         private float Get()
         {
-            return group switch
-            {
-                AudioGroup.MASTER => ManagerCoreAudio.Instance.GetMasterPitchMult(),
-                AudioGroup.MISC => ManagerCoreAudio.Instance.GetMiscPitchMult(),
-                AudioGroup.EFFECT => ManagerCoreAudio.Instance.GetEffectsPitchMult(),
-                AudioGroup.AMBIENT => ManagerCoreAudio.Instance.GetAmbientPitchMult(),
-                AudioGroup.MUSIC => ManagerCoreAudio.Instance.GetMusicPitchMult(),
-                AudioGroup.GAME => ManagerCoreAudio.Instance.GetGamePitchMult(),
-                _ => 1,
-            };
+            AudioManager.Instance.GetPitch(group, out float _, out float _, out float multiplier);
+
+            return multiplier;
         }
         private void Set(float value)
         {
-            switch (group)
-            {
-                case AudioGroup.MASTER: ManagerCoreAudio.Instance.SetMasterPitchMult(value); break;
-                case AudioGroup.MISC: ManagerCoreAudio.Instance.SetMiscPitchMult(value); break;
-                case AudioGroup.EFFECT: ManagerCoreAudio.Instance.SetEffectsPitchMult(value); break;
-                case AudioGroup.AMBIENT: ManagerCoreAudio.Instance.SetAmbientPitchMult(value); break;
-                case AudioGroup.MUSIC: ManagerCoreAudio.Instance.SetMusicPitchMult(value); break;
-                case AudioGroup.GAME: ManagerCoreAudio.Instance.SetGamePitchMult(value); break;
-            }
+            AudioManager.Instance.SetPitchMult(group, value);
         }
     }
 }

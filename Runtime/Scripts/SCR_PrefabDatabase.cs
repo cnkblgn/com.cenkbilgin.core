@@ -4,19 +4,20 @@ using UnityEngine;
 
 namespace Core
 {
-    internal static class PrefabDatabase
+    public static class PrefabDatabase
     {
+        internal static bool IsParsed => database != null;
+
         private static Dictionary<PrefabID, GameObject> database = null;
         private static string[] keys = Array.Empty<string>();
 
-        internal static string[] GetKeys() => keys;
-        internal static bool GetIsValid() => database != null;
+        public static string[] GetKeys() => keys;
 
         internal static bool TryGet(PrefabID id, out GameObject prefab)
         {
-            if (!GetIsValid())
+            if (!IsParsed)
             {
-                throw new InvalidOperationException($"Database is not parsed!");
+                throw new InvalidOperationException($"Prefab database is not parsed! Please build via PrefabDatabaseConfig");
             }
 
             if (!id.IsValid)
@@ -32,8 +33,25 @@ namespace Core
             Debug.LogError($"prefab not found! [{id.Key}]");
             return false;
         }
-        internal static void Build(GameObject[] gameObjects)
+        internal static bool TrySpawn(PrefabID id, Vector3 position, Quaternion rotation, Transform parent, out GameObject gameObject)
         {
+            gameObject = null;
+
+            if (TryGet(id, out GameObject prefab))
+            {
+                gameObject = GameObject.Instantiate(prefab, position, rotation, parent);
+                return true;
+            }
+
+            return false;
+        }
+        internal static void Parse(GameObject[] gameObjects)
+        {
+            if (gameObjects == null)
+            {
+                return;
+            }
+
             database = new(gameObjects.Length);
 
             keys = new string[gameObjects.Length];

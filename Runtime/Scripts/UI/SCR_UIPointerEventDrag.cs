@@ -1,13 +1,12 @@
 using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 namespace Core.UI
 {
     using static CoreUtility;
 
-    public class UIPointerEventDrag : UIPointerEvent
+    public sealed class UIPointerEventDrag : UIPointerEvent
     {
         [Header("_")]
         [SerializeField, Required] private Canvas targetCanvas;

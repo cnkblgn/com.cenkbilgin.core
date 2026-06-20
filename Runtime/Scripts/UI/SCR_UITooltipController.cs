@@ -7,7 +7,7 @@ namespace Core.UI
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Canvas))]
-    public class UITooltipController : MonoBehaviour
+    public sealed class UITooltipController : MonoBehaviour
     {
         [Header("_")]
         [SerializeField, Required] private UITextBox textBox = null;

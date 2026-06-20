@@ -38,15 +38,15 @@ namespace Game
 
             Vector3 direction = controller.GetCameraOrigin().TransformVector(new(Move.GetAxis().x, 0f, Move.GetAxis().y));
 
-            if (ManagerCoreInput.Instance.PointerScroll.y > 0)
+            if (InputManager.Instance.PointerScroll.y > 0)
             {
                 targetIndex = Mathf.Clamp(targetIndex + 1, 1, maxStep);
-                ManagerCoreUI.Instance.ShowNotification($"Noclip Speed: {targetIndex}", 3f);
+                UIManager.Instance.ShowNotification($"Noclip Speed: {targetIndex}", 3f);
             }
-            else if (ManagerCoreInput.Instance.PointerScroll.y < 0)
+            else if (InputManager.Instance.PointerScroll.y < 0)
             {
                 targetIndex = Mathf.Clamp(targetIndex - 1, 1, maxStep);
-                ManagerCoreUI.Instance.ShowNotification($"Noclip Speed: {targetIndex}", 3f);
+                UIManager.Instance.ShowNotification($"Noclip Speed: {targetIndex}", 3f);
             }
 
             targetSpeed = targetIndex * 0.5f;

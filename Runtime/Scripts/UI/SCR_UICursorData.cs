@@ -6,7 +6,7 @@ namespace Core.UI
     using static CoreUtility;
 
     [Serializable]
-    public class UICursorData
+    internal sealed class UICursorData
     {
         [Required] public Sprite Icon = null;
         public string ID = "default";

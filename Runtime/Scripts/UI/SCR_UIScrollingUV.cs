@@ -6,7 +6,7 @@ namespace Core.UI
     using static CoreUtility;
 
     [DisallowMultipleComponent]
-    public class UIScrollingUV : MonoBehaviour
+    public sealed class UIScrollingUV : MonoBehaviour
     {
         [Header("_")]
         [SerializeField, Required] private RawImage image = null;
@@ -20,7 +20,7 @@ namespace Core.UI
         private void Awake() => rect = image.uvRect;
         private void LateUpdate()
         {
-            if (ManagerCoreGame.Instance.GetGameState() != GameState.RESUME)
+            if (GameManager.Instance.GetGameState() != GameState.RESUME)
             {
                 return;
             }

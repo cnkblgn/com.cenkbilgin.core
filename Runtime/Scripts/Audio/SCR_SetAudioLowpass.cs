@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Core.Audio
 {
-    public class SetAudioLowpass : MonoBehaviour
+    public sealed class SetAudioLowpass : MonoBehaviour
     {
         [Header("_")]
         [SerializeField] private AudioGroup group = AudioGroup.GAME;
@@ -47,28 +47,13 @@ namespace Core.Audio
 
         private float Get()
         {
-            return group switch
-            {
-                AudioGroup.MASTER => ManagerCoreAudio.Instance.GetLowpass(AudioGroup.MASTER),
-                AudioGroup.MISC => ManagerCoreAudio.Instance.GetLowpass(AudioGroup.MISC),
-                AudioGroup.EFFECT => ManagerCoreAudio.Instance.GetLowpass(AudioGroup.EFFECT),
-                AudioGroup.AMBIENT => ManagerCoreAudio.Instance.GetLowpass(AudioGroup.AMBIENT),
-                AudioGroup.MUSIC => ManagerCoreAudio.Instance.GetLowpass(AudioGroup.MUSIC),
-                AudioGroup.GAME => ManagerCoreAudio.Instance.GetLowpass(AudioGroup.GAME),
-                _ => 1,
-            };
+            AudioManager.Instance.GetLowpass(group, out float current);
+
+            return current;
         }
         private void Set(float value)
         {
-            switch (group)
-            {
-                case AudioGroup.MASTER: ManagerCoreAudio.Instance.SetLowpass(value, 0, AudioGroup.MASTER); break;
-                case AudioGroup.MISC: ManagerCoreAudio.Instance.SetLowpass(value, 0, AudioGroup.MISC); break;
-                case AudioGroup.EFFECT: ManagerCoreAudio.Instance.SetLowpass(value, 0, AudioGroup.EFFECT); break;
-                case AudioGroup.AMBIENT: ManagerCoreAudio.Instance.SetLowpass(value, 0, AudioGroup.AMBIENT); break;
-                case AudioGroup.MUSIC: ManagerCoreAudio.Instance.SetLowpass(value, 0, AudioGroup.MUSIC); break;
-                case AudioGroup.GAME: ManagerCoreAudio.Instance.SetLowpass(value, 0, AudioGroup.GAME); break;
-            }
+            AudioManager.Instance.SetLowpass(group, value);
         }
     }
 }

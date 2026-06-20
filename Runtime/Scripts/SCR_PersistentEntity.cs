@@ -11,8 +11,7 @@ namespace Core
     {
         public static event Action<PersistentEntity> OnMarkedForDestroy;
 
-        public abstract string TypeID { get; }
-        public abstract string PrefabID { get; }
+        public abstract PrefabID PrefabID { get; }
         public Guid InstanceID => instanceID;
         public bool IsMarkedForDestroy => isMarkedForDestroy;
 
@@ -22,6 +21,9 @@ namespace Core
         private Guid instanceID = default;
         private bool isQuitting = false;
         private bool isMarkedForDestroy = false;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void OnRuntimeInitialize() => OnMarkedForDestroy = null;
 
         protected virtual void Start()
         {
@@ -38,7 +40,7 @@ namespace Core
                 return;
             }
 
-            if (!IsMarkedForDestroy && Application.isPlaying && !ManagerCorePersistent.Instance.IsLoading && !ManagerCoreGame.Instance.IsLoading)
+            if (!IsMarkedForDestroy && Application.isPlaying && !PersistentDatabase.IsLoading && !GameManager.Instance.IsLoading)
             {
                 Debug.LogError($"[{name}] destroyed without persistence or destroyed illegally");
             }
@@ -72,7 +74,7 @@ namespace Core
             _instanceID = instanceID.ToString();
         }
 
-        public void MarkForDestroy(bool isSilent = false)
+        public void MarkForDestroy()
         {
             if (isMarkedForDestroy)
             {
@@ -80,8 +82,7 @@ namespace Core
             }
 
             isMarkedForDestroy = true;
-
-            if (!isSilent) OnMarkedForDestroy?.Invoke(this);
+            OnMarkedForDestroy?.Invoke(this);
         }
 
         public PersistentEntityData Export()
@@ -90,10 +91,9 @@ namespace Core
 
             OnExported(data);
 
-            return new(TypeID, PrefabID, instanceID, isMarkedForDestroy, data);
+            return new(PrefabID, instanceID, isMarkedForDestroy, data);
         }
         protected abstract void OnExported(Dictionary<string, DataNode> data);
-
         public void Import(PersistentEntityData data)
         {
             instanceID = data.InstanceID;

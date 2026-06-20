@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Core
 {
-    public static class EaseEvaluater
+    internal static class EaseEvaluater
     {
         public static float Evaluate(EaseType type, float time)
         {

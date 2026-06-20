@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace Core.UI
@@ -8,7 +7,7 @@ namespace Core.UI
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(CanvasGroup))]
-    public class UITransitionController : MonoBehaviour
+    public sealed class UITransitionController : MonoBehaviour
     {
         private CanvasGroup thisCanvas = null;
         private TaskInstanceTweenFadeCanvas thisTween = null;
@@ -19,59 +18,60 @@ namespace Core.UI
 
             Hide();
         }
+
         /// <summary> 0 -> 1, fades to black </summary>
-        public void FadeIn(float fadeTime, float waitTime, Action onStartAction, Action onFinishAction)
+        public void FadeIn(UITransitionContext ctx)
         {
             if (thisTween != null)
             {
                 if (!thisTween.IsCompleted)
                 {
-                    onStartAction?.Invoke();
+                    ctx.OnStart?.Invoke();
 
-                    if (onFinishAction != null)
+                    if (ctx.OnFinish != null)
                     {
-                        this.WaitFrame(onFinishAction);
+                        this.WaitFrame(ctx.OnFinish);
                     }                   
                     return;
                 }
             }
 
-            onStartAction?.Invoke();
+            ctx.OnStart?.Invoke();
             thisCanvas.Show();
             thisCanvas.alpha = 0;
 
-            thisTween = thisCanvas.Fade(1, fadeTime, waitTime, TweenType.UNSCALED, EaseType.EASE_OUT_SINE, () =>
+            thisTween = thisCanvas.Fade(1, ctx.FadeTime, ctx.WaitTime, TweenType.UNSCALED, EaseType.EASE_OUT_SINE, () =>
             {
                 thisTween.Stop();
                 thisTween = null;
-                onFinishAction?.Invoke();
+                ctx.OnFinish?.Invoke();
             });
         }
         /// <summary> 1 -> 0, fades to white </summary>
-        public void FadeOut(float fadeTime, float waitTime, Action onStartAction, Action onFinishAction)
+        public void FadeOut(UITransitionContext ctx)
         {
             if (thisTween != null)
             {
                 if (!thisTween.IsCompleted)
                 {
-                    onStartAction?.Invoke();
+                    ctx.OnStart?.Invoke();
 
-                    if (onFinishAction != null)
+                    if (ctx.OnFinish != null)
                     {
-                        this.WaitFrame(onFinishAction);
+                        this.WaitFrame(ctx.OnFinish);
                     }
                     return;
                 }
             }
 
-            onStartAction?.Invoke();
+            ctx.OnStart?.Invoke();
             thisCanvas.Show();
             thisCanvas.alpha = 1;
 
-            thisTween = thisCanvas.Fade(0, fadeTime, waitTime, TweenType.UNSCALED, EaseType.EASE_IN_SINE, () =>
+            thisTween = thisCanvas.Fade(0, ctx.FadeTime, ctx.WaitTime, TweenType.UNSCALED, EaseType.EASE_IN_SINE, () =>
             {
                 Hide();
-                onFinishAction?.Invoke();
+                ctx.OnFinish?.Invoke();
             });
         }
 

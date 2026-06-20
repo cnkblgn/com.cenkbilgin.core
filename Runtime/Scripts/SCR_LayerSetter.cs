@@ -4,7 +4,7 @@ namespace Core
 {
     using static CoreUtility;
 
-    public class LayerSetter : MonoBehaviour
+    internal sealed class LayerSetter : MonoBehaviour
     {
         [Header("_")]
         [SerializeField] private int layer = 0;

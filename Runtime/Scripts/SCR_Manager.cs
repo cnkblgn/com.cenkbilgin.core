@@ -3,8 +3,6 @@ using UnityEngine;
 
 namespace Core
 {
-    using static CoreUtility;
-
     [DisallowMultipleComponent]
     [DefaultExecutionOrder(-1)]
     public abstract class Manager<T> : MonoBehaviour where T : Manager<T>
@@ -27,7 +25,7 @@ namespace Core
         {
             if (instance != null && instance != this)
             {
-                Debug.LogError($"Duplicate manager [{nameof(T)}]");
+                Debug.LogError($"Duplicate manager [{nameof(T)}]", instance);
                 Destroy(gameObject);
                 return;
             }

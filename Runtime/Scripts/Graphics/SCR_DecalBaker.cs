@@ -6,7 +6,7 @@ namespace Core.Graphics
     using static CoreUtility;
 
     [DisallowMultipleComponent]
-    public class DecalBaker : MonoBehaviour
+    public sealed class DecalBaker : MonoBehaviour
     {
         [Header("_")]
         [SerializeField] private bool bakeOnStart = true;

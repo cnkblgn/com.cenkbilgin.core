@@ -6,7 +6,7 @@ namespace Core.UI
     using static CoreUtility;
 
     [DisallowMultipleComponent]
-    public class UIScrollingElement : MonoBehaviour
+    public sealed class UIScrollingElement : MonoBehaviour
     {
         [Header("_")]
         [SerializeField, Required] private TMP_Text[] texts = null;
@@ -48,7 +48,7 @@ namespace Core.UI
         }
         private void LateUpdate()
         {
-            if (ManagerCoreGame.Instance.GetGameState() != GameState.RESUME)
+            if (GameManager.Instance.GetGameState() != GameState.RESUME)
             {
                 return;
             }

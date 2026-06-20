@@ -5,7 +5,7 @@ namespace Core.UI
 {
     using static CoreUtility;
 
-    public class UIPointerEventScale : UIPointerEvent
+    public sealed class UIPointerEventScale : UIPointerEvent
     {
         [Header("_")]
         [SerializeField] private EaseType onClickScaleEasingType = EaseType.LINEAR;

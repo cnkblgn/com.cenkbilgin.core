@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Core
 {
     [DisallowMultipleComponent, SelectionBase]
-    public class GameEntity : MonoBehaviour 
+    public sealed class GameEntity : MonoBehaviour 
     {
         public Transform ThisTransform
         {

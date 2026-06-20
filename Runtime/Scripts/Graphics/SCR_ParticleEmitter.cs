@@ -2,10 +2,8 @@ using UnityEngine;
 
 namespace Core.Graphics
 {
-    using static CoreUtility;
-
     [DisallowMultipleComponent]
-    public class ParticleEmitter : MonoBehaviour
+    public sealed class ParticleEmitter : MonoBehaviour
     {
         private Transform thisTransform = null;
         private ParticleSystem[] thisEmitters = null;

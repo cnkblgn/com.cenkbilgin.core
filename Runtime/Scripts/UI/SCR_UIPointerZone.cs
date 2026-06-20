@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.UI;
-using Core;
 
 namespace Core.UI
 {
@@ -10,7 +9,7 @@ namespace Core.UI
     /// Creates empty quad for event detection, generates no image/draw call!
     /// </summary>
     [RequireComponent(typeof(CanvasRenderer))]
-    public class UIPointerZone : MaskableGraphic
+    public sealed class UIPointerZone : MaskableGraphic
     {
         public UIPointerZone() => useLegacyMeshGeneration = false;
         protected override void OnPopulateMesh(VertexHelper vh) => vh.Clear();
