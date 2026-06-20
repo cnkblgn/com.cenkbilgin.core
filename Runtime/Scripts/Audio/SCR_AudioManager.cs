@@ -34,12 +34,12 @@ namespace Core.Audio
             }
         }
 
-        private const string LOWPASS_MASTER = "MasterLowpassFrequency";
-        private const string LOWPASS_GAME = "GaöeLowpassFrequency";
-        private const string LOWPASS_MUSIC = "MusicLowpassFrequency";
-        private const string LOWPASS_MISC = "MiscLowpassFrequency";
-        private const string LOWPASS_EFFECT = "EffectLowpassFrequency";
-        private const string LOWPASS_AMBIENT = "AmbientLowpassFrequency";
+        private const string LOWPASS_MASTER = "MasterLowpass";
+        private const string LOWPASS_GAME = "GameLowpass";
+        private const string LOWPASS_MUSIC = "MusicLowpass";
+        private const string LOWPASS_MISC = "MiscLowpass";
+        private const string LOWPASS_EFFECT = "EffectLowpass";
+        private const string LOWPASS_AMBIENT = "AmbientLowpass";
         private const string VOLUME_MASTER = "MasterVolume";
         private const string VOLUME_GAME = "GameVolume";
         private const string VOLUME_MUSIC = "MusicVolume";
