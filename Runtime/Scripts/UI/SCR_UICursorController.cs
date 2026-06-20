@@ -20,7 +20,6 @@ namespace Core.UI
 
         private readonly Dictionary<string, UICursorData> table = new();
         private Canvas thisCanvas = null;
-        private bool hasMoved = false;
 
         private void Awake()
         {
@@ -32,15 +31,6 @@ namespace Core.UI
                 table[cursor.ID] = cursor;
             }
         }
-#if UNITY_EDITOR
-        private void LateUpdate()
-        {
-            if (!hasMoved)
-            {
-                Debug.LogWarning("Please update cursor position by calling MoveCursor()");
-            }
-        }
-#endif
 
         private bool TryGetCursor(string id, out UICursorData cursor)
         {
@@ -67,7 +57,6 @@ namespace Core.UI
             RectTransformUtility.ScreenPointToLocalPointInRectangle(thisCanvas.transform as RectTransform, screenPosition, null, out Vector2 position);
 
             cursorTransform.localPosition = position;
-            hasMoved = true;
         }
         public void SetCursor(string id)
         {
