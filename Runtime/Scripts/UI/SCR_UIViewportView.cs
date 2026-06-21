@@ -390,6 +390,9 @@ namespace Core.UI
                 UIManager.Instance.HideCursor();
             }
 
+            isActive = true;
+            isRendering = true;
+
             OnHide();
             HideRenderer();
 
