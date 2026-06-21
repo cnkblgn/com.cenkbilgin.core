@@ -295,8 +295,6 @@ namespace Core.UI
                 return;
             }
 
-            Canvas.Hide();
-
             isInitialized = true;
             isRendering = false;
             isActive = false;
@@ -317,6 +315,8 @@ namespace Core.UI
                     canvases[i].GetComponent<GraphicRaycaster>()
                 );
             }           
+
+            Canvas.Hide();
 
             camera.targetTexture = renderTexture;
             eventSystem = EventSystem.current;
