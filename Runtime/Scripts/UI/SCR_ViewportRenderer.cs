@@ -16,12 +16,12 @@ namespace Core.UI
         [SerializeField, Required] private GameObject connection = null;
 
         [Header("_")]
-        [SerializeField] private bool addStageOnAwake = true;
-        [SerializeField] private bool disableRendererOnAwake = true;
+        [SerializeField] private bool addOnAwake = true;
+        [SerializeField] private bool hideOnAwake = true;
 
         private new MeshRenderer renderer = null;
         private string id = STRING_NULL;
-        private bool isViewportAdded = false;
+        private bool hasAdded = false;
 
         private void Awake()
         {
@@ -33,14 +33,15 @@ namespace Core.UI
         }
         private void Start()
         {
-            if (addStageOnAwake)
+            if (addOnAwake)
             {
                 AddViewport();
             }
 
-            if (disableRendererOnAwake)
+            if (hideOnAwake)
             {
                 HideRenderer();
+                HideViewport();
             }
             else
             {
@@ -50,18 +51,18 @@ namespace Core.UI
 
         public void AddViewport()
         {
-            if (isViewportAdded)
+            if (hasAdded)
             {
                 Debug.LogWarning($"Viewport [{id}] is already added to manager!");
                 return;
             }
 
             UIManager.Instance.AddViewport(prefab);
-            isViewportAdded = true;
+            hasAdded = true;
         }
         public void ShowViewport()
         {
-            if (!isViewportAdded)
+            if (!hasAdded)
             {
                 Debug.LogWarning("Trying to show viewport that is not added?");
                 return;
@@ -71,7 +72,7 @@ namespace Core.UI
         }
         public void HideViewport()
         {
-            if (!isViewportAdded)
+            if (!hasAdded)
             {
                 return;
             }
