@@ -133,6 +133,7 @@ namespace Core.UI
 
             if (ids.Contains(prefab.ID))
             {
+                Debug.LogWarning($"viewport [{prefab.ID}] is already added to manager!");
                 return;
             }
 
@@ -196,6 +197,7 @@ namespace Core.UI
                 if (viewports[i].ID == id)
                 {
                     viewports[i].ShowViewport(renderer);
+
                     UpdateRender(viewports[i]);
                 }
             }

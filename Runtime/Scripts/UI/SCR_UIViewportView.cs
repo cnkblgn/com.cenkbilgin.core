@@ -295,7 +295,11 @@ namespace Core.UI
                 return;
             }
 
+            Canvas.Hide();
+
             isInitialized = true;
+            isRendering = false;
+            isActive = false;
 
             renderTime = 0f;
             renderInterval = 1 / rendererFPS;
@@ -319,10 +323,6 @@ namespace Core.UI
             eventData = new(eventSystem);
 
             OnInitialized();
-
-            isActive = true;
-            HideRenderer();
-            isActive = false;
         }
         internal void Deinitialize()
         {
@@ -372,26 +372,33 @@ namespace Core.UI
 
         internal void ShowViewport(ViewportRenderer renderer)
         {
+            if (isActive)
+            {
+                return;
+            }
+
             if (canvasInput)
             {
                 UIManager.Instance.ShowCursor();
             }
 
-            this.renderer = renderer;
             isActive = true;
+            this.renderer = renderer;
 
             OnShow(this.renderer);
             ShowRenderer();
         }      
         internal void HideViewport()
         {
+            if (!isActive)
+            {
+                return;
+            }
+
             if (canvasInput)
             {
                 UIManager.Instance.HideCursor();
             }
-
-            isActive = true;
-            isRendering = true;
 
             OnHide();
             HideRenderer();

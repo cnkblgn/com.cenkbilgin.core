@@ -17,11 +17,10 @@ namespace Core.UI
 
         [Header("_")]
         [SerializeField] private bool addOnAwake = true;
-        [SerializeField] private bool hideOnAwake = true;
+        [SerializeField] private bool showOnAwake = false;
 
         private new MeshRenderer renderer = null;
         private string id = STRING_NULL;
-        private bool hasAdded = false;
 
         private void Awake()
         {
@@ -36,54 +35,22 @@ namespace Core.UI
             if (addOnAwake)
             {
                 AddViewport();
-            }
 
-            if (hideOnAwake)
-            {
-                HideRenderer();
-                HideViewport();
-            }
-            else
-            {
-                ShowRenderer();
+                if (showOnAwake)
+                {
+                    ShowViewport();
+                }
             }
         }
 
-        public void AddViewport()
-        {
-            if (hasAdded)
-            {
-                Debug.LogWarning($"Viewport [{id}] is already added to manager!");
-                return;
-            }
+        public void AddViewport() => UIManager.Instance.AddViewport(prefab);
+        public void ShowViewport() => UIManager.Instance.ShowViewport(id, this);
+        public void HideViewport() => UIManager.Instance.HideViewport(id);
 
-            UIManager.Instance.AddViewport(prefab);
-            hasAdded = true;
-        }
-        public void ShowViewport()
-        {
-            if (!hasAdded)
-            {
-                Debug.LogWarning("Trying to show viewport that is not added?");
-                return;
-            }
+        internal void ShowRenderer() => renderer.enabled = true;
+        internal void HideRenderer() => renderer.enabled = false;
 
-            UIManager.Instance.ShowViewport(id, this);
-        }
-        public void HideViewport()
-        {
-            if (!hasAdded)
-            {
-                return;
-            }
-
-            UIManager.Instance.HideViewport(id);
-        }
-
-        public void ShowRenderer() => renderer.enabled = true;
-        public void HideRenderer() => renderer.enabled = false;
-
-        public bool CheckVisibility(Transform target, float minDistance)
+        internal bool CheckVisibility(Transform target, float minDistance)
         {
             if (renderer == null)
             {
