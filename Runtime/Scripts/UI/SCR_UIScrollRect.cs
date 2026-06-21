@@ -1,5 +1,4 @@
 using UnityEngine;
-using TMPro;
 
 namespace Core.UI
 {
@@ -9,39 +8,38 @@ namespace Core.UI
     public sealed class UIScrollingElement : MonoBehaviour
     {
         [Header("_")]
-        [SerializeField, Required] private TMP_Text[] texts = null;
+        [SerializeField, Required] private RectTransform[] transforms = null;
 
         [Header("_")]
         [SerializeField, Range(0, 1), Tooltip("x, y")] private int direction = 0;
         [SerializeField] private float speed = 100f;
         [SerializeField] private float spacing = 40f;
 
-        private RectTransform[] rects;
+        private Rect[] rects;
         private float offset;
 
         private void Start()
         {
-            rects = new RectTransform[texts.Length];
-
+            rects = new Rect[transforms.Length];
             float offset = 0f;
 
-            for (int i = 0; i < texts.Length; i++)
+            for (int i = 0; i < transforms.Length; i++)
             {
-                rects[i] = texts[i].rectTransform;
-                Vector2 pos = rects[i].anchoredPosition;
+                Vector2 pos = transforms[i].anchoredPosition;
+                rects[i] = transforms[i].rect;
 
                 if (direction == 0)
                 {
                     pos.x = offset;
-                    offset += rects[i].rect.width + spacing;
+                    offset += rects[i].width + spacing;
                 }
                 else
                 {
                     pos.y = offset;
-                    offset += rects[i].rect.height + spacing;
+                    offset += rects[i].height + spacing;
                 }
 
-                rects[i].anchoredPosition = pos;
+                transforms[i].anchoredPosition = pos;
             }
 
             this.offset = offset;
@@ -55,25 +53,28 @@ namespace Core.UI
 
             Vector2 dir = direction == 0 ? Vector2.left : Vector2.down;
 
-            for (int i = 0; i < rects.Length; i++)
+            for (int i = 0; i < transforms.Length; i++)
             {
-                rects[i].anchoredPosition += speed * Time.deltaTime * dir;
+                RectTransform t = transforms[i];
+                Rect r = rects[i];
 
-                if (IsOutOfBounds(rects[i]))
+                t.anchoredPosition += speed * Time.deltaTime * dir;
+
+                if (IsOutOfBounds(t.anchoredPosition.x, t.anchoredPosition.y, r.width, r.height))
                 {
-                    ResetToEnd(rects[i]);
+                    ResetToEnd(transforms[i]);
                 }
             }
         }
 
-        private bool IsOutOfBounds(RectTransform rect)
+        private bool IsOutOfBounds(float x, float y, float width, float height)
         {
             if (IsHorizontal())
             {
-                return rect.anchoredPosition.x + rect.rect.width < 0;
+                return x + width < 0;
             }
 
-            return rect.anchoredPosition.y + rect.rect.height < 0;
+            return y + height < 0;
         }
         private bool IsHorizontal() => direction == 0;
 
