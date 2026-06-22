@@ -12,7 +12,7 @@ namespace Core.UI
         [Header("_")]
         [SerializeField, Required] private Camera rendererCamera = null;
         [SerializeField, Min(0)] private float cullingDistance = 16;
-        [SerializeField, Required] private LayerMask viewportDetectionMask = 0;
+        [SerializeField] private LayerMask viewportDetectionMask = 0;
 
         [Header("_")]
         [SerializeField, Required] private Transform container = null;
