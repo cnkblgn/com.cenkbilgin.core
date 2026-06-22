@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,18 +12,23 @@ namespace Core.UI
         [Header("_")]
         [SerializeField, Required] private Camera rendererCamera = null;
         [SerializeField, Min(0)] private float cullingDistance = 16;
+        [SerializeField, Required] private LayerMask viewportDetectionMask = 0;
 
         [Header("_")]
         [SerializeField, Required] private Transform container = null;
 
         private readonly List<string> ids = new(4);
         private readonly List<UIViewportView> viewports = new(4);
-        private int mask = -1;
+        private readonly RaycastHit[] hits = new RaycastHit[5];
 
-        private void Start()
+        private void Awake()
         {
+            if (rendererCamera == null)
+            {
+                throw new NullReferenceException($"Viewport renderer camera not found! {nameof(rendererCamera)}");
+            }
+
             rendererCamera.enabled = false;
-            mask = LayerMask.GetMask("Viewport");
         }
         private void OnEnable() => GameManager.OnBeforeSceneChanged += OnBeforeSceneChanged;
         private void OnDisable() => GameManager.OnBeforeSceneChanged -= OnBeforeSceneChanged;
@@ -58,16 +64,23 @@ namespace Core.UI
             }
 
             Ray ray = ctx.Camera.ScreenPointToRay(ctx.PointerPosition);
-            Vector2 screenPosition = Vector2.zero;
+            Vector2 position = Vector2.zero;
             ViewportRenderer renderer = null;
 
-            if (Physics.Raycast(ray, out RaycastHit hit, 5.0f, mask, QueryTriggerInteraction.Ignore))
+            int count = Physics.RaycastNonAlloc(ray, hits, 5.0f, viewportDetectionMask, QueryTriggerInteraction.Ignore);
+
+            for (int i = 0; i < count; i++)
             {
-                renderer = hit.collider.GetComponent<ViewportRenderer>();
-                screenPosition = hit.textureCoord;
+                RaycastHit hit = hits[i];
+
+                if (hit.collider.TryGetComponent(out renderer))
+                {
+                    position = hit.textureCoord;
+                    break;
+                }
             }
 
-            view.Tick(in ctx, screenPosition, renderer);
+            view.Tick(in ctx, position, renderer);
         }
         private void UpdateRender(UIViewportView view)
         {

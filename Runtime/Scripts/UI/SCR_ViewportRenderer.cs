@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Core.UI
@@ -24,10 +25,17 @@ namespace Core.UI
 
         private void Awake()
         {
+            if (prefab == null)
+            {
+                throw new NullReferenceException($"Viewport prefab not found! {nameof(prefab)}");
+            }
+
+            if (connection == null)
+            {
+                throw new NullReferenceException($"Viewport connection not found! {nameof(prefab)}");
+            }
+
             renderer = GetComponent<MeshRenderer>();
-
-            gameObject.SetLayer(LayerMask.NameToLayer("Viewport"));
-
             id = prefab.ID;
         }
         private void Start()

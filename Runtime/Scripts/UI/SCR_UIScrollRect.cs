@@ -5,7 +5,7 @@ namespace Core.UI
     using static CoreUtility;
 
     [DisallowMultipleComponent]
-    public sealed class UIScrollingElement : MonoBehaviour
+    public sealed class UIScrollRect : MonoBehaviour
     {
         [Header("_")]
         [SerializeField, Required] private RectTransform[] transforms = null;

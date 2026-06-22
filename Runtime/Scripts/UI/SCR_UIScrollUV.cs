@@ -6,7 +6,7 @@ namespace Core.UI
     using static CoreUtility;
 
     [DisallowMultipleComponent]
-    public sealed class UIScrollingUV : MonoBehaviour
+    public sealed class UIScrollUV : MonoBehaviour
     {
         [Header("_")]
         [SerializeField, Required] private RawImage image = null;
