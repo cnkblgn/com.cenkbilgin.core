@@ -37,6 +37,8 @@ namespace Core.UI
 
             renderer = GetComponent<MeshRenderer>();
             id = prefab.ID;
+
+            HideRenderer();
         }
         private void Start()
         {
