@@ -8,12 +8,12 @@ namespace Core.Graphics
     [DisallowMultipleComponent]
     public sealed class LightEmitter : MonoBehaviour
     {
-        public bool IsActive => thisLight.isActiveAndEnabled;
+        public bool IsActive => isActive;
         public float Brightness => currentBrightness;
 
         [Header("_")]
-        [SerializeField] private Light thisLight = null;
-        [SerializeField] private MeshRenderer thisMesh = null;
+        [SerializeField] private Light[] lights = new Light[0];
+        [SerializeField] private MeshRenderer[] meshes = new MeshRenderer[0];
 
         [Header("_")]
         [SerializeField, ColorUsage(false, true)] private Color lightColor = COLOR_WHITE;
@@ -24,13 +24,14 @@ namespace Core.Graphics
         [SerializeField] private LightAnimation animationStyle = LightAnimation.DEFAULT;
         [SerializeField, Range(10, 60)] private float animationRate = 1;
 
-        private float defaultIntensity = 1;
+        private bool isActive = false;
+        private float[] defaultIntensities;
         private float currentBrightness = 1;
 
         private void Awake()
         {
-            InitializeLight();
-            InitializeMesh();
+            InitializeLights();
+            InitializeMeshes();
         }
         private void Update()
         {
@@ -41,43 +42,31 @@ namespace Core.Graphics
 
             currentBrightness = LightAnimator.Calculate(animationStyle, animationRate);
 
-            if (thisLight != null)
-            {
-                UpdateLight();
-            }
-           
-            if (thisMesh != null)
-            {
-                UpdateMesh();
-            }
+            UpdateLights();
+            UpdateMeshes();
         }
+
 #if UNITY_EDITOR
         private void OnValidate()
         {
-            if (thisLight != null)
-            {
-                thisLight.color = lightColor;
-                thisLight.intensity = lightIntensity;
-            }
-
-            if (thisMesh != null)
-            {
-                UpdateMesh();
-            }
+            UpdateLights();
+            UpdateMeshes();
         }
 #endif
+
         public void Enable()
         {
-            if (thisLight != null)
+            if (isActive)
             {
-                thisLight.enabled = true;
-                UpdateLight();
+                return;
             }
 
-            if (thisMesh != null)
-            {
-                UpdateMesh();
-            }
+            isActive = true;
+
+            EnableLights();
+            UpdateLights();
+
+            UpdateMeshes();
         }
         public void Enable(LightAnimation id, float rate)
         {
@@ -88,58 +77,94 @@ namespace Core.Graphics
         }
         public void Disable()
         {
-            if (thisLight != null)
+            if (!isActive)
             {
-                thisLight.enabled = false;
+                return;
             }
 
-            if (thisMesh != null)
-            {
-                UpdateMesh();
-            }
+            isActive = false;
+
+            DisableLights();
+            UpdateMeshes();
         }    
 
-        private void InitializeLight()
+        private void InitializeLights()
         {
-            if (thisLight == null)
+            defaultIntensities = new float[lights.Length];
+
+            for (int i = 0; i < lights.Length; i++)
             {
-                return;
+                defaultIntensities[i] = lights[i].intensity;
             }
 
-            defaultIntensity = thisLight.intensity;
             currentBrightness = 1;
         }
-        private void InitializeMesh()
+        private void EnableLights()
         {
-            if (thisMesh == null)
+            for (int i = 0; i < lights.Length; i++)
+            {
+                lights[i].enabled = true;
+            }
+        }
+        private void DisableLights()
+        {
+            for (int i = 0; i < lights.Length; i++)
+            {
+                lights[i].enabled = false;
+            }
+        }
+        private void UpdateLights()
+        {
+            for (int i = 0; i < lights.Length; i++)
+            {
+                UpdateLight(lights[i], defaultIntensities[i]);
+            }
+        }
+        private void UpdateLight(Light light, float intensity)
+        {
+            if (light == null)
+            {
+#if UNITY_EDITOR
+                Debug.LogError("Light emitter light update failed! light is null!");
+#endif
+                return;
+            }
+
+            if (light.isActiveAndEnabled)
+            {
+                light.intensity = intensity * lightIntensity * currentBrightness;
+            }
+        }
+
+        private void InitializeMeshes()
+        {
+            if (meshes == null)
             {
                 return;
             }
 
-            UpdateMesh();
+            UpdateMeshes();
         }
-
-        private void UpdateLight()
+        private void UpdateMeshes()
         {
-            if (thisLight.isActiveAndEnabled)
+            for (int i = 0; i < meshes.Length; i++)
             {
-                thisLight.intensity = defaultIntensity * currentBrightness;
+                UpdateMesh(meshes[i]);
             }
         }
-        private void UpdateMesh()
+        private void UpdateMesh(MeshRenderer mesh)
         {
-            Color targetColor;
-
-            if (thisLight != null)
+            if (mesh == null)
             {
-                targetColor = thisLight.enabled ? lightColor * defaultIntensity * currentBrightness : COLOR_BLACK;
-            }
-            else
-            {
-                targetColor = lightColor * defaultIntensity * currentBrightness;
+#if UNITY_EDITOR
+                Debug.LogError("Light emitter mesh update failed! mesh is null!");
+#endif
+                return;
             }
 
-            thisMesh.SetShaderUserValue(EncodeColorWithFlag(targetColor, true));
+            Color targetColor = isActive ? lightColor * currentBrightness : COLOR_BLACK;
+
+            mesh.SetShaderUserValue(EncodeColorWithFlag(targetColor, true));
         }
     }
 }
