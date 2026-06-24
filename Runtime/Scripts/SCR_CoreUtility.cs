@@ -522,7 +522,7 @@ namespace Core
             Vector3 aToB = (bPos - aPos).normalized;
             Vector3 bToA = -aToB;
 
-            return Vector3.Dot(aFwd, aToB) >= threshold && Vector3.Dot(bFwd, bToA) >= threshold;
+            return -Vector3.Dot(aFwd, aToB) >= threshold && Vector3.Dot(bFwd, bToA) >= threshold;
         }
         #endregion
 
