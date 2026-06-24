@@ -77,5 +77,6 @@ namespace Core
 
             Debug.Log($"Prefab build successfull!");
         }
+        internal static void Parse(List<GameObject> gameObjects) => gameObjects.ToArray();
     }
 }

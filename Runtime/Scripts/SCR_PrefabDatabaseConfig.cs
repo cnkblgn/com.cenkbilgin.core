@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace Core
 {
@@ -8,9 +9,14 @@ namespace Core
     public sealed class PrefabDatabaseConfig : ScriptableObject
     {
         [Header("_")]
-        [SerializeField, Required] private GameObject[] collection = null;
+        [SerializeField, Required] private List<GameObject> collection = null;
 
         [Clickable("Build")]
         public void Parse() => PrefabDatabase.Parse(collection);
+
+#if UNITY_EDITOR
+        public void Register(GameObject obj) => collection.Add(obj);
+        public void Unregister(GameObject obj) => collection.Remove(obj);
+#endif
     }
 }
