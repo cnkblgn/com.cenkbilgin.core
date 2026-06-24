@@ -49,6 +49,7 @@ namespace Core.Graphics
 #if UNITY_EDITOR
         private void OnValidate()
         {
+            InitializeLights();
             UpdateLights();
             UpdateMeshes();
         }
