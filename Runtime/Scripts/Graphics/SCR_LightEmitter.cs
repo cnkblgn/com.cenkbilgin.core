@@ -24,7 +24,7 @@ namespace Core.Graphics
         [SerializeField] private LightAnimation animationStyle = LightAnimation.DEFAULT;
         [SerializeField, Range(10, 60)] private float animationRate = 1;
 
-        private bool isActive = false;
+        private bool isActive = true;
         private float[] defaultIntensities;
         private float currentBrightness = 1;
 
