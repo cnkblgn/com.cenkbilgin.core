@@ -21,6 +21,7 @@ namespace Core.UI
         [SerializeField] private bool showOnAwake = false;
 
         private new MeshRenderer renderer = null;
+        private new MeshCollider collider = null;
         private string id = STRING_NULL;
 
         private void Awake()
@@ -36,6 +37,7 @@ namespace Core.UI
             }
 
             renderer = GetComponent<MeshRenderer>();
+            collider = GetComponent<MeshCollider>();
             id = prefab.ID;
 
             HideRenderer();
@@ -57,8 +59,16 @@ namespace Core.UI
         public void ShowViewport() => UIManager.Instance.ShowViewport(id, this);
         public void HideViewport() => UIManager.Instance.HideViewport(id);
 
-        internal void ShowRenderer() => renderer.enabled = true;
-        internal void HideRenderer() => renderer.enabled = false;
+        internal void ShowRenderer()
+        {
+            collider.enabled = true;
+            renderer.enabled = true;
+        }
+        internal void HideRenderer()
+        {
+            collider.enabled = false;
+            renderer.enabled = false;
+        }
 
         internal bool CheckVisibility(Transform target, float minDistance)
         {
