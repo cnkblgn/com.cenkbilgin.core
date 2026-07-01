@@ -141,6 +141,7 @@ namespace Core.Graphics
 
             if (light.isActiveAndEnabled)
             {
+                light.color = lightColor;
                 light.intensity = intensity * lightIntensity * currentBrightness;
             }
         }
