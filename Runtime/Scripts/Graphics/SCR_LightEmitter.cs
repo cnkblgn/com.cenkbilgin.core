@@ -12,6 +12,9 @@ namespace Core.Graphics
         public float Brightness => currentBrightness;
 
         [Header("_")]
+        [SerializeField] private bool disableOnAwake = false;
+
+        [Header("_")]
         [SerializeField] private Light[] lights = new Light[0];
         [SerializeField] private MeshRenderer[] meshes = new MeshRenderer[0];
 
@@ -32,6 +35,11 @@ namespace Core.Graphics
         {
             InitializeLights();
             InitializeMeshes();
+
+            if (disableOnAwake)
+            {
+                Disable();
+            }
         }
         private void Update()
         {
