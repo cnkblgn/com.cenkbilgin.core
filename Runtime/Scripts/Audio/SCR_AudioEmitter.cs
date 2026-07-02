@@ -64,7 +64,11 @@ namespace Core.Audio
         private bool hasFocus = true;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void OnRuntimeInitialize() { OnCreated = null; OnDestroyed = null; }
+        private static void OnRuntimeInitialize() 
+        { 
+            OnCreated = null; 
+            OnDestroyed = null; 
+        }
 
         private void Start() => OnCreated?.Invoke(this);
         private void OnDestroy() => OnDestroyed?.Invoke(this);
@@ -131,8 +135,6 @@ namespace Core.Audio
 
             if (!occlusionEnabled)
             {
-                thisAudioSource.volume = baseVolume * volumeMultiplier;
-                thisAudioSource.pitch = basePitch * pitchMultiplier;
                 return;
             }
 
@@ -303,10 +305,26 @@ namespace Core.Audio
         public void SetPosition(Vector3 position) => thisTransform.position = position;
 
         public float GetPitch() => pitchMultiplier;
-        public void SetPitch(float value) => pitchMultiplier = value;
+        public void SetPitch(float value)
+        {
+            pitchMultiplier = value;
+
+            if (!occlusionEnabled)
+            {
+                thisAudioSource.pitch = basePitch * pitchMultiplier;
+            }
+        }
 
         public float GetVolume() => volumeMultiplier;
-        public void SetVolume(float value) => volumeMultiplier = value;
+        public void SetVolume(float value)
+        {
+            volumeMultiplier = value;
+
+            if (!occlusionEnabled)
+            {
+                thisAudioSource.volume = baseVolume * volumeMultiplier;
+            }
+        }
 
         public float GetLowpass() => MAX_CUTOFF * lowpassMultiplier;
         public void SetLowpass(float value)
