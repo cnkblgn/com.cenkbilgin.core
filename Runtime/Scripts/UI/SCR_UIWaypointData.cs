@@ -33,7 +33,6 @@ namespace Core.UI
         }
         private UIWaypointData(Guid id, Sprite icon, Color color, string text, float duration)
         {
-            if (icon == null) throw new ArgumentNullException(nameof(icon));
             if (text == null) throw new ArgumentNullException(nameof(text));
 
             TargetTransform = null;
