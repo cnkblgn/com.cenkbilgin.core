@@ -177,7 +177,7 @@ namespace Core.Audio
                     continue;
                 }
 
-                emitter.TickOcculusion();               
+                emitter.TickOcclusion();               
             }
         }
         private void OnEnable()

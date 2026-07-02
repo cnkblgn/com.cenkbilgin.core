@@ -45,7 +45,6 @@ namespace Core.Audio
         private readonly RaycastHit[] occlusionRightHits = new RaycastHit[(int)OCCLUSION_DEPTH];
         private float basePitch = 1;
         private float baseVolume = 1;
-        private float baseResonance = 1;
         private float distanceToListener = float.MinValue;
         private float occlusionValue = 0;
         private float occlusionBlend = 12.5f;
@@ -140,8 +139,9 @@ namespace Core.Audio
             ApplyVolume(false);
             ApplyLowpass(false);
             ApplyPitch();
+            ApplyResonance();
         }
-        internal void TickOcculusion()
+        internal void TickOcclusion()
         {
             if (!hasFocus)
             {
@@ -198,9 +198,7 @@ namespace Core.Audio
         }
         private void ApplyResonance()
         {
-            float resonance = baseResonance * resonanceMultiplier;
-
-            thisAudioFilter.lowpassResonanceQ = resonance;
+            thisAudioFilter.lowpassResonanceQ = resonanceMultiplier;
         }
 
         public void Play(AudioClip clip, Transform listener, AudioMixerGroup group, float blend, float volume, float pitch, float minDistance, float maxDistance, bool loop, LayerMask occlusionMask, float occlusionAngle, float occlusionBlend, AnimationCurve occlusionLowpass, AnimationCurve occlusionVolume)
@@ -233,7 +231,7 @@ namespace Core.Audio
                 return;
             }
 
-            occlusionEnabled = false;
+            ResetValues();
 
             thisAudioClip = clip;
             thisAudioListener = listener;
@@ -273,12 +271,7 @@ namespace Core.Audio
             thisAudioSource.clip = null;
             thisAudioSource.gameObject.SetActive(false);
 
-            volumeMultiplier = 1;
-            pitchMultiplier = 1;
-            lowpassMultiplier = 1;
-
-            isPaused = false;
-            isPlaying = false;
+            ResetValues();
         }
         public void Pause()
         {
@@ -350,6 +343,25 @@ namespace Core.Audio
                 ApplyPitch();
                 ApplyResonance();
             }
+        }
+
+        private void ResetValues()
+        {
+            occlusionEnabled = false;
+            occlusionFront = false;
+            occlusionLeft = false;
+            occlusionRight = false;
+            occlusionValue = 0;
+            occlusionLowpassMultiplier = 1;
+            occlusionVolumeMultiplier = 1;
+
+            volumeMultiplier = 1;
+            pitchMultiplier = 1;
+            lowpassMultiplier = 1;
+            resonanceMultiplier = 1;
+
+            isPaused = false;
+            isPlaying = false;
         }
 
         public Vector3 GetPosition() => thisTransform.position;

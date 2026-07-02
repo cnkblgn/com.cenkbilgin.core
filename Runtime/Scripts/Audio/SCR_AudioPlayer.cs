@@ -117,23 +117,41 @@ namespace Core.Audio
 
             AudioManager m = AudioManager.Instance;
 
-            audioObject.Play
-            (
-                clip,
-                m.AudioListener,
-                m.GetAudioGroup(audioGroup),
-                blend,
-                volume * (randomizeVolume ? Random.Range(0.75f, 1.15f) : 1),
-                pitch * (randomizePitch ? Random.Range(0.9f, 1.1f) : 1),
-                minDistance,
-                maxDistance,
-                playOnLoop,
-                m.OcclusionMask,
-                m.OcclusionAngle,
-                m.OcclusionBlend,
-                m.OcclusionLowpass,
-                m.OcclusionVolume
-            );
+            if (useOcculusion)
+            {
+                audioObject.Play
+                (
+                    clip,
+                    m.AudioListener,
+                    m.GetAudioGroup(audioGroup),
+                    blend,
+                    volume * (randomizeVolume ? Random.Range(0.75f, 1.15f) : 1),
+                    pitch * (randomizePitch ? Random.Range(0.9f, 1.1f) : 1),
+                    minDistance,
+                    maxDistance,
+                    playOnLoop,
+                    m.OcclusionMask,
+                    m.OcclusionAngle,
+                    m.OcclusionBlend,
+                    m.OcclusionLowpass,
+                    m.OcclusionVolume
+                );
+            }
+            else
+            {
+                audioObject.Play
+                (
+                    clip,
+                    m.AudioListener,
+                    m.GetAudioGroup(audioGroup),
+                    blend,
+                    volume * (randomizeVolume ? Random.Range(0.75f, 1.15f) : 1),
+                    pitch * (randomizePitch ? Random.Range(0.9f, 1.1f) : 1),
+                    minDistance,
+                    maxDistance,
+                    playOnLoop
+                );
+            }
 
             SetLowpass(lowpass / 22000f);
             SetResonance(rezonance);
