@@ -153,6 +153,11 @@ namespace Core.Audio
         {
             const int updatesPerFrame = 8;
 
+            for (int i = 0; i < audioEmitterCollection.Count; i++)
+            {
+                audioEmitterCollection[i].TickState();
+            }
+
             for (int i = 0; i < updatesPerFrame; i++)
             {
                 if (audioEmitterCollection.Count == 0)
@@ -172,7 +177,7 @@ namespace Core.Audio
                     continue;
                 }
 
-                emitter.Tick();               
+                emitter.TickOcculusion();               
             }
         }
         private void OnEnable()

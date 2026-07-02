@@ -1,4 +1,6 @@
+using PlasticGui.WorkspaceWindow.PendingChanges;
 using System;
+using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 using UnityEngine;
 using UnityEngine.Audio;
 
@@ -43,8 +45,7 @@ namespace Core.Audio
         private readonly RaycastHit[] occlusionRightHits = new RaycastHit[(int)OCCLUSION_DEPTH];
         private float basePitch = 1;
         private float baseVolume = 1;
-        private float targetVolume = 1;
-        private float targetLowpass = MAX_CUTOFF;
+        private float baseResonance = 1;
         private float distanceToListener = float.MinValue;
         private float occlusionValue = 0;
         private float occlusionBlend = 12.5f;
@@ -54,6 +55,9 @@ namespace Core.Audio
         private float volumeMultiplier = 1;
         private float pitchMultiplier = 1;
         private float lowpassMultiplier = 1;
+        private float resonanceMultiplier = 1;
+        private float occlusionVolumeMultiplier = 1;
+        private float occlusionLowpassMultiplier = 1;
         private bool occlusionEnabled = false;
         private bool occlusionFront = false;
         private bool occlusionLeft = false;
@@ -104,7 +108,7 @@ namespace Core.Audio
 #endif
         private void OnApplicationFocus(bool focus) => hasFocus = focus;
 
-        public void Tick()
+        internal void TickState()
         {
             if (!hasFocus)
             {
@@ -133,6 +137,32 @@ namespace Core.Audio
                 return;
             }
 
+            ApplyVolume(false);
+            ApplyLowpass(false);
+            ApplyPitch();
+        }
+        internal void TickOcculusion()
+        {
+            if (!hasFocus)
+            {
+                return;
+            }
+
+            if (!isInitialized)
+            {
+                return;
+            }
+
+            if (!isPlaying)
+            {
+                return;
+            }
+
+            if (thisAudioSource.isVirtual)
+            {
+                return;
+            }
+
             if (!occlusionEnabled)
             {
                 return;
@@ -147,6 +177,32 @@ namespace Core.Audio
 
             Occlude();
         }
+
+        private void ApplyVolume(bool immediate)
+        {
+            float volume = baseVolume * volumeMultiplier * occlusionVolumeMultiplier;
+
+            thisAudioSource.volume = !occlusionEnabled || immediate ? volume : Mathf.Lerp(thisAudioSource.volume, volume, occlusionBlend * Time.deltaTime);
+        }
+        private void ApplyLowpass(bool immediate)
+        {
+            float lowpass = MAX_CUTOFF * lowpassMultiplier * occlusionLowpassMultiplier;
+
+            thisAudioFilter.cutoffFrequency = !occlusionEnabled || immediate ? lowpass : Mathf.Lerp(thisAudioFilter.cutoffFrequency, lowpass, occlusionBlend * Time.deltaTime);
+        }
+        private void ApplyPitch()
+        {
+            float pitch = basePitch * pitchMultiplier;
+
+            thisAudioSource.pitch = pitch;
+        }
+        private void ApplyResonance()
+        {
+            float resonance = baseResonance * resonanceMultiplier;
+
+            thisAudioFilter.lowpassResonanceQ = resonance;
+        }
+
         public void Play(AudioClip clip, Transform listener, AudioMixerGroup group, float blend, float volume, float pitch, float minDistance, float maxDistance, bool loop, LayerMask occlusionMask, float occlusionAngle, float occlusionBlend, AnimationCurve occlusionLowpass, AnimationCurve occlusionVolume)
         {
             Play(clip, listener, group, blend, volume, pitch, minDistance, maxDistance, loop);
@@ -283,22 +339,17 @@ namespace Core.Audio
 
             occlusionValue = localOcclusion;
 
-            float occlusionT = Mathf.Clamp01(occlusionValue * OCCLUSION_FACTOR);
-            targetLowpass = MAX_CUTOFF * (1f - occlusionLowpassCurve.Evaluate(occlusionT)) * lowpassMultiplier;
-            targetVolume = baseVolume * (1f - occlusionVolumeCurve.Evaluate(occlusionT)) * volumeMultiplier;
+            float t = Mathf.Clamp01(occlusionValue * OCCLUSION_FACTOR);
+            occlusionLowpassMultiplier = 1f - occlusionLowpassCurve.Evaluate(t);
+            occlusionVolumeMultiplier = 1f - occlusionVolumeCurve.Evaluate(t);
 
             if (isFirstTime)
             {
-                thisAudioFilter.cutoffFrequency = targetLowpass;
-                thisAudioSource.volume = targetVolume;
+                ApplyLowpass(true);
+                ApplyVolume(true);
+                ApplyPitch();
+                ApplyResonance();
             }
-            else
-            {
-                thisAudioFilter.cutoffFrequency = Mathf.Lerp(thisAudioFilter.cutoffFrequency, targetLowpass, occlusionBlend * Time.deltaTime);
-                thisAudioSource.volume = Mathf.Lerp(thisAudioSource.volume, targetVolume, occlusionBlend * Time.deltaTime);
-            }
-
-            thisAudioSource.pitch = basePitch * pitchMultiplier;
         }
 
         public Vector3 GetPosition() => thisTransform.position;
@@ -308,36 +359,28 @@ namespace Core.Audio
         public void SetPitch(float value)
         {
             pitchMultiplier = value;
-
-            if (!occlusionEnabled)
-            {
-                thisAudioSource.pitch = basePitch * pitchMultiplier;
-            }
+            ApplyPitch();
         }
 
         public float GetVolume() => volumeMultiplier;
         public void SetVolume(float value)
         {
             volumeMultiplier = value;
-
-            if (!occlusionEnabled)
-            {
-                thisAudioSource.volume = baseVolume * volumeMultiplier;
-            }
+            ApplyVolume(true);
         }
 
         public float GetLowpass() => MAX_CUTOFF * lowpassMultiplier;
         public void SetLowpass(float value)
         {
             lowpassMultiplier = value;
-
-            if (!occlusionEnabled)
-            {
-                thisAudioFilter.cutoffFrequency = MAX_CUTOFF * lowpassMultiplier;
-            }
+            ApplyLowpass(true);
         }
 
-        public float GetResonance() => thisAudioFilter.lowpassResonanceQ;
-        public void SetResonance(float value) => thisAudioFilter.lowpassResonanceQ = value;
+        public float GetResonance() => resonanceMultiplier;
+        public void SetResonance(float value)
+        {
+            resonanceMultiplier = value;
+            ApplyResonance();
+        }
     }
 }
