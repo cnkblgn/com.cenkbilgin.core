@@ -31,7 +31,7 @@ namespace Core.UI
             waypointTemplate.gameObject.SetActive(false);
             waypointPool = new(PoolType.RELEASE, waypointTemplate, thisTransform, waypointCapacity);
         }        
-        private void Update()
+        private void LateUpdate()
         {
             if (!isOpened)
             {
