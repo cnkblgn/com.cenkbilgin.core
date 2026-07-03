@@ -108,7 +108,7 @@ namespace Core.UI
             Vector3 direction = position - cameraTransform.position;
 
             // Kamera arkasýndaysa, hedefi kameranýn önüne simetrik yansýt.
-            if (Vector3.Dot(toTarget, cameraTransform.forward) < 0f)
+            if (Vector3.Dot(direction, cameraTransform.forward) < 0f)
             {
                 position = cameraTransform.position - direction;
             }
