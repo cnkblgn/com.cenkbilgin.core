@@ -8,7 +8,7 @@ namespace Core.UI
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Canvas))]
-    internal sealed class UIWaypointController : MonoBehaviour
+    public sealed class UIWaypointController : MonoBehaviour
     {
         [Header("_")]
         [SerializeField] private RectTransform waypointBounds = null;
