@@ -97,8 +97,8 @@ namespace Core.UI
         }
         public void ShowAll()
         {
-            thisCanvas.Show();
             isOpened = true;
+            thisCanvas.Show();
         }
         public void Hide(in Guid id)
         {
