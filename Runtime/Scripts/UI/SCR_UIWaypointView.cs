@@ -37,7 +37,7 @@ namespace Core.UI
                 return;
             }
 
-            ClampToRect(cameraController, cameraTransform, rectBounds);
+            ClampToRect(cameraController, rectBounds);
         }
         public void Tick(Camera cameraController, Transform cameraTransform)
         {
@@ -102,18 +102,16 @@ namespace Core.UI
             screenPosition.y = Mathf.Clamp(screenPosition.y, minY, maxY);
             thisTransform.position = screenPosition;
         }
-        private void ClampToRect(Camera cameraController, Transform cameraTransform, Rect rectBounds)
+        private void ClampToRect(Camera cameraController, Rect rectBounds)
         {
-            Vector3 position = Data.Position + offset;
-            Vector3 direction = position - cameraTransform.position;
+            Vector3 worldPosition = Data.Position + offset;
+            Vector3 viewport = cameraController.WorldToViewportPoint(worldPosition);
 
-            // Kamera arkasýndaysa, hedefi kameranýn önüne simetrik yansýt.
-            if (Vector3.Dot(direction, cameraTransform.forward) < 0f)
+            if (viewport.z < 0f)
             {
-                position = cameraTransform.position - direction;
+                viewport.x = 1f - viewport.x;
+                viewport.y = 1f - viewport.y;
             }
-
-            Vector3 viewport = cameraController.WorldToViewportPoint(position);
 
             float minX = rectBounds.xMin + cachedWidth;
             float maxX = rectBounds.xMax - cachedWidth;
