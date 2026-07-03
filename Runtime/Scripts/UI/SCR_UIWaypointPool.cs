@@ -9,7 +9,7 @@ namespace Core.UI
 
         public UIWaypointPool(PoolType type, UIWaypointView prefab, Transform container, int count) => Pool = new("UI_WAYPOINT_POOL", type, prefab, container, count, this);
          
-        public UIWaypointView Spawn(in UIWaypointData data, Vector3 offset, Func<bool> destroyUntil)
+        public UIWaypointView Spawn(in UIWaypointData data, Vector3 offset)
         {
             UIWaypointView entity = Pool.GetNext();
 
@@ -18,7 +18,7 @@ namespace Core.UI
                 return null;
             }
 
-            entity.Show(data, offset, destroyUntil);
+            entity.Show(data, offset);
 
             return entity;
         }

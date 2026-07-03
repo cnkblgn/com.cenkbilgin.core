@@ -11,6 +11,7 @@ namespace Core.UI
     internal sealed class UIWaypointController : MonoBehaviour
     {
         [Header("_")]
+        [SerializeField] private RectTransform waypointBounds = null;
         [SerializeField, Required] private UIWaypointView waypointTemplate = null;
 
         private Canvas thisCanvas = null;
@@ -36,6 +37,9 @@ namespace Core.UI
                 return;
             }
 
+            bool hasBounds = waypointBounds != null;
+            Rect bounds = hasBounds ? waypointBounds.rect : default;
+
             for (int i = 0; i < waypointPool.Pool.TotalCount; i++)
             {
                 if (waypointPool.Pool.TryGet(i, out UIWaypointView entity) && !entity.gameObject.activeSelf)
@@ -43,7 +47,14 @@ namespace Core.UI
                     continue;
                 }
 
-                entity.Tick(cameraController, cameraTransform);
+                if (hasBounds)
+                {
+                    entity.Tick(cameraController, cameraTransform, bounds);
+                }
+                else
+                {
+                    entity.Tick(cameraController, cameraTransform);
+                }
 
                 if (entity.IsCompleted)
                 {
@@ -52,27 +63,21 @@ namespace Core.UI
             }
         }
 
-        public void Show(in UIWaypointData data, Vector3 offset, Camera camera, Func<bool> destroyUntil)
+        public void Show(in UIWaypointData data, Vector3 offset, Camera camera)
         {
-            UIWaypointView entity = waypointPool.Spawn(data, offset, destroyUntil);
+            UIWaypointView entity = waypointPool.Spawn(data, offset);
 
             Guid id = data.ID;
 
             if (entity == null)
             {
-                Debug.LogError("UIWaypointEntity == null!");
+                Debug.LogError("waypoint entity not found in pool!");
                 return;
             }
 
             if (camera == null)
             {
-                Debug.LogError("mainCamera == null!");
-                return;
-            }
-
-            if (waypointTemplate == null)
-            {
-                Debug.LogError("waypointTemplate == null!");
+                Debug.LogError("waypoint camera is null!");
                 return;
             }
 

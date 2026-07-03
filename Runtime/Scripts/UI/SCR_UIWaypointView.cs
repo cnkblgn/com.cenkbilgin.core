@@ -17,71 +17,73 @@ namespace Core.UI
         [Header("_")]
         [SerializeField, Required] private Image iconImage = null;
         [SerializeField, Required] private TextMeshProUGUI nameText = null;
-        [SerializeField, Required] private TextMeshProUGUI distanceText = null;
+
+        [Header("_")]
+        [SerializeField] private TextMeshProUGUI distanceText = null;
 
         private RectTransform thisTransform = null;
-        private Func<bool> destroyUntil = null;
         private Action completeCallback = null;
         private Vector3 offset = Vector3.zero;
-        private float tickDuration = -1;
-        private float tickTimer = 0;
         private float textTimer = 0;
         private float cachedWidth = 0;
         private float cachedHeight = 0;
         private bool isInitialized = false;
         private bool isActive = false;
 
+        public void Tick(Camera cameraController, Transform cameraTransform, Rect rectBounds)
+        {
+            if (!TryTickInternal(cameraController, cameraTransform))
+            {
+                return;
+            }
+
+            ClampToRect(cameraController, rectBounds);
+        }
         public void Tick(Camera cameraController, Transform cameraTransform)
+        {
+            if (!TryTickInternal(cameraController, cameraTransform))
+            {
+                return;
+            }
+
+            ClampToScreen(cameraController, cameraTransform);
+        }
+        private bool TryTickInternal(Camera cameraController, Transform cameraTransform)
         {
             if (!isActive)
             {
-                return;
+                return false;
             }
 
-            if (cameraController == null)
+            if (cameraController == null || cameraTransform == null)
             {
                 Complete();
-                return; 
-            }
-
-            if (cameraTransform == null)
-            {
-                Complete();
-                return;
+                return false;
             }
 
             if (Data.HasTarget && Data.TargetTransform == null)
             {
                 Complete();
-                return;
+                return false;
             }
 
-            if (destroyUntil != null && destroyUntil())
+            if (distanceText != null)
             {
-                Hide();
-                return;
-            }
+                textTimer += Time.deltaTime;
 
-            if (tickDuration >= 1)
-            {
-                if (tickTimer > tickDuration)
+                if (textTimer >= 0.5f)
                 {
-                    Hide();
-                    return;
+                    float distance = Vector3.Distance(Data.Position, cameraTransform.position);
+                    distanceText.text = $"{(int)distance} m";
+                    textTimer = 0;
                 }
-
-                tickTimer += Time.deltaTime;
             }
 
-            textTimer += Time.deltaTime;
+            return true;
+        }
 
-            if (textTimer >= 0.5f)
-            {
-                float distance = Vector3.Distance(Data.Position, cameraTransform.position);
-                distanceText.text = $"{(int)distance} m";
-                textTimer = 0;
-            }
-
+        private void ClampToScreen(Camera cameraController, Transform cameraTransform)
+        {
             float minX = cachedWidth;
             float maxX = Screen.width - minX;
 
@@ -100,8 +102,31 @@ namespace Core.UI
             screenPosition.y = Mathf.Clamp(screenPosition.y, minY, maxY);
             thisTransform.position = screenPosition;
         }
+        private void ClampToRect(Camera cameraController, Rect rectBounds)
+        {
+            Vector3 worldPosition = Data.Position + offset;
+            Vector3 viewport = cameraController.WorldToViewportPoint(worldPosition);
 
-        public void Initialize()
+            if (viewport.z < 0)
+            {
+                viewport.x = 1f - viewport.x;
+                viewport.y = 1f - viewport.y;
+            }
+
+            float minX = rectBounds.xMin + cachedWidth;
+            float maxX = rectBounds.xMax - cachedWidth;
+            float minY = rectBounds.yMin + cachedHeight;
+            float maxY = rectBounds.yMax - cachedHeight;
+
+            Vector2 localPosition = new((viewport.x - 0.5f) * rectBounds.width, (viewport.y - 0.5f) * rectBounds.height);
+
+            localPosition.x = Mathf.Clamp(localPosition.x, minX, maxX);
+            localPosition.y = Mathf.Clamp(localPosition.y, minY, maxY);
+
+            thisTransform.anchoredPosition = localPosition;
+        }
+
+        internal void Initialize()
         {
             if (isInitialized)
             {
@@ -113,7 +138,7 @@ namespace Core.UI
 
             isInitialized = true;
         }
-        public void Deinitialize()
+        internal void Deinitialize()
         {
             if (!isInitialized)
             {
@@ -126,34 +151,29 @@ namespace Core.UI
             IsCompleted = false;
         }
 
-        public void Show(in UIWaypointData data, Vector3 offset, Func<bool> destroyUntil)
+        public void Show(in UIWaypointData data, Vector3 offset)
         {
             if (!isInitialized)
             {
                 return;
             }
 
-            Data = data;
-
             gameObject.SetActive(true);
 
+            Data = data;
             isActive = true;
             IsCompleted = false;
-            tickTimer = 0;
 
-            tickDuration = Data.Duration;
             this.offset = offset;
-            this.destroyUntil = destroyUntil;
-
             nameText.text = Data.Text;
             iconImage.color = Data.Color;
             iconImage.sprite = Data.Icon != null ? Data.Icon : iconImage.sprite;
 
+            cachedWidth = thisTransform.rect.width * 0.5f;
+            cachedHeight = thisTransform.rect.height * 0.5f;
+
             thisTransform.localScale = Vector3.zero;
             thisTransform.Scale(Vector3.one, 0.25f);
-
-            cachedWidth = LayoutUtility.GetPreferredWidth(thisTransform) * 0.5f;
-            cachedHeight = LayoutUtility.GetPreferredHeight(thisTransform) * 0.5f;
         }
         public void Hide()
         {
