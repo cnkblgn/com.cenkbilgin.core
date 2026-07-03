@@ -15,11 +15,12 @@ namespace Core.UI
         public bool IsCompleted { get; private set; }
 
         [Header("_")]
-        [SerializeField, Required] private Image iconImage = null;
-        [SerializeField, Required] private TextMeshProUGUI nameText = null;
+        [SerializeField, Required] private Image icon = null;
+        [SerializeField, Required] private TextMeshProUGUI text = null;
 
         [Header("_")]
-        [SerializeField] private TextMeshProUGUI distanceText = null;
+        [SerializeField] private bool showDistance = false;
+        [SerializeField] private bool hideBehind = false;
 
         private RectTransform thisTransform = null;
         private Action completeCallback = null;
@@ -28,62 +29,40 @@ namespace Core.UI
         private float cachedWidth = 0;
         private float cachedHeight = 0;
         private bool isInitialized = false;
+        private bool isVisible = false;
         private bool isActive = false;
 
-        public void Tick(Camera cameraController, Transform cameraTransform, Rect rectBounds)
-        {
-            if (!TryTickInternal(cameraController, cameraTransform))
-            {
-                return;
-            }
-
-            ClampToRect(cameraController, rectBounds);
-        }
         public void Tick(Camera cameraController, Transform cameraTransform)
-        {
-            if (!TryTickInternal(cameraController, cameraTransform))
-            {
-                return;
-            }
-
-            ClampToScreen(cameraController);
-        }
-        private bool TryTickInternal(Camera cameraController, Transform cameraTransform)
         {
             if (!isActive)
             {
-                return false;
+                return;
             }
 
             if (cameraController == null || cameraTransform == null)
             {
                 Complete();
-                return false;
+                return;
             }
 
             if (Data.HasTarget && Data.TargetTransform == null)
             {
                 Complete();
-                return false;
+                return;
             }
 
-            if (distanceText != null)
+            if (showDistance)
             {
                 textTimer += Time.deltaTime;
 
                 if (textTimer >= 0.5f)
                 {
                     float distance = Vector3.Distance(Data.Position, cameraTransform.position);
-                    distanceText.text = $"{(int)distance} m";
+                    text.text = $"{Data.Text}\n{(int)distance} m";
                     textTimer = 0;
                 }
             }
 
-            return true;
-        }
-
-        private void ClampToScreen(Camera cameraController)
-        {
             float minX = cachedWidth;
             float maxX = Screen.width - minX;
             float minY = cachedHeight;
@@ -91,39 +70,41 @@ namespace Core.UI
 
             Vector3 worldPosition = Data.Position + offset;
             Vector3 screenPosition = cameraController.WorldToScreenPoint(worldPosition);
+            bool isBehind = screenPosition.z < 0f;
 
-            if (screenPosition.z < 0f)
+            if (isBehind)
             {
                 screenPosition.x = Screen.width - screenPosition.x;
                 screenPosition.y = Screen.height - screenPosition.y;
             }
 
+            if (hideBehind)
+            {
+                bool isOffscreen = isBehind || screenPosition.x < 0f || screenPosition.x > Screen.width || screenPosition.y < 0f || screenPosition.y > Screen.height;
+
+                if (isOffscreen)
+                {
+                    if (isVisible)
+                    {
+                        icon.enabled = false;
+                        text.enabled = false;
+                        isVisible = false;
+                    }
+                }
+                else
+                {
+                    if (!isVisible)
+                    {
+                        icon.enabled = true;
+                        text.enabled = true;
+                        isVisible = true;
+                    }
+                }
+            }
+
             screenPosition.x = Mathf.Clamp(screenPosition.x, minX, maxX);
             screenPosition.y = Mathf.Clamp(screenPosition.y, minY, maxY);
             thisTransform.position = screenPosition;
-        }
-        private void ClampToRect(Camera cameraController, Rect rectBounds)
-        {
-            Vector3 worldPosition = Data.Position + offset;
-            Vector3 viewport = cameraController.WorldToViewportPoint(worldPosition);
-
-            if (viewport.z < 0f)
-            {
-                viewport.x = 1f - viewport.x;
-                viewport.y = 1f - viewport.y;
-            }
-
-            float minX = rectBounds.xMin + cachedWidth;
-            float maxX = rectBounds.xMax - cachedWidth;
-            float minY = rectBounds.yMin + cachedHeight;
-            float maxY = rectBounds.yMax - cachedHeight;
-
-            Vector2 localPosition = new((viewport.x - 0.5f) * rectBounds.width, (viewport.y - 0.5f) * rectBounds.height);
-
-            localPosition.x = Mathf.Clamp(localPosition.x, minX, maxX);
-            localPosition.y = Mathf.Clamp(localPosition.y, minY, maxY);
-
-            thisTransform.anchoredPosition = localPosition;
         }
 
         internal void Initialize()
@@ -163,11 +144,12 @@ namespace Core.UI
             Data = data;
             isActive = true;
             IsCompleted = false;
+            isVisible = true;
 
             this.offset = offset;
-            nameText.text = Data.Text;
-            iconImage.color = Data.Color;
-            iconImage.sprite = Data.Icon != null ? Data.Icon : iconImage.sprite;
+            text.text = Data.Text;
+            icon.color = Data.Color;
+            icon.sprite = Data.Icon != null ? Data.Icon : icon.sprite;
 
             cachedWidth = thisTransform.rect.width * 0.5f;
             cachedHeight = thisTransform.rect.height * 0.5f;

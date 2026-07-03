@@ -8,10 +8,9 @@ namespace Core.UI
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Canvas))]
-    public sealed class UIWaypointController : MonoBehaviour
+    internal sealed class UIWaypointController : MonoBehaviour
     {
         [Header("_")]
-        [SerializeField] private RectTransform waypointBounds = null;
         [SerializeField, Required] private UIWaypointView waypointTemplate = null;
         [SerializeField, Range(1, 128)] private int waypointCapacity = 16;
 
@@ -38,9 +37,6 @@ namespace Core.UI
                 return;
             }
 
-            bool hasBounds = waypointBounds != null;
-            Rect bounds = hasBounds ? waypointBounds.rect : default;
-
             for (int i = 0; i < waypointCapacity; i++)
             {
                 if (waypointPool.Pool.TryGet(i, out UIWaypointView entity) && !entity.gameObject.activeSelf)
@@ -48,14 +44,7 @@ namespace Core.UI
                     continue;
                 }
 
-                if (hasBounds)
-                {
-                    entity.Tick(cameraController, cameraTransform, bounds);
-                }
-                else
-                {
-                    entity.Tick(cameraController, cameraTransform);
-                }
+                entity.Tick(cameraController, cameraTransform);
 
                 if (entity.IsCompleted)
                 {
