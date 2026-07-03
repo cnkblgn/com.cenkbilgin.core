@@ -107,10 +107,9 @@ namespace Core.UI
             Vector3 worldPosition = Data.Position + offset;
             Vector3 viewport = cameraController.WorldToViewportPoint(worldPosition);
 
-            if (viewport.z < 0)
+            if (viewport.z < 0f)
             {
-                viewport.x = 1f - viewport.x;
-                viewport.y = 1f - viewport.y;
+                viewport.x = -viewport.x;
             }
 
             float minX = rectBounds.xMin + cachedWidth;
