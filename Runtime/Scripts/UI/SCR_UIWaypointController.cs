@@ -13,6 +13,7 @@ namespace Core.UI
         [Header("_")]
         [SerializeField] private RectTransform waypointBounds = null;
         [SerializeField, Required] private UIWaypointView waypointTemplate = null;
+        [SerializeField, Range(1, 128)] private int waypointCapacity = 16;
 
         private Canvas thisCanvas = null;
         private RectTransform thisTransform = null;
@@ -28,7 +29,7 @@ namespace Core.UI
             thisTransform = GetComponent<RectTransform>();
 
             waypointTemplate.gameObject.SetActive(false);
-            waypointPool = new(PoolType.RELEASE, waypointTemplate, thisTransform, 16);
+            waypointPool = new(PoolType.RELEASE, waypointTemplate, thisTransform, waypointCapacity);
         }        
         private void Update()
         {
@@ -40,7 +41,7 @@ namespace Core.UI
             bool hasBounds = waypointBounds != null;
             Rect bounds = hasBounds ? waypointBounds.rect : default;
 
-            for (int i = 0; i < waypointPool.Pool.TotalCount; i++)
+            for (int i = 0; i < waypointCapacity; i++)
             {
                 if (waypointPool.Pool.TryGet(i, out UIWaypointView entity) && !entity.gameObject.activeSelf)
                 {

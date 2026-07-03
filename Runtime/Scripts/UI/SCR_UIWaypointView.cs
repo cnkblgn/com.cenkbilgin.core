@@ -46,7 +46,7 @@ namespace Core.UI
                 return;
             }
 
-            ClampToScreen(cameraController, cameraTransform);
+            ClampToScreen(cameraController);
         }
         private bool TryTickInternal(Camera cameraController, Transform cameraTransform)
         {
@@ -82,20 +82,20 @@ namespace Core.UI
             return true;
         }
 
-        private void ClampToScreen(Camera cameraController, Transform cameraTransform)
+        private void ClampToScreen(Camera cameraController)
         {
             float minX = cachedWidth;
             float maxX = Screen.width - minX;
-
             float minY = cachedHeight;
             float maxY = Screen.height - minY;
 
             Vector3 worldPosition = Data.Position + offset;
-            Vector2 screenPosition = cameraController.WorldToScreenPoint(worldPosition);
+            Vector3 screenPosition = cameraController.WorldToScreenPoint(worldPosition);
 
-            if (Vector3.Dot((worldPosition - cameraTransform.position), cameraTransform.forward) < 0)
+            if (screenPosition.z < 0f)
             {
-                screenPosition.x *= -1;
+                screenPosition.x = Screen.width - screenPosition.x;
+                screenPosition.y = Screen.height - screenPosition.y;
             }
 
             screenPosition.x = Mathf.Clamp(screenPosition.x, minX, maxX);
