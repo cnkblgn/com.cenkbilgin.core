@@ -59,12 +59,12 @@ namespace Core.UI
         public void ShowViewport() => UIManager.Instance.ShowViewport(id, this);
         public void HideViewport() => UIManager.Instance.HideViewport(id);
 
-        public void ShowRenderer()
+        internal void ShowRenderer()
         {
             collider.enabled = true;
             renderer.enabled = true;
         }
-        public void HideRenderer()
+        internal void HideRenderer()
         {
             collider.enabled = false;
             renderer.enabled = false;
