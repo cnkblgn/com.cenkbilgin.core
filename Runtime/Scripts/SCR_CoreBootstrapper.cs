@@ -58,9 +58,9 @@ namespace Core
                 return false;
             }
 
-            SceneAsset scene = AssetDatabase.LoadAssetAtPath<SceneAsset>(path);
+            asset = AssetDatabase.LoadAssetAtPath<SceneAsset>(path);
 
-            if (scene == null)
+            if (asset == null)
             {
                 sceneGuid = null;
 
@@ -68,7 +68,7 @@ namespace Core
                 return false;
             }
 
-            return scene;
+            return true;
         }
 #endif
     }
