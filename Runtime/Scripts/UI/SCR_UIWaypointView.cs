@@ -58,7 +58,9 @@ namespace Core.UI
                 if (textTimer >= 0.5f)
                 {
                     float distance = Vector3.Distance(Data.Position, cameraTransform.position);
-                    text.text = $"{Data.Text}\n{(int)distance} m";
+                    string distanceString = $"{(int)distance} m";
+
+                    text.text = string.IsNullOrEmpty(Data.Text) ? distanceString : $"{Data.Text}\n{distanceString}";
                     textTimer = 0;
                 }
             }
