@@ -56,7 +56,7 @@ namespace Core.UI
             }
             else
             {
-                valueText.text = value.ToString(STRING_FORMAT_000);
+                valueText.text = value.ToString("0.00");
             }
         }
     }

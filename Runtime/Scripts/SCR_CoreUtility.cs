@@ -846,10 +846,6 @@ namespace Core
         #endregion
 
         #region STRING
-        public const string STRING_FORMAT_0 = "0";
-        public const string STRING_FORMAT_00 = "0.0";
-        public const string STRING_FORMAT_000 = "0.00";
-        public const string STRING_FORMAT_0000 = "0.000";
         public const string STRING_EMPTY = "";
         public const string STRING_LINE = "\n";
         public const string STRING_NULL = "NULL";
@@ -862,17 +858,17 @@ namespace Core
         public const string STRING_BLACK = "#000000";
         public const string STRING_GHOST = "#666666";
 
-        public static readonly string OPEN_BOLD = "<b>";
-        public static readonly string CLOSE_BOLD = "</b>";
-        public static readonly string OPEN_RED = $"<color={STRING_RED}>";
-        public static readonly string OPEN_GREEN = $"<color={STRING_GREEN}>";
-        public static readonly string OPEN_BLUE = $"<color={STRING_BLUE}>";
-        public static readonly string OPEN_YELLOW = $"<color={STRING_YELLOW}>";
-        public static readonly string OPEN_WHITE = $"<color={STRING_WHITE}>";
-        public static readonly string OPEN_GRAY = $"<color={STRING_GRAY}>";
-        public static readonly string OPEN_BLACK = $"<color={STRING_BLACK}>";
-        public static readonly string OPEN_GHOST = $"<color={STRING_GHOST}>";
-        public static readonly string CLOSE_COLOR = "</color>";
+        private static readonly string OPEN_BOLD = "<b>";
+        private static readonly string CLOSE_BOLD = "</b>";
+        private static readonly string OPEN_RED = $"<color={STRING_RED}>";
+        private static readonly string OPEN_GREEN = $"<color={STRING_GREEN}>";
+        private static readonly string OPEN_BLUE = $"<color={STRING_BLUE}>";
+        private static readonly string OPEN_YELLOW = $"<color={STRING_YELLOW}>";
+        private static readonly string OPEN_WHITE = $"<color={STRING_WHITE}>";
+        private static readonly string OPEN_GRAY = $"<color={STRING_GRAY}>";
+        private static readonly string OPEN_BLACK = $"<color={STRING_BLACK}>";
+        private static readonly string OPEN_GHOST = $"<color={STRING_GHOST}>";
+        private static readonly string CLOSE_COLOR = "</color>";
 
         public static string GetSprite(int id, string color = STRING_WHITE) => $"<sprite={id} color={color}>";
         public static string ToBold(this string a) => OPEN_BOLD + a + CLOSE_BOLD;
@@ -885,6 +881,7 @@ namespace Core
         public static string ToGray(this string a) => OPEN_GRAY + a + CLOSE_COLOR;
         public static string ToGhost(this string a) => OPEN_GHOST + a + CLOSE_COLOR;
         public static string ToStyle(this string a, string id) => $"<style={id}>{a}</style>";
+        public static string ToSize(this string a, int size) => $"<size={size}%>{a}</size>";
         #endregion
 
         #region COLOR
