@@ -5,13 +5,13 @@ namespace Core.Audio
 {
     internal readonly struct SoundEntry
     {
+        public readonly SoundID ID;
         public readonly AudioClip Clip;
-        public readonly int Index;
 
-        public SoundEntry(AudioClip clip, int index)
+        public SoundEntry(SoundID iD, AudioClip clip)
         {
-            Clip = clip != null ? clip : throw new ArgumentNullException(nameof(clip));
-            Index = index;
+            ID = iD;
+            Clip = clip ?? throw new ArgumentNullException(nameof(clip));
         }
     }
 }

@@ -24,21 +24,26 @@ namespace Core.Audio
 
             if (database.TryGetValue(id, out SoundEntry entry))
             {
-                return entry.Index;
+                return entry.ID.Index;
             }
 
             return -1;
         }
-
-        public static bool TryGet(int index, out AudioClip clip)
+        public static SoundID GetID(int index)
         {
             if (index >= indices.Length || index < 0)
             {
                 throw new ArgumentOutOfRangeException($"sound database index out of range {nameof(index)}");
             }
 
-            return TryGet(new SoundID(ids[index], -1), out clip);
+            if (!database.TryGetValue(new(ids[index], -1), out SoundEntry entry))
+            {
+                return SoundID.Empty;
+            }
+
+            return entry.ID;
         }
+
         internal static bool TryGet(SoundID id, out AudioClip clip)
         {
             clip = null;
@@ -86,8 +91,9 @@ namespace Core.Audio
 #endif
 
                 string key = collection[i].name;
+                SoundID id = new(key, i);
 
-                database.Add(new(key, i), new(collection[i], i));
+                database.Add(id, new(id, collection[i]));
 
                 ids[i] = key;
                 indices[i] = i;
