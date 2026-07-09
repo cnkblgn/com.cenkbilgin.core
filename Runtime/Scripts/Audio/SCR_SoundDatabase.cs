@@ -30,6 +30,15 @@ namespace Core.Audio
             return -1;
         }
 
+        public static bool TryGet(int index, out AudioClip clip)
+        {
+            if (index >= indices.Length || index < 0)
+            {
+                throw new ArgumentOutOfRangeException($"sound database index out of range {nameof(index)}");
+            }
+
+            return TryGet(new SoundID(ids[index], -1), out clip);
+        }
         internal static bool TryGet(SoundID id, out AudioClip clip)
         {
             clip = null;
