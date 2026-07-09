@@ -6,7 +6,7 @@ namespace Core
     using static CoreUtility;
 
     [Serializable]
-    public struct ActorTag : IEquatable<ActorTag>
+    public partial struct ActorTag : IEquatable<ActorTag>
     {
         public static readonly ActorTag Empty = new(STRING_EMPTY, 0);
 
@@ -23,7 +23,10 @@ namespace Core
             this.key = key;
             this.index = index;
         }
-        public readonly bool Equals(ActorTag other) => key == other.key && index == other.index;
         public readonly override int GetHashCode() => HashCode.Combine(key, index);
+        public readonly bool Equals(ActorTag other) => key == other.key && index == other.index;
+        public readonly override bool Equals(object obj) => obj is ActorTag other && Equals(other);
+        public static bool operator ==(ActorTag left, ActorTag right) => left.Equals(right);
+        public static bool operator !=(ActorTag left, ActorTag right) => !left.Equals(right);
     }
 }

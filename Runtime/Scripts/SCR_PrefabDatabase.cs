@@ -11,7 +11,7 @@ namespace Core
         private static Dictionary<PrefabID, GameObject> database = null;
         private static string[] ids = Array.Empty<string>();
 
-        public static string[] GetIDs() => ids;
+        public static IReadOnlyList<string> GetIDs() => ids;
 
         internal static bool TryGet(PrefabID id, out GameObject prefab)
         {

@@ -16,8 +16,8 @@ namespace Core
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void OnRuntimeInitialize() => actorDatabase.Clear();
 
-        public static string[] GetTags() => tagKeys;
-        public static string[] GetIDs() => idKeys;
+        public static IReadOnlyList<string> GetTags() => tagKeys;
+        public static IReadOnlyList<string> GetIDs() => idKeys;
         public static int GetTagIndex(string id)
         {
             if (!IsParsed)

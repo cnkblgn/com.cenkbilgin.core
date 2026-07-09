@@ -13,16 +13,21 @@ namespace Core
     {
         #region EDITOR
 #if UNITY_EDITOR
-        public static void GenerateScriptDatabase(ScriptableObject instance, string namespaceName, string structName, IEnumerable<string> keys, string outputFileName, bool sanitize)
+        public static void GenerateScriptDatabase(ScriptableObject instance, string namespaceName, string structName, IEnumerable<string> keys, string outputFileName, bool sanitize, bool indexed)
         {
             StringBuilder sb = new();
             sb.AppendLine($"namespace {namespaceName}");
             sb.AppendLine("{");
             sb.AppendLine($"    public partial struct {structName}");
             sb.AppendLine("    {");
+            int index = 0;
             foreach (string key in keys)
             {
-                sb.AppendLine($"        public static readonly {structName} {(sanitize ? key.ToIdentifier() : key)} = new(\"{key}\");");
+                string k = (sanitize ? key.ToIdentifier() : key);
+                string i = indexed ? $",{index}" : STRING_EMPTY;
+
+                sb.AppendLine($"        public static readonly {structName} {k} = new(\"{k}\"{i});");
+                index++;
             }
             sb.AppendLine("    }");
             sb.AppendLine("}");

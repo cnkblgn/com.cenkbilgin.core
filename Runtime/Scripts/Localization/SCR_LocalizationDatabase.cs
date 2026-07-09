@@ -229,12 +229,12 @@ namespace Core.Localization
             }
         }
 
-        public static string[] GetKeys() => keys;
-        public static string[] GetLanguages() => languages;
+        public static IReadOnlyList<string> GetKeys() => keys;
+        public static IReadOnlyList<string> GetLanguages() => languages;
         public static string GetLanguage() => GetLanguages()[currentLanguageIndex];
         public static void SetLanguage(int index)
         {
-            if (currentLanguageIndex == index || index < 0 || index >= GetLanguages().Length)
+            if (currentLanguageIndex == index || index < 0 || index >= GetLanguages().Count)
             {
                 return;
             }

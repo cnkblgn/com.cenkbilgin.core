@@ -28,7 +28,7 @@ namespace Core.Editor
             public Vector2 Scroll = Vector2.zero;
 
             public string Search = STRING_EMPTY;
-            public string[] Cached = null;
+            public IReadOnlyList<string> Cached = null;
 
             public readonly List<int> Filtered = new(64);
         }
@@ -38,7 +38,7 @@ namespace Core.Editor
         /// <summary> This is used for finding serialized property. Draws named property. Use property name! eg: ItemID </summary>
         protected abstract string GetKey();
         /// <summary> This is used for search list. eg: ItemDatabase.GetKeys(); </summary>
-        protected abstract string[] GetKeys();
+        protected abstract IReadOnlyList<string> GetKeys();
         /// <summary> This is called before applying key id </summary>
         protected virtual void OnApply(SerializedProperty property, string key) { }
 
@@ -121,7 +121,7 @@ namespace Core.Editor
         }
         private void DrawList(Rect rect, SerializedProperty property, SerializedProperty keyProperty, State state)
         {
-            string[] keys = GetKeys();
+            IReadOnlyList<string> keys = GetKeys();
 
             EnsureFilter(state, keys);
 
@@ -254,7 +254,7 @@ namespace Core.Editor
             return dropdownRect;
         }
 
-        private void EnsureFilter(State state, string[] keys)
+        private void EnsureFilter(State state, IReadOnlyList<string> keys)
         {
             if (!state.Dirty && ReferenceEquals(state.Cached, keys))
             {
@@ -266,7 +266,7 @@ namespace Core.Editor
 
             bool hasSearch = !string.IsNullOrEmpty(state.Search);
 
-            for (int i = 0; i < keys.Length; i++)
+            for (int i = 0; i < keys.Count; i++)
             {
                 string id = keys[i];
 

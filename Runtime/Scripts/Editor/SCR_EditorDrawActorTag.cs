@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEditor;
 
 namespace Core.Editor
@@ -5,7 +6,7 @@ namespace Core.Editor
     [CustomPropertyDrawer(typeof(ActorTag))]
     internal class EditorDrawActorTag : EditorDrawSearchable
     {
-        protected override string[] GetKeys() => ActorDatabase.GetTags();
+        protected override IReadOnlyList<string> GetKeys() => ActorDatabase.GetTags();
         protected override string GetKey() => "key";
         protected override void OnApply(SerializedProperty property, string key)
         {

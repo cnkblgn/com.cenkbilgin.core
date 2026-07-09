@@ -10,10 +10,22 @@ namespace Core.Audio
 
         private static Dictionary<SoundID, SoundEntry> database = null;
         private static string[] ids = Array.Empty<string>();
-        private static int[] indices = Array.Empty<int>();
 
-        public static string[] GetIDs() => ids;
-        public static int[] GetIndices() => indices;
+        public static IReadOnlyList<string> GetIDs() => ids;
+        public static SoundID GetID(int index)
+        {
+            if (index >= ids.Length || index < 0)
+            {
+                throw new ArgumentOutOfRangeException($"sound database index out of range {nameof(index)}");
+            }
+
+            if (!database.TryGetValue(new(ids[index], -1), out SoundEntry entry))
+            {
+                return SoundID.Empty;
+            }
+
+            return entry.ID;
+        }
         public static int GetIndex(SoundID id)
         {
             if (!IsParsed)
@@ -28,20 +40,6 @@ namespace Core.Audio
             }
 
             return -1;
-        }
-        public static SoundID GetID(int index)
-        {
-            if (index >= indices.Length || index < 0)
-            {
-                throw new ArgumentOutOfRangeException($"sound database index out of range {nameof(index)}");
-            }
-
-            if (!database.TryGetValue(new(ids[index], -1), out SoundEntry entry))
-            {
-                return SoundID.Empty;
-            }
-
-            return entry.ID;
         }
 
         internal static bool TryGet(SoundID id, out AudioClip clip)
@@ -76,7 +74,6 @@ namespace Core.Audio
 
             database = new(collection.Length);
             ids = new string[collection.Length];
-            indices = new int[collection.Length];
 
             for (int i = 0; i < collection.Length; i++)
             {
@@ -94,9 +91,7 @@ namespace Core.Audio
                 SoundID id = new(key, i);
 
                 database.Add(id, new(id, collection[i]));
-
                 ids[i] = key;
-                indices[i] = i;
             }
 
             Debug.Log($"SoundDatabase build successfull!");
