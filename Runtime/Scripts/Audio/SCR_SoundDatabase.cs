@@ -8,16 +8,33 @@ namespace Core.Audio
     {
         internal static bool IsParsed => database != null;
 
-        private static Dictionary<SoundID, AudioClip> database = null;
+        private static Dictionary<SoundID, SoundEntry> database = null;
         private static string[] ids = Array.Empty<string>();
 
         public static string[] GetIDs() => ids;
-
-        internal static bool TryGet(SoundID id, out AudioClip clip)
+        public static int GetIndex(SoundID id)
         {
             if (!IsParsed)
             {
-                throw new InvalidOperationException($"Sound database is not parsed! Please build via AudioDatabaseConfig");
+                Debug.LogError($"Sound database is not parsed! Please build via SoundDatabaseConfig");
+                return -1;
+            }
+
+            if (database.TryGetValue(id, out SoundEntry entry))
+            {
+                return entry.Index;
+            }
+
+            return -1;
+        }
+
+        internal static bool TryGet(SoundID id, out AudioClip clip)
+        {
+            clip = null;
+
+            if (!IsParsed)
+            {
+                throw new InvalidOperationException($"Sound database is not parsed! Please build via SoundDatabaseConfig");
             }
 
             if (!id.IsValid)
@@ -25,8 +42,9 @@ namespace Core.Audio
                 throw new ArgumentNullException($"[{nameof(id)}] soundID is not valid!");
             }
 
-            if (database.TryGetValue(id, out clip))
+            if (database.TryGetValue(id, out SoundEntry entry))
             {
+                clip = entry.Clip;
                 return true;
             }
 
@@ -58,7 +76,7 @@ namespace Core.Audio
 
                 string key = collection[i].name;
 
-                database.Add(new(key), collection[i]);
+                database.Add(new(key, i), new(collection[i], i));
 
                 ids[i] = key;
             }
