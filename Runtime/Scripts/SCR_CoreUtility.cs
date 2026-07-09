@@ -41,24 +41,20 @@ namespace Core
             File.WriteAllText(outputPath, sb.ToString());
             AssetDatabase.Refresh();
         }
-        public static void GenerateScriptDatabase(ScriptableObject instance, string namespaceName, string structName, string[] structParams, IEnumerable<string> keys, string outputFileName, bool sanitize)
+        public static void GenerateScriptDatabase(ScriptableObject instance, string namespaceName, string structName, IEnumerable<(string key, int index)> entries, string outputFileName, bool sanitize)
         {
             StringBuilder sb = new();
             sb.AppendLine($"namespace {namespaceName}");
             sb.AppendLine("{");
             sb.AppendLine($"    public partial struct {structName}");
             sb.AppendLine("    {");
-            foreach (string key in keys)
+
+            foreach (var (key, index) in entries)
             {
-                string t = "";
-
-                foreach (string param in structParams)
-                {
-                    t += $",{param}";
-                }
-
-                sb.AppendLine($"        public static readonly {structName} {(sanitize ? key.ToIdentifier() : key)} = new(\"{key}\"{t});");
+                string identifier = sanitize ? key.ToIdentifier() : key;
+                sb.AppendLine($"        public static readonly {structName} {identifier} = new(\"{key}\", {index});");
             }
+
             sb.AppendLine("    }");
             sb.AppendLine("}");
 
@@ -66,12 +62,10 @@ namespace Core
             string scriptPath = AssetDatabase.GetAssetPath(script);
             string scriptFolder = Path.GetDirectoryName(scriptPath).Replace("\\", "/");
             string outputFolder = $"{scriptFolder}/Generated";
-
             if (!Directory.Exists(outputFolder))
             {
                 Directory.CreateDirectory(outputFolder);
             }
-
             string outputPath = $"{outputFolder}/{outputFileName}";
             File.WriteAllText(outputPath, sb.ToString());
             AssetDatabase.Refresh();

@@ -1,4 +1,5 @@
 
+using System.Linq;
 using UnityEngine;
 
 namespace Core.Audio
@@ -16,7 +17,7 @@ namespace Core.Audio
         {
             SoundDatabase.Build(collection);
 
-            GenerateScriptDatabase(this, "Core.Audio", "SoundID", SoundDatabase.GetIDs(), "SCR_GeneratedSoundID.cs", true);
+            GenerateScriptDatabase(this, "Core.Audio", "SoundID", SoundDatabase.GetIDs().Zip(SoundDatabase.GetIndices(), (key, index) => (key, index)), "SCR_GeneratedSoundID.cs", true);
         }
     }
 }

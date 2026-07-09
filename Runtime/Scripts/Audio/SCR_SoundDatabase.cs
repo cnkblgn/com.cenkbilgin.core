@@ -10,8 +10,10 @@ namespace Core.Audio
 
         private static Dictionary<SoundID, SoundEntry> database = null;
         private static string[] ids = Array.Empty<string>();
+        private static int[] indices = Array.Empty<int>();
 
         public static string[] GetIDs() => ids;
+        public static int[] GetIndices() => indices;
         public static int GetIndex(SoundID id)
         {
             if (!IsParsed)
@@ -59,8 +61,8 @@ namespace Core.Audio
             }
 
             database = new(collection.Length);
-
             ids = new string[collection.Length];
+            indices = new int[collection.Length];
 
             for (int i = 0; i < collection.Length; i++)
             {
@@ -79,6 +81,7 @@ namespace Core.Audio
                 database.Add(new(key, i), new(collection[i], i));
 
                 ids[i] = key;
+                indices[i] = i;
             }
 
             Debug.Log($"SoundDatabase build successfull!");
