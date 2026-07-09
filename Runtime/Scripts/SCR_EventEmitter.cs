@@ -5,7 +5,7 @@ using UnityEngine.Events;
 namespace Core
 {
     [DisallowMultipleComponent]
-    public sealed class ActionEmitter : MonoBehaviour
+    public sealed class EventEmitter : MonoBehaviour
     {
         [Header("_")]
         [SerializeField] private bool emitOnStart = false;

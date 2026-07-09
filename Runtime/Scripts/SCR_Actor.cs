@@ -18,7 +18,7 @@ namespace Core
         } private Transform thisTransform = null;
 
         public ActorID ID => id;
-        public ulong Mask { get; private set; }
+        public ulong Tags { get; private set; }
 
         [Header("_")]
         [SerializeField] private ActorID id;
@@ -26,7 +26,7 @@ namespace Core
 
         private void Awake()
         {
-            Mask = tags.CreateMask();
+            Tags = tags.CreateMask();
 
             ActorDatabase.RegisterActor(id, this);
         }
