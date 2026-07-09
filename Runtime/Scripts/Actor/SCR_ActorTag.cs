@@ -15,7 +15,7 @@ namespace Core.Actor
         public readonly ulong Mask => 1UL << index;
         public readonly bool IsValid => !string.IsNullOrEmpty(key);
 
-        [SerializeField, Required] private string key;
+        [SerializeField] private string key;
         [SerializeField, ReadOnly] private int index;
 
         public ActorTag(string key, int index)

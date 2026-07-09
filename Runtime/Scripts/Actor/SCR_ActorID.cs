@@ -13,7 +13,7 @@ namespace Core.Actor
         public readonly string Key => key;
         public readonly bool IsValid => !string.IsNullOrEmpty(key);
 
-        [SerializeField, Required] private string key;
+        [SerializeField] private string key;
 
         public ActorID(string key) => this.key = key;
         public readonly bool Equals(ActorID other) => key == other.key;
