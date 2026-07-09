@@ -1,4 +1,4 @@
 namespace Core
 {
-    public delegate void HitProcessor(in HitData ctx);
+    public delegate void HitProcessor(in HitData data);
 }

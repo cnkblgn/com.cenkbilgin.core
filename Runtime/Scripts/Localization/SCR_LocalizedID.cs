@@ -6,14 +6,14 @@ namespace Core.Localization
     using static CoreUtility;
 
     [Serializable]
-    public struct LocalizedString
+    public struct LocalizedID
     {
         public readonly string Key => key;
         public readonly bool IsValid => !string.IsNullOrEmpty(key);
 
         [SerializeField, Required] private string key;
 
-        public LocalizedString(string key) => this.key = key;
+        public LocalizedID(string key) => this.key = key;
 
         public readonly string Get() => LocalizationDatabase.GetString(key);
         public readonly string Get(string arg0) => LocalizationDatabase.GetString(key, arg0);

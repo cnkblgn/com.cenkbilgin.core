@@ -7,7 +7,7 @@ namespace Core.Editor
 {
     using static CoreUtility;
 
-    public abstract class EditorDrawKey : PropertyDrawer
+    public abstract class EditorDrawSearchable : PropertyDrawer
     {
         private const float ROW_HEIGHT = 16f;
         private const float SEARCH_HEIGHT = 16f;
@@ -35,16 +35,12 @@ namespace Core.Editor
 
         private static readonly Dictionary<EntityId, Dictionary<string, State>> states = new();
 
-        /// <summary>
-        /// This is used for finding serialized property. Draws named property. Use property name! eg: ItemID
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> This is used for finding serialized property. Draws named property. Use property name! eg: ItemID </summary>
         protected abstract string GetKey();
-        /// <summary>
-        /// This is used for search list. eg: ItemDatabase.GetIDs();
-        /// </summary>
-        /// <returns></returns>
-        protected abstract string[] GetIDs();
+        /// <summary> This is used for search list. eg: ItemDatabase.GetKeys(); </summary>
+        protected abstract string[] GetKeys();
+        /// <summary> This is called before applying key id </summary>
+        protected virtual void OnApply(SerializedProperty property, string key) { }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
@@ -125,7 +121,7 @@ namespace Core.Editor
         }
         private void DrawList(Rect rect, SerializedProperty property, SerializedProperty keyProperty, State state)
         {
-            string[] keys = GetIDs();
+            string[] keys = GetKeys();
 
             EnsureFilter(state, keys);
 
@@ -178,6 +174,8 @@ namespace Core.Editor
             if (GUI.Button(rowRect, label, EditorStyles.miniButton))
             {
                 keyProperty.stringValue = value;
+
+                OnApply(property, value);
                 property.serializedObject.ApplyModifiedProperties();
 
                 state.Open = false;

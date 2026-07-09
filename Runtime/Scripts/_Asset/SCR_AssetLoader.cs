@@ -19,8 +19,7 @@ namespace Game
 #if UNITY_EDITOR
         private void OnValidate()
         {
-            Debug.Log($"Assets Loaded -> {Path}");
-            database = Core.Editor.EditorUtility.FindAssetsByType<TDatabase>(Path);
+            if (TryFindAssetsByType(out database, Path)) { Debug.Log($"Assets Loaded -> {Path}"); }
         }
 #endif
     }

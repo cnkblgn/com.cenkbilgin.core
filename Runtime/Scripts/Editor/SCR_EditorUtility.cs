@@ -1,4 +1,3 @@
-using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -20,7 +19,7 @@ namespace Core.Editor
             SceneView.RepaintAll();
         }
         private static GameObject copiedObject;
-        [MenuItem("Tools/Copy All Components", false, 2)]
+        [MenuItem("Tools/Copy All Components", false, 1)]
         private static void CopyComponents()
         {
             if (Selection.activeGameObject == null)
@@ -32,7 +31,7 @@ namespace Core.Editor
             copiedObject = Selection.activeGameObject;
             Debug.Log($"Copied components from: {copiedObject.name}");
         }
-        [MenuItem("Tools/Paste All Components", false, 3)]
+        [MenuItem("Tools/Paste All Components", false, 2)]
         private static void PasteComponents()
         {
             if (copiedObject == null)
@@ -76,11 +75,11 @@ namespace Core.Editor
             copiedObject = null;
             Debug.Log($"Pasted {copiedCount} components from {source.name} to {target.name}");
         }
-        [MenuItem("Tools/Copy All Components", true, 4)]
+        [MenuItem("Tools/Copy All Components", true, 3)]
         private static bool ValidateCopy() => Selection.activeGameObject != null;
-        [MenuItem("Tools/Paste All Components", true, 5)]
+        [MenuItem("Tools/Paste All Components", true, 4)]
         private static bool ValidatePaste() => copiedObject != null && Selection.activeGameObject != null;
-        [MenuItem("Tools/Search and Remap Materials", false, 6)]
+        [MenuItem("Tools/Search and Remap Materials", false, 5)]
         private static void SearchAndRemapMaterials()
         {
             Object[] objects = Selection.objects;
@@ -113,89 +112,6 @@ namespace Core.Editor
 
                 Debug.Log($"Material found and remapped to: {path}");
             }
-        }
-
-        public static T CreateAsset<T>(string assetPath) where T : ScriptableObject
-        {
-            // Klasör kýsmýný al
-            string folderPath = Path.GetDirectoryName(assetPath);
-
-            if (!Directory.Exists(folderPath))
-            {
-                Directory.CreateDirectory(folderPath);
-            }
-
-            T asset = ScriptableObject.CreateInstance<T>();
-
-            AssetDatabase.CreateAsset(asset, assetPath);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-
-            Selection.activeObject = asset;
-            EditorGUIUtility.PingObject(asset);
-
-            Debug.Log($"EditorUtility.CreateAsset() [{nameof(T)}] created at [{folderPath}]");
-            return asset;
-        }
-        public static T FindAssetByKeyword<T>(string keyword, string folder = "Assets") where T : Object
-        {
-            string filter = "t:" + typeof(T).Name;
-            string query = keyword + " " + filter;
-
-            GUID[] guids = AssetDatabase.FindAssetGUIDs(query, new[] { folder });
-
-            if (guids == null || guids.Length == 0)
-            {
-                Debug.LogError($"EditorUtility.FindAssetByKeyword() No asset found with keyword: " + keyword);
-                return null;
-            }
-
-            return GetAssetFromGuid<T>(guids[0]);
-        }
-        public static T FindAssetByType<T>(string folder = "Assets") where T : Object
-        {
-            string filter = "t:" + typeof(T).Name;
-            GUID[] guids = AssetDatabase.FindAssetGUIDs(filter, new[] { folder });
-
-            if (guids.Length == 0)
-            {
-                Debug.LogError($"EditorUtility.FindAssetByName() No asset found with type: [{filter}]");
-                return null;
-            }
-
-            return GetAssetFromGuid<T>(guids[0]);
-        }
-        public static T[] FindAssetsByType<T>(string folder = "Assets") where T : Object
-        {
-            string filter = "t:" + typeof(T).Name;
-            GUID[] guids = AssetDatabase.FindAssetGUIDs(filter, new[] { folder });
-
-            if (guids.Length == 0)
-            {
-                Debug.LogError($"EditorUtility.FindAssetByName() No asset found with type: [{filter}]");
-                return null;
-            }
-
-            T[] assets = new T[guids.Length];
-
-            for (int i = 0; i < guids.Length; i++)
-            {
-                assets[i] = GetAssetFromGuid<T>(guids[i]);
-            }
-
-            return assets;
-        }
-        private static T GetAssetFromGuid<T>(GUID guid) where T : Object
-        {
-            string path = AssetDatabase.GUIDToAssetPath(guid);
-            T asset = AssetDatabase.LoadAssetAtPath<T>(path);
-
-            if (asset == null)
-            {
-                Debug.LogError($"EditorUtility.GetAssetFromGuid() No asset found with path: [{path}]");
-            }
-
-            return asset;
         }
 
         public static void DrawFieldOfView(Transform origin, float radius, float angle)

@@ -1,0 +1,69 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace Core.Audio
+{
+    public static class SoundDatabase
+    {
+        internal static bool IsParsed => database != null;
+
+        private static Dictionary<SoundID, AudioClip> database = null;
+        private static string[] ids = Array.Empty<string>();
+
+        public static string[] GetIDs() => ids;
+
+        internal static bool TryGet(SoundID id, out AudioClip clip)
+        {
+            if (!IsParsed)
+            {
+                throw new InvalidOperationException($"Sound database is not parsed! Please build via AudioDatabaseConfig");
+            }
+
+            if (!id.IsValid)
+            {
+                throw new ArgumentNullException($"[{nameof(id)}] soundID is not valid!");
+            }
+
+            if (database.TryGetValue(id, out clip))
+            {
+                return true;
+            }
+
+            Debug.LogError($"audio clip not found! [{id.Key}]");
+            return false;
+        }
+        internal static void Build(AudioClip[] collection)
+        {
+            if (collection == null)
+            {
+                return;
+            }
+
+            database = new(collection.Length);
+
+            ids = new string[collection.Length];
+
+            for (int i = 0; i < collection.Length; i++)
+            {
+                AudioClip clip = collection[i];
+
+#if UNITY_EDITOR
+                if (clip == null)
+                {
+                    Debug.LogError("Sound database clip is null!");
+                    continue;
+                }
+#endif
+
+                string key = collection[i].name;
+
+                database.Add(new(key), collection[i]);
+
+                ids[i] = key;
+            }
+
+            Debug.Log($"SoundDatabase build successfull!");
+        }
+    }
+}

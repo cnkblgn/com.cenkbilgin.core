@@ -1,13 +1,184 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using Unity.Mathematics;
+using UnityEditor;
 using UnityEngine;
 
 namespace Core
 { 
     public static class CoreUtility
     {
+        #region EDITOR
+#if UNITY_EDITOR
+        public static void GenerateScriptDatabase(ScriptableObject instance, string namespaceName, string structName, IEnumerable<string> keys, string outputFileName, bool sanitize)
+        {
+            StringBuilder sb = new();
+            sb.AppendLine($"namespace {namespaceName}");
+            sb.AppendLine("{");
+            sb.AppendLine($"    public partial struct {structName}");
+            sb.AppendLine("    {");
+            foreach (string key in keys)
+            {
+                sb.AppendLine($"        public static readonly {structName} {(sanitize ? key.ToIdentifier() : key)} = new(\"{key}\");");
+            }
+            sb.AppendLine("    }");
+            sb.AppendLine("}");
+
+            MonoScript script = MonoScript.FromScriptableObject(instance);
+            string scriptPath = AssetDatabase.GetAssetPath(script);
+            string scriptFolder = Path.GetDirectoryName(scriptPath).Replace("\\", "/");
+            string outputFolder = $"{scriptFolder}/Generated";
+
+            if (!Directory.Exists(outputFolder))
+            {
+                Directory.CreateDirectory(outputFolder);
+            }
+
+            string outputPath = $"{outputFolder}/{outputFileName}";
+            File.WriteAllText(outputPath, sb.ToString());
+            AssetDatabase.Refresh();
+        }
+        public static void GenerateScriptDatabase(ScriptableObject instance, string namespaceName, string structName, string[] structParams, IEnumerable<string> keys, string outputFileName, bool sanitize)
+        {
+            StringBuilder sb = new();
+            sb.AppendLine($"namespace {namespaceName}");
+            sb.AppendLine("{");
+            sb.AppendLine($"    public partial struct {structName}");
+            sb.AppendLine("    {");
+            foreach (string key in keys)
+            {
+                string t = "";
+
+                foreach (string param in structParams)
+                {
+                    t += $",{param}";
+                }
+
+                sb.AppendLine($"        public static readonly {structName} {(sanitize ? key.ToIdentifier() : key)} = new(\"{key}\"{t});");
+            }
+            sb.AppendLine("    }");
+            sb.AppendLine("}");
+
+            MonoScript script = MonoScript.FromScriptableObject(instance);
+            string scriptPath = AssetDatabase.GetAssetPath(script);
+            string scriptFolder = Path.GetDirectoryName(scriptPath).Replace("\\", "/");
+            string outputFolder = $"{scriptFolder}/Generated";
+
+            if (!Directory.Exists(outputFolder))
+            {
+                Directory.CreateDirectory(outputFolder);
+            }
+
+            string outputPath = $"{outputFolder}/{outputFileName}";
+            File.WriteAllText(outputPath, sb.ToString());
+            AssetDatabase.Refresh();
+        }
+        public static bool TryCreateAsset<T>(string assetPath, out T asset) where T : ScriptableObject
+        {
+            // Klasör kısmını al
+            string folderPath = Path.GetDirectoryName(assetPath);
+
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+
+            try
+            {
+                asset = ScriptableObject.CreateInstance<T>();
+
+                AssetDatabase.CreateAsset(asset, assetPath);
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+
+                Selection.activeObject = asset;
+                EditorGUIUtility.PingObject(asset);
+
+                Debug.Log($"EditorUtility.CreateAsset() [{nameof(T)}] created at [{folderPath}]");
+
+                return true;
+            }
+            catch (System.Exception e)
+            {
+                Debug.Log($"EditorUtility.CreateAsset() [{nameof(T)}] created at [{folderPath}] << e: {e}");
+                throw;
+            }
+        }
+        public static bool TryFindAssetByKeyword<T>(out T asset, string keyword, string folder = "Assets") where T : UnityEngine.Object
+        {
+            string filter = "t:" + typeof(T).Name;
+            string query = keyword + " " + filter;
+            asset = null;
+
+            GUID[] guids = AssetDatabase.FindAssetGUIDs(query, new[] { folder });
+
+            if (guids == null || guids.Length == 0)
+            {
+                Debug.LogError($"EditorUtility.FindAssetByKeyword() No asset found with keyword: " + keyword);
+                return false;
+            }
+
+            return TryGetAssetFromGuid(guids[0], out asset);
+        }
+        public static bool TryFindAssetByType<T>(out T asset, string folder = "Assets") where T : UnityEngine.Object
+        {
+            string filter = "t:" + typeof(T).Name;
+            GUID[] guids = AssetDatabase.FindAssetGUIDs(filter, new[] { folder });
+            asset = null;
+
+            if (guids.Length == 0)
+            {
+                Debug.LogError($"EditorUtility.FindAssetByName() No asset found with type: [{filter}]");
+                return false;
+            }
+
+            return TryGetAssetFromGuid(guids[0], out asset);
+        }
+        public static bool TryFindAssetsByType<T>(out T[] assets, string folder = "Assets") where T : UnityEngine.Object
+        {
+            string filter = "t:" + typeof(T).Name;
+            GUID[] guids = AssetDatabase.FindAssetGUIDs(filter, new[] { folder });
+            assets = null;
+
+            if (guids.Length == 0)
+            {
+                Debug.LogWarning($"EditorUtility.FindAssetByName() No asset found with type: [{filter}]");
+                return false;
+            }
+
+            bool found = false;
+            assets = new T[guids.Length];
+
+            for (int i = 0; i < guids.Length; i++)
+            {
+                if (TryGetAssetFromGuid<T>(guids[i], out T asset))
+                {
+                    assets[i] = asset;
+                    found = true;
+                }
+            }
+
+            return found;
+        }
+        private static bool TryGetAssetFromGuid<T>(GUID guid, out T asset) where T : UnityEngine.Object
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            asset = AssetDatabase.LoadAssetAtPath<T>(path);
+
+            if (asset == null)
+            {
+                Debug.LogWarning($"EditorUtility.GetAssetFromGuid() No asset found with path: [{path}]");
+                return false;
+            }
+
+            return true;
+        }
+#endif
+        #endregion
+
         #region SCENE
         [Serializable]
         public class Scene
@@ -882,6 +1053,53 @@ namespace Core
         public static string ToGhost(this string a) => OPEN_GHOST + a + CLOSE_COLOR;
         public static string ToStyle(this string a, string id) => $"<style={id}>{a}</style>";
         public static string ToSize(this string a, int size) => $"<size={size}%>{a}</size>";
+        public static string ToIdentifier(this string text)
+        {
+            StringBuilder sb = new();
+
+            bool previousUnderscore = false;
+
+            for (int i = 0; i < text.Length; i++)
+            {
+                char c = text[i];
+
+                if (char.IsLetterOrDigit(c))
+                {
+                    if (i > 0 && char.IsLower(text[i - 1]) && char.IsUpper(c))
+                    {
+                        if (!previousUnderscore)
+                        {
+                            sb.Append('_');
+                        }
+                    }
+
+                    sb.Append(char.ToUpperInvariant(c));
+                    previousUnderscore = false;
+                }
+                else
+                {
+                    if (!previousUnderscore)
+                    {
+                        sb.Append('_');
+                        previousUnderscore = true;
+                    }
+                }
+            }
+
+            string result = sb.ToString().Trim('_');
+
+            if (result.Length == 0)
+            {
+                result = "_EMPTY";
+            }
+
+            if (char.IsDigit(result[0]))
+            {
+                result = "_" + result;
+            }
+
+            return result;
+        }
         #endregion
 
         #region COLOR

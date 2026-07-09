@@ -10,7 +10,7 @@ namespace Core.Localization
         [Header("_")]
         [SerializeField, Required] private TextAsset file = null;
 
-        [Clickable("Parse")]
-        public bool TryParse() => LocalizationDatabase.TryParse(file);
+        [Clickable("Build")]
+        public void Build() => LocalizationDatabase.Build(file);
     }
 }

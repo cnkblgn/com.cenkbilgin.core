@@ -12,7 +12,7 @@ namespace Core
         private const string KEY_AVAILABLE_ENTITIES = "availableEntities";
         private const string KEY_DELETED_ENTITIES = "deletedEntities";
 
-        public static void ExportEntityToNode(this PersistentEntityData entity, Dictionary<string, DataNode> data)
+        public static void ExportEntityTo(this PersistentEntityData entity, Dictionary<string, DataNode> data)
         {
             if (data == null)
             {
@@ -24,7 +24,7 @@ namespace Core
             data.SetBool(KEY_DESTROYED, entity.IsMarkedForDestroy);
             data.SetData(KEY_DATA, entity.Data);
         }
-        public static PersistentEntityData CreateEntityFromNode(Dictionary<string, DataNode> data)
+        public static PersistentEntityData CreateEntityFrom(Dictionary<string, DataNode> data)
         {
             if (data == null)
             {
@@ -40,7 +40,7 @@ namespace Core
             );
         }
 
-        public static void ExportSceneToNode(this PersistentSceneData sceneData, Dictionary<string, DataNode> data)
+        public static void ExportSceneTo(this PersistentSceneData sceneData, Dictionary<string, DataNode> data)
         {
             if (data == null)
             {
@@ -57,7 +57,7 @@ namespace Core
 
                 Dictionary<string, DataNode> node = new();
 
-                entity.ExportEntityToNode(node);
+                entity.ExportEntityTo(node);
 
                 availableEntities.SetData(availableEntity.Key.ToString(), node);
             }
@@ -73,7 +73,7 @@ namespace Core
 
             data.SetData(KEY_DELETED_ENTITIES, deletedEntities);
         }
-        public static PersistentSceneData CreateSceneFromNode(Dictionary<string, DataNode> data)
+        public static PersistentSceneData CreateSceneFrom(Dictionary<string, DataNode> data)
         {
             if (data == null)
             {
@@ -88,7 +88,7 @@ namespace Core
             {
                 Dictionary<string, DataNode> node = availableEntities.GetData(availableEntity.Key);
 
-                PersistentEntityData entity = CreateEntityFromNode(node);
+                PersistentEntityData entity = CreateEntityFrom(node);
 
                 scene.AvailableEntities[Guid.Parse(availableEntity.Key)] = entity;
             }

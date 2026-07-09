@@ -3,9 +3,9 @@ using UnityEditor;
 namespace Core.Editor
 {
     [CustomPropertyDrawer(typeof(PrefabID))]
-    public class EditorDrawPrefabID : EditorDrawKey
+    internal class EditorDrawPrefabID : EditorDrawSearchable
     {
-        protected override string[] GetIDs() => PrefabDatabase.GetKeys();
+        protected override string[] GetKeys() => PrefabDatabase.GetIDs();
         protected override string GetKey() => "key";
     }
 }

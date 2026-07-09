@@ -68,12 +68,12 @@ namespace Core.Localization
             value = $"[{key}]";
             return false;
         }
-        internal static bool TryParse(TextAsset file)
+        internal static void Build(TextAsset file)
         {
             if (file == null)
             {
                 Debug.LogError("Localization parse failed! file == null");
-                return false;
+                return;
             }
 
             try
@@ -93,8 +93,6 @@ namespace Core.Localization
 
                 Debug.LogError($"Localization parse failed: {e.Message}");
             }
-
-            return IsParsed;
         }
         internal static Dictionary<string, string> Parse(string csvFile, int languageIndex, char separator, out string[] languages, out string[] keys)
         {

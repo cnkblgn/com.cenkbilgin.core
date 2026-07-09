@@ -9,9 +9,9 @@ namespace Core
         internal static bool IsParsed => database != null;
 
         private static Dictionary<PrefabID, GameObject> database = null;
-        private static string[] keys = Array.Empty<string>();
+        private static string[] ids = Array.Empty<string>();
 
-        public static string[] GetKeys() => keys;
+        public static string[] GetIDs() => ids;
 
         internal static bool TryGet(PrefabID id, out GameObject prefab)
         {
@@ -45,7 +45,8 @@ namespace Core
 
             return false;
         }
-        internal static void Parse(GameObject[] gameObjects)
+
+        internal static void Build(GameObject[] gameObjects)
         {
             if (gameObjects == null)
             {
@@ -54,7 +55,7 @@ namespace Core
 
             database = new(gameObjects.Length);
 
-            keys = new string[gameObjects.Length];
+            ids = new string[gameObjects.Length];
 
             for (int i = 0; i < gameObjects.Length; i++)
             {
@@ -72,11 +73,11 @@ namespace Core
 
                 database.Add(new(key), gameObjects[i]);
 
-                keys[i] = key;
+                ids[i] = key;
             }
 
             Debug.Log($"Prefab build successfull!");
         }
-        internal static void Parse(List<GameObject> gameObjects) => Parse(gameObjects.ToArray());
+        internal static void Build(List<GameObject> gameObjects) => Build(gameObjects.ToArray());
     }
 }

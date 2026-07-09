@@ -12,7 +12,7 @@ namespace Core
         [SerializeField, Required] private List<GameObject> collection = null;
 
         [Clickable("Build")]
-        public void Parse() => PrefabDatabase.Parse(collection);
+        public void Build() => PrefabDatabase.Build(collection);
 
 #if UNITY_EDITOR
         public void Register(GameObject obj) => collection.Add(obj);
