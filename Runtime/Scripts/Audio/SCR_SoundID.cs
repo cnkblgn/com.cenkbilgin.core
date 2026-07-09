@@ -22,7 +22,10 @@ namespace Core.Audio
             this.key = key;
             this.index = index;
         }
-        public readonly bool Equals(SoundID other) => key == other.key && index == other.index;
         public readonly override int GetHashCode() => HashCode.Combine(key, index);
+        public readonly bool Equals(SoundID other) => key == other.key && index == other.index;
+        public readonly override bool Equals(object obj) => obj is SoundID other && Equals(other);
+        public static bool operator ==(SoundID left, SoundID right) => left.Equals(right);
+        public static bool operator !=(SoundID left, SoundID right) => !left.Equals(right);
     }
 }
