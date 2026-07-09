@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Core.Actor
+namespace Core
 {
     public class Actor : MonoBehaviour
     {

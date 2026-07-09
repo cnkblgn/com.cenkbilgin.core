@@ -1,7 +1,6 @@
 using UnityEditor;
-using Core.Editor;
 
-namespace Core.Actor.Editor
+namespace Core.Editor
 {
     [CustomPropertyDrawer(typeof(ActorID))]
     internal class EditorDrawActorID : EditorDrawSearchable

@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Core.Actor
+namespace Core
 {
     using static CoreUtility;
 

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Core.Actor
+namespace Core
 {
     using static CoreUtility;
 
@@ -16,7 +16,7 @@ namespace Core.Actor
         {
             ActorDatabase.Build(ids, tags);
 
-            GenerateScriptDatabase(this, "Core.Actor", "ActorID", ActorDatabase.GetIDs(), "SCR_GeneratedActorID.cs", true);
+            GenerateScriptDatabase(this, "Core", "ActorID", ActorDatabase.GetIDs(), "SCR_GeneratedActorID.cs", true);
         }
     }
 }

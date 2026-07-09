@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Core.Actor
+namespace Core
 {
     public static class ActorDatabase
     {

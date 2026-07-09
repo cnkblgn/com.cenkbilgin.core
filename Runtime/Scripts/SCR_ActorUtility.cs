@@ -1,4 +1,4 @@
-namespace Core.Actor
+namespace Core
 {
     public static class ActorUtility
     {
