@@ -26,7 +26,7 @@ namespace Core
                 string k = (sanitize ? key.ToIdentifier() : key);
                 string i = indexed ? $",{index}" : STRING_EMPTY;
 
-                sb.AppendLine($"        public static readonly {structName} {k} = new(\"{k}\"{i});");
+                sb.AppendLine($"        public static readonly {structName} {k} = new(\"{key}\"{i});");
                 index++;
             }
             sb.AppendLine("    }");
@@ -56,8 +56,9 @@ namespace Core
 
             foreach (var (key, index) in entries)
             {
-                string identifier = sanitize ? key.ToIdentifier() : key;
-                sb.AppendLine($"        public static readonly {structName} {identifier} = new(\"{key}\", {index});");
+                string k = sanitize ? key.ToIdentifier() : key;
+
+                sb.AppendLine($"        public static readonly {structName} {k} = new(\"{key}\", {index});");
             }
 
             sb.AppendLine("    }");
