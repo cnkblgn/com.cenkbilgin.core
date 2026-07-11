@@ -20,7 +20,7 @@ namespace Core.UI
         private void Awake() => rect = image.uvRect;
         private void LateUpdate()
         {
-            if (GameManager.Instance.GetGameState() != GameState.RESUME)
+            if (ManagerGame.Instance.GetGameState() != GameState.RESUME)
             {
                 return;
             }

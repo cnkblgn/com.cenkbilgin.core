@@ -14,13 +14,13 @@ namespace Core.UI
         {
             base.OnPointerEnterInternal(eventData);
 
-            UIManager.Instance.SetCursor(id);
+            ManagerUI.Instance.SetCursor(id);
         }
         protected override void OnPointerExitInternal(PointerEventData eventData)
         {
             base.OnPointerExitInternal(eventData);
 
-            UIManager.Instance.SetCursor();
+            ManagerUI.Instance.SetCursor();
         }
     }
 }

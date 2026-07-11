@@ -1,11 +1,11 @@
-using Core.Editor;
 using System.Collections.Generic;
 using UnityEditor;
+using Core.Editor;
 
 namespace Core.Audio.Editor
 {
     [CustomPropertyDrawer(typeof(SoundID))]
-    public class EditorDrawLocalizedID : EditorDrawSearchable
+    public class EditorDrawSoundID : EditorDrawSearchable
     {
         protected override IReadOnlyList<string> GetKeys() => SoundDatabase.GetIDs();
         protected override string GetKey() => "key";

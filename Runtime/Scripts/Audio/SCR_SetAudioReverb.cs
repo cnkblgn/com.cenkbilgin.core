@@ -34,7 +34,7 @@ namespace Core.Audio
             reverbZone.reverbPreset = preset;
         }
 #endif
-        public void Revert() => AudioManager.Instance.RevertReverb(fade);
-        public void Fade() => AudioManager.Instance.SetReverb(reverbZone, fade);
+        public void Revert() => ManagerAudio.Instance.RevertReverb(fade);
+        public void Fade() => ManagerAudio.Instance.SetReverb(reverbZone, fade);
     }
 }

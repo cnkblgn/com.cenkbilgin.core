@@ -15,36 +15,36 @@ namespace Core.Input
 
         public readonly bool GetKeyUp()
         {
-            if (InputManager.HasInstance)
+            if (ManagerInput.HasInstance)
             {
-                return InputManager.Instance.GetKeyUp(this);
+                return ManagerInput.Instance.GetKeyUp(this);
             }
 
             return false;
         }
         public readonly bool GetKeyDown()
         {
-            if (InputManager.HasInstance)
+            if (ManagerInput.HasInstance)
             {
-                return InputManager.Instance.GetKeyDown(this);
+                return ManagerInput.Instance.GetKeyDown(this);
             }
 
             return false;
         }
         public readonly bool GetKey()
         {
-            if (InputManager.HasInstance)
+            if (ManagerInput.HasInstance)
             {
-                return InputManager.Instance.GetKey(this);
+                return ManagerInput.Instance.GetKey(this);
             }
 
             return false;
         }
         public readonly Vector2 GetAxis()
         {
-            if (InputManager.HasInstance)
+            if (ManagerInput.HasInstance)
             {
-                return InputManager.Instance.GetAxis(this);
+                return ManagerInput.Instance.GetAxis(this);
             }
 
             return Vector2.zero;

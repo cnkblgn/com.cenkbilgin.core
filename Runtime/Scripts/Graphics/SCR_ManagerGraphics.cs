@@ -1,0 +1,326 @@
+﻿using System;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
+
+namespace Core.Graphics
+{
+    using static CoreUtility;
+
+    [DisallowMultipleComponent]
+    public sealed class ManagerGraphics : Manager<ManagerGraphics>
+    {
+        public static event Action<Vector2> OnResolutionChanged = null;
+
+        [Header("_")]
+        [SerializeField, Required] private UniversalRenderPipelineAsset urpPipelineSettings = null;
+        [SerializeField, Required] private UniversalRendererData urpRendererSettings = default;
+        [SerializeField, Required] private Volume volumeController = default;
+
+        [Header("_")]
+        [SerializeField] private DecalGroup[] decalGroup = null;
+        [SerializeField, Required] private Transform decalContainer = null;
+        [SerializeField, Required] private ParticleEmitter[] particleGroup = null;
+        [SerializeField, Required] private Transform particleContainer = null;
+
+        private readonly Dictionary<string, DecalPool> decalPool = new();
+        private readonly Dictionary<string, ParticlePool> particlePool = new();
+        private VolumeProfile currentVolumeProfile = null;
+        private Camera mainCamera = null;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void OnRuntimeInitialize() => OnResolutionChanged = null;
+
+        protected override void Awake()
+        {
+            if (urpPipelineSettings == null) throw new ArgumentNullException();
+            if (urpRendererSettings == null) throw new ArgumentNullException();
+            if (volumeController == null) throw new ArgumentNullException();
+            if (decalContainer == null) throw new ArgumentNullException();
+            if (particleGroup == null) throw new ArgumentNullException();
+            if (particleContainer == null) throw new ArgumentNullException();
+            
+            base.Awake();
+
+            QualitySettings.maxQueuedFrames = 0;
+            DebugManager.instance.enableRuntimeUI = true;
+            DebugManager.instance.displayRuntimeUI = false;
+
+            InitializeDecalPool();
+            InitializeParticlePool();
+
+            currentVolumeProfile = Instantiate(volumeController.sharedProfile);
+            volumeController.profile = currentVolumeProfile;
+        }
+        private void OnEnable()
+        {
+            ManagerGame.OnBeforeSceneChanged += OnBeforeSceneChanged;
+            ManagerGame.OnAfterSceneChanged += OnAfterSceneChanged;
+        }
+        private void OnDisable()
+        {
+            ManagerGame.OnBeforeSceneChanged -= OnBeforeSceneChanged;
+            ManagerGame.OnAfterSceneChanged -= OnAfterSceneChanged;
+        }
+
+#if UNITY_EDITOR
+        private void OnApplicationQuit() => SetRenderScale(1);
+        private void OnValidate()
+        {
+            foreach (DecalGroup group in decalGroup)
+            {
+                group.Validate();
+            }
+        }
+#endif
+
+        private void OnBeforeSceneChanged(string scene) { ResetDecalPool(); ResetParticlePool(); }
+        private void OnAfterSceneChanged(string scene) { }
+
+        public ParticleEmitter SpawnParticle(ParticleEmitter particle, Vector3 position, Vector3 direction)
+        {
+            if (particle == null)
+            {
+                Debug.LogError("particle == null");
+                return null;
+            }
+
+            if (!particlePool.TryGetValue(particle.name, out ParticlePool pool))
+            {
+                Debug.LogError($"[{particle.name}] not found!");
+                return null;
+            }
+
+            return pool.Spawn(position, direction);
+        }
+        public ParticleEmitter SpawnParticle(ParticleEmitter[] particle, Vector3 position, Vector3 direction)
+        {
+            if (particle == null)
+            {
+                return null;
+            }
+
+            if (particle.Length <= 0)
+            {
+                return null;
+            }
+
+            return SpawnParticle(particle[UnityEngine.Random.Range(0, particle.Length)], position, direction);
+        }
+        private void InitializeParticlePool()
+        {
+            foreach (ParticleEmitter emitter in particleGroup)
+            {
+                particlePool[emitter.name] = new(PoolType.SINGLE, emitter, particleContainer, 1);
+            }
+        }
+        private void ResetParticlePool()
+        {
+            foreach (ParticlePool pool in particlePool.Values)
+            {
+                pool.Pool.Reset(false, true);
+            }
+        }
+
+        public DecalEmitter SpawnDecal(DecalEmitter decal, Transform parent, Vector3 position, Quaternion rotation, float scale)
+        {
+            if (decal == null)
+            {
+                Debug.LogError("decal == null");
+                return null;
+            }
+
+            if (!decalPool.TryGetValue(decal.name, out DecalPool pool))
+            {
+                Debug.LogError($"[{decal.name}] not found!");
+                return null;
+            }
+
+            return pool.Spawn(parent, position, rotation, scale);
+        }
+        public DecalEmitter SpawnDecal(DecalEmitter[] decal, Transform parent, Vector3 position, Quaternion rotation, float scale)
+        {
+            if (decal == null)
+            {
+                return null;
+            }
+
+            if (decal.Length <= 0)
+            {
+                return null;
+            }
+
+            return SpawnDecal(decal[UnityEngine.Random.Range(0, decal.Length)], parent, position, rotation, scale);
+        }
+        private void InitializeDecalPool()
+        {
+            foreach (DecalGroup group in decalGroup)
+            {
+                decalPool[group.Prefab.name] = new(PoolType.RING_BUFFER, group.Prefab, decalContainer, group.Count);
+            }
+        }
+        private void ResetDecalPool()
+        {
+            foreach (DecalPool pool in decalPool.Values)
+            {
+                pool.Pool.Reset(true, true);
+            }
+        }
+
+        public bool GetVolumeComponent<T>(out T component) where T : VolumeComponent => volumeController.profile.TryGet(typeof(T), out component);
+
+        public UpscalingFilterSelection GetUpscaleFilter() => urpPipelineSettings.upscalingFilter;
+        public void SetUpscaleFilter(UpscalingFilterSelection upscaleFilter) => urpPipelineSettings.upscalingFilter = upscaleFilter;
+
+        public float GetRenderScale() => urpPipelineSettings.renderScale;
+        public void SetRenderScale(float value) => urpPipelineSettings.renderScale = value;
+
+        public bool GetMultiSampling() => urpPipelineSettings.msaaSampleCount > 1;
+        public void SetMultiSampling(int value) => urpPipelineSettings.msaaSampleCount = Mathf.Clamp(value, 1, 8);
+
+        public AntialiasingMode GetAntialiasing()
+        {
+            if (GetMainCamera() != null)
+            {
+                if (mainCamera.TryGetComponent(out UniversalAdditionalCameraData cameraData))
+                {
+                    return cameraData.antialiasing;
+                }
+            }
+
+            return AntialiasingMode.None;
+        }
+        public void SetAntialiasing(AntialiasingMode antialiasingMode)
+        {
+            if (GetMainCamera() != null)
+            {
+                if (mainCamera.TryGetComponent(out UniversalAdditionalCameraData cameraData))
+                {
+                    cameraData.antialiasing = antialiasingMode;
+                    cameraData.antialiasingQuality = AntialiasingQuality.High;
+                    cameraData.stopNaN = true;
+                    cameraData.dithering = true;
+                    cameraData.renderPostProcessing = true;
+                }
+            }
+        }
+
+        public int GetFrameRate() => Application.targetFrameRate;
+        public void SetFrameRate(int value) => Application.targetFrameRate = value;
+
+        public int GetVysnc() => QualitySettings.vSyncCount;
+        public void SetVsync(bool value) => QualitySettings.vSyncCount = value ? 1 : 0;
+
+        public int GetShadowQuality()
+        {
+            int value = urpPipelineSettings.mainLightShadowmapResolution;
+
+            return value == 4096 ? 3 : value == 2048 ? 2 : value == 1024 ? 1 : 0;      
+        }
+        public void SetShadowQuality(int value)
+        {
+            if (GetMainCamera() != null)
+            {
+                if (mainCamera.TryGetComponent(out UniversalAdditionalCameraData cameraData))
+                {
+                    cameraData.renderShadows = value > 0;
+                }
+            }
+
+            urpPipelineSettings.mainLightShadowmapResolution = value == 3 ? 4096 : value == 2 ? 2048 : value == 1 ? 1024 : 512;
+            urpPipelineSettings.additionalLightsShadowmapResolution = value == 3 ? 4096 : value == 2 ? 2048 : value == 1 ? 1024 : 512;
+        }
+
+        public int GetTextureQuality() => QualitySettings.globalTextureMipmapLimit;
+        public void SetTextureQuality(int quality) => QualitySettings.globalTextureMipmapLimit = 2 - Mathf.Clamp(quality, 0, 2);
+
+        public Resolution GetResolution() => Screen.currentResolution;
+        public void SetResolution(int width, int height, FullScreenMode mode)
+        {
+            Resolution resolution = GetResolution();
+            FullScreenMode fullScreenMode = Screen.fullScreenMode;
+
+            if (resolution.width == width && resolution.height == height && fullScreenMode == mode)
+            {
+                return;
+            }
+
+            Screen.SetResolution(width, height, mode);
+            OnResolutionChanged?.Invoke(new(width, height));
+        }
+
+        public Camera GetMainCamera() => mainCamera;
+        public void SetMainCamera(Camera target)
+        {
+            if (target == null)
+            {
+                throw new ArgumentNullException(nameof(target));
+            }
+
+            if (target == mainCamera)
+            {
+                return;
+            }
+
+            DisableCamera(mainCamera);
+
+            CopyCameraSettings(mainCamera, target);
+
+            EnableCamera(target);
+
+            mainCamera = target;
+        }
+        private void EnableCamera(Camera target)
+        {
+            if (target == null)
+            {
+                return;
+            }    
+
+            if (target.TryGetComponent(out AudioListener listener))
+            {
+                listener.enabled = true;
+            }
+
+            target.enabled = true;
+        }
+        private void DisableCamera(Camera target)
+        {
+            if (target == null)
+            {
+                return;
+            }
+
+            if (target.TryGetComponent(out AudioListener listener))
+            {
+                listener.enabled = false;
+            }
+
+            target.enabled = false;
+        }
+        private void CopyCameraSettings(Camera source, Camera target)
+        {
+            if (source == null || target == null)
+            {
+                return;
+            }
+
+            target.useOcclusionCulling = source.useOcclusionCulling;
+            target.cullingMask = source.cullingMask;
+            target.clearFlags = source.clearFlags;
+            target.backgroundColor = source.backgroundColor;
+
+            UniversalAdditionalCameraData sourceData = source.GetUniversalAdditionalCameraData();
+            UniversalAdditionalCameraData targetData = target.GetUniversalAdditionalCameraData();
+
+            targetData.renderPostProcessing = sourceData.renderPostProcessing;
+            targetData.antialiasing = sourceData.antialiasing;
+            targetData.stopNaN = sourceData.stopNaN;
+            targetData.dithering = sourceData.dithering;
+            targetData.renderShadows = sourceData.renderShadows;
+            targetData.requiresColorOption = sourceData.requiresColorOption;
+            targetData.requiresDepthOption = sourceData.requiresDepthOption;
+        }
+    }
+}

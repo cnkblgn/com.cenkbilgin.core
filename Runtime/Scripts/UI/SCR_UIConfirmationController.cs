@@ -61,7 +61,7 @@ namespace Core.UI
                 return;
             }
 
-            UIManager.Instance.ShowCursor();
+            ManagerUI.Instance.ShowCursor();
 
             thisCanvas.Show();
             onAcceptEvent = ctx.OnAccept;
@@ -74,7 +74,7 @@ namespace Core.UI
         {
             if (hideCursor)
             {
-                UIManager.Instance.HideCursor();
+                ManagerUI.Instance.HideCursor();
             }
 
             thisCanvas.Hide();

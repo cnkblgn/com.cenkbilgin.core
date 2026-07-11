@@ -30,14 +30,14 @@ namespace Core.UI
 
             rendererCamera.enabled = false;
         }
-        private void OnEnable() => GameManager.OnBeforeSceneChanged += OnBeforeSceneChanged;
-        private void OnDisable() => GameManager.OnBeforeSceneChanged -= OnBeforeSceneChanged;
+        private void OnEnable() => ManagerGame.OnBeforeSceneChanged += OnBeforeSceneChanged;
+        private void OnDisable() => ManagerGame.OnBeforeSceneChanged -= OnBeforeSceneChanged;
 
         private void OnBeforeSceneChanged(string obj) => Clear();
 
         public void Tick(in UIInputContext ctx)
         {
-            if (GameManager.Instance.GetGameState() != GameState.RESUME)
+            if (ManagerGame.Instance.GetGameState() != GameState.RESUME)
             {
                 return;
             }

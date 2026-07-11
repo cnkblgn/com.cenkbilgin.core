@@ -55,9 +55,9 @@ namespace Core.UI
             }
         }
 
-        public void AddViewport() => UIManager.Instance.AddViewport(prefab);
-        public void ShowViewport() => UIManager.Instance.ShowViewport(id, this);
-        public void HideViewport() => UIManager.Instance.HideViewport(id);
+        public void AddViewport() => ManagerUI.Instance.AddViewport(prefab);
+        public void ShowViewport() => ManagerUI.Instance.ShowViewport(id, this);
+        public void HideViewport() => ManagerUI.Instance.HideViewport(id);
 
         internal void ShowRenderer()
         {

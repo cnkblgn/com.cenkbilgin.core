@@ -98,7 +98,7 @@ namespace Core.Audio
                     thisTransform = GetComponent<Transform>();
                 }
 
-                AudioManager.Instance.PlaySound(clip, audioGroup, thisTransform.position, blend, volume * (randomizeVolume ? Random.Range(0.75f, 1.15f) : 1), pitch * (randomizePitch ? Random.Range(0.9f, 1.1f) : 1), minDistance, maxDistance, useOcculusion);
+                ManagerAudio.Instance.PlaySound(clip, audioGroup, thisTransform.position, blend, volume * (randomizeVolume ? Random.Range(0.75f, 1.15f) : 1), pitch * (randomizePitch ? Random.Range(0.9f, 1.1f) : 1), minDistance, maxDistance, useOcculusion);
 
                 return;
             }
@@ -115,7 +115,7 @@ namespace Core.Audio
                 FadeIn();
             }
 
-            AudioManager m = AudioManager.Instance;
+            ManagerAudio m = ManagerAudio.Instance;
 
             if (useOcculusion)
             {

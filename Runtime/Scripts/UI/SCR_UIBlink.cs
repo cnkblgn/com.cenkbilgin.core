@@ -30,7 +30,7 @@ namespace Game
                 return;
             }
 
-            if (GameManager.Instance.GetGameState() != GameState.RESUME)
+            if (ManagerGame.Instance.GetGameState() != GameState.RESUME)
             {
                 return;
             }

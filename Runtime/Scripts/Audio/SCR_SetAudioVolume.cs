@@ -47,13 +47,13 @@ namespace Core.Audio
 
         private float Get()
         {
-            AudioManager.Instance.GetVolume(group, out float _, out float _, out float multiplier);
+            ManagerAudio.Instance.GetVolume(group, out float _, out float _, out float multiplier);
 
             return multiplier;
         }
         private void Set(float value)
         {
-            AudioManager.Instance.SetVolumeMult(group, value);
+            ManagerAudio.Instance.SetVolumeMult(group, value);
         }
     }
 }

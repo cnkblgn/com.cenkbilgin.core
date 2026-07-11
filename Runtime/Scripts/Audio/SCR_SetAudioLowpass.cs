@@ -47,13 +47,13 @@ namespace Core.Audio
 
         private float Get()
         {
-            AudioManager.Instance.GetLowpass(group, out float current);
+            ManagerAudio.Instance.GetLowpass(group, out float current);
 
             return current;
         }
         private void Set(float value)
         {
-            AudioManager.Instance.SetLowpass(group, value);
+            ManagerAudio.Instance.SetLowpass(group, value);
         }
     }
 }

@@ -48,11 +48,11 @@ namespace Core.UI
 
         private void OnEnable()
         {
-            GameManager.OnGameStateChanged += OnGameStateChanged;
+            ManagerGame.OnGameStateChanged += OnGameStateChanged;
         }
         private void OnDisable()
         {
-            GameManager.OnGameStateChanged -= OnGameStateChanged;
+            ManagerGame.OnGameStateChanged -= OnGameStateChanged;
 
             OnDeinitialized();
         }
@@ -379,7 +379,7 @@ namespace Core.UI
 
             if (canvasInput)
             {
-                UIManager.Instance.ShowCursor();
+                ManagerUI.Instance.ShowCursor();
             }
 
             isActive = true;
@@ -397,7 +397,7 @@ namespace Core.UI
 
             if (canvasInput)
             {
-                UIManager.Instance.HideCursor();
+                ManagerUI.Instance.HideCursor();
             }
 
             OnHide();
