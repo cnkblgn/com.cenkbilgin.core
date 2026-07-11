@@ -16,7 +16,7 @@ namespace Core
 
 #if UNITY_EDITOR
         [Clickable("Build")]
-        internal void Generate()
+        public void Generate()
         {
             PrefabDatabase.Build(collection);
 
