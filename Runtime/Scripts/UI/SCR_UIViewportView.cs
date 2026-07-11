@@ -300,7 +300,7 @@ namespace Core.UI
             isActive = false;
 
             renderTime = 0f;
-            renderInterval = 1 / rendererFPS;
+            renderInterval = 1f / rendererFPS;
 
             Canvas[] canvases = GetComponentsInChildren<Canvas>();
             data = new UIViewportCanvas[canvases.Length];
