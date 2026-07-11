@@ -6,7 +6,7 @@ namespace Core
     using static CoreUtility;
 
     [CreateAssetMenu(fileName = "SCO_PrefabRegistry", menuName = "Resources/Prefab Registry", order = 0)]
-    internal sealed class RegistryPrefab : Registry
+    public sealed class RegistryPrefab : Registry
     {
         [Header("_")]
         [SerializeField, Required] private List<GameObject> collection = null;
@@ -16,7 +16,7 @@ namespace Core
 
 #if UNITY_EDITOR
         [Clickable("Build")]
-        public void Generate()
+        internal void Generate()
         {
             PrefabDatabase.Build(collection);
 
