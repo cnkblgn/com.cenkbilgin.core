@@ -13,7 +13,7 @@ namespace Core
         private static string[] idKeys = Array.Empty<string>();
         private static string[] tagKeys = Array.Empty<string>();
         private static Dictionary<string, int> tagDatabase = null;
-        private static readonly Dictionary<ActorID, Actor> actorDatabase = new();
+        private static readonly Dictionary<ActorID, List<ActorEntry>> actorDatabase = new();
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void OnRuntimeInitialize() => actorDatabase.Clear();
@@ -64,28 +64,53 @@ namespace Core
             Debug.Log($"Actor database build successfull!");
         }
 
-        internal static bool TryGetActor(ActorID id, out Actor entity)
+        internal static bool TryGetAnyActor(ActorID id, out Actor actor)
         {
-            entity = null;
+            actor = null;
 
             if (!id.IsValid)
             {
                 return false;
             }
 
-            if (!actorDatabase.TryGetValue(id, out entity))
+            if (!actorDatabase.TryGetValue(id, out List<ActorEntry> entries))
             {
                 Debug.LogError($"id not found in database: [{id}]");
                 return false;
             }
 
+            if (entries.Count <= 0)
+            {
+                return false;
+            }
+
+            actor = entries[0].Actor;
             return true;
         }
-        internal static void RegisterActor(ActorID id, Actor entity)
+        internal static bool TryGetAllActors(ActorID id, out IReadOnlyList<ActorEntry> actors)
         {
-            if (entity == null)
+            actors = null;
+
+            if (!id.IsValid)
             {
-                throw new ArgumentNullException(nameof(entity));
+                return false;
+            }
+
+            if (!actorDatabase.TryGetValue(id, out List<ActorEntry> entries))
+            {
+                Debug.LogError($"id not found in database: [{id}]");
+                return false;
+            }
+
+            actors = entries;
+            return true;
+        }
+
+        internal static void RegisterActor(ActorID id, Actor actor)
+        {
+            if (actor == null)
+            {
+                throw new ArgumentNullException(nameof(actor));
             }
 
             if (!id.IsValid)
@@ -94,26 +119,41 @@ namespace Core
             }
 
 #if UNITY_EDITOR
-            if (actorDatabase.ContainsKey(id))
+            if (actorDatabase.TryGetValue(id, out List<ActorEntry> entries))
             {
-                Debug.LogWarning($"you are trying to register duplicate entity with [{id.Key}] id", entity);
+                foreach (ActorEntry entry in entries)
+                {
+                    if (entry == null)
+                    {
+                        Debug.LogError("Invalid null actor detected!");
+                        return;
+                    }
+
+                    if (entry.ID == actor.GetInstanceID())
+                    {
+                        Debug.LogError($"Actor register failed! Duplicate detected! [{entry.ID}]");
+                        return;
+                    }
+                }
             }
 #endif
-            actorDatabase[id] = entity;
+
+            actorDatabase[id].Add(new(actor));
         }
-        internal static void RemoveActor(ActorID id)
+        internal static void RemoveActor(Actor actor)
         {
-            if (!id.IsValid)
+            if (actor == null)
             {
+                throw new ArgumentNullException(nameof(actor));
+            }
+
+            if (!actorDatabase.TryGetValue(actor.ID, out List<ActorEntry> entries))
+            {
+                Debug.LogError($"You are trying to remove invalid actor! [{actor.ID}]");
                 return;
-            }
+            };
 
-            if (!actorDatabase.ContainsKey(id))
-            {
-                Debug.LogWarning($"you are trying to remove invalid [{id.Key}] id");
-            }
-
-            actorDatabase.Remove(id);
+            entries.Remove(new(actor));
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Core
@@ -22,6 +23,7 @@ namespace Core
         public static bool operator ==(ActorID left, ActorID right) => left.Equals(right);
         public static bool operator !=(ActorID left, ActorID right) => !left.Equals(right);
 
-        public readonly bool TryGetActor(out Actor actor) => ActorDatabase.TryGetActor(this, out actor);
+        public readonly bool TryGetAnyActor(out Actor actor) => ActorDatabase.TryGetAnyActor(this, out actor);
+        public readonly bool TryGetAllActors(out IReadOnlyList<ActorEntry> entries) => ActorDatabase.TryGetAllActors(this, out entries);
     }
 }

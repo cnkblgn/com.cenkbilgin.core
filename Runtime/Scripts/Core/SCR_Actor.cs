@@ -21,7 +21,7 @@ namespace Core
         public ulong Tags { get; private set; }
 
         [Header("_")]
-        [SerializeField] private ActorID id;
+        [SerializeField] private ActorID id = ActorID.NONE;
         [SerializeField] private ActorTag[] tags;
 
         private void Awake()
@@ -30,6 +30,6 @@ namespace Core
 
             ActorDatabase.RegisterActor(id, this);
         }
-        private void OnDestroy() => ActorDatabase.RemoveActor(id);
+        private void OnDestroy() => ActorDatabase.RemoveActor(this);
     }
 }
