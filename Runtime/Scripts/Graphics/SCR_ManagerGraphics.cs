@@ -250,6 +250,26 @@ namespace Core.Graphics
             OnResolutionChanged?.Invoke(new(width, height));
         }
 
+        public float GetRenderDistance()
+        {
+            if (mainCamera == null)
+            {
+                Debug.Log("Get render distance failed! please set main camera via ManagerGraphics!");
+                return 1000;
+            }
+
+            return mainCamera.farClipPlane;
+        }
+        public void SetRenderDistance(float value)
+        {
+            if (mainCamera == null)
+            {
+                Debug.Log("Set render distance failed! please set main camera via ManagerGraphics!");
+            }
+
+            mainCamera.farClipPlane = Mathf.Max(10, value);
+        }
+
         public Camera GetMainCamera() => mainCamera;
         public void SetMainCamera(Camera target)
         {
