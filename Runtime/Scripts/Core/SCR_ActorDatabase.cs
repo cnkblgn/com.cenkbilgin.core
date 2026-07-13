@@ -87,11 +87,13 @@ namespace Core
             actor = entries[0].Actor;
             return true;
         }
-        internal static bool TryGetAnyActor(ActorTag tag, out Actor actor)
+        internal static bool TryGetAnyActor(ActorTag tag, out Actor actor) => TryGetAnyActor(tag.Mask, out actor);
+        internal static bool TryGetAnyActor(ActorTag[] tags, out Actor actor) => TryGetAnyActor(tags.CreateMask(), out actor);
+        internal static bool TryGetAnyActor(ulong tags, out Actor actor)
         {
             actor = null;
 
-            if (!tag.IsValid)
+            if (tags == 0)
             {
                 return false;
             }
@@ -102,7 +104,7 @@ namespace Core
                 {
                     Actor tempActor = entries[i].Actor;
 
-                    if (tempActor.HasAny(tag))
+                    if (tempActor.HasAny(tags))
                     {
                         actor = tempActor;
                         return true;
@@ -132,11 +134,13 @@ namespace Core
             actors = entries;
             return true;
         }
-        internal static bool TryGetAllActors(ActorTag tag, out List<Actor> actors)
+        internal static bool TryGetAllActors(ActorTag tag, out List<Actor> actors) => TryGetAllActors(tag.Mask, out actors);
+        internal static bool TryGetAllActors(ActorTag[] tags, out List<Actor> actors) => TryGetAllActors(tags.CreateMask(), out actors);
+        internal static bool TryGetAllActors(ulong tags, out List<Actor> actors)
         {
             actors = new();
 
-            if (!tag.IsValid)
+            if (tags == 0)
             {
                 return false;
             }
@@ -149,7 +153,7 @@ namespace Core
                 {
                     Actor tempActor = entries[i].Actor;
 
-                    if (tempActor.HasAny(tag))
+                    if (tempActor.HasAny(tags))
                     {
                         actors.Add(tempActor);
                         found = true;

@@ -12,5 +12,8 @@ namespace Core
 
         public static bool HasAll(this Actor @base, ActorTag target) => HasAll(@base.Tags, target.Mask);
         public static bool HasAny(this Actor @base, ActorTag target) => HasAny(@base.Tags, target.Mask);
+
+        public static bool HasAll(this Actor @base, ulong target) => HasAll(@base.Tags, target);
+        public static bool HasAny(this Actor @base, ulong target) => HasAny(@base.Tags, target);
     }
 }
