@@ -1,12 +1,9 @@
-using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Core
 {
-    using static CoreUtility;
-
     public static class ActorDatabase
     {
         internal static bool IsParsed => tagDatabase != null;
@@ -39,7 +36,7 @@ namespace Core
 
         internal static void Build(string[] ids, string[] tags)
         {
-            if (tags == null)
+            if (ids == null || tags == null)
             {
                 return;
             }
@@ -76,7 +73,9 @@ namespace Core
 
             if (!actorDatabase.TryGetValue(id, out List<ActorEntry> entries))
             {
+#if UNITY_EDITOR
                 Debug.LogError($"id not found in database: [{id}]");
+#endif
                 return false;
             }
 
@@ -97,21 +96,16 @@ namespace Core
                 return false;
             }
 
-            for (int i = 0; i < idKeys.Length; i++)
+            foreach (List<ActorEntry> entries in actorDatabase.Values)
             {
-                ActorID id = new(idKeys[i]);
-
-                if (TryGetAllActors(id, out IReadOnlyList<ActorEntry> entries))
+                for (int i = 0; i < entries.Count; i++)
                 {
-                    for (int j = 0; j < entries.Count; j++)
-                    {
-                        Actor tempActor = entries[i].Actor;
+                    Actor tempActor = entries[i].Actor;
 
-                        if (tempActor.HasAny(tag))
-                        {
-                            actor = tempActor;
-                            return true;
-                        }
+                    if (tempActor.HasAny(tag))
+                    {
+                        actor = tempActor;
+                        return true;
                     }
                 }
             }
@@ -129,7 +123,9 @@ namespace Core
 
             if (!actorDatabase.TryGetValue(id, out List<ActorEntry> entries))
             {
+#if UNITY_EDITOR
                 Debug.LogError($"id not found in database: [{id}]");
+#endif
                 return false;
             }
 
@@ -145,25 +141,23 @@ namespace Core
                 return false;
             }
 
-            for (int i = 0; i < idKeys.Length; i++)
+            bool found = false;
+
+            foreach (List<ActorEntry> entries in actorDatabase.Values)
             {
-                ActorID id = new(idKeys[i]);
-
-                if (TryGetAllActors(id, out IReadOnlyList<ActorEntry> entries))
+                for (int i = 0; i < entries.Count; i++)
                 {
-                    for (int j = 0; j < entries.Count; j++)
-                    {
-                        Actor tempActor = entries[i].Actor;
+                    Actor tempActor = entries[i].Actor;
 
-                        if (tempActor.HasAny(tag))
-                        {
-                            actors.Add(tempActor);
-                        }
+                    if (tempActor.HasAny(tag))
+                    {
+                        actors.Add(tempActor);
+                        found = true;
                     }
                 }
             }
 
-            return true;
+            return found;
         }
 
         internal static void RegisterActor(ActorID id, Actor actor)
@@ -198,7 +192,13 @@ namespace Core
             }
 #endif
 
-            actorDatabase[id].Add(new(actor));
+            if (!actorDatabase.TryGetValue(id, out entries))
+            {
+                entries = new();
+                actorDatabase.Add(id, entries);
+            }
+
+            entries.Add(new(actor));
         }
         internal static void RemoveActor(Actor actor)
         {
