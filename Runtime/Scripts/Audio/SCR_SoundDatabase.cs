@@ -53,7 +53,7 @@ namespace Core.Audio
 
             if (!id.IsValid)
             {
-                throw new ArgumentNullException($"[{nameof(id)}] soundID is not valid!");
+                throw new ArgumentNullException($"[{id}] soundID is not valid!");
             }
 
             if (database.TryGetValue(id, out SoundEntry entry))
