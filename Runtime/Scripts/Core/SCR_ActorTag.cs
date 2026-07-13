@@ -8,11 +8,11 @@ namespace Core
     [Serializable]
     public partial struct ActorTag : IEquatable<ActorTag>
     {
-        public static readonly ActorTag Empty = new(STRING_EMPTY, 0);
+        public static readonly ActorTag NONE = new(STRING_EMPTY, 0);
 
         public readonly string Key => key;
         public readonly int Index => index;
-        public readonly ulong Mask => 1UL << index;
+        public readonly ulong Mask => IsValid ? 1UL << index : 0;
         public readonly bool IsValid => !string.IsNullOrEmpty(key);
 
         [SerializeField] private string key;

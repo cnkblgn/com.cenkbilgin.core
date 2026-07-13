@@ -55,9 +55,10 @@ namespace Core
             for (int i = 0; i < tags.Length; i++)
             {
                 string key = tags[i];
+                int index = i + 1;
 
                 tagKeys[i] = key;
-                tagDatabase[key] = i;
+                tagDatabase[key] = index;
             }
 
             Debug.Log($"Actor database build successfull!");

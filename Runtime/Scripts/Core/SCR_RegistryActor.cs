@@ -20,7 +20,7 @@ namespace Core
         {
             ActorDatabase.Build(ids, tags);
 
-            GenerateScriptDatabase(this, "Core", "ActorTag", ActorDatabase.GetTags(), "SCR_GeneratedActorTag.cs", true, true);
+            GenerateScriptDatabase(this, "Core", "ActorTag", ActorDatabase.GetTags(), "SCR_GeneratedActorTag.cs", true, true, 1);
             GenerateScriptDatabase(this, "Core", "ActorID", ActorDatabase.GetIDs(), "SCR_GeneratedActorID.cs", true, false);
         }
 #endif

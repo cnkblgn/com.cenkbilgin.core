@@ -8,7 +8,7 @@ namespace Core
     [Serializable]
     public partial struct ActorID : IEquatable<ActorID>
     {
-        public static readonly ActorID Empty = new(STRING_EMPTY);
+        public static readonly ActorID NONE = new(STRING_EMPTY);
 
         public readonly string Key => key;
         public readonly bool IsValid => !string.IsNullOrEmpty(key);

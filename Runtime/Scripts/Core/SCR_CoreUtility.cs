@@ -15,14 +15,14 @@ namespace Core
 #if UNITY_EDITOR
 
         [HideInCallstack]
-        public static void GenerateScriptDatabase(ScriptableObject instance, string namespaceName, string structName, IEnumerable<string> keys, string outputFileName, bool sanitize, bool indexed)
+        public static void GenerateScriptDatabase(ScriptableObject instance, string namespaceName, string structName, IEnumerable<string> keys, string outputFileName, bool sanitize, bool indexed, int startIndex = 0)
         {
             StringBuilder sb = new();
             sb.AppendLine($"namespace {namespaceName}");
             sb.AppendLine("{");
             sb.AppendLine($"    public partial struct {structName}");
             sb.AppendLine("    {");
-            int index = 0;
+            int index = startIndex;
             foreach (string key in keys)
             {
                 string k = (sanitize ? key.ToIdentifier() : key);
