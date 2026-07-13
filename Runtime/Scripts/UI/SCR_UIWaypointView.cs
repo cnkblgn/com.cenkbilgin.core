@@ -9,13 +9,13 @@ namespace Core.UI
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(RectTransform))]
+    [RequireComponent(typeof(CanvasGroup))]
     internal sealed class UIWaypointView : MonoBehaviour
     {
         public UIWaypointData Data { get; private set; }
         public bool IsCompleted { get; private set; }
 
         [Header("_")]
-        [SerializeField, Required] private CanvasGroup container = null;
         [SerializeField, Required] private Image icon = null;
         [SerializeField, Required] private TextMeshProUGUI text = null;
 
@@ -23,6 +23,7 @@ namespace Core.UI
         [SerializeField] private bool showDistance = false;
         [SerializeField] private bool hideBehind = false;
 
+        private CanvasGroup thisCanvas = null;
         private RectTransform thisTransform = null;
         private Action completeCallback = null;
         private Vector3 offset = Vector3.zero;
@@ -89,7 +90,7 @@ namespace Core.UI
                 {
                     if (isVisible)
                     {
-                        container.Hide();
+                        thisCanvas.Hide();
                         isVisible = false;
                     }
                 }
@@ -97,7 +98,7 @@ namespace Core.UI
                 {
                     if (!isVisible)
                     {
-                        container.Show(false, false);
+                        thisCanvas.Show(false, false);
                         isVisible = true;
                     }
                 }
@@ -116,6 +117,7 @@ namespace Core.UI
             }
 
             thisTransform = GetComponent<RectTransform>();
+            thisCanvas = GetComponent<CanvasGroup>();
             completeCallback = Complete;
 
             isInitialized = true;
@@ -172,6 +174,7 @@ namespace Core.UI
         private void Complete()
         {
             IsCompleted = true;
+            thisCanvas.Show(false, false);
             gameObject.SetActive(false);
         }
     }
