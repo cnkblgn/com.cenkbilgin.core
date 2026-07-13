@@ -26,8 +26,7 @@ namespace Core
 
         private void Awake()
         {
-            Tags = tags.CreateMask();
-
+            Tags = ActorTag.CreateMask(tags);
             ActorDatabase.RegisterActor(id, this);
         }
         private void OnDestroy() => ActorDatabase.RemoveActor(this);

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Core
@@ -40,5 +41,7 @@ namespace Core
 
             return mask;
         }
+        public readonly bool TryGetAnyActor(out Actor actor) => ActorDatabase.TryGetAnyActor(this, out actor);
+        public readonly bool TryGetAllActors(out List<Actor> actors) => ActorDatabase.TryGetAllActors(this, out actors);
     }
 }

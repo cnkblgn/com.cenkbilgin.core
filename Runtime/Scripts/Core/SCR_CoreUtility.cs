@@ -14,7 +14,7 @@ namespace Core
         #region EDITOR
 #if UNITY_EDITOR
 
-        [HideInCallstack]
+        [HideInCallstack] 
         public static void GenerateScriptDatabase(ScriptableObject instance, string namespaceName, string structName, IEnumerable<string> keys, string outputFileName, bool sanitize, bool indexed, int startIndex = 0)
         {
             StringBuilder sb = new();

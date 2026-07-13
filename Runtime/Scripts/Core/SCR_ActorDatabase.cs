@@ -1,3 +1,4 @@
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -87,6 +88,36 @@ namespace Core
             actor = entries[0].Actor;
             return true;
         }
+        internal static bool TryGetAnyActor(ActorTag tag, out Actor actor)
+        {
+            actor = null;
+
+            if (!tag.IsValid)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < idKeys.Length; i++)
+            {
+                ActorID id = new(idKeys[i]);
+
+                if (TryGetAllActors(id, out IReadOnlyList<ActorEntry> entries))
+                {
+                    for (int j = 0; j < entries.Count; j++)
+                    {
+                        Actor tempActor = entries[i].Actor;
+
+                        if (tempActor.HasAny(tag))
+                        {
+                            actor = tempActor;
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
         internal static bool TryGetAllActors(ActorID id, out IReadOnlyList<ActorEntry> actors)
         {
             actors = null;
@@ -103,6 +134,35 @@ namespace Core
             }
 
             actors = entries;
+            return true;
+        }
+        internal static bool TryGetAllActors(ActorTag tag, out List<Actor> actors)
+        {
+            actors = new();
+
+            if (!tag.IsValid)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < idKeys.Length; i++)
+            {
+                ActorID id = new(idKeys[i]);
+
+                if (TryGetAllActors(id, out IReadOnlyList<ActorEntry> entries))
+                {
+                    for (int j = 0; j < entries.Count; j++)
+                    {
+                        Actor tempActor = entries[i].Actor;
+
+                        if (tempActor.HasAny(tag))
+                        {
+                            actors.Add(tempActor);
+                        }
+                    }
+                }
+            }
+
             return true;
         }
 
