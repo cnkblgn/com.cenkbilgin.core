@@ -15,6 +15,7 @@ namespace Core.UI
         public bool IsCompleted { get; private set; }
 
         [Header("_")]
+        [SerializeField, Required] private CanvasGroup container = null;
         [SerializeField, Required] private Image icon = null;
         [SerializeField, Required] private TextMeshProUGUI text = null;
 
@@ -88,8 +89,7 @@ namespace Core.UI
                 {
                     if (isVisible)
                     {
-                        icon.enabled = false;
-                        text.enabled = false;
+                        container.Hide();
                         isVisible = false;
                     }
                 }
@@ -97,8 +97,7 @@ namespace Core.UI
                 {
                     if (!isVisible)
                     {
-                        icon.enabled = true;
-                        text.enabled = true;
+                        container.Show(false, false);
                         isVisible = true;
                     }
                 }
