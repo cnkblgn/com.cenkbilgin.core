@@ -14,6 +14,7 @@ namespace Core.Localization
         private static string[] languages = Array.Empty<string>();
         private static string[] keys = Array.Empty<string>();
         private static Dictionary<string, string>[] database = null;
+        private static readonly Dictionary<string, LocalizationInterpolator> interpolators = new(StringComparer.OrdinalIgnoreCase);
 
         private static Dictionary<string, string> currentLanguageData = null;
         private static int currentLanguageIndex = 0;
@@ -23,13 +24,13 @@ namespace Core.Localization
 
         internal static string GetString(string key)
         {
-            TryGet(key, out string value);
+            TryGetString(key, out string value);
 
             return value;
         }
         internal static string GetString(string key, string arg0)
         {
-            if (TryGet(key, out string value))
+            if (TryGetString(key, out string value))
             {
                 if (!string.IsNullOrEmpty(value))
                 {
@@ -39,9 +40,21 @@ namespace Core.Localization
 
             return value;
         }
+        internal static string GetString(string key, string arg0, string arg1)
+        {
+            if (TryGetString(key, out string value))
+            {
+                if (!string.IsNullOrEmpty(value))
+                {
+                    return string.Format(value, arg0, arg1);
+                }
+            }
+
+            return value;
+        }
         internal static string GetString(string key, params object[] args)
         {
-            if (TryGet(key, out string value))
+            if (TryGetString(key, out string value))
             {
                 if (!string.IsNullOrEmpty(value))
                 {
@@ -52,7 +65,12 @@ namespace Core.Localization
             return value;
         }
 
-        private static bool TryGet(string key, out string value)
+        internal static string GetStringInterpolated(string key) => Interpolate(GetString(key));
+        internal static string GetStringInterpolated(string key, string arg0) => Interpolate(GetString(key, arg0));
+        internal static string GetStringInterpolated(string key, string arg0, string arg1) => Interpolate(GetString(key, arg0, arg1));
+        internal static string GetStringInterpolated(string key, params object[] args) => Interpolate(GetString(key, args));
+
+        private static bool TryGetString(string key, out string value)
         {
             if (!IsParsed)
             {
@@ -68,7 +86,13 @@ namespace Core.Localization
             value = $"[{key}]";
             return false;
         }
-        internal static void Build(TextAsset file)
+
+        internal static void Build(TextAsset file, IEnumerable<LocalizationInterpolator> values)
+        {
+            BuildText(file);
+            BuildInterpolators(values);
+        }
+        private static void BuildText(TextAsset file)
         {
             if (file == null)
             {
@@ -94,6 +118,102 @@ namespace Core.Localization
                 Debug.LogError($"Localization parse failed: {e.Message}");
             }
         }
+        private static void BuildInterpolators(IEnumerable<LocalizationInterpolator> values)
+        {
+            interpolators.Clear();
+
+            if (values == null)
+            {
+                return;
+            }
+
+            foreach (LocalizationInterpolator interpolator in values)
+            {
+                if (interpolator == null || string.IsNullOrEmpty(interpolator.Key))
+                {
+                    continue;
+                }
+
+                if (!interpolators.TryAdd(interpolator.Key, interpolator))
+                {
+                    throw new InvalidOperationException($"Duplicate localization interpolator key '{interpolator.Key}'.");
+                }
+            }
+        }
+
+        internal static string Interpolate(string text)
+        {
+            int tokenStart = text.IndexOf('{');
+
+            if (tokenStart < 0)
+            {
+                return text;
+            }
+
+            StringBuilder builder = new(text.Length + 32);
+            int position = 0;
+
+            while (tokenStart >= 0)
+            {
+                int tokenEnd = text.IndexOf('}', tokenStart + 1);
+
+                if (tokenEnd < 0)
+                {
+                    break;
+                }
+
+                int separator = text.IndexOf(':', tokenStart + 1, tokenEnd - tokenStart - 1);
+
+                if (separator < 0)
+                {
+                    tokenStart = text.IndexOf('{', tokenStart + 1);
+                    continue;
+                }
+
+                int keyStart = tokenStart + 1;
+                int keyLength = separator - keyStart;
+
+                builder.Append(text, position, tokenStart - position);
+
+                if (!TryInterpolate(text, keyStart, keyLength, separator + 1, tokenEnd - separator - 1, builder))
+                {
+                    builder.Append(text, tokenStart, tokenEnd - tokenStart + 1);
+                }
+
+                position = tokenEnd + 1;
+                tokenStart = text.IndexOf('{', position);
+            }
+
+            if (position == 0)
+            {
+                return text;
+            }
+
+            builder.Append(text, position, text.Length - position);
+            return builder.ToString();
+        }
+        private static bool TryInterpolate(string text, int keyStart, int keyLength, int valueStart, int valueLength, StringBuilder builder)
+        {
+            foreach (KeyValuePair<string, LocalizationInterpolator> pair in interpolators)
+            {
+                string key = pair.Key;
+
+                if (key.Length != keyLength)
+                {
+                    continue;
+                }
+
+                if (string.Compare(text, keyStart, key, 0, keyLength, StringComparison.OrdinalIgnoreCase) != 0)
+                {
+                    continue;
+                }
+
+                return pair.Value.TryInterpolate(text, valueStart, valueLength, builder);
+            }
+
+            return false;
+        }
+
         internal static Dictionary<string, string> Parse(string csvFile, int languageIndex, char separator, out string[] languages, out string[] keys)
         {
             Dictionary<string, string>[] database = ParseAll(csvFile, separator, out languages, out keys);

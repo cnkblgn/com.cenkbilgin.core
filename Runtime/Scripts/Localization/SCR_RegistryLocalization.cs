@@ -10,8 +10,11 @@ namespace Core.Localization
         [Header("_")]
         [SerializeField, Required] private TextAsset file = null;
 
+        [Header("_")]
+        [SerializeField] private LocalizationInterpolator[] interpolators;
+
         [Clickable("Build")]
-        private void Build() => LocalizationDatabase.Build(file);
+        private void Build() => LocalizationDatabase.Build(file, interpolators);
 
         public override void OnAwake() => Build();
         public override void OnInitialize() => Build();

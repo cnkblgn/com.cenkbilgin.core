@@ -23,7 +23,13 @@ namespace Core.Localization
 
         public readonly string Get() => LocalizationDatabase.GetString(key);
         public readonly string Get(string arg0) => LocalizationDatabase.GetString(key, arg0);
+        public readonly string Get(string arg0, string arg1) => LocalizationDatabase.GetString(key, arg0, arg1);
         public readonly string Get(params object[] args) => LocalizationDatabase.GetString(key, args);
+
+        public readonly string GetInterpolated() => LocalizationDatabase.GetStringInterpolated(key);
+        public readonly string GetInterpolated(string arg0) => LocalizationDatabase.GetStringInterpolated(key, arg0);
+        public readonly string GetInterpolated(string arg0, string arg1) => LocalizationDatabase.GetStringInterpolated(key, arg0, arg1);
+        public readonly string GetInterpolated(params object[] args) => LocalizationDatabase.GetStringInterpolated(key, args);
 
     }
 }
