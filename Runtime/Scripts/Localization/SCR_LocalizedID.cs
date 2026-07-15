@@ -8,6 +8,8 @@ namespace Core.Localization
     [Serializable]
     public struct LocalizedID : IEquatable<LocalizedID>
     {
+        public static readonly LocalizedID NONE = new(STRING_EMPTY);
+
         public readonly string Key => key;
         public readonly bool IsValid => !string.IsNullOrEmpty(key);
 
