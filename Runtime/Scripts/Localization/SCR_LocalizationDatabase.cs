@@ -22,13 +22,13 @@ namespace Core.Localization
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void OnRuntimeInitialize() => OnLocalizationChanged = null;
 
-        internal static string GetString(string key)
+        public static string GetString(string key)
         {
             TryGetString(key, out string value);
 
             return value;
         }
-        internal static string GetString(string key, string arg0)
+        public static string GetString(string key, string arg0)
         {
             if (TryGetString(key, out string value))
             {
@@ -40,7 +40,7 @@ namespace Core.Localization
 
             return value;
         }
-        internal static string GetString(string key, string arg0, string arg1)
+        public static string GetString(string key, string arg0, string arg1)
         {
             if (TryGetString(key, out string value))
             {
@@ -52,7 +52,7 @@ namespace Core.Localization
 
             return value;
         }
-        internal static string GetString(string key, params object[] args)
+        public static string GetString(string key, params object[] args)
         {
             if (TryGetString(key, out string value))
             {
