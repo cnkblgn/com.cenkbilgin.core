@@ -8,7 +8,7 @@ namespace Core.Audio
     [Serializable]
     public partial struct SoundID : IEquatable<SoundID> 
     {
-        public static readonly SoundID Empty = new(STRING_EMPTY, -1);
+        public static readonly SoundID NONE = new(STRING_EMPTY, -1);
 
         public readonly string Key => key;
         public readonly int Index => index;

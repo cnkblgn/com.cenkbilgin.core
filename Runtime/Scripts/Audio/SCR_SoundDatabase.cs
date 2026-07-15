@@ -21,7 +21,7 @@ namespace Core.Audio
 
             if (!database.TryGetValue(new(ids[index], -1), out SoundEntry entry))
             {
-                return SoundID.Empty;
+                return SoundID.NONE;
             }
 
             return entry.ID;

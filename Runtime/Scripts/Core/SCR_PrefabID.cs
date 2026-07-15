@@ -8,7 +8,7 @@ namespace Core
     [Serializable]
     public partial struct PrefabID : IEquatable<PrefabID>
     {
-        public static readonly PrefabID Empty = new(STRING_EMPTY);
+        public static readonly PrefabID NONE = new(STRING_EMPTY);
 
         public readonly string Key => key;
         public readonly bool IsValid => !string.IsNullOrEmpty(key);

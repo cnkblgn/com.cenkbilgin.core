@@ -8,7 +8,7 @@ namespace Core.Graphics
     [Serializable]
     public partial struct IconID : IEquatable<IconID>
     {
-        public static readonly IconID Empty = new(STRING_EMPTY);
+        public static readonly IconID NONE = new(STRING_EMPTY);
 
         public readonly string Key => key;
         public readonly bool IsValid => !string.IsNullOrEmpty(key);
