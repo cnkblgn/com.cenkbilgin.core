@@ -42,10 +42,8 @@ namespace Core.Audio
             return -1;
         }
 
-        internal static bool TryGet(SoundID id, out AudioClip clip)
+        internal static AudioClip GetClip(SoundID id)
         {
-            clip = null;
-
             if (!IsParsed)
             {
                 throw new InvalidOperationException($"Sound database is not parsed! Please build via SoundDatabaseConfig");
@@ -58,12 +56,11 @@ namespace Core.Audio
 
             if (database.TryGetValue(id, out SoundEntry entry))
             {
-                clip = entry.Clip;
-                return true;
+                return entry.Clip;
             }
 
             Debug.LogError($"audio clip not found! [{id.Key}]");
-            return false;
+            return null;
         }
         internal static void Build(AudioClip[] collection)
         {

@@ -12,7 +12,7 @@ namespace Core.Graphics
         private static string[] ids = Array.Empty<string>();
 
         public static IReadOnlyList<string> GetIDs() => ids;
-        public static Sprite Get(IconID id)
+        public static Sprite GetSprite(IconID id)
         {
             if (!IsParsed)
             {

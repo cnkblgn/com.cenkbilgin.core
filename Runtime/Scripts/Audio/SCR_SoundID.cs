@@ -27,5 +27,9 @@ namespace Core.Audio
         public readonly override bool Equals(object obj) => obj is SoundID other && Equals(other);
         public static bool operator ==(SoundID left, SoundID right) => left.Equals(right);
         public static bool operator !=(SoundID left, SoundID right) => !left.Equals(right);
+
+        public readonly AudioClip GetClip() => SoundDatabase.GetClip(this);
+        public readonly void Play(AudioGroup group) => ManagerAudio.Instance.PlaySound(GetClip(), group, Vector3.zero, 0, 1, 1, 1, 10, false);
+        public readonly void Play(AudioGroup group, Vector3 position, float blend = 0, float volume = 1, float pitch = 1, float minDistance = 1, float maxDistance = 10, bool occulusion = false) => ManagerAudio.Instance.PlaySound(GetClip(), group, position, blend, volume, pitch, minDistance, maxDistance, occulusion);
     }
 }

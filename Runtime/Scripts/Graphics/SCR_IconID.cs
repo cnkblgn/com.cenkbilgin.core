@@ -23,6 +23,6 @@ namespace Core.Graphics
         public static bool operator ==(IconID left, IconID right) => left.Equals(right);
         public static bool operator !=(IconID left, IconID right) => !left.Equals(right);
 
-        public readonly Sprite Get() => IconDatabase.Get(this);
+        public readonly Sprite Get() => IconDatabase.GetSprite(this);
     }
 }

@@ -11,6 +11,6 @@ namespace Core.Graphics.Editor
         protected override IReadOnlyList<string> GetKeys() => IconDatabase.GetIDs();
         protected override string GetKey() => "key";
         protected override void OnApply(SerializedProperty property, string key) { }
-        protected override Object GetAsset(string key) => IconDatabase.Get(new(key));
+        protected override Object GetAsset(string key) => IconDatabase.GetSprite(new(key));
     }
 }
