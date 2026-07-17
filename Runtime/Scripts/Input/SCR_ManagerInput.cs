@@ -116,28 +116,6 @@ namespace Core.Input
         public bool GetKeyDown(InputAction action) => GetAction(action)?.WasPressedThisFrame() == true;
         public bool GetKeyUp(InputAction action) => GetAction(action)?.WasReleasedThisFrame() == true;
         public Vector2 GetAxis(InputAction action) => GetAction(action)?.ReadValue<Vector2>() ?? Vector2.zero;
-        public int GetIcon(InputAction action) => GetIcon(action.path);
-        public int GetIcon(string path)
-        {
-            UnityEngine.InputSystem.InputAction action = GetAction(path);
-
-            if (action == null)
-            {
-                return -1;
-            }
-
-            if (action.controls.Count <= 0)
-            {
-                return -1;
-            }
-
-            if (!InputIcons.Database.TryGetValue(action.controls[0].name, out int icon))
-            {
-                return -1;
-            }
-
-            return icon;
-        }
         public string GetDisplay(InputAction action, int bindingIndex) => GetDisplay(action.path, bindingIndex);
         public string GetDisplay(string path, int bindingIndex)
         {
@@ -148,7 +126,9 @@ namespace Core.Input
                 return STRING_NULL;
             }
 
-            return action.GetBindingDisplayString(bindingIndex);
+            action.GetBindingDisplayString(bindingIndex, out _, out string controlPath);
+   
+            return controlPath;
         }
         public void StartRebind(InputAction action, int bindingIndex, Action onStart, Action onComplete, Action onCancel) => StartRebind(action.path, bindingIndex, onStart, onComplete, onCancel);
         public void StartRebind(string path, int bindingIndex, Action onStart, Action onComplete, Action onCancel)

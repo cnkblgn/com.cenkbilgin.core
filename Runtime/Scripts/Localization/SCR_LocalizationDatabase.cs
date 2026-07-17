@@ -89,8 +89,8 @@ namespace Core.Localization
 
         internal static void Build(TextAsset file, IEnumerable<LocalizationInterpolator> values)
         {
-            BuildText(file);
             BuildInterpolators(values);
+            BuildText(file);
         }
         private static void BuildText(TextAsset file)
         {
