@@ -1,22 +1,21 @@
 {
   "name": "com.cenkbilgin.core",
   "displayName": "Core Systems",
-  "version": "3.9.4",
+  "version": "3.9.5",
   "unity": "6000.3",
   "description": "Core template for future unity projects.",
-  "author": {
+  "author":
+  {
     "name": "Cenk Bilgin",
     "url": "https://github.com/cenkbilgin"
   },
-	"license": "Proprietary",
-	"dependencies": {
-		"com.unity.nuget.newtonsoft-json": "3.2.2"
-  },
-  "samples": [
+  "license": "Proprietary",
+  "samples":
+  [
     {
-		"displayName": "Template",
-		"description": "Template",
-		"path": "Samples~"
+      "displayName": "Template",
+      "description": "Template",
+      "path": "Samples~"
     }
   ]
 }

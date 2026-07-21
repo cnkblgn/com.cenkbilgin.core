@@ -1,0 +1,20 @@
+{
+    "name": "ASM_EffectEditor",
+    "rootNamespace": "Core.Effect.Editor",
+    "references": [
+        "GUID:cd1711b8a18680d4d823307638cb8090",
+        "GUID:1d623e8bdcfc7404e812f09ec1d93209",
+        "GUID:273ac7abeb8e1dd4296b1be14f8df5d3"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

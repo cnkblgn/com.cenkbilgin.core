@@ -1,0 +1,20 @@
+{
+    "name": "ASM_DamageEditor",
+    "rootNamespace": "Core.Damage.Editor",
+    "references": [
+        "GUID:cd1711b8a18680d4d823307638cb8090",
+        "GUID:1d623e8bdcfc7404e812f09ec1d93209",
+        "GUID:b9a3526883fa80f44b419980b4407ea4"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
