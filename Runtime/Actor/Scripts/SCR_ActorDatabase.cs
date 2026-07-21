@@ -133,7 +133,7 @@ namespace Core.Actors
             if (!actorDatabase.TryGetValue(id, out List<ActorEntry> entries))
             {
 #if UNITY_EDITOR
-                Debug.LogError($"id not found in database: [{id.key}]");
+                Debug.LogError($"id not found in database: [{id.Key}]");
 #endif
                 return false;
             }
