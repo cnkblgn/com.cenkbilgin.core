@@ -35,6 +35,22 @@ namespace Core.Stat
 
         public static SearchCollection<string> GetIDs() => ids;
         public static int GetIndex(string id) => GetDefinition(new(id, -1)).ID.Index;
+        public static StatID GetID(int index)
+        {
+            int i = 0;
+
+            foreach (StatID id in database.Keys)
+            {
+                if (index == i)
+                {
+                    return id;
+                }
+
+                i++;
+            }
+
+            return default;
+        }
         public static IReadOnlyCollection<StatDefinition> GetDatabase() => database.Values;
         public static StatDefinition GetDefinition(StatID id)
         {

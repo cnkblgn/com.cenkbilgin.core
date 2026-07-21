@@ -35,7 +35,24 @@ namespace Core.Effect
 
         public static SearchCollection<string> GetIDs() => ids;
         public static int GetIndex(string id) => GetDefinition(new(id, -1)).ID.Index;
+        public static EffectID GetID(int index)
+        {
+            int i = 0;
+
+            foreach (EffectID id in database.Keys)
+            {
+                if (index == i)
+                {
+                    return id;
+                }
+
+                i++;
+            }
+
+            return default;
+        }
         public static IReadOnlyCollection<EffectDefinition> GetDefinitions() => database.Values;
+
         public static EffectDefinition GetDefinition(EffectID id)
         {
             if (!database.TryGetValue(id, out EffectDefinition definition))
