@@ -8,6 +8,7 @@ namespace Core.Actors
     {
         private static SearchCollection<string> ids = new(Array.Empty<SearchEntry<string>>());
         private static SearchCollection<string> tags = new(Array.Empty<SearchEntry<string>>());
+        private static readonly Dictionary<string, int> idDatabase = new();
         private static readonly Dictionary<string, int> tagDatabase = new();
         private static readonly Dictionary<ActorID, List<ActorEntry>> actorDatabase = new();
 
@@ -22,12 +23,17 @@ namespace Core.Actors
             }
 
             tagDatabase.Clear();
+            idDatabase.Clear();
             tags = new(new SearchEntry<string>[tagCollection.Length]);
             ids = new(new SearchEntry<string>[idCollection.Length]);
 
             for (int i = 0; i < idCollection.Length; i++)
             {
-                ids.Entries[i] = new SearchEntry<string>(idCollection[i], idCollection[i]);
+                string key = idCollection[i];
+                int index = i + 1;
+
+                idDatabase[key] = index;
+                ids.Entries[i] = new SearchEntry<string>(key, key);
             }
 
             for (int i = 0; i < tagCollection.Length; i++)
@@ -44,6 +50,15 @@ namespace Core.Actors
 
         public static SearchCollection<string> GetIDs() => ids;
         public static SearchCollection<string> GetTags() => tags;
+        public static int GetIDIndex(string id)
+        {
+            if (idDatabase.TryGetValue(id, out int a))
+            {
+                return a;
+            }
+
+            return -1;
+        }
         public static int GetTagIndex(string id)
         {
             if (tagDatabase.TryGetValue(id, out int a))

@@ -17,7 +17,6 @@ namespace Core.Stat
             }
 
             database.Clear();
-
             ids = new SearchCollection<string>(new SearchEntry<string>[entries.Length]);
 
             for (int i = 0; i < entries.Length; i++)
@@ -25,7 +24,9 @@ namespace Core.Stat
                 StatEntry entry = entries[i];
                 string key = entry.Key;
 
-                database[new(key)] = new(new(key), entry.Default, entry.Min, entry.Max);
+                StatID id = new(key, i);
+
+                database[id] = new(id, entry.Default, entry.Min, entry.Max);
                 ids.Entries[i] = new SearchEntry<string>(key, key);
             }
 
@@ -33,6 +34,7 @@ namespace Core.Stat
         }
 
         public static SearchCollection<string> GetIDs() => ids;
+        public static int GetIndex(string id) => GetDefinition(new(id, -1)).ID.Index;
         public static IReadOnlyCollection<StatDefinition> GetDatabase() => database.Values;
         public static StatDefinition GetDefinition(StatID id)
         {

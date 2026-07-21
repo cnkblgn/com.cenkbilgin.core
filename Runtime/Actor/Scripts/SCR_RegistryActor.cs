@@ -21,7 +21,7 @@ namespace Core.Actors
             ActorDatabase.Build(ids, tags);
 
             GenerateScriptDatabase(this, "Core.Actors", "ActorTag", ActorDatabase.GetTags(), "SCR_GeneratedActorTag.cs", true, true, 1);
-            GenerateScriptDatabase(this, "Core.Actors", "ActorID", ActorDatabase.GetIDs(), "SCR_GeneratedActorID.cs", true, false);
+            GenerateScriptDatabase(this, "Core.Actors", "ActorID", ActorDatabase.GetIDs(), "SCR_GeneratedActorID.cs", true, true, 1);
         }
 
         /// <summary> Overrides ids </summary>

@@ -4,8 +4,6 @@ using UnityEngine;
 
 namespace Core.Effect
 {
-    using static CoreUtility;
-
     public static class EffectDatabase
     {
         private static readonly Dictionary<EffectID, EffectDefinition> database = new();
@@ -26,7 +24,9 @@ namespace Core.Effect
                 EffectEntry entry = entries[i];
                 string key = entry.Key;
 
-                database[new(key)] = new(new(key), entry.IconID, entry.NameID, entry.Action, entry.Tag, entry.Interval);
+                EffectID id = new(key, i);
+
+                database[id] = new(id, entry.IconID, entry.NameID, entry.Action, entry.Tag, entry.Interval);
                 ids.Entries[i] = new SearchEntry<string>(key, key);
             }
 
@@ -34,6 +34,7 @@ namespace Core.Effect
         }
 
         public static SearchCollection<string> GetIDs() => ids;
+        public static int GetIndex(string id) => GetDefinition(new(id, -1)).ID.Index;
         public static IReadOnlyCollection<EffectDefinition> GetDefinitions() => database.Values;
         public static EffectDefinition GetDefinition(EffectID id)
         {

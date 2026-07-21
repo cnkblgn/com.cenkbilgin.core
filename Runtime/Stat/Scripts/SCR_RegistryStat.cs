@@ -19,7 +19,7 @@ namespace Core.Stat
         {
             StatDatabase.Build(entries);
 
-            GenerateScriptDatabase(this, "Core.Stat", "StatID", StatDatabase.GetIDs(), "SCR_GeneratedStatID.cs", true, false);
+            GenerateScriptDatabase(this, "Core.Stat", "StatID", StatDatabase.GetIDs(), "SCR_GeneratedStatID.cs", true, true);
         }
 
         /// <summary> Overrides entries </summary>

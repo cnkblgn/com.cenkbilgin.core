@@ -8,6 +8,12 @@ namespace Core.Actors.Editor
     [CustomPropertyDrawer(typeof(ActorID))]
     internal sealed class EditorDrawSearchableActorID : EditorDrawSearchable<string>
     {
+        protected override void OnApply(SerializedProperty property, string key)
+        {
+            SerializedProperty indexProperty = property.FindPropertyRelative("index");
+            indexProperty.intValue = ActorDatabase.GetIDIndex(key);
+        }
+
         protected override string GetEmpty() => STRING_EMPTY;
 
         protected override string GetKey() => "key";

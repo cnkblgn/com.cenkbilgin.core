@@ -19,7 +19,7 @@ namespace Core.Effect
         {
             EffectDatabase.Build(entries);
 
-            GenerateScriptDatabase(this, "Core.Effect", "EffectID", EffectDatabase.GetIDs(), "SCR_GeneratedEffectID.cs", true, false);
+            GenerateScriptDatabase(this, "Core.Effect", "EffectID", EffectDatabase.GetIDs(), "SCR_GeneratedEffectID.cs", true, true);
         }
 
         /// <summary> Overrides entries </summary>
