@@ -22,5 +22,6 @@ namespace Core.Effect
         public static bool operator !=(EffectID left, EffectID right) => !left.Equals(right);
 
         public readonly EffectDefinition GetDefinition() => EffectDatabase.GetDefinition(this);
+        public readonly EffectInstance CreateInstance(float duration) => EffectDatabase.CreateInstance(this, duration);
     }
 }

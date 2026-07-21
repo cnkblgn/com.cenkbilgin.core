@@ -44,5 +44,14 @@ namespace Core.Effect
 
             return definition;
         }
+        internal static EffectInstance CreateInstance(EffectID id, float duration)
+        {
+            if (!database.ContainsKey(id))
+            {
+                throw new ArgumentNullException($"effect definition not found for [{id}]");
+            }
+
+            return new(id, duration);
+        }
     }
 }
