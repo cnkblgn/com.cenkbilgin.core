@@ -20,6 +20,7 @@ namespace Core.Interaction
         [SerializeField, Min(0.1f)] private float distance = 2.5f;
 
         private Actor thisActor = null;
+        private IInteractionUser thisUser = null;
         private Interactable currentTarget = null;
         private readonly StackBool canInteract = new();
         private float nextInteractTime;
@@ -34,6 +35,8 @@ namespace Core.Interaction
             }
 
             thisActor = GetComponent<Actor>();
+            thisUser = GetComponent<IInteractionUser>();
+
             nextInteractTime = Time.time + 0.01f;
         }
         private void Update()
@@ -53,6 +56,12 @@ namespace Core.Interaction
             }
         }
 
+        private void SetState(InteractionContext ctx)
+        {
+            OnStateChanged?.Invoke(ctx);
+            thisUser?.HandleStateChanged(in ctx);
+        }
+
         public bool TryInteract()
         {
             if (!CanInteract())
@@ -66,7 +75,7 @@ namespace Core.Interaction
             }
             else
             {
-                OnStateChanged?.Invoke(new(null, thisActor, null, InteractionState.INTERACT_DENIED));
+                SetState(new(null, thisActor, null, InteractionState.INTERACT_DENIED));
             }
 
             return true;
@@ -124,18 +133,18 @@ namespace Core.Interaction
 
             currentTarget = newTarget;
             currentTarget.EnterFocus(thisActor, out InteractionContext ctx);
-            OnStateChanged?.Invoke(ctx);
+            SetState(ctx);
         }
         private void InteractTarget()
         {
             if (currentTarget == null)
             {
-                OnStateChanged?.Invoke(new(null, thisActor, null, InteractionState.INTERACT_DENIED));
+                SetState(new(null, thisActor, null, InteractionState.INTERACT_DENIED));
                 return;
             }
 
             currentTarget.Interact(thisActor, out InteractionContext ctx);
-            OnStateChanged?.Invoke(ctx);
+            SetState(ctx);
         }
         private void ClearTarget()
         {
@@ -147,7 +156,7 @@ namespace Core.Interaction
             currentTarget.ExitFocus(thisActor, out InteractionContext ctx);
             currentTarget = null;
 
-            OnStateChanged?.Invoke(ctx);
+            SetState(ctx);
         }
 
         public float GetInteractionDistance() => distance;
