@@ -28,8 +28,8 @@ namespace Core.Damage
                 Debug.LogWarning("Warning damage tag supports only 63 index!");
             }
         }
-        public readonly override int GetHashCode() => HashCode.Combine(key, index);
-        public readonly bool Equals(DamageTag other) => key == other.key && index == other.index;
+        public readonly override int GetHashCode() => key != null ? key.GetHashCode() : 0;
+        public readonly bool Equals(DamageTag other) => key == other.key;
         public readonly override bool Equals(object obj) => obj is DamageTag other && Equals(other);
         public static bool operator ==(DamageTag left, DamageTag right) => left.Equals(right);
         public static bool operator !=(DamageTag left, DamageTag right) => !left.Equals(right);

@@ -11,7 +11,7 @@ namespace Core.Audio.Editor
         protected override void OnApply(SerializedProperty property, string key)
         {
             SerializedProperty indexProperty = property.FindPropertyRelative("index");
-            indexProperty.intValue = SoundDatabase.GetIndex(new(key, -1));
+            indexProperty.intValue = SoundDatabase.GetIndex(key);
         }
 
         protected override string GetEmpty() => STRING_EMPTY;

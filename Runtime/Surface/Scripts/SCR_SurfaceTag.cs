@@ -29,8 +29,8 @@ namespace Core.Surface
             }
         }
 
-        public readonly override int GetHashCode() => HashCode.Combine(key, index);
-        public readonly bool Equals(SurfaceTag other) => key == other.key && index == other.index;
+        public readonly override int GetHashCode() => key != null ? key.GetHashCode() : 0;
+        public readonly bool Equals(SurfaceTag other) => key == other.key;
         public readonly override bool Equals(object obj) => obj is SurfaceTag other && Equals(other);
 
         public static bool operator ==(SurfaceTag left, SurfaceTag right) => left.Equals(right);

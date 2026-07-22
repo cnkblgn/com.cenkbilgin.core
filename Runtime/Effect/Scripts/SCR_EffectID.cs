@@ -20,9 +20,9 @@ namespace Core.Effect
             this.key = key;
             this.index = index;
         }
-        public readonly override int GetHashCode() => HashCode.Combine(key, index);
+        public readonly override int GetHashCode() => key != null ? key.GetHashCode() : 0;
         public readonly override bool Equals(object obj) => obj is EffectID other && Equals(other);
-        public readonly bool Equals(EffectID other) => key == other.key && index == other.index;
+        public readonly bool Equals(EffectID other) => key == other.key;
         public static bool operator ==(EffectID left, EffectID right) => left.Equals(right);
         public static bool operator !=(EffectID left, EffectID right) => !left.Equals(right);
 

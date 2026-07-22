@@ -57,9 +57,9 @@ namespace Core.Audio
 
             return entry.ID;
         }
-        public static int GetIndex(SoundID id)
+        public static int GetIndex(string id)
         {
-            if (database.TryGetValue(id, out SoundEntry entry))
+            if (database.TryGetValue(new(id, -1), out SoundEntry entry))
             {
                 return entry.ID.Index;
             }

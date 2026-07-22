@@ -7,7 +7,7 @@ namespace Core.Damage
     public static class DamageDatabase
     {
         private static SearchCollection<string> tags = new(Array.Empty<SearchEntry<string>>());
-        private static readonly Dictionary<string, int> tagDatabase = new();
+        private static readonly Dictionary<string, DamageTag> tagDatabase = new();
 
         internal static void Build(string[] entries)
         {
@@ -24,19 +24,20 @@ namespace Core.Damage
                 string key = entries[i];
                 int index = i + 1;
 
-                tagDatabase[key] = index;
+                DamageTag tag = new(key, index);
+
+                tagDatabase[key] = tag;
                 tags.Entries[i] = new SearchEntry<string>(key, key);
             }
 
             Debug.Log($"Damage database build successfull!");
         }
-
         public static SearchCollection<string> GetTags() => tags;
-        public static int GetIndex(string id)
+        public static int GetIndex(string key)
         {
-            if (tagDatabase.TryGetValue(id, out int a))
+            if (tagDatabase.TryGetValue(key, out DamageTag tag))
             {
-                return a;
+                return tag.Index;
             }
 
             return -1;

@@ -12,16 +12,14 @@ namespace Core
         private static bool TryCache() => TryFindAssetsByType(out registries);
 
         [UnityEditor.Callbacks.DidReloadScripts(1)]
-        private static void OnAssemblyReload()
+        private static void OnAfterScriptLoad()
         {
             if (TryCache())
             {
                 for (int i = 0; i < registries.Length; i++)
                 {
-                    registries[i].OnAssemblyReload();
+                    registries[i].OnAfterScriptLoad();
                 }
-
-                Debug.Log("Registry assemblies are reloaded!");
             }
         }
 #endif

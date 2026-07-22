@@ -29,8 +29,8 @@ namespace Core.Actors
                 Debug.LogError("Warning actor tag supports only 63 index!");
             }
         }
-        public readonly override int GetHashCode() => HashCode.Combine(key, index);
-        public readonly bool Equals(ActorTag other) => key == other.key && index == other.index;
+        public readonly override int GetHashCode() => key != null ? key.GetHashCode() : 0;
+        public readonly bool Equals(ActorTag other) => key == other.key;
         public readonly override bool Equals(object obj) => obj is ActorTag other && Equals(other);
         public static bool operator ==(ActorTag left, ActorTag right) => left.Equals(right);
         public static bool operator !=(ActorTag left, ActorTag right) => !left.Equals(right);

@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
 
@@ -14,68 +13,65 @@ namespace Core
         #region EDITOR
 #if UNITY_EDITOR
 
-        [HideInCallstack] 
-        public static void GenerateScriptDatabase(ScriptableObject instance, string namespaceName, string structName, SearchCollection<string> keys, string outputFileName, bool sanitize, bool indexed, int startIndex = 0)
-        {
-            string[] temp = new string[keys.Entries.Length];
-
-            for (int i = 0; i < temp.Length; i++)
-            {
-                temp[i] = keys.Entries[i].Value;
-            }
-
-            GenerateScriptDatabase(instance, namespaceName, structName, temp, outputFileName, sanitize, indexed, startIndex);
-        }
-        public static void GenerateScriptDatabase(ScriptableObject instance, string namespaceName, string structName, IEnumerable<string> keys, string outputFileName, bool sanitize, bool indexed, int startIndex = 0)
-        {
-            StringBuilder sb = new();
-            sb.AppendLine($"namespace {namespaceName}");
-            sb.AppendLine("{");
-            sb.AppendLine($"    public partial struct {structName}");
-            sb.AppendLine("    {");
-            int index = startIndex;
-            foreach (string key in keys)
-            {
-                string k = (sanitize ? key.ToIdentifier() : key);
-                string i = indexed ? $",{index}" : STRING_EMPTY;
-
-                sb.AppendLine($"        public static readonly {structName} {k} = new(\"{key}\"{i});");
-                index++;
-            }
-            sb.AppendLine("    }");
-            sb.AppendLine("}");
-
-            GenerateTextFile(instance, outputFileName, sb);
-        }
+        /// <summary>
+        /// Generates a text file at the specified path.
+        /// </summary>
+        /// <param name="path">
+        /// Full output path of the generated file, including the file name and extension.
+        /// <para>Example: <c>Assets/Scripts/GeneratedIDs.cs</c></para>
+        /// </param>
+        /// <param name="content">
+        /// Text content to write into the generated file.
+        /// </param>
         [HideInCallstack]
-        public static void GenerateTextFile(ScriptableObject instance, string name, StringBuilder data)
-        {
-            if (instance == null) throw new ArgumentNullException($"Script file generation failed! instance is null [{nameof(instance)}]");
-
-            GenerateTextFile(AssetDatabase.GetAssetPath(MonoScript.FromScriptableObject(instance)), name, data);
-        }
+        public static void GenerateTextFile(string path, StringBuilder content) => GenerateTextFile(path, content.ToString());
+        /// <summary>
+        /// Generates a text file at the specified path.
+        /// </summary>
+        /// <param name="path">
+        /// Full output path of the generated file, including the file name and extension.
+        /// <para>Example: <c>Assets/Scripts/GeneratedIDs.cs</c></para>
+        /// </param>
+        /// <param name="content">
+        /// Text content to write into the generated file.
+        /// </param>
         [HideInCallstack]
-        public static void GenerateTextFile(string path, string name, StringBuilder data)
+        public static void GenerateTextFile(string path, string content)
         {
-            if (path == null) throw new ArgumentNullException($"Script file generation failed! path is null [{nameof(path)}]");
-
-            if (data == null) throw new ArgumentNullException($"Script file generation failed! data is null [{nameof(name)}]");
-
-            if (string.IsNullOrEmpty(name)) throw new ArgumentNullException($"Script file generation failed! file name is null or empty [{nameof(data)}]");
-
-            string pathFolder = Path.GetDirectoryName(path).Replace("\\", "/");
-            string outputFolder = $"{pathFolder}/_Generated";
-
-            if (!Directory.Exists(outputFolder))
+            if (path == null)
             {
-                Directory.CreateDirectory(outputFolder);
+                throw new ArgumentNullException(nameof(path), "Text file generation failed. Path is null.");
             }
 
-            string outputPath = $"{outputFolder}/{name}";
-            File.WriteAllText(outputPath, data.ToString());
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                throw new ArgumentException("Text file generation failed. Path is empty.", nameof(path));
+            }
+
+            if (content == null)
+            {
+                throw new ArgumentNullException(nameof(content), "Text file generation failed. Content is null.");
+            }
+
+            string directory = Path.GetDirectoryName(path);
+
+            if (string.IsNullOrEmpty(directory))
+            {
+                throw new InvalidOperationException($"Text file generation failed. Invalid path [{path}]");
+            }
+
+            directory = directory.Replace("\\", "/");
+
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            File.WriteAllText(path, content);
+
             AssetDatabase.Refresh();
 
-            Debug.Log($"Script Generated at [{outputPath}]");
+            Debug.Log($"Text generated at [{path}]");
         }
         public static bool TryCreateAsset<T>(string path, out T asset) where T : ScriptableObject
         {
@@ -739,6 +735,7 @@ namespace Core
 
             return result;
         }
+        public static string ToLiteral(this string value) => $"\"{value.Replace("\\", "\\\\").Replace("\"", "\\\"")}\"";
         #endregion
 
         #region COLOR
