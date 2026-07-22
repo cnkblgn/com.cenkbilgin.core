@@ -43,8 +43,9 @@ namespace Core.Audio
                 foreach (SearchEntry<string> entry in SoundDatabase.GetIDs().Entries)
                 {
                     string id = entry.Value;
+                    int index = SoundDatabase.GetIndex(id);
 
-                    generator.Field($"public static readonly SoundID {id.ToIdentifier()} = new({id.ToLiteral()})");
+                    generator.Field($"public static readonly SoundID {id.ToIdentifier()} = new({id.ToLiteral()},{index})");
                 }
             }
 
