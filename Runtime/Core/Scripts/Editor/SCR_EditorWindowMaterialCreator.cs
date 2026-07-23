@@ -9,16 +9,31 @@ namespace Core.Editor
     internal sealed class EditorWindowMaterialCreator : EditorWindow
     {
         [SerializeField] private Shader shader;
+        [SerializeField] private string typePrefix = "TEX";
+        [SerializeField] private string typeAlbedo = "C";
+        [SerializeField] private string typeNormal = "N";
+        [SerializeField] private string typeMask = "M";
 
         private SerializedProperty propertyShader = null;
+        private SerializedProperty propertyTypePrefix = null;
+        private SerializedProperty propertyTypeAlbedo = null;
+        private SerializedProperty propertyTypeNormal = null;
+        private SerializedProperty propertyTypeMask = null;
         private SerializedObject serializedObject = null;
-        private const string TYPE_PREFIX = "TEX";
-        private const string TYPE_ALBEDO = "C";
-        private const string TYPE_NORMAL = "N";
-        private const string TYPE_MASK = "M";
 
-        private void OnEnable() { serializedObject = new SerializedObject(this); propertyShader = serializedObject.FindProperty("shader"); }
-        [MenuItem("Tools/Material Creator")] public static void ShowTool() => GetWindow<EditorWindowMaterialCreator>("Material Creator");
+        private void OnEnable()
+        {
+            serializedObject = new SerializedObject(this);
+            propertyShader = serializedObject.FindProperty("shader");
+            propertyTypePrefix = serializedObject.FindProperty("typePrefix");
+            propertyTypeAlbedo = serializedObject.FindProperty("typeAlbedo");
+            propertyTypeNormal = serializedObject.FindProperty("typeNormal");
+            propertyTypeMask = serializedObject.FindProperty("typeMask");
+        }
+
+        [MenuItem("Tools/Material Creator")]
+        public static void ShowTool() => GetWindow<EditorWindowMaterialCreator>("Material Creator");
+
         private void OnGUI()
         {
             serializedObject.Update();
@@ -27,8 +42,30 @@ namespace Core.Editor
             {
                 using (new EditorGUILayout.HorizontalScope())
                 {
-                    EditorGUILayout.PropertyField(propertyShader, new GUIContent(""));
+                    EditorGUILayout.PropertyField(propertyShader, new GUIContent("Shader"));
                 }
+
+                EditorGUILayout.Space(4);
+                EditorGUILayout.LabelField("Naming Convention", EditorStyles.boldLabel);
+
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.PropertyField(propertyTypePrefix, new GUIContent("Prefix"));
+                }
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.PropertyField(propertyTypeAlbedo, new GUIContent("Albedo Suffix"));
+                }
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.PropertyField(propertyTypeNormal, new GUIContent("Normal Suffix"));
+                }
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.PropertyField(propertyTypeMask, new GUIContent("Mask Suffix"));
+                }
+
+                EditorGUILayout.Space(4);
                 using (new EditorGUILayout.HorizontalScope())
                 {
                     if (GUILayout.Button("Create Material", new GUIStyle(EditorStyles.miniButton) { alignment = TextAnchor.MiddleCenter, richText = true, fontStyle = FontStyle.Bold }))
@@ -40,6 +77,7 @@ namespace Core.Editor
 
             serializedObject.ApplyModifiedProperties();
         }
+
         private void Create()
         {
             if (shader == null)
@@ -47,6 +85,8 @@ namespace Core.Editor
                 Debug.LogError("EditorWindowMaterialCreator.Create() shader == null");
                 return;
             }
+
+            bool anyCreated = false;
 
             foreach (var obj in Selection.objects)
             {
@@ -57,8 +97,19 @@ namespace Core.Editor
                     if (GetMaterial(texture, out string path, out string type))
                     {
                         CreateMaterial(texture, path, type);
+                        anyCreated = true;
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"EditorWindowMaterialCreator: '{texture.name}' isimlendirme kuralýyla eþleþmedi, atlandý.");
                     }
                 }
+            }
+
+            if (anyCreated)
+            {
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
             }
         }
 
@@ -73,6 +124,7 @@ namespace Core.Editor
 
             return path;
         }
+
         private bool GetMaterial(Texture2D texture, out string path, out string type)
         {
             List<string> format = new(texture.name.Split('_'));
@@ -84,28 +136,25 @@ namespace Core.Editor
                 return false;
             }
 
-            if (format[0] == TYPE_PREFIX)
+            if (!string.IsNullOrEmpty(typePrefix) && format[0] == typePrefix)
             {
                 format.RemoveAt(0);
             }
 
-            if (type == TYPE_ALBEDO)
+            bool recognized = type == typeAlbedo || type == typeNormal || type == typeMask;
+
+            if (!recognized)
             {
-                format.RemoveAt(format.Count - 1);
+                return false;
             }
-            else if (type == TYPE_NORMAL)
-            {
-                format.RemoveAt(format.Count - 1);
-            }
-            else if (type == TYPE_MASK)
-            {
-                format.RemoveAt(format.Count - 1);
-            }
+
+            format.RemoveAt(format.Count - 1);
 
             path = GetDirectory(texture) + "/" + ("MAT_" + string.Join("_", format)) + ".mat";
 
             return true;
         }
+
         private void CreateMaterial(Texture2D texture, string path, string type)
         {
             Material material;
@@ -120,24 +169,22 @@ namespace Core.Editor
                 AssetDatabase.CreateAsset(material, path);
             }
 
-            if (type == TYPE_ALBEDO)
+            if (type == typeAlbedo)
             {
                 material.SetTexture("_BaseMap", texture);
             }
-            else if (type == TYPE_NORMAL)
+            else if (type == typeNormal)
             {
                 material.SetTexture("_NormalMap", texture);
             }
-            else if (type == TYPE_MASK)
+            else if (type == typeMask)
             {
                 material.SetTexture("_MaskMap", texture);
             }
-            else
-            {
-                material.SetTexture("_BaseMap", texture);
-            }
 
             material.enableInstancing = true;
+
+            UnityEditor.EditorUtility.SetDirty(material);
         }
     }
 }
