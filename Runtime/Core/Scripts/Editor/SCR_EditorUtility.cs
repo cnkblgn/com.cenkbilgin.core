@@ -1,3 +1,4 @@
+using System;
 using UnityEditor;
 using UnityEngine;
 
@@ -94,20 +95,21 @@ namespace Core.Editor
             {
                 string path = AssetDatabase.GetAssetPath(obj);
 
-                if (!path.EndsWith(".fbx"))
+                if (!string.Equals(Path.GetExtension(path), ".fbx", StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
 
-                ModelImporter importer = AssetImporter.GetAtPath(path) as ModelImporter;
-
-                if (importer == null)
+                if (AssetImporter.GetAtPath(path) is not ModelImporter importer)
                 {
                     continue;
                 }
 
                 importer.materialImportMode = ModelImporterMaterialImportMode.ImportStandard;
-                importer.SearchAndRemapMaterials(ModelImporterMaterialName.BasedOnMaterialName, ModelImporterMaterialSearch.Everywhere);
+                importer.SearchAndRemapMaterials(
+                    ModelImporterMaterialName.BasedOnMaterialName,
+                    ModelImporterMaterialSearch.Everywhere);
+
                 importer.SaveAndReimport();
 
                 Debug.Log($"Material found and remapped to: {path}");
