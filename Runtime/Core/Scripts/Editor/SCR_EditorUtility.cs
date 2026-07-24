@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -83,7 +84,7 @@ namespace Core.Editor
         [MenuItem("Tools/Search and Remap Materials", false, 5)]
         private static void SearchAndRemapMaterials()
         {
-            Object[] objects = Selection.objects;
+            UnityEngine.Object[] objects = Selection.objects;
 
             if (objects.Length <= 0)
             {
@@ -91,7 +92,7 @@ namespace Core.Editor
                 return;
             }
 
-            foreach (Object obj in objects)
+            foreach (UnityEngine.Object obj in objects)
             {
                 string path = AssetDatabase.GetAssetPath(obj);
 
