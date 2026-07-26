@@ -16,10 +16,14 @@ namespace Core.Editor
         {
             Mesh = CreateCubeMesh();
             Shader = Shader.Find(SHADER_ID);
-            Material = new(Shader) 
-            { 
-                hideFlags = HideFlags.HideAndDontSave 
-            };
+
+            if (Shader != null)
+            {
+                Material = new(Shader)
+                {
+                    hideFlags = HideFlags.HideAndDontSave
+                };
+            }
         }
 
         private static Mesh CreateCubeMesh()
