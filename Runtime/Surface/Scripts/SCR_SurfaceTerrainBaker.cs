@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace Core.Surface.Editor
+namespace Core.Surface
 {
     using static CoreUtility;
 
@@ -23,15 +23,16 @@ namespace Core.Surface.Editor
         public SurfaceTag[] Tags;
     }
 
+    [DisallowMultipleComponent]
     [RequireComponent(typeof(Terrain))]
-    internal class SurfaceTerrainBaker : MonoBehaviour
+    public class SurfaceTerrainBaker : MonoBehaviour
     {
         [Header("_")]
         [SerializeField] private Resolution resolution = Resolution._512;
         [SerializeField] private Mapping[] mappings;
 
         [ContextMenu("Build")]
-        internal void Bake()
+        public void Bake()
         {
             Terrain terrain = GetComponent<Terrain>();
             TerrainData data = terrain.terrainData;
