@@ -7,26 +7,26 @@ namespace Core.Surface
 {
     using static CoreUtility;
 
-    public enum Resolution : int
-    {
-        _64 = 64,
-        _128 = 128,
-        _256 = 256,
-        _512 = 512,
-        _1024 = 1024,
-    }
-
-    [Serializable]
-    public struct Mapping
-    {
-        public TerrainLayer Layer;
-        public SurfaceTag[] Tags;
-    }
-
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Terrain))]
     public class SurfaceTerrainBaker : MonoBehaviour
     {
+        private enum Resolution : int
+        {
+            _64 = 64,
+            _128 = 128,
+            _256 = 256,
+            _512 = 512,
+            _1024 = 1024,
+        }
+
+        [Serializable]
+        private struct Mapping
+        {
+            public TerrainLayer Layer;
+            public SurfaceTag[] Tags;
+        }
+
         [Header("_")]
         [SerializeField] private Resolution resolution = Resolution._512;
         [SerializeField] private Mapping[] mappings;
