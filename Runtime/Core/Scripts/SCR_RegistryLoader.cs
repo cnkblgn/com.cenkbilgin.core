@@ -31,9 +31,12 @@ namespace Core
             {
 #if UNITY_EDITOR
                 TryCache();
-#else
-                return;
 #endif
+            }
+
+            if (registries == null)
+            {
+                return;
             }
 
             for (int i = 0; i < registries.Length; i++)

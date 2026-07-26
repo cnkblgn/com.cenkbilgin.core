@@ -101,7 +101,7 @@ namespace Core.Editor
                     }
                     else
                     {
-                        Debug.LogWarning($"EditorWindowMaterialCreator: '{texture.name}' isimlendirme kuralýyla eþleþmedi, atlandý.");
+                        Debug.LogWarning($"Material creation failed '{texture.name}' does not match naming convention!");
                     }
                 }
             }

@@ -21,8 +21,11 @@ namespace Core.Graphics.Editor
             }
 
             Texture2D first = textures[0];
+            TextureImporter firstImporter = (TextureImporter)AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(first));
 
-            Texture2DArray array = new(first.width, first.height, textures.Length, first.format, true, false)
+            bool isLinear = !firstImporter.sRGBTexture;
+
+            Texture2DArray array = new(first.width, first.height, textures.Length, first.format, true, isLinear)
             {
                 filterMode = first.filterMode,
                 wrapMode = first.wrapMode
@@ -30,6 +33,20 @@ namespace Core.Graphics.Editor
 
             for (int i = 0; i < textures.Length; i++)
             {
+                TextureImporter importer = (TextureImporter)AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(textures[i]));
+
+                if (importer.textureType != firstImporter.textureType)
+                {
+                    Debug.LogError("All textures must have same Texture Type.");
+                    return;
+                }
+
+                if (importer.sRGBTexture != firstImporter.sRGBTexture)
+                {
+                    Debug.LogError("All textures must use same Color Space.");
+                    return;
+                }
+
                 for (int mip = 0; mip < textures[i].mipmapCount; mip++)
                 {
                     UnityEngine.Graphics.CopyTexture(textures[i], 0, mip, array, i, mip);
@@ -54,6 +71,10 @@ namespace Core.Graphics.Editor
         private static void CreateAtlas()
         {
             Texture2D[] textures = Selection.objects.OfType<Texture2D>().OrderBy(t => t.name).ToArray();
+            Texture2D first = textures[0];
+            TextureImporter firstImporter = (TextureImporter)AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(first));
+
+            bool isLinear = !firstImporter.sRGBTexture;
 
             if (textures.Length == 0) 
             { 
@@ -61,26 +82,15 @@ namespace Core.Graphics.Editor
                 return;
             }
 
-            static Vector2Int calculateGridLayout(int count)
+            static Vector2Int calculateGrid(int count)
             {
-                if (count <= 1)
-                {
-                    return new(count, 1);
-                }
+                int cols = Mathf.CeilToInt(Mathf.Sqrt(count));
+                int rows = Mathf.CeilToInt(count / (float)cols);
 
-                int bestRows = 1;
-
-                for (int i = Mathf.FloorToInt(Mathf.Sqrt(count)); i >= 1; i--)
-                {
-                    if (count % i == 0) { bestRows = i; break; }
-                }
-
-                int cols = count / bestRows;
-
-                return new(cols, bestRows);
+                return new(cols, rows);
             }
 
-            Vector2Int grid = calculateGridLayout(textures.Length);
+            Vector2Int grid = calculateGrid(textures.Length);
             int cols = grid.x;
             int rows = grid.y;
 
@@ -91,7 +101,12 @@ namespace Core.Graphics.Editor
             int atlasWidth = cellWidth * cols;
             int atlasHeight = cellHeight * rows;
 
-            RenderTexture rt = new(atlasWidth, atlasHeight, 0, RenderTextureFormat.ARGB32);
+            RenderTextureDescriptor desc = new(atlasWidth, atlasHeight, RenderTextureFormat.ARGB32, 0)
+            {
+                sRGB = !isLinear
+            };
+
+            RenderTexture rt = new(desc);
             RenderTexture prev = RenderTexture.active;
             RenderTexture.active = rt;
             GL.Clear(true, true, Color.clear);
@@ -101,16 +116,28 @@ namespace Core.Graphics.Editor
 
             for (int i = 0; i < textures.Length; i++)
             {
+                TextureImporter importer = (TextureImporter)AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(textures[i]));
+
+                if (importer.textureType != firstImporter.textureType)
+                {
+                    Debug.LogError("All textures must have same Texture Type.");
+                    return;
+                }
+
+                if (importer.sRGBTexture != firstImporter.sRGBTexture)
+                {
+                    Debug.LogError("All textures must use same Color Space.");
+                    return;
+                }
+
                 int col = i % cols;
                 int row = i / cols;
 
-                // Unity texture koordinatý alttan baþlar, bu yüzden row'u ters çeviriyoruz
                 int flippedRow = rows - 1 - row;
 
                 Rect pixelRect = new(col * cellWidth, flippedRow * cellHeight, cellWidth, cellHeight);
-                UnityEngine.Graphics.Blit(textures[i], rt, new Vector2(1, 1), new Vector2(0, 0)); // tam blit, aþaðýda düzeltiliyor
+                UnityEngine.Graphics.Blit(textures[i], rt, new Vector2(1, 1), new Vector2(0, 0));
 
-                // Doðru konuma blit etmek için viewport ayarlýyoruz
                 UnityEngine.Graphics.SetRenderTarget(rt);
                 GL.PushMatrix();
                 GL.LoadPixelMatrix(0, atlasWidth, atlasHeight, 0);
@@ -134,8 +161,6 @@ namespace Core.Graphics.Editor
             rt.Release();
             Object.DestroyImmediate(rt);
 
-            // PNG olarak diske kaydet
-            Texture2D first = textures[0];
             string folderPath = Path.GetDirectoryName(AssetDatabase.GetAssetPath(first));
             string pngPath = AssetDatabase.GenerateUniqueAssetPath(Path.Combine(folderPath, "NewTextureAtlas.png"));
 
