@@ -13,11 +13,10 @@ namespace Core.Localization
         [Header("_")]
         [SerializeReference, Reference] private LocalizationInterpolator[] interpolators;
 
-        public override void OnBeforeSceneLoad() => Build();
-        public override void OnAfterScriptLoad() => Build();
+        public override void OnBeforeSceneLoad() => Reload();
+        public override void OnAfterScriptLoad() => Reload();
 
-        [Clickable("Build")]
-        private void Build() => LocalizationDatabase.Build(file, interpolators);
+        public override void Reload() => LocalizationDatabase.Build(file, interpolators);
 
     }
 }

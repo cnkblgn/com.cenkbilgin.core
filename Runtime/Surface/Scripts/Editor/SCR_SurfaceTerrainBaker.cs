@@ -30,7 +30,7 @@ namespace Core.Surface.Editor
         [SerializeField] private Resolution resolution = Resolution._512;
         [SerializeField] private Mapping[] mappings;
 
-        [Clickable("Build")]
+        [ContextMenu("Build")]
         internal void Bake()
         {
             Terrain terrain = GetComponent<Terrain>();

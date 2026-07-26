@@ -19,8 +19,7 @@ namespace Core.Audio
         public void BuildDatabase() => SoundDatabase.Build(entries);
 
 #if UNITY_EDITOR
-        [Clickable("Build")]
-        internal void Build()
+        public override void Reload()
         {
             BuildDatabase();
             Generate();

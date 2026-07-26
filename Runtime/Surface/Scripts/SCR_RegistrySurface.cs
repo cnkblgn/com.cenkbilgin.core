@@ -19,8 +19,8 @@ namespace Core.Surface
         public void BuildDatabase() => SurfaceDatabase.Build(entries);
 
 #if UNITY_EDITOR
-        [Clickable("Build")]
-        internal void Build()
+
+        public override void Reload()
         {
             BuildDatabase();
             Generate();
@@ -52,7 +52,6 @@ namespace Core.Surface
 
             GenerateTextFile(path, generator.ToString());
         }
-
         public void Override(string[] entries)
         {
             if (entries == null)

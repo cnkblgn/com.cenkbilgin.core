@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
@@ -314,6 +315,25 @@ namespace Core.Editor
 
         [MenuItem("Tools/Search and Remove Missing Components", true, 7)]
         private static bool ValidateSearchAndRemoveMissingComponents() => !EditorApplication.isPlaying && Selection.gameObjects.Length > 0;
+
+        public static void DrawButton(string name, UnityEngine.Object target, Action action)
+        {
+            EditorGUILayout.Space();
+
+            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                if (GUILayout.Button(name))
+                {
+                    Undo.RecordObject(target, name);
+
+                    action?.Invoke();
+
+                    UnityEditor.EditorUtility.SetDirty(target);
+                    AssetDatabase.SaveAssets();
+                    AssetDatabase.Refresh();
+                }
+            }
+        }
 
         public static void DrawFieldOfView(Transform origin, float radius, float angle)
         {

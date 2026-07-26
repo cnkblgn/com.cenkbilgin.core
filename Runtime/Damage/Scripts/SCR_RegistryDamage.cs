@@ -19,8 +19,7 @@ namespace Core.Damage
         public void BuildDatabase() => DamageDatabase.Build(entries);
 
 #if UNITY_EDITOR
-        [Clickable("Build")]
-        internal void Build()
+        public override void Reload()
         {
             BuildDatabase();
             Generate();

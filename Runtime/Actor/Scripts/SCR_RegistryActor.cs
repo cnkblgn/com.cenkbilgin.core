@@ -21,8 +21,7 @@ namespace Core.Actors
         public void BuildDatabase() => ActorDatabase.Build(ids, tags);
 
 #if UNITY_EDITOR
-        [Clickable("Build")]
-        internal void Build()
+        public override void Reload()
         {
             BuildDatabase();
             GenerateTags();

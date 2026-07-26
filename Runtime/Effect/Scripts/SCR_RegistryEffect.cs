@@ -19,8 +19,7 @@ namespace Core.Effect
         public void BuildDatabase() => EffectDatabase.Build(entries);
 
 #if UNITY_EDITOR
-        [Clickable("Build")]
-        public void Build()
+        public override void Reload()
         {
             BuildDatabase();
             Generate();

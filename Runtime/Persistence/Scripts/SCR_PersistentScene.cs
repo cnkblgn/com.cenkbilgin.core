@@ -29,7 +29,7 @@ namespace Core.Persistence
         }
 
 #if UNITY_EDITOR
-        [Clickable("Populate")]
+        [ContextMenu("Populate")]
         public void Populate()
         {
             entities = GetComponentsInChildren<PersistentEntity>(true).ToList();
