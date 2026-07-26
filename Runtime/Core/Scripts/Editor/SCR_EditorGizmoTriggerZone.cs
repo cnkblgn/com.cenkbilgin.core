@@ -1,6 +1,5 @@
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace Core.Editor
 {
@@ -9,11 +8,18 @@ namespace Core.Editor
     {
         private static readonly Mesh Mesh;
         private static readonly Material Material;
+        private static readonly Shader Shader;
+
+        private const string SHADER_ID = "Hidden/FX_UnlitTrigger";
 
         static EditorGizmoTriggerZone()
         {
             Mesh = CreateCubeMesh();
-            Material = new(Shader.Find("Hidden/FX_TriggerZone")) { hideFlags = HideFlags.HideAndDontSave };
+            Shader = Shader.Find(SHADER_ID);
+            Material = new(Shader) 
+            { 
+                hideFlags = HideFlags.HideAndDontSave 
+            };
         }
 
         private static Mesh CreateCubeMesh()
@@ -35,6 +41,12 @@ namespace Core.Editor
         {
             if (Event.current.type != EventType.Repaint)
             {
+                return;
+            }
+
+            if (Shader == null)
+            {
+                Debug.LogWarning($"Missing shader with id: {SHADER_ID}");
                 return;
             }
 

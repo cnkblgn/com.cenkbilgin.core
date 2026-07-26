@@ -1,4 +1,4 @@
-Shader "Hidden/FX_TriggerZone"
+Shader "Hidden/FX_UnlitTrigger"
 {
     Properties
     {
