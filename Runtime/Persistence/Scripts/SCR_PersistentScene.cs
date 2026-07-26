@@ -13,6 +13,8 @@ namespace Core.Persistence
 
         private void Awake()
         {
+            PersistentDatabase.SetRoot(transform);
+
             for (int i = 0; i < entities.Count; i++)
             {
                 PersistentEntity entity = entities[i];

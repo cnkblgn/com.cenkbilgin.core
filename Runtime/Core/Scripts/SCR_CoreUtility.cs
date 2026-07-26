@@ -1102,6 +1102,25 @@ namespace Core
 
             return c;
         }
+        public static void SnapToGround(this Transform transform, Vector3 point, Vector3 normal)
+        {
+            Renderer[] renderers = transform.GetComponentsInChildren<Renderer>();
+            float offset = 0;
+
+            if (renderers.Length > 0)
+            {
+                Bounds bounds = renderers[0].bounds;
+
+                for (int i = 1; i < renderers.Length; i++)
+                {
+                    bounds.Encapsulate(renderers[i].bounds);
+                }
+
+                offset = transform.position.y - bounds.min.y;
+            }
+
+            transform.SetPositionAndRotation(point + normal * offset, Quaternion.FromToRotation(transform.up, normal) * transform.rotation);
+        }
         #endregion
     }
 }

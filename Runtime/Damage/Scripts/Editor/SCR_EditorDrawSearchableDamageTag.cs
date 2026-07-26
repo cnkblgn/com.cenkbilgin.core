@@ -8,7 +8,7 @@ namespace Core.Damage.Editor
     [CustomPropertyDrawer(typeof(DamageTag))]
     internal sealed class EditorDrawSearchableDamageTag : EditorDrawSearchable<string>
     {
-        protected override void OnApply(SerializedProperty property, string key)
+        protected override void OnApply(SerializedProperty property, string key, int index)
         {
             SerializedProperty indexProperty = property.FindPropertyRelative("index");
             indexProperty.intValue = DamageDatabase.GetIndex(key);

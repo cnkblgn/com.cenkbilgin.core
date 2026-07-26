@@ -8,7 +8,7 @@ namespace Core.Surface.Editor
     [CustomPropertyDrawer(typeof(SurfaceTag))]
     internal sealed class EditorDrawSearchableSurfaceTag : EditorDrawSearchable<string>
     {
-        protected override void OnApply(SerializedProperty property, string key)
+        protected override void OnApply(SerializedProperty property, string key, int index)
         {
             SerializedProperty indexProperty = property.FindPropertyRelative("index");
             indexProperty.intValue = SurfaceDatabase.GetIndex(key);

@@ -10,17 +10,20 @@ namespace Core.Persistence
 
         private static readonly Dictionary<Guid, PersistentEntity> availableEntities = new();
         private static readonly HashSet<Guid> deletedEntities = new();
+        private static Transform entityRoot;
         private static bool isLoading = false;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void OnBeforeSceneLoad()
         {
-            PersistentEntity.OnMarkedForDestroy += OnEntityRequestDestroy;
+            PersistentEntity.OnMarkedForDestroy += OnEntityMarkedForDestroy;
 
             availableEntities.Clear();
             deletedEntities.Clear();
+
+            entityRoot = null;
         }
-        private static void OnEntityRequestDestroy(PersistentEntity entity)
+        private static void OnEntityMarkedForDestroy(PersistentEntity entity)
         {
             if (isLoading)
             {
@@ -32,7 +35,7 @@ namespace Core.Persistence
                 return;
             }
 
-            if (!entity.IsMarkedForDestroy)
+            if (!entity.IsMarkedForDestroy())
             {
                 return;
             }
@@ -51,8 +54,9 @@ namespace Core.Persistence
         {
             if (!gameObject.TryGetComponent(out entity))
             {
-                Debug.LogError($"Trying to register [{gameObject.name}] but has no [PersistentEntity] component", gameObject);
-
+#if UNITY_EDITOR
+                Debug.LogError($"Trying to register [{gameObject.name}] but has no [PersistentEntity] component! If its intented please ignore it", gameObject);
+#endif
                 return false;
             }
 
@@ -99,7 +103,7 @@ namespace Core.Persistence
 
             foreach (PersistentEntity entity in availableEntities.Values)
             {
-                if (entity == null || entity.IsMarkedForDestroy)
+                if (entity == null || entity.IsMarkedForDestroy())
                 {
                     continue;
                 }
@@ -153,16 +157,18 @@ namespace Core.Persistence
                     continue;
                 }
 
-                if (remainingEntities.Value.PrefabID.TrySpawn(Vector3.zero, Quaternion.identity, null, out GameObject gameObject))
+                GameObject spawned = remainingEntities.Value.PrefabID.Spawn(Vector3.zero, Quaternion.identity, entityRoot);
+
+                if (spawned != null)
                 {
-                    if (gameObject.TryGetComponent(out PersistentEntity entity))
+                    if (spawned.TryGetComponent(out PersistentEntity entity))
                     {
                         entity.Import(remainingEntities.Value);
                         TryRegister(entity);
                     }
                     else
                     {
-                        Debug.LogWarning($"[PersistentInstanceEntity] component not found in [{gameObject.name}]");
+                        Debug.LogWarning($"[PersistentInstanceEntity] component not found in [{spawned.name}]");
                     }
                 }
                 else
@@ -173,5 +179,8 @@ namespace Core.Persistence
 
             isLoading = false;
         }
+
+        internal static Transform GetRoot() => entityRoot;
+        public static void SetRoot(Transform transform) => entityRoot = transform;
     }
 }

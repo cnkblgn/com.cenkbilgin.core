@@ -4,7 +4,7 @@ Shader "Hidden/FX_TriggerZone"
     {
         _ColorA ("Color A", Color) = (1,1,0,0.18)
         _ColorB ("Color B", Color) = (0,0,0,0.18)
-        _StripeScale("Stripe Scale", Float) = 4
+        _StripeScale("Stripe Scale", Float) = 1
     }
 
     SubShader
@@ -56,7 +56,7 @@ Shader "Hidden/FX_TriggerZone"
             {
                 float stripe = frac((IN.positionWS.x + IN.positionWS.y + IN.positionWS.z) * _StripeScale);
 
-                return stripe < 0.5 ? _ColorA : _ColorB;
+                return stripe < 0.25 ? _ColorA : _ColorB;
             }
             ENDHLSL
         }

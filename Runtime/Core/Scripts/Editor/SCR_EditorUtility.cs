@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -9,6 +10,11 @@ namespace Core.Editor
 
     public static class EditorUtility
     {
+        private const int SIM_STEP_COUNT = 300;
+        private const float SIM_STEP_SECOND = 0.02f;
+
+        private static GameObject copiedObject;
+
         [MenuItem("Tools/Toggle Gizmos %g", false, 0)] // Ctrl+G or Cmd+G
         private static void ToggleGizmos()
         {
@@ -20,8 +26,8 @@ namespace Core.Editor
             SceneView.lastActiveSceneView.drawGizmos = !SceneView.lastActiveSceneView.drawGizmos;
             SceneView.RepaintAll();
         }
-        private static GameObject copiedObject;
-        [MenuItem("Tools/Copy All Components", false, 1)]
+        
+        [MenuItem("Tools/Copy All Components %#c", false, 1)]
         private static void CopyComponents()
         {
             if (Selection.activeGameObject == null)
@@ -33,7 +39,11 @@ namespace Core.Editor
             copiedObject = Selection.activeGameObject;
             Debug.Log($"Copied components from: {copiedObject.name}");
         }
-        [MenuItem("Tools/Paste All Components", false, 2)]
+
+        [MenuItem("Tools/Copy All Components %#c", true, 1)]
+        private static bool ValidateCopy() => Selection.activeGameObject != null;
+
+        [MenuItem("Tools/Paste All Components %#v", false, 2)]
         private static void PasteComponents()
         {
             if (copiedObject == null)
@@ -77,18 +87,161 @@ namespace Core.Editor
             copiedObject = null;
             Debug.Log($"Pasted {copiedCount} components from {source.name} to {target.name}");
         }
-        [MenuItem("Tools/Copy All Components", true, 3)]
-        private static bool ValidateCopy() => Selection.activeGameObject != null;
-        [MenuItem("Tools/Paste All Components", true, 4)]
+            
+        [MenuItem("Tools/Paste All Components %#v", true, 2)]
         private static bool ValidatePaste() => copiedObject != null && Selection.activeGameObject != null;
-        [MenuItem("Tools/Search and Remap Materials", false, 5)]
+
+        [MenuItem("Tools/Reset Transform %#r", false, 3)]
+        private static void ResetTransform()
+        {
+            foreach (GameObject go in Selection.gameObjects)
+            {
+                Undo.RecordObject(go.transform, "Reset Transform");
+
+                go.transform.localPosition = Vector3.zero;
+                go.transform.localRotation = Quaternion.identity;
+                go.transform.localScale = Vector3.one;
+
+                UnityEditor.EditorUtility.SetDirty(go.transform);
+            }
+        }
+
+        [MenuItem("Tools/Reset Transform %#r", true, 3)]
+        private static bool ValidateResetTransform() => !EditorApplication.isPlaying && Selection.gameObjects.Length > 0;
+
+        [MenuItem("Tools/Simulate Transforms %#e", false, 4)]
+        private static void SimulateTransform()
+        {
+            GameObject[] selected = Selection.gameObjects;
+            if (selected.Length == 0)
+            {
+                Debug.LogWarning("Simulate transform failed! No selected game object.");
+                return;
+            }
+
+            Undo.SetCurrentGroupName("Simulate Transforms");
+            int undoGroup = Undo.GetCurrentGroup();
+
+            var tempRigidbodies = new List<Rigidbody>();
+            var tempColliders = new List<Collider>();
+
+            foreach (GameObject go in selected)
+            {
+                Undo.RecordObject(go.transform, "Simulate Transforms");
+
+                if (!go.TryGetComponent<Rigidbody>(out var rb))
+                {
+                    rb = Undo.AddComponent<Rigidbody>(go);
+                    tempRigidbodies.Add(rb);
+                }
+
+                if (go.GetComponent<Collider>() == null)
+                {
+                    Collider col = Undo.AddComponent<BoxCollider>(go);
+                    tempColliders.Add(col);
+                }
+
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
+            }
+
+            SimulationMode previousMode = Physics.simulationMode;
+            Physics.simulationMode = SimulationMode.Script;
+
+            for (int i = 0; i < SIM_STEP_COUNT; i++)
+            {
+                Physics.Simulate(SIM_STEP_SECOND);
+            }
+
+            Physics.simulationMode = previousMode;
+
+            foreach (Rigidbody rb in tempRigidbodies)
+            {
+                if (rb != null) Undo.DestroyObjectImmediate(rb);
+            }
+            foreach (Collider col in tempColliders)
+            {
+                if (col != null) Undo.DestroyObjectImmediate(col);
+            }
+
+            Undo.CollapseUndoOperations(undoGroup);
+
+            Debug.Log($"Simulate transform successfull! Total simulated: {selected.Length}");
+        }
+
+        [MenuItem("Tools/Simulate Transforms %#e", true, 4)]
+        private static bool ValidateSimulateTransform() => !EditorApplication.isPlaying && Selection.gameObjects.Length > 0;
+
+        [MenuItem("Tools/Snap Transform %#t", false, 5)]
+        private static void SnapTransform()
+        {
+            GameObject[] selected = Selection.gameObjects;
+            if (selected.Length == 0)
+            {
+                Debug.LogWarning("Snap transform failed! No selected game object.");
+                return;
+            }
+
+            Undo.SetCurrentGroupName("Snap Transforms");
+            int undoGroup = Undo.GetCurrentGroup();
+            int snappedCount = 0;
+
+            foreach (GameObject go in selected)
+            {
+                Vector3 origin = go.transform.position + Vector3.up * 1024;
+                RaycastHit[] hits = Physics.RaycastAll(origin, Vector3.down, 4096);
+
+                RaycastHit? closestHit = null;
+                float closestDistance = float.MaxValue;
+
+                foreach (RaycastHit hit in hits)
+                {
+                    if (hit.collider.transform.IsChildOf(go.transform))
+                    {
+                        continue;
+                    }
+
+                    if (hit.distance < closestDistance)
+                    {
+                        closestDistance = hit.distance;
+                        closestHit = hit;
+                    }
+                }
+
+                if (!closestHit.HasValue)
+                {
+                    Debug.LogWarning($"Snap transform failed! '{go.name}' has no viable collider to snap!", go);
+                    continue;
+                }
+
+                RaycastHit groundHit = closestHit.Value;
+
+                Undo.RecordObject(go.transform, "Snap Transform");
+
+                go.transform.SnapToGround(groundHit.point, groundHit.normal);
+
+                snappedCount++;
+            }
+
+            Undo.CollapseUndoOperations(undoGroup);
+
+            Debug.Log($"Snap transform successfull! Total snapped: {snappedCount}/{selected.Length}");
+        }
+
+        [MenuItem("Tools/Snap Transform %#t", true, 5)]
+        private static bool ValidateSnapTransform() => !EditorApplication.isPlaying && Selection.gameObjects.Length > 0;
+
+        [MenuItem("Tools/Search and Remap Materials", false, 6)]
         private static void SearchAndRemapMaterials()
         {
             UnityEngine.Object[] objects = Selection.objects;
 
+            const string formatFbx = ".fbx";
+            const string formatObj = ".obj";
+
             if (objects.Length <= 0)
             {
-                Debug.LogWarning("Please select .fbx asset");
+                Debug.LogWarning($"Please select [{formatFbx}] asset or [{formatObj}] asset");
                 return;
             }
 
@@ -96,7 +249,7 @@ namespace Core.Editor
             {
                 string path = AssetDatabase.GetAssetPath(obj);
 
-                if (!string.Equals(Path.GetExtension(path), ".fbx", StringComparison.OrdinalIgnoreCase))
+                if (!string.Equals(Path.GetExtension(path), formatFbx, StringComparison.OrdinalIgnoreCase) && !string.Equals(Path.GetExtension(path), formatObj, StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
@@ -116,6 +269,51 @@ namespace Core.Editor
                 Debug.Log($"Material found and remapped to: {path}");
             }
         }
+
+        [MenuItem("Tools/Search and Remap Materials", true, 6)]
+        private static bool ValidateSearchAndRemapMaterials() => !EditorApplication.isPlaying && Selection.gameObjects.Length > 0;
+
+        [MenuItem("Tools/Search and Remove Missing Components", false, 7)]
+        private static void SearchAndRemoveMissingComponents()
+        {
+            int totalRemoved = 0;
+
+            foreach (UnityEngine.Object obj in Selection.objects)
+            {
+                string path = AssetDatabase.GetAssetPath(obj);
+
+                // Prefab Asset
+                if (!string.IsNullOrEmpty(path))
+                {
+                    GameObject prefab = PrefabUtility.LoadPrefabContents(path);
+
+                    foreach (Transform t in prefab.GetComponentsInChildren<Transform>(true))
+                    {
+                        totalRemoved += GameObjectUtility.RemoveMonoBehavioursWithMissingScript(t.gameObject);
+                    }
+
+                    PrefabUtility.SaveAsPrefabAsset(prefab, path);
+                    PrefabUtility.UnloadPrefabContents(prefab);
+                }
+                // Scene Object
+                else if (obj is GameObject go)
+                {
+                    foreach (Transform t in go.GetComponentsInChildren<Transform>(true))
+                    {
+                        Undo.RegisterCompleteObjectUndo(t.gameObject, "Remove Missing Components");
+                        totalRemoved += GameObjectUtility.RemoveMonoBehavioursWithMissingScript(t.gameObject);
+                        UnityEditor.EditorUtility.SetDirty(t.gameObject);
+                    }
+                }
+            }
+
+            AssetDatabase.SaveAssets();
+
+            Debug.Log($"Removed {totalRemoved} missing component(s).");
+        }
+
+        [MenuItem("Tools/Search and Remove Missing Components", true, 7)]
+        private static bool ValidateSearchAndRemoveMissingComponents() => !EditorApplication.isPlaying && Selection.gameObjects.Length > 0;
 
         public static void DrawFieldOfView(Transform origin, float radius, float angle)
         {

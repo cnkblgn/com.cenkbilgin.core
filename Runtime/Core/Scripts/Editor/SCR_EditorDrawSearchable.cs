@@ -121,7 +121,7 @@ namespace Core.Editor
             EditorGUI.EndProperty();
         }
         /// <summary> This is called before applying value </summary>
-        protected virtual void OnApply(SerializedProperty property, T value) { }
+        protected virtual void OnApply(SerializedProperty property, T value, int index) { }
 
         /// <summary> Draws the extra content reserved by GetExtraHeight. </summary>
         protected virtual void DrawExtra(Rect rect, SerializedProperty property, SerializedProperty keyProperty) { }
@@ -164,19 +164,19 @@ namespace Core.Editor
             state.Scroll = GUI.BeginScrollView(rect, state.Scroll, viewRect);
             {
                 float y = 0f;
-
-                DrawRow(ref y, viewRect.width, SEARCH_NONE_TEXT, property, keyProperty, state, current, GetEmpty());
+   
+                DrawRow(ref y, viewRect.width, SEARCH_NONE_TEXT, property, keyProperty, state, current, GetEmpty(), 0);
 
                 for (int i = 0; i < state.Filtered.Count; i++)
                 {
                     SearchEntry<T> entry = state.Filtered[i];
 
-                    DrawRow(ref y, viewRect.width, entry.Label, property, keyProperty, state, current, entry.Value);
+                    DrawRow(ref y, viewRect.width, entry.Label, property, keyProperty, state, current, entry.Value, i);
                 }
             }
             GUI.EndScrollView();
         }
-        private void DrawRow(ref float height, float width, string label, SerializedProperty property, SerializedProperty keyProperty, SearchState<T> state, T current, T value)
+        private void DrawRow(ref float height, float width, string label, SerializedProperty property, SerializedProperty keyProperty, SearchState<T> state, T current, T value, int index)
         {
             Rect rowRect = new
             (
@@ -199,7 +199,7 @@ namespace Core.Editor
             {
                 SetValue(keyProperty, value);
 
-                OnApply(property, value);
+                OnApply(property, value, index);
                 property.serializedObject.ApplyModifiedProperties();
 
                 state.Open = false;

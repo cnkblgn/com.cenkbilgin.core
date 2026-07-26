@@ -22,7 +22,7 @@ namespace Core.Prefab
         public static bool operator ==(PrefabID left, PrefabID right) => left.Equals(right);
         public static bool operator !=(PrefabID left, PrefabID right) => !left.Equals(right);
 
-        public readonly bool TryGet(out GameObject prefab) => PrefabDatabase.TryGet(this, out prefab);
-        public readonly bool TrySpawn(Vector3 position, Quaternion rotation, Transform parent, out GameObject spawned) => PrefabDatabase.TrySpawn(this, position, rotation, parent, out spawned);
+        public readonly GameObject Get() => PrefabDatabase.Get(this);
+        public readonly GameObject Spawn(Vector3 position, Quaternion rotation, Transform parent) => PrefabDatabase.Spawn(this, position, rotation, parent);
     }
 }

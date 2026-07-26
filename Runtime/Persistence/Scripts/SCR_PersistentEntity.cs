@@ -12,10 +12,9 @@ namespace Core.Persistence
 
         public abstract PrefabID PrefabID { get; }
         public Guid InstanceID => instanceID;
-        public bool IsMarkedForDestroy => isMarkedForDestroy;
 
         [Header("_")]
-        [SerializeField] private string _instanceID = "";
+        [SerializeField, Info("Only for debug purposes! don't touch")] private string _instanceID = "";
 
         private Guid instanceID = default;
         private bool isQuitting = false;
@@ -28,7 +27,7 @@ namespace Core.Persistence
         {
             if (instanceID == Guid.Empty)
             {
-                Debug.LogError($"InstanceID missing for {gameObject.name}", gameObject);
+                Debug.LogError($"InstanceID missing for [{gameObject.name}] please generate instance ID via PersistentScene!", gameObject);
             }
         }
         private void OnApplicationQuit() => isQuitting = true;
@@ -39,7 +38,7 @@ namespace Core.Persistence
                 return;
             }
 
-            if (!IsMarkedForDestroy && Application.isPlaying && !PersistentDatabase.IsLoading && !ManagerGame.Instance.IsLoading)
+            if (!isMarkedForDestroy && Application.isPlaying && !PersistentDatabase.IsLoading && !ManagerGame.Instance.IsLoading)
             {
                 Debug.LogError($"[{name}] destroyed without persistence or destroyed illegally");
             }
@@ -73,6 +72,7 @@ namespace Core.Persistence
             _instanceID = instanceID.ToString();
         }
 
+        public bool IsMarkedForDestroy() => isMarkedForDestroy;
         public void MarkForDestroy()
         {
             if (isMarkedForDestroy)
@@ -93,6 +93,7 @@ namespace Core.Persistence
             return new(PrefabID, instanceID, isMarkedForDestroy, data);
         }
         protected abstract void OnExported(Dictionary<string, DataNode> data);
+
         public void Import(PersistentEntityData data)
         {
             instanceID = data.InstanceID;

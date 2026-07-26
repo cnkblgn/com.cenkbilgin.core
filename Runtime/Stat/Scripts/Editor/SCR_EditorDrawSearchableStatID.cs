@@ -8,7 +8,7 @@ namespace Core.Stat.Editor
     [CustomPropertyDrawer(typeof(StatID))]
     internal sealed class EditorDrawSearchableStatID : EditorDrawSearchable<string>
     {
-        protected override void OnApply(SerializedProperty property, string key)
+        protected override void OnApply(SerializedProperty property, string key, int index)
         {
             SerializedProperty indexProperty = property.FindPropertyRelative("index");
             indexProperty.intValue = StatDatabase.GetIndex(key);

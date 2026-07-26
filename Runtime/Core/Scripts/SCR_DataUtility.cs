@@ -25,5 +25,47 @@ namespace Core
         public static Vector2 GetVector2(this Dictionary<string, DataNode> data, string key, Vector2 def = default) => data.TryGetValue(key, out var v) && v.Type == DataType.VECTOR2 ? v.Value.Vector2 : def;
         public static Guid GetGuid(this Dictionary<string, DataNode> data, string key, Guid def = default) => data.TryGetValue(key, out var v) && v.Type == DataType.GUID ? v.Value.Guid : def;
         public static Dictionary<string, DataNode> GetData(this Dictionary<string, DataNode> data, string key) => data.TryGetValue(key, out var v) && v.Type == DataType.DATA && v.Value.Data != null ? new(v.Value.Data) : new();
+
+
+        #region IMPORT / EXPORT
+
+        private const string POS = "t_p";
+        private const string ROT = "t_r";
+        private const string LINEER_VEL = "r_lv";
+        private const string ANGULAR_VEL = "r_av";
+
+        public static void ExportTo(this Transform obj, Dictionary<string, DataNode> data)
+        {
+            if (data == null) throw new ArgumentNullException(nameof(data));
+
+            data.SetVector3(POS, obj.position);
+            data.SetVector3(ROT, obj.rotation.eulerAngles);
+        }
+        public static void ImportFrom(this Transform obj, Dictionary<string, DataNode> data)
+        {
+            if (data == null) throw new ArgumentNullException(nameof(data));
+
+            obj.SetPositionAndRotation(data.GetVector3(POS), Quaternion.Euler(data.GetVector3(ROT)));
+        }
+
+        public static void ExportTo(this Rigidbody obj, Dictionary<string, DataNode> data)
+        {
+            if (data == null) throw new ArgumentNullException(nameof(data));
+
+            data.SetVector3(POS, obj.position);
+            data.SetVector3(ROT, obj.rotation.eulerAngles);
+            data.SetVector3(LINEER_VEL, obj.linearVelocity);
+            data.SetVector3(ANGULAR_VEL, obj.angularVelocity);
+        }
+        public static void ImportFrom(this Rigidbody obj, Dictionary<string, DataNode> data)
+        {
+            if (data == null) throw new ArgumentNullException(nameof(data));
+
+            obj.position = data.GetVector3(POS);
+            obj.rotation = Quaternion.Euler(data.GetVector3(ROT));
+            obj.linearVelocity = data.GetVector3(LINEER_VEL);
+            obj.angularVelocity = data.GetVector3(ANGULAR_VEL);
+        }
+        #endregion
     }
 }

@@ -11,33 +11,22 @@ namespace Core.Prefab
 
         public static SearchCollection<string> GetIDs() => ids;
 
-        internal static bool TryGet(PrefabID id, out GameObject prefab)
+        internal static GameObject Get(PrefabID id)
         {
             if (!id.IsValid)
             {
                 throw new ArgumentNullException($"[{nameof(id)}] prefabID is not valid!");
             }
 
-            if (database.TryGetValue(id, out prefab))
+            if (database.TryGetValue(id, out GameObject prefab))
             {
-                return true;
+                return prefab;
             }
 
-            Debug.LogError($"prefab not found! [{id.Key}]");
-            return false;
+            Debug.LogError($"Prefab not found in database! [{id.Key}]");
+            return null;
         }
-        internal static bool TrySpawn(PrefabID id, Vector3 position, Quaternion rotation, Transform parent, out GameObject gameObject)
-        {
-            gameObject = null;
-
-            if (TryGet(id, out GameObject prefab))
-            {
-                gameObject = GameObject.Instantiate(prefab, position, rotation, parent);
-                return true;
-            }
-
-            return false;
-        }
+        internal static GameObject Spawn(PrefabID id, Vector3 position, Quaternion rotation, Transform parent) => GameObject.Instantiate(Get(id), position, rotation, parent);
 
         internal static void Build(GameObject[] gameObjects)
         {
