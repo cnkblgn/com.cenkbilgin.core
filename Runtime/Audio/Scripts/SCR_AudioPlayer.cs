@@ -34,6 +34,8 @@ namespace Core.Audio
         [SerializeField, Min(0)] private float maxDistance = 500;
         [SerializeField, Min(0)] private float fadeIn = 0;
         [SerializeField, Min(0)] private float fadeOut = 0;
+        [SerializeField, Range(0, 360)] private float spread = 0;
+        [SerializeField, Range(-1, 1)] private float pan = 0;
         [SerializeField, Range(1, 22000f)] private float lowpass = 22000f;
         [SerializeField, Range(0, 5)] private float rezonance = 1;
 
@@ -64,8 +66,13 @@ namespace Core.Audio
                 return;
             }
 
-            emitter.GetComponent<AudioSource>().minDistance = minDistance;
-            emitter.GetComponent<AudioSource>().maxDistance = maxDistance;
+            if (emitter.TryGetComponent(out AudioSource source))
+            {
+                source.spread = spread;
+                source.panStereo = pan;
+                source.minDistance = minDistance;
+                source.maxDistance = maxDistance;
+            }
         }
 #endif
         private void Start()
