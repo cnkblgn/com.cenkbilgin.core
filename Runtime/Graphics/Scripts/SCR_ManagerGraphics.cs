@@ -168,7 +168,20 @@ namespace Core.Graphics
             }
         }
 
-        public bool GetVolumeComponent<T>(out T component) where T : VolumeComponent => volumeController.profile.TryGet(typeof(T), out component);
+        public IReadOnlyList<ScriptableRendererFeature> GetRendererFeatures() => urpRendererSettings.rendererFeatures;
+        public bool TryGetRendererFeature(Predicate<ScriptableRendererFeature> predicate, out ScriptableRendererFeature feature)
+        {
+            feature = urpRendererSettings.rendererFeatures.Find(predicate);
+
+            if (feature != null)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool TryGetVolumeComponent<T>(out T component) where T : VolumeComponent => volumeController.profile.TryGet(typeof(T), out component);
 
         public UpscalingFilterSelection GetUpscaleFilter() => urpPipelineSettings.upscalingFilter;
         public void SetUpscaleFilter(UpscalingFilterSelection upscaleFilter) => urpPipelineSettings.upscalingFilter = upscaleFilter;
