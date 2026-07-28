@@ -54,9 +54,9 @@ namespace Core.Item
 
         private void Initialize() => SetState(InventoryState.INITIALIZED);
 
-        private void SetState(InventoryState state, InventoryResult result = InventoryResult.SUCCESS, ItemData item = null, InventoryEntity inventory = null)
+        private void SetState(InventoryState state, InventoryResult result = InventoryResult.SUCCESS, ItemData item = null)
         {
-            InventoryContext ctx = new(state, result, this, inventory, item);
+            InventoryContext ctx = new(state, result, this, item);
 
             OnStateChanged?.Invoke(ctx);
             thisHandler?.HandleStateChanged(in ctx);
@@ -70,18 +70,6 @@ namespace Core.Item
         }
         public void ExportTo(out InventoryData inventory) => inventory = new(thisInventory);
 
-        /// <summary> Opens and selects target inventory to interact. </summary>
-        public void Open(InventoryEntity target = null)
-        {
-            targetInventory = target;
-            SetState(InventoryState.OPENED, InventoryResult.SUCCESS, null, targetInventory);
-        }
-        /// <summary> Closes and clears target inventory. </summary>
-        public void Close()
-        {
-            SetState(InventoryState.CLOSED, InventoryResult.SUCCESS, null, targetInventory);
-            targetInventory = null;
-        }
         /// <summary> Clears inventory. Removes all items and calls Initialize. </summary>
         public void Clear()
         {
