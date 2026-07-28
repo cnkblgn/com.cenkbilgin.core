@@ -8,6 +8,8 @@ namespace Core.Effect
     [Serializable]
     public struct EffectEntry
     {
+        [HideInInspector] public string Name;
+
         [Info("Please generate id if its not visible")] public EffectID ID;
         public LocalizedID NameID;
         public IconID IconID;
@@ -23,6 +25,8 @@ namespace Core.Effect
             Tag = tag;
             Interval = interval;
             Action = action;
+
+            Name = ID.Key;
         }
     }
 }

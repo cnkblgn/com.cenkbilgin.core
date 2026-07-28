@@ -25,6 +25,11 @@ namespace Core.Quest
         public void BuildDatabase() => QuestDatabase.Build(ids, entries);
 
 #if UNITY_EDITOR
+        private void OnValidate()
+        {
+            for (int i = 0; i < entries.Length; i++) entries[i].Name = entries[i].ID.Key;
+        }
+
         public override void Reload()
         {
             BuildDatabase();

@@ -9,6 +9,8 @@ namespace Core.Item
     [Serializable]
     public struct ItemEntry
     {
+        [HideInInspector] public string Name;
+
         [Info("Please generate id if its not visible")] public ItemID ID;
         public ItemTag[] Tags;
         public PrefabID EntityID;
@@ -36,6 +38,8 @@ namespace Core.Item
             Stack = stack;
             Weight = weight;
             Component = component;
+
+            Name = ID.Key;
         }
     }
 }

@@ -7,6 +7,8 @@ namespace Core.Quest
     [Serializable]
     public struct QuestEntry
     {
+        [HideInInspector] public string Name;
+
         public QuestID ID;
         public QuestID NextID;
         public LocalizedID NameID;
@@ -24,6 +26,8 @@ namespace Core.Quest
             Requirements = requirements;
             Conditions = conditions;
             Actions = actions;
+
+            Name = ID.Key;
         }
     }
 }
