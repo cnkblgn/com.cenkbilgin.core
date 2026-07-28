@@ -10,7 +10,7 @@ namespace Core.Item
     using static InventoryData;
 
     [DisallowMultipleComponent]
-    public class InventoryEntity : MonoBehaviour
+    public sealed class InventoryEntity : MonoBehaviour
     {
         public event Action<InventoryContext> OnStateChanged = null;
 
@@ -33,6 +33,7 @@ namespace Core.Item
         [SerializeField] private float dropForce = 5;
 
         private InventoryData thisInventory = new(MIN_WIDTH, MIN_HEIGHT, MIN_WEIGHT);
+        private InventoryEntity targetInventory = null;
         private IInventoryHandler thisHandler = null;
         private ulong whitelistTag;
 
@@ -53,9 +54,9 @@ namespace Core.Item
 
         private void Initialize() => SetState(InventoryState.INITIALIZED);
 
-        private void SetState(InventoryState state, InventoryResult result = InventoryResult.SUCCESS, ItemData item = null)
+        private void SetState(InventoryState state, InventoryResult result = InventoryResult.SUCCESS, ItemData item = null, InventoryEntity inventory = null)
         {
-            InventoryContext ctx = new(state, result, this, item);
+            InventoryContext ctx = new(state, result, this, inventory, item);
 
             OnStateChanged?.Invoke(ctx);
             thisHandler?.HandleStateChanged(in ctx);
@@ -69,6 +70,19 @@ namespace Core.Item
         }
         public void ExportTo(out InventoryData inventory) => inventory = new(thisInventory);
 
+        /// <summary> Opens and selects target inventory to interact. </summary>
+        public void Open(InventoryEntity target = null)
+        {
+            targetInventory = target;
+            SetState(InventoryState.OPENED, InventoryResult.SUCCESS, null, targetInventory);
+        }
+        /// <summary> Closes and clears target inventory. </summary>
+        public void Close()
+        {
+            SetState(InventoryState.CLOSED, InventoryResult.SUCCESS, null, targetInventory);
+            targetInventory = null;
+        }
+        /// <summary> Clears inventory. Removes all items and calls Initialize. </summary>
         public void Clear()
         {
             thisInventory.Clear();

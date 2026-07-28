@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Core.Item
 {
-    public class InventoryData
+    public sealed class InventoryData
     {
         public const int MIN_WIDTH = 1;
         public const int MAX_WIDTH = 4;

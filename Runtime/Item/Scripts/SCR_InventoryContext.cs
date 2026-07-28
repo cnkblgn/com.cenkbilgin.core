@@ -4,14 +4,16 @@ namespace Core.Item
     {
         public readonly InventoryState State;
         public readonly InventoryResult Result;
-        public readonly InventoryEntity Inventory;
+        public readonly InventoryEntity BaseInventory;
+        public readonly InventoryEntity TargetInventory;
         public readonly ItemData Item;
 
-        public InventoryContext(InventoryState state, InventoryResult result, InventoryEntity inventory, ItemData item)
+        public InventoryContext(InventoryState state, InventoryResult result, InventoryEntity baseInventory, InventoryEntity target, ItemData item)
         {
             State = state;
             Result = result;
-            Inventory = inventory;
+            BaseInventory = baseInventory;
+            TargetInventory = target;
             Item = item;
         }
     }

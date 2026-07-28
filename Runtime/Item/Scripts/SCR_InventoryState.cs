@@ -8,5 +8,7 @@ namespace Core.Item
         ITEM_REMOVED,
         ITEM_DROPPED,
         ITEM_TRANSFERED,
+        OPENED,
+        CLOSED,
     }
 }

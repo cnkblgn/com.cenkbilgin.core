@@ -6,8 +6,6 @@ using UnityEngine.Rendering.Universal;
 
 namespace Core.Graphics
 {
-    using static CoreUtility;
-
     [DisallowMultipleComponent]
     public sealed class ManagerGraphics : Manager<ManagerGraphics>
     {
