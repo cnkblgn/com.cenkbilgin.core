@@ -1,5 +1,6 @@
-using UnityEngine;
 using Core.Editor;
+using UnityEditor;
+using UnityEngine;
 
 namespace Core.Damage
 {
@@ -43,7 +44,7 @@ namespace Core.Damage
                 foreach (SearchEntry<string> entry in DamageDatabase.GetTags().Entries)
                 {
                     string id = entry.Value;
-                    int index = DamageDatabase.GetIndex(id);
+                    int index = DamageDatabase.GetTagIndex(id);
 
                     generator.Field($"public static readonly DamageTag {id.ToIdentifier()} = new({id.ToLiteral()},{index})");
                 }
@@ -53,7 +54,7 @@ namespace Core.Damage
         }
 
         /// <summary> Overrides entries </summary>
-        public void Override(string[] entries)
+        public void OverrideEntries(string[] entries)
         {
             if (entries == null)
             {
@@ -67,6 +68,9 @@ namespace Core.Damage
             {
                 this.entries[i] = entries[i];
             }
+
+            UnityEditor.EditorUtility.SetDirty(this);
+            AssetDatabase.SaveAssets();
         }
 #endif
     }

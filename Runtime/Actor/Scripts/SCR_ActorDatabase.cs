@@ -6,14 +6,14 @@ namespace Core.Actors
 {
     public static class ActorDatabase
     {
-        private static SearchCollection<string> ids = new(Array.Empty<SearchEntry<string>>());
-        private static SearchCollection<string> tags = new(Array.Empty<SearchEntry<string>>());
-        private static readonly Dictionary<string, int> idDatabase = new();
-        private static readonly Dictionary<string, int> tagDatabase = new();
-        private static readonly Dictionary<ActorID, List<ActorEntry>> actorDatabase = new();
+        private static SearchCollection<string> idSearch = new(Array.Empty<SearchEntry<string>>());
+        private static SearchCollection<string> tagSearch = new(Array.Empty<SearchEntry<string>>());
+        private static readonly Dictionary<string, int> idLookup = new();
+        private static readonly Dictionary<string, int> tagLookup = new();
+        private static readonly Dictionary<ActorID, List<ActorEntry>> database = new();
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void OnRuntimeInitialize() => actorDatabase.Clear();
+        private static void OnRuntimeInitialize() => database.Clear();
 
         internal static void Build(string[] idCollection, string[] tagCollection)
         {
@@ -22,18 +22,18 @@ namespace Core.Actors
                 return;
             }
 
-            tagDatabase.Clear();
-            idDatabase.Clear();
-            tags = new(new SearchEntry<string>[tagCollection.Length]);
-            ids = new(new SearchEntry<string>[idCollection.Length]);
+            tagLookup.Clear();
+            idLookup.Clear();
+            tagSearch = new(new SearchEntry<string>[tagCollection.Length]);
+            idSearch = new(new SearchEntry<string>[idCollection.Length]);
 
             for (int i = 0; i < idCollection.Length; i++)
             {
                 string key = idCollection[i];
                 int index = i + 1;
 
-                idDatabase[key] = index;
-                ids.Entries[i] = new SearchEntry<string>(key, key);
+                idLookup[key] = index;
+                idSearch.Entries[i] = new SearchEntry<string>(key, key);
             }
 
             for (int i = 0; i < tagCollection.Length; i++)
@@ -41,18 +41,18 @@ namespace Core.Actors
                 string key = tagCollection[i];
                 int index = i + 1;
 
-                tagDatabase[key] = index;
-                tags.Entries[i] = new SearchEntry<string>(key, key);
+                tagLookup[key] = index;
+                tagSearch.Entries[i] = new SearchEntry<string>(key, key);
             }
 
             Debug.Log($"Actor database build successfull!");
         }
 
-        public static SearchCollection<string> GetIDs() => ids;
-        public static SearchCollection<string> GetTags() => tags;
+        public static SearchCollection<string> GetIDs() => idSearch;
+        public static SearchCollection<string> GetTags() => tagSearch;
         public static int GetIDIndex(string id)
         {
-            if (idDatabase.TryGetValue(id, out int a))
+            if (idLookup.TryGetValue(id, out int a))
             {
                 return a;
             }
@@ -61,7 +61,7 @@ namespace Core.Actors
         }
         public static int GetTagIndex(string id)
         {
-            if (tagDatabase.TryGetValue(id, out int a))
+            if (tagLookup.TryGetValue(id, out int a))
             {
                 return a;
             }
@@ -78,7 +78,7 @@ namespace Core.Actors
                 return false;
             }
 
-            if (!actorDatabase.TryGetValue(id, out List<ActorEntry> entries))
+            if (!database.TryGetValue(id, out List<ActorEntry> entries))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"id not found in database: [{id.Key}]");
@@ -105,7 +105,7 @@ namespace Core.Actors
                 return false;
             }
 
-            foreach (List<ActorEntry> entries in actorDatabase.Values)
+            foreach (List<ActorEntry> entries in database.Values)
             {
                 for (int i = 0; i < entries.Count; i++)
                 {
@@ -130,7 +130,7 @@ namespace Core.Actors
                 return false;
             }
 
-            if (!actorDatabase.TryGetValue(id, out List<ActorEntry> entries))
+            if (!database.TryGetValue(id, out List<ActorEntry> entries))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"id not found in database: [{id.Key}]");
@@ -154,7 +154,7 @@ namespace Core.Actors
 
             bool found = false;
 
-            foreach (List<ActorEntry> entries in actorDatabase.Values)
+            foreach (List<ActorEntry> entries in database.Values)
             {
                 for (int i = 0; i < entries.Count; i++)
                 {
@@ -184,7 +184,7 @@ namespace Core.Actors
             }
 
 #if UNITY_EDITOR
-            if (actorDatabase.TryGetValue(id, out List<ActorEntry> entries))
+            if (database.TryGetValue(id, out List<ActorEntry> entries))
             {
                 foreach (ActorEntry entry in entries)
                 {
@@ -203,10 +203,10 @@ namespace Core.Actors
             }
 #endif
 
-            if (!actorDatabase.TryGetValue(id, out entries))
+            if (!database.TryGetValue(id, out entries))
             {
                 entries = new();
-                actorDatabase.Add(id, entries);
+                database.Add(id, entries);
             }
 
             entries.Add(new(actor));
@@ -218,7 +218,7 @@ namespace Core.Actors
                 throw new ArgumentNullException(nameof(actor));
             }
 
-            if (!actorDatabase.TryGetValue(actor.ID, out List<ActorEntry> entries))
+            if (!database.TryGetValue(actor.ID, out List<ActorEntry> entries))
             {
                 Debug.LogError($"You are trying to remove invalid actor! [{actor.ID}]");
                 return;

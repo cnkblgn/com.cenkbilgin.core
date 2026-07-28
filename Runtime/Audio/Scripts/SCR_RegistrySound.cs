@@ -24,6 +24,7 @@ namespace Core.Audio
             BuildDatabase();
             Generate();
         }
+
         private void Generate()
         {
             SourceGenerator generator = new();

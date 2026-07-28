@@ -6,23 +6,23 @@ namespace Core.Graphics
 {
     public static class IconDatabase
     {
+        private static SearchCollection<string> idSearch = new(Array.Empty<SearchEntry<string>>());
         private static readonly Dictionary<IconID, Sprite> database = new();
-        private static SearchCollection<string> ids = new(Array.Empty<SearchEntry<string>>());
 
-        internal static void Build(Sprite[] collection)
+        internal static void Build(Sprite[] spriteCollection)
         {
-            if (collection == null)
+            if (spriteCollection == null)
             {
                 return;
             }
 
             database.Clear();
 
-            ids = new SearchCollection<string>(new SearchEntry<string>[collection.Length]);
+            idSearch = new SearchCollection<string>(new SearchEntry<string>[spriteCollection.Length]);
 
-            for (int i = 0; i < collection.Length; i++)
+            for (int i = 0; i < spriteCollection.Length; i++)
             {
-                Sprite clip = collection[i];
+                Sprite clip = spriteCollection[i];
 #if UNITY_EDITOR
                 if (clip == null)
                 {
@@ -30,18 +30,18 @@ namespace Core.Graphics
                     continue;
                 }
 #endif
-                string key = collection[i].name;
+                string key = spriteCollection[i].name;
                 IconID id = new(key);
 
-                database.Add(id, collection[i]);
-                ids.Entries[i] = new SearchEntry<string>(key, key);
+                database.Add(id, spriteCollection[i]);
+                idSearch.Entries[i] = new SearchEntry<string>(key, key);
             }
 
 
             Debug.Log($"IconDatabase build successfull!");
         }
 
-        public static SearchCollection<string> GetIDs() => ids;
+        public static SearchCollection<string> GetIDs() => idSearch;
         public static Sprite GetSprite(IconID id)
         {
             if (!id.IsValid)

@@ -3,8 +3,6 @@ using UnityEngine;
 
 namespace Core.Item
 {
-    using static CoreUtility;
-
     [Serializable]
     public partial struct ItemID : IEquatable<ItemID>
     {

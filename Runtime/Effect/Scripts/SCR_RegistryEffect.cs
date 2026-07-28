@@ -1,5 +1,6 @@
-using UnityEngine;
 using Core.Editor;
+using UnityEditor;
+using UnityEngine;
 
 namespace Core.Effect
 {
@@ -9,6 +10,9 @@ namespace Core.Effect
     public sealed class RegistryEffect : Registry
     {
         [Header("_")]
+        [SerializeField, Required] private string[] ids;
+
+        [Header("_")]
         [SerializeField] private EffectEntry[] entries;
 
         [Header("_")]
@@ -16,7 +20,7 @@ namespace Core.Effect
 
         public override void OnBeforeSceneLoad() => BuildDatabase();
         public override void OnAfterScriptLoad() => BuildDatabase();
-        public void BuildDatabase() => EffectDatabase.Build(entries);
+        public void BuildDatabase() => EffectDatabase.Build(ids, entries);
 
 #if UNITY_EDITOR
         public override void Reload()
@@ -43,17 +47,36 @@ namespace Core.Effect
                 foreach (SearchEntry<string> entry in EffectDatabase.GetIDs().Entries)
                 {
                     string id = entry.Value;
-                    int index = EffectDatabase.GetIndex(id);
 
-                    generator.Field($"public static readonly EffectID {id.ToIdentifier()} = new({id.ToLiteral()},{index})");
+                    generator.Field($"public static readonly EffectID {id.ToIdentifier()} = new({id.ToLiteral()})");
                 }
             }
 
             GenerateTextFile(path, generator.ToString());
         }
 
+        /// <summary> Overrides ids </summary>
+        public void OverrideIDs(string[] entries)
+        {
+            if (entries == null)
+            {
+                Debug.LogError("Registry override entry cannot be null!");
+                return;
+            }
+
+            ids = new string[entries.Length];
+
+            for (int i = 0; i < entries.Length; i++)
+            {
+                ids[i] = entries[i];
+            }
+
+            UnityEditor.EditorUtility.SetDirty(this);
+            AssetDatabase.SaveAssets();
+        }
+
         /// <summary> Overrides entries </summary>
-        public void Override(EffectEntry[] entries)
+        public void OverrideEntries(EffectEntry[] entries)
         {
             if (entries == null)
             {
@@ -65,8 +88,11 @@ namespace Core.Effect
 
             for (int i = 0; i < entries.Length; i++)
             {
-                this.entries[i] = new(entries[i]);
+                this.entries[i] = entries[i];
             }
+
+            UnityEditor.EditorUtility.SetDirty(this);
+            AssetDatabase.SaveAssets();
         }
 #endif
     }

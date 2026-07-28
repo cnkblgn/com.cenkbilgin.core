@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using Core.Editor;
+using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
-using Core.Editor;
 
 namespace Core.Prefab
 {
@@ -52,8 +53,20 @@ namespace Core.Prefab
             GenerateTextFile(path, generator.ToString());
         }
 
-        public void Register(GameObject obj) => entries.Add(obj);
-        public void Unregister(GameObject obj) => entries.Remove(obj);
+        public void Register(GameObject obj)
+        {
+            entries.Add(obj);
+
+            UnityEditor.EditorUtility.SetDirty(this);
+            AssetDatabase.SaveAssets();
+        }
+        public void Unregister(GameObject obj)
+        {
+            entries.Remove(obj);
+
+            UnityEditor.EditorUtility.SetDirty(this);
+            AssetDatabase.SaveAssets();
+        }
 #endif
     }
 }

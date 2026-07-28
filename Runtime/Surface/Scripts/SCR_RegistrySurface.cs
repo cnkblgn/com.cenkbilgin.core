@@ -1,5 +1,6 @@
-using UnityEngine;
 using Core.Editor;
+using UnityEditor;
+using UnityEngine;
 
 namespace Core.Surface
 {
@@ -41,10 +42,10 @@ namespace Core.Surface
             {
                 generator.Line();
 
-                foreach (SearchEntry<string> entry in SurfaceDatabase.GetIDs().Entries)
+                foreach (SearchEntry<string> entry in SurfaceDatabase.GetTags().Entries)
                 {
                     string id = entry.Value;
-                    int index = SurfaceDatabase.GetIndex(id);
+                    int index = SurfaceDatabase.GetTagIndex(id);
 
                     generator.Field($"public static readonly SurfaceTag {id.ToIdentifier()} = new({id.ToLiteral()},{index})");
                 }
@@ -52,7 +53,9 @@ namespace Core.Surface
 
             GenerateTextFile(path, generator.ToString());
         }
-        public void Override(string[] entries)
+
+        /// <summary> Overrides entries </summary>
+        public void OverrideEntries(string[] entries)
         {
             if (entries == null)
             {
@@ -66,6 +69,9 @@ namespace Core.Surface
             {
                 this.entries[i] = entries[i];
             }
+
+            UnityEditor.EditorUtility.SetDirty(this);
+            AssetDatabase.SaveAssets();
         }
 #endif
     }

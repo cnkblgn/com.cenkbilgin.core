@@ -1,5 +1,6 @@
-using UnityEngine;
 using Core.Editor;
+using UnityEditor;
+using UnityEngine;
 
 namespace Core.Actors
 {
@@ -81,7 +82,7 @@ namespace Core.Actors
             GenerateTextFile(idsPath, generator.ToString());
         }
 
-        /// <summary> Overrides ids </summary>
+        /// <summary> Overrides idSearch </summary>
         public void OverrideIDs(string[] entries)
         {
             if (entries == null)
@@ -96,9 +97,12 @@ namespace Core.Actors
             {
                 ids[i] = entries[i];
             }
+
+            UnityEditor.EditorUtility.SetDirty(this);
+            AssetDatabase.SaveAssets();
         }
 
-        /// <summary> Overrides tags </summary>
+        /// <summary> Overrides tagSearch </summary>
         public void OverrideTags(string[] entries)
         {
             if (entries == null)
@@ -113,6 +117,9 @@ namespace Core.Actors
             {
                 tags[i] = entries[i];
             }
+
+            UnityEditor.EditorUtility.SetDirty(this);
+            AssetDatabase.SaveAssets();
         }
 #endif
     }

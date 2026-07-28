@@ -16,5 +16,6 @@ namespace Core.Stat
             Min = min;
             Max = max;
         }
+        public StatDefinition(StatEntry entry) : this(entry.ID, entry.Default, entry.Min, entry.Max) { }
     }
 }

@@ -11,13 +11,13 @@ namespace Core.Surface.Editor
         protected override void OnApply(SerializedProperty property, string key, int index)
         {
             SerializedProperty indexProperty = property.FindPropertyRelative("index");
-            indexProperty.intValue = SurfaceDatabase.GetIndex(key);
+            indexProperty.intValue = SurfaceDatabase.GetTagIndex(key);
         }
 
         protected override string GetEmpty() => STRING_EMPTY;
 
         protected override string GetKey() => "key";
-        protected override SearchCollection<string> GetKeys() => SurfaceDatabase.GetIDs();
+        protected override SearchCollection<string> GetKeys() => SurfaceDatabase.GetTags();
 
         protected override string GetValue(SerializedProperty keyProperty) => keyProperty.stringValue;
         protected override void SetValue(SerializedProperty keyProperty, string value) => keyProperty.stringValue = value;

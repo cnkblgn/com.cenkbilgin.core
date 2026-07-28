@@ -1,5 +1,6 @@
-using UnityEngine;
 using Core.Editor;
+using UnityEditor;
+using UnityEngine;
 
 namespace Core.Stat
 {
@@ -9,6 +10,9 @@ namespace Core.Stat
     public sealed class RegistryStat : Registry
     {
         [Header("_")]
+        [SerializeField, Required] private string[] ids;
+
+        [Header("_")]
         [SerializeField] private StatEntry[] entries;
 
         [Header("_")]
@@ -16,7 +20,7 @@ namespace Core.Stat
 
         public override void OnBeforeSceneLoad() => BuildDatabase();
         public override void OnAfterScriptLoad() => BuildDatabase();
-        public void BuildDatabase() => StatDatabase.Build(entries);
+        public void BuildDatabase() => StatDatabase.Build(ids, entries);
 
 #if UNITY_EDITOR
         public override void Reload()
@@ -43,13 +47,32 @@ namespace Core.Stat
                 foreach (SearchEntry<string> entry in StatDatabase.GetIDs().Entries)
                 {
                     string id = entry.Value;
-                    int index = StatDatabase.GetIndex(id);
 
-                    generator.Field($"public static readonly StatID {id.ToIdentifier()} = new({id.ToLiteral()},{index})");
+                    generator.Field($"public static readonly StatID {id.ToIdentifier()} = new({id.ToLiteral()})");
                 }
             }
 
             GenerateTextFile(path, generator.ToString());
+        }
+
+        /// <summary> Overrides ids </summary>
+        public void OverrideIDs(string[] entries)
+        {
+            if (entries == null)
+            {
+                Debug.LogError("Registry override entry cannot be null!");
+                return;
+            }
+
+            ids = new string[entries.Length];
+
+            for (int i = 0; i < entries.Length; i++)
+            {
+                ids[i] = entries[i];
+            }
+
+            UnityEditor.EditorUtility.SetDirty(this);
+            AssetDatabase.SaveAssets();
         }
 
         /// <summary> Overrides entries </summary>
@@ -65,8 +88,12 @@ namespace Core.Stat
 
             for (int i = 0; i < entries.Length; i++)
             {
-                this.entries[i] = new(entries[i]);
+                this.entries[i] = entries[i];
             }
+
+
+            UnityEditor.EditorUtility.SetDirty(this);
+            AssetDatabase.SaveAssets();
         }
 #endif
     }

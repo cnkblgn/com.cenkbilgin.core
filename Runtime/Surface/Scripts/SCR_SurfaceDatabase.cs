@@ -6,34 +6,43 @@ namespace Core.Surface
 {
     public static class SurfaceDatabase
     {
+        private static SearchCollection<string> tagSearch = new(Array.Empty<SearchEntry<string>>());
         private static readonly Dictionary<string, int> database = new();
-        private static SearchCollection<string> ids = new(Array.Empty<SearchEntry<string>>());
 
-        internal static void Build(string[] collection)
+        internal static void Build(string[] tagCollection)
         {
-            if (collection == null)
+            if (tagCollection == null)
             {
                 return;
             }
 
             database.Clear();
 
-            ids = new SearchCollection<string>(new SearchEntry<string>[collection.Length]);
+            tagSearch = new SearchCollection<string>(new SearchEntry<string>[tagCollection.Length]);
 
-            for (int i = 0; i < collection.Length; i++)
+            for (int i = 0; i < tagCollection.Length; i++)
             {
-                string key = collection[i];
+                string key = tagCollection[i];
                 int index = i + 1;
 
                 database[key] = index;
-                ids.Entries[i] = new SearchEntry<string>(key, key);
+                tagSearch.Entries[i] = new SearchEntry<string>(key, key);
             }
 
             Debug.Log($"Surface database build successfull!");
         }
 
-        public static SearchCollection<string> GetIDs() => ids;
-        public static int GetIndex(string id)
+        public static SearchCollection<string> GetTags() => tagSearch;
+        public static string GetTagKey(int index)
+        {
+            if (index < 0 || index >= database.Count)
+            {
+                throw new IndexOutOfRangeException($"SurfaceTag index [{index}] is not valid!");
+            }
+
+            return tagSearch.Entries[index].Value;
+        }
+        public static int GetTagIndex(string id)
         {
             if (database.TryGetValue(id, out int a))
             {

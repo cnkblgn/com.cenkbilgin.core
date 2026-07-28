@@ -1,5 +1,6 @@
-using UnityEngine;
 using Core.Editor;
+using UnityEditor;
+using UnityEngine;
 
 namespace Core.Item
 {
@@ -99,6 +100,9 @@ namespace Core.Item
             {
                 ids[i] = entries[i];
             }
+
+            UnityEditor.EditorUtility.SetDirty(this);
+            AssetDatabase.SaveAssets();
         }
 
         /// <summary> Overrides tags </summary>
@@ -116,6 +120,9 @@ namespace Core.Item
             {
                 tags[i] = entries[i];
             }
+
+            UnityEditor.EditorUtility.SetDirty(this);
+            AssetDatabase.SaveAssets();
         }
 
         /// <summary> Overrides entries </summary>
@@ -133,6 +140,9 @@ namespace Core.Item
             {
                 this.entries[i] = entries[i];
             }
+
+            UnityEditor.EditorUtility.SetDirty(this);
+            AssetDatabase.SaveAssets();
         }
 #endif
     }

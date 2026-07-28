@@ -1,0 +1,20 @@
+{
+    "name": "ASM_QuestEditor",
+    "rootNamespace": "Core.Quest.Editor",
+    "references": [
+        "GUID:cd1711b8a18680d4d823307638cb8090",
+        "GUID:1d623e8bdcfc7404e812f09ec1d93209",
+        "GUID:f83f46e2a0fbe3d479f8b866569bfaf7"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

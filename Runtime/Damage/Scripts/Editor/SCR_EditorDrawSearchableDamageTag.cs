@@ -11,7 +11,7 @@ namespace Core.Damage.Editor
         protected override void OnApply(SerializedProperty property, string key, int index)
         {
             SerializedProperty indexProperty = property.FindPropertyRelative("index");
-            indexProperty.intValue = DamageDatabase.GetIndex(key);
+            indexProperty.intValue = DamageDatabase.GetTagIndex(key);
         }
 
         protected override string GetEmpty() => STRING_EMPTY;

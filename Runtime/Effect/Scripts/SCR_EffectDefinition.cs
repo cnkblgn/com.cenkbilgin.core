@@ -22,5 +22,6 @@ namespace Core.Effect
             Action = action ?? throw new ArgumentNullException($"Effect action cannot be null! please assign action via effect entry! {nameof(action)}");
             Interval = interval;
         }
+        public EffectDefinition(EffectEntry entry) : this(entry.ID, entry.IconID, entry.NameID, entry.Action, entry.Tag, entry.Interval) { }
     }
 }
