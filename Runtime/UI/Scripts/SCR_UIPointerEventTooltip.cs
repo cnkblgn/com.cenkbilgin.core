@@ -5,7 +5,7 @@ namespace Core.UI
 {
     using static CoreUtility;
 
-    public class UIPointerEventTooltip : UIPointerEvent
+    public sealed class UIPointerEventTooltip : UIPointerEvent
     {
         public bool IsFocused { get; private set; } = false;
 
@@ -94,7 +94,7 @@ namespace Core.UI
             this.autoUpdate = autoUpdate;
             runtimeText = text;
         }
-        public virtual void Show(Vector2? position)
+        public void Show(Vector2? position)
         {
             if (isOpened)
             {
@@ -104,7 +104,7 @@ namespace Core.UI
             ManagerUI.Instance.ShowTooltip(baseText + runtimeText, position ?? GetPosition());
             isOpened = true;
         }
-        public virtual void Hide()
+        public void Hide()
         {
             if (!isOpened)
             {
