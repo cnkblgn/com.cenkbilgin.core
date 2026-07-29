@@ -8,11 +8,11 @@ namespace Core.Item
     public sealed class InventoryData
     {
         public const int MIN_WIDTH = 1;
-        public const int MAX_WIDTH = 4;
+        public const int MAX_WIDTH = 16;
         public const int MIN_HEIGHT = 1;
-        public const int MAX_HEIGHT = 10;
+        public const int MAX_HEIGHT = 16;
         public const int MIN_WEIGHT = 1;
-        public const int MAX_WEIGHT = 100;
+        public const int MAX_WEIGHT = 1000;
 
         public float CurrentWeight { get; private set; }
         public int CurrentCapacity => itemTable.Count;
