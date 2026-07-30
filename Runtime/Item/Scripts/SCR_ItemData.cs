@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Core.Item
 {
-    public sealed class ItemData
+    public sealed class ItemData : IEquatable<ItemData>
     {
         public readonly ItemID BaseID;
         public readonly Guid InstanceID;
@@ -37,6 +37,25 @@ namespace Core.Item
         }
         public ItemData(ItemData data) : this(data == null ? throw new ArgumentNullException(nameof(data)) : data.BaseID, data.InstanceID, data.Data, data.Position, data.stack, data.IsRotated) { }
         public ItemData(ItemData data, Vector2Int position) : this(data) { Position = position; }
+
+        public bool Equals(ItemData other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return InstanceID.Equals(other.InstanceID) && BaseID.Equals(other.BaseID);
+        }
+        public override bool Equals(object obj) => Equals(obj as ItemData);
+        public override int GetHashCode() => HashCode.Combine(InstanceID, BaseID);
+        public static bool operator ==(ItemData left, ItemData right) =>  left is null ? right is null : left.Equals(right);
+        public static bool operator !=(ItemData left, ItemData right) => !(left == right);
 
         public Vector2Int GetScale()
         {
