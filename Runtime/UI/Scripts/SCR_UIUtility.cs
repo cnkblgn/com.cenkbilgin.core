@@ -31,15 +31,15 @@ namespace Core.UI
                 content.anchoredPosition = new Vector2(content.anchoredPosition.x, Mathf.Abs(thisTransform.anchoredPosition.y + thisTransform.sizeDelta.y / 2));
             }
         }
-        public static void ClampToView(this RectTransform thisTransform, RectTransform rootCanvas)
+        public static void ClampToView(this RectTransform thisTransform, RectTransform rootCanvas, Camera camera = null)
         {
-            ClampToView(thisTransform, rootCanvas, thisTransform.anchoredPosition);
+            ClampToView(thisTransform, rootCanvas, thisTransform.anchoredPosition, camera);
         }
-        public static void ClampToView(this RectTransform thisTransform, RectTransform rootCanvas, Vector2 screenPosition)
+        public static void ClampToView(this RectTransform thisTransform, RectTransform rootCanvas, Vector2 screenPosition, Camera camera = null)
         {
             if (rootCanvas == null)
             {
-                Debug.LogError("rootCanvas == null!");
+                Debug.LogError("Clamp to view failed! root canvas is missing?");
                 return;
             }
 
@@ -47,16 +47,19 @@ namespace Core.UI
 
             if (pivot.x > 0 || pivot.y > 0)
             {
-                Debug.LogWarning("wrong pivot, pivot must be = (0,0)");
+                Debug.LogWarning("Clamp to view failed! wrong pivot, pivot must be = (0,0)");
             }
 
-            Vector2 position = screenPosition / rootCanvas.localScale.x;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(rootCanvas, screenPosition, camera, out Vector2 localPoint);
 
             Rect rootRect = rootCanvas.rect;
             Rect thisRect = thisTransform.rect;
 
-            if (position.x + thisRect.width > rootRect.width) position.x = rootRect.width - thisRect.width;
-            if (position.y + thisRect.height > rootRect.height) position.y = rootRect.height - thisRect.height;
+            Vector2 position = localPoint;
+            if (position.x < rootRect.xMin) position.x = rootRect.xMin;
+            if (position.y < rootRect.yMin) position.y = rootRect.yMin;
+            if (position.x + thisRect.width > rootRect.xMax) position.x = rootRect.xMax - thisRect.width;
+            if (position.y + thisRect.height > rootRect.yMax) position.y = rootRect.yMax - thisRect.height;
 
             thisTransform.anchoredPosition = position;
         }

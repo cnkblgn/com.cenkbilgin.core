@@ -4,9 +4,6 @@ using UnityEngine.EventSystems;
 
 namespace Core.UI
 {
-    using static CoreUtility;
-    using static TaskUtility;
-
     [DisallowMultipleComponent]
     public sealed class ManagerUI : Manager<ManagerUI>
     {
