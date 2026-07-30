@@ -18,10 +18,10 @@ namespace Core.Item
         public IconID IconID;
         public LocalizedID NameID;
         public LocalizedID DescID;
-        [Min(1)] public int Width;
-        [Min(1)] public int Height;
+        [Range(InventoryData.MIN_WIDTH, InventoryData.MAX_WIDTH)] public int Width;
+        [Range(InventoryData.MIN_HEIGHT, InventoryData.MAX_HEIGHT)] public int Height;
         [Min(1)] public int Stack;
-        [Min(0)] public float Weight;
+        [Range(InventoryData.MIN_WEIGHT, InventoryData.MAX_WEIGHT)] public float Weight;
         [SerializeReference, Reference] public ItemComponent Component;
 
         public ItemEntry(ItemID id, ItemTag[] tags, PrefabID entityID, PrefabID equipableID, IconID iconID, LocalizedID nameID, LocalizedID descID, int width, int height, int stack, float weight, ItemComponent component)

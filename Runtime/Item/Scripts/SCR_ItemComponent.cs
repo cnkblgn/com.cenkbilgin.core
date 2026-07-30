@@ -16,6 +16,7 @@ namespace Core.Item
         public abstract void GetDescription(Dictionary<string, DataNode> data, in StringBuilder sb);
     }
 
+    [Serializable]
     public sealed class ItemComponentGeneric : ItemComponent
     {
         public override void GetDefaults(Dictionary<string, DataNode> data) { }
