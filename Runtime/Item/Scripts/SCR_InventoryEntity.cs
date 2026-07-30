@@ -20,7 +20,7 @@ namespace Core.Item
         [SerializeField] private new LocalizedID name;
 
         [Header("_")]
-        [SerializeField, Required] private ItemID[] startingItems;
+        [SerializeField] private ItemID[] startingItems;
         [SerializeField] private ItemTag[] whitelistedItems;
 
         [Header("_")]
