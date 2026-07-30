@@ -43,13 +43,6 @@ namespace Core.UI
                 return;
             }
 
-            Vector2 pivot = thisTransform.pivot;
-
-            if (pivot.x > 0 || pivot.y > 0)
-            {
-                Debug.LogWarning("Clamp to view failed! wrong pivot, pivot must be = (0,0)");
-            }
-
             RectTransformUtility.ScreenPointToLocalPointInRectangle(rootCanvas, screenPosition, camera, out Vector2 localPoint);
 
             Rect rootRect = rootCanvas.rect;

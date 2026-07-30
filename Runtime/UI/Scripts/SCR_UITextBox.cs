@@ -13,7 +13,7 @@ namespace Core.UI
         [SerializeField] private bool overrideWrapping = true;
 
         [Header("_")]
-        [SerializeField] private RectTransform canvasBounds = null;
+        [SerializeField, Info("Canvas Bounds pivot must be (0, 0)")] private RectTransform canvasBounds = null;
         [SerializeField, Required] private RectTransform textContainer = null;
         [SerializeField, Required] private TextMeshProUGUI textElement = null;
         [SerializeField] private Vector2 textOffset = new(16, 16);
