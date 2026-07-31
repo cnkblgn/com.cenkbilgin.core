@@ -7,20 +7,20 @@ namespace Core.Animation
         private Vector3 currentValue = Vector3.zero;
         private Vector3 targetValue = Vector3.zero;
 
-        public Vector3 Update(CycleConfig config, float deltaTime, float strength = 1)
+        public Vector3 Update(CycleConfig config, float deltaTime, float amplitude = 1, float frequency = 1)
         {
             if (config == null)
             {
                 return Vector3.zero;
             }
 
-            float x = config.Amplitude.x * Mathf.Cos(Time.time * config.Frequency.x * Mathf.PI * 2f * 0.5f);
-            float y = config.Amplitude.y * Mathf.Sin(Time.time * config.Frequency.y * Mathf.PI * 2f);
-            float z = config.Amplitude.z * Mathf.Sin(Time.time * config.Frequency.z * Mathf.PI * 2f);
+            float x = config.Amplitude.x * Mathf.Cos(Time.time * frequency * config.Frequency.x * Mathf.PI * 2f * 0.5f);
+            float y = config.Amplitude.y * Mathf.Sin(Time.time * frequency * config.Frequency.y * Mathf.PI * 2f);
+            float z = config.Amplitude.z * Mathf.Sin(Time.time * frequency * config.Frequency.z * Mathf.PI * 2f);
 
-            targetValue.x = Mathf.Clamp(x * strength, -config.Clamp.x, config.Clamp.x);
-            targetValue.y = Mathf.Clamp(y * strength, -config.Clamp.y, config.Clamp.y);
-            targetValue.z = Mathf.Clamp(z * strength, -config.Clamp.z, config.Clamp.z);
+            targetValue.x = Mathf.Clamp(x * amplitude, -config.Clamp.x, config.Clamp.x);
+            targetValue.y = Mathf.Clamp(y * amplitude, -config.Clamp.y, config.Clamp.y);
+            targetValue.z = Mathf.Clamp(z * amplitude, -config.Clamp.z, config.Clamp.z);
 
             float t = 1f - Mathf.Exp(-config.Roughness * deltaTime);
 
