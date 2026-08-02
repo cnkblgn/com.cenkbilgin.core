@@ -8,6 +8,12 @@ namespace Core.Effect.Editor
     [CustomPropertyDrawer(typeof(EffectID))]
     internal sealed class EditorDrawSearchableEffectID : EditorDrawSearchable<string>
     {
+        protected override void OnApply(SerializedProperty property, string key, int index)
+        {
+            SerializedProperty indexProperty = property.FindPropertyRelative("index");
+            indexProperty.intValue = EffectDatabase.GetIDIndex(key);
+        }
+
         protected override string GetEmpty() => STRING_EMPTY;
 
         protected override string GetKey() => "key";
