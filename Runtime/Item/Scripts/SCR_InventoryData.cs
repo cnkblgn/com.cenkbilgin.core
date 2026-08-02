@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 using UnityEngine;
 
 namespace Core.Item
@@ -12,8 +11,8 @@ namespace Core.Item
         public const int MAX_WIDTH = 16;
         public const int MIN_HEIGHT = 1;
         public const int MAX_HEIGHT = 16;
-        public const int MIN_WEIGHT = 1;
-        public const int MAX_WEIGHT = 1000;
+        public const float MIN_WEIGHT = 0;
+        public const float MAX_WEIGHT = 1000;
 
         public float CurrentWeight { get; private set; }
         public int CurrentCapacity => itemTable.Count;
