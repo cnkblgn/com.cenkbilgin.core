@@ -40,6 +40,15 @@ namespace Core.Effect
 
         public static IReadOnlyCollection<EffectDefinition> GetDatabase() => database.Values;
         public static SearchCollection<string> GetIDs() => idSearch;
+        public static EffectID GetID(int index)
+        {
+            if (index < 0 || index >= idSearch.Entries.Length)
+            {
+                throw new ArgumentOutOfRangeException("Effect get id failed! index out of bounds!");
+            }
+
+            return new(idSearch.Entries[index].Value, index);
+        }
         public static int GetIDIndex(string id)
         {
             if (idLookup.TryGetValue(id, out int a))
