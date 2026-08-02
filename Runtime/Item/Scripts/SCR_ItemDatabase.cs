@@ -11,7 +11,8 @@ namespace Core.Item
         private static readonly Dictionary<string, int> idLookup = new();
         private static readonly Dictionary<string, int> tagLookup = new();
         private static readonly Dictionary<ItemID, ItemDefinition> database = new();
-        private static Transform entityRoot;
+        private static ItemProcessor processor;
+        private static Transform root;
 
         internal static void Build(string[] idCollection, string[] tagCollection, ItemEntry[] entries)
         {
@@ -121,7 +122,7 @@ namespace Core.Item
                 throw new ArgumentNullException($"Trying to create item entity with null data! {nameof(data)}");
             }
 
-            GameObject spawned = data.BaseID.GetDefinition().EntityID.Spawn(position, rotation, parent == null ? entityRoot : parent);
+            GameObject spawned = data.BaseID.GetDefinition().EntityID.Spawn(position, rotation, parent == null ? root : parent);
 
             if (spawned == null)
             {
@@ -134,6 +135,7 @@ namespace Core.Item
             }
 
             entity.ImportFrom(data);
+            processor?.Invoke(entity);
             return entity;
         }
 
@@ -153,7 +155,10 @@ namespace Core.Item
             return items;
         }
 
-        internal static Transform GetRoot() => entityRoot;
-        public static void SetRoot(Transform transform) => entityRoot = transform;
+        internal static ItemProcessor GetProcessor() => processor;
+        public static void SetProcessor(ItemProcessor value) => processor = value;
+
+        internal static Transform GetRoot() => root;
+        public static void SetRoot(Transform transform) => root = transform;
     }
 }
