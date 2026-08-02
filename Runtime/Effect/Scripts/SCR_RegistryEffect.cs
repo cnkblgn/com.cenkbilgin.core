@@ -52,8 +52,9 @@ namespace Core.Effect
                 foreach (SearchEntry<string> entry in EffectDatabase.GetIDs().Entries)
                 {
                     string id = entry.Value;
+                    int index = EffectDatabase.GetIDIndex(id);
 
-                    generator.Field($"public static readonly EffectID {id.ToIdentifier()} = new({id.ToLiteral()})");
+                    generator.Field($"public static readonly EffectID {id.ToIdentifier()} = new({id.ToLiteral()},{index})");
                 }
             }
 
