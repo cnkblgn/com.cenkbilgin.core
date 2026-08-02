@@ -7,7 +7,7 @@ namespace Core.Surface
     public static class SurfaceDatabase
     {
         private static SearchCollection<string> tagSearch = new(Array.Empty<SearchEntry<string>>());
-        private static readonly Dictionary<string, int> database = new();
+        private static readonly Dictionary<string, SurfaceTag> database = new();
 
         internal static void Build(string[] tagCollection)
         {
@@ -17,16 +17,18 @@ namespace Core.Surface
             }
 
             database.Clear();
+            tagSearch = new SearchCollection<string>(new SearchEntry<string>[tagCollection.Length + 1]);
 
-            tagSearch = new SearchCollection<string>(new SearchEntry<string>[tagCollection.Length]);
+            database["GENERIC"] = new("GENERIC", 0);
+            tagSearch.Entries[0] = new("GENERIC", "GENERIC");
 
             for (int i = 0; i < tagCollection.Length; i++)
             {
                 string key = tagCollection[i];
                 int index = i + 1;
 
-                database[key] = index;
-                tagSearch.Entries[i] = new SearchEntry<string>(key, key);
+                database[key] = new(key, index);
+                tagSearch.Entries[index] = new SearchEntry<string>(key, key);
             }
 
             Debug.Log($"Surface database build successfull!");
@@ -44,9 +46,9 @@ namespace Core.Surface
         }
         public static int GetTagIndex(string id)
         {
-            if (database.TryGetValue(id, out int a))
+            if (database.TryGetValue(id, out SurfaceTag tag))
             {
-                return a;
+                return tag.Index;
             }
 
             return -1;

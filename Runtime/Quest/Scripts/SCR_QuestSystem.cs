@@ -35,7 +35,7 @@ namespace Core.Quest
 
         public static bool TryStartQuest(QuestID id)
         {
-            if (id == QuestID.NONE)
+            if (!id.IsValid)
             {
                 return false;
             }
@@ -121,7 +121,7 @@ namespace Core.Quest
 
             QuestDefinition definition = id.GetDefinition();
 
-            if (definition.NextID != QuestID.NONE)
+            if (definition.NextID.IsValid)
             {
                 TryStartQuest(definition.NextID);
             }

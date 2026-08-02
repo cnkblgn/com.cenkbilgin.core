@@ -17,17 +17,18 @@ namespace Core.Damage
             }
 
             database.Clear();
-            tagSearch = new(new SearchEntry<string>[tagCollection.Length]);
+            tagSearch = new(new SearchEntry<string>[tagCollection.Length + 1]);
+
+            database["GENERIC"] = new("GENERIC", 0);
+            tagSearch.Entries[0] = new("GENERIC", "GENERIC");
 
             for (int i = 0; i < tagCollection.Length; i++)
             {
                 string key = tagCollection[i];
                 int index = i + 1;
 
-                DamageTag tag = new(key, index);
-
-                database[key] = tag;
-                tagSearch.Entries[i] = new SearchEntry<string>(key, key);
+                database[key] = new(key, index);
+                tagSearch.Entries[index] = new SearchEntry<string>(key, key);
             }
 
             Debug.Log($"Damage database build successfull!");

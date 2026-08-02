@@ -24,8 +24,11 @@ namespace Core.Item
             tagLookup.Clear();
             idLookup.Clear();
 
-            tagSearch = new(new SearchEntry<string>[tagCollection.Length]);
+            tagSearch = new(new SearchEntry<string>[tagCollection.Length + 1]);
             idSearch = new(new SearchEntry<string>[idCollection.Length]);
+
+            tagLookup["GENERIC"] = 0;
+            tagSearch.Entries[0] = new("GENERIC", "GENERIC");
 
             for (int i = 0; i < idCollection.Length; i++)
             {
@@ -42,7 +45,7 @@ namespace Core.Item
                 int index = i + 1;
 
                 tagLookup[key] = index;
-                tagSearch.Entries[i] = new SearchEntry<string>(key, key);
+                tagSearch.Entries[index] = new SearchEntry<string>(key, key);
             }
 
             for (int i = 0; i < entries.Length; i++)

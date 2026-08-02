@@ -3,13 +3,9 @@ using UnityEngine;
 
 namespace Core.Damage
 {
-    using static CoreUtility;
-
     [Serializable]
     public partial struct DamageTag : IEquatable<DamageTag>
     {
-        public static readonly DamageTag NONE = new(STRING_EMPTY, 0);
-
         public readonly string Key => key;
         public readonly int Index => index;
         public readonly ulong Mask => IsValid ? 1UL << index : 0;

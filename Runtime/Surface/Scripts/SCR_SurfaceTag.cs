@@ -8,8 +8,6 @@ namespace Core.Surface
     [Serializable]
     public partial struct SurfaceTag : IEquatable<SurfaceTag>
     {
-        public static readonly SurfaceTag DEFAULT = new(STRING_EMPTY, 0);
-
         public readonly string Key => key;
         public readonly int Index => index;
         public readonly ulong Mask => IsValid ? 1UL << index : 0;

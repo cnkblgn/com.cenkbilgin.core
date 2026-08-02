@@ -8,8 +8,6 @@ namespace Core.Quest
     [Serializable]
     public partial struct QuestID : IEquatable<QuestID>
     {
-        public static readonly QuestID NONE = new(STRING_EMPTY);
-
         public readonly string Key => key;
         public readonly bool IsValid => !string.IsNullOrEmpty(key);
 

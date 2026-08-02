@@ -34,7 +34,7 @@ namespace Core.Quest
                 return false;
             }
 
-            if (ID != ActorID.NONE && ID != id)
+            if (ID.IsValid && ID != id)
             {
                 return false;
             }

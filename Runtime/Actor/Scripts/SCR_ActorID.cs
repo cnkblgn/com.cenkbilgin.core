@@ -4,13 +4,9 @@ using UnityEngine;
 
 namespace Core.Actors
 {
-    using static CoreUtility;
-
     [Serializable]
     public partial struct ActorID : IEquatable<ActorID>
     {
-        public static readonly ActorID NONE = new(STRING_EMPTY, 0);
-
         public readonly string Key => key;
         public readonly int Index => index;
         public readonly bool IsValid => !string.IsNullOrEmpty(key);

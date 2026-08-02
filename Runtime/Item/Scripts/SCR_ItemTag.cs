@@ -8,8 +8,6 @@ namespace Core.Item
     [Serializable]
     public partial struct ItemTag : IEquatable<ItemTag>
     {
-        public static readonly ItemTag GENERIC = new(STRING_EMPTY, 0);
-
         public readonly string Key => key;
         public readonly int Index => index;
         public readonly ulong Mask => IsValid ? 1UL << index : 0;
