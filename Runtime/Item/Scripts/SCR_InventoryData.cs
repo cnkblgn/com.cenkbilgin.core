@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 using UnityEngine;
 
 namespace Core.Item
@@ -265,11 +266,12 @@ namespace Core.Item
             result = InventoryResult.NO_VALID_SPACE;
             return false;
         }
-        public bool TryGetItemByTag(ItemTag tag, out ItemData registered, out InventoryResult result)
+        public bool TryGetItemByTag(ItemTag tag, out ItemData registered, out InventoryResult result) => TryGetItemByTag(tag.Mask, out registered, out result);
+        public bool TryGetItemByTag(ulong tags, out ItemData registered, out InventoryResult result)
         {
             foreach (ItemData item in itemTable.Values)
             {
-                if (item.Tags.HasAny(tag))
+                if (item.Tags.HasAny(tags))
                 {
                     registered = item;
                     result = InventoryResult.SUCCESS;
