@@ -8,13 +8,13 @@ namespace Core.Quest
     {
         public QuestEvent Event;
         public ActorID ID;
-        public ulong Tags;
+        public ActorTag[] Tags;
         public byte Amount;
 
         public QuestRequirement(QuestEvent @event, ActorID id, ActorTag[] tags, byte amount)
         {
             Event = @event;
-            Tags = tags != null ? tags.CreateMask() : 0;
+            Tags = tags;
             ID = id;
             Amount = amount;
         }
@@ -29,7 +29,7 @@ namespace Core.Quest
                 return false;
             }
 
-            if (tags != 0 && !tags.HasAll(Tags))
+            if (tags != 0 && !tags.HasAll(Tags.CreateMask()))
             {
                 return false;
             }
