@@ -72,8 +72,11 @@ namespace Core.Editor
             bool enterChildren = true;
             float y = rect.y;
 
+            EditorGUI.indentLevel++;
+
             while (iterator.NextVisible(enterChildren) && !SerializedProperty.EqualContents(iterator, end))
             {
+                float indent = 15f * EditorGUI.indentLevel; // veya sabit bir deðer, örn. 15f
                 float height = EditorGUI.GetPropertyHeight(iterator, true);
 
                 Rect fieldRect = new(rect.x, y, rect.width, height);
@@ -83,6 +86,8 @@ namespace Core.Editor
                 y += height + 2f;
                 enterChildren = false;
             }
+
+            EditorGUI.indentLevel--;
         }
         protected override void DrawField(Rect rect, SerializedProperty property, SerializedProperty keyProperty, GUIContent label)
         {
