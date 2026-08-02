@@ -14,6 +14,8 @@ namespace Core.Stat
         [SerializeField, Required] private string key;
 
         public StatID(string key) => this.key = key;
+
+        public readonly override string ToString() => $"Key: {key}";
         public readonly override int GetHashCode() => key != null ? key.GetHashCode() : 0;
         public readonly override bool Equals(object obj) => obj is StatID other && Equals(other);
         public readonly bool Equals(StatID other) => key == other.key;

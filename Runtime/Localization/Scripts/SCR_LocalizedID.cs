@@ -16,6 +16,7 @@ namespace Core.Localization
         [SerializeField, Required] private string key;
 
         public LocalizedID(string key) => this.key = key;
+
         public readonly override int GetHashCode() => key != null ? key.GetHashCode() : 0;
         public readonly bool Equals(LocalizedID other) => key == other.key;
         public readonly override bool Equals(object obj) => obj is LocalizedID other && Equals(other);

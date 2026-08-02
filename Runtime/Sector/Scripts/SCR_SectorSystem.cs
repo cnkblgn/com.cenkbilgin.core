@@ -32,7 +32,7 @@ namespace Core.Sector
         public static event Action<Vector3> OnOriginShift = null;
 
         [Header("_")]
-        [SerializeField, Info("If not visible please generate sectors.\nasdsadasda test ediyoruz")] private bool showGizmos = false;
+        [SerializeField, Info("If not visible please generate sectors.")] private bool showGizmos = false;
         [SerializeField] private GridSize gridSize = GridSize._4096;
         [SerializeField] private TileCount tileCount = TileCount._4;
 

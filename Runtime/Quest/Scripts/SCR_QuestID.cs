@@ -17,6 +17,7 @@ namespace Core.Quest
 
         public QuestID(string key) => this.key = key;
 
+        public readonly override string ToString() => $"Key: {key}";
         public readonly override int GetHashCode() => key != null ? key.GetHashCode() : 0;
         public readonly override bool Equals(object obj) => obj is QuestID other && Equals(other);
         public readonly bool Equals(QuestID other) => key == other.key;

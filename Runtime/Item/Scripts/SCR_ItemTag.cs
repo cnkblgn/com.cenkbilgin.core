@@ -28,6 +28,8 @@ namespace Core.Item
                 Debug.LogError("Warning actor tag supports only 63 index!");
             }
         }
+
+        public readonly override string ToString() => $"Key: {key} << Index: {index}";
         public readonly override int GetHashCode() => key != null ? key.GetHashCode() : 0;
         public readonly bool Equals(ItemTag other) => key == other.key;
         public readonly override bool Equals(object obj) => obj is ItemTag other && Equals(other);

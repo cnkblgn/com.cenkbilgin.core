@@ -17,6 +17,7 @@ namespace Core.Graphics
 
         public IconID(string key) => this.key = key;
 
+        public readonly override string ToString() => $"Key: {key}";
         public readonly override int GetHashCode() => key != null ? key.GetHashCode() : 0;
         public readonly bool Equals(IconID other) => key == other.key;
         public readonly override bool Equals(object obj) => obj is IconID other && Equals(other);

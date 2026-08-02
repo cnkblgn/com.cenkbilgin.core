@@ -12,6 +12,8 @@ namespace Core.Effect
         [SerializeField, Required] private string key;
 
         public EffectID(string key) => this.key = key;
+
+        public readonly override string ToString() => $"Key: {key}";
         public readonly override int GetHashCode() => key != null ? key.GetHashCode() : 0;
         public readonly override bool Equals(object obj) => obj is EffectID other && Equals(other);
         public readonly bool Equals(EffectID other) => key == other.key;

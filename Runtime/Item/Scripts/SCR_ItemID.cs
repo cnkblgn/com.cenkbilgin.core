@@ -18,6 +18,8 @@ namespace Core.Item
             this.key = key;
             this.index = index;
         }
+
+        public readonly override string ToString() => $"Key: {key} << Index: {index}";
         public readonly override int GetHashCode() => key != null ? key.GetHashCode() : 0;
         public readonly override bool Equals(object obj) => obj is ItemID other && Equals(other);
         public readonly bool Equals(ItemID other) => key == other.key;

@@ -23,6 +23,8 @@ namespace Core.Actors
             this.key = key;
             this.index = index;
         }
+
+        public readonly override string ToString() => $"Key: {key} << Index: {index}";
         public readonly override int GetHashCode() => key != null ? key.GetHashCode() : 0;
         public readonly override bool Equals(object obj) => obj is ActorID other && Equals(other);
         public readonly bool Equals(ActorID other) => key == other.key;

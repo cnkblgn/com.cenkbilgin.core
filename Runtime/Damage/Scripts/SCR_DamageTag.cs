@@ -28,6 +28,8 @@ namespace Core.Damage
                 Debug.LogWarning("Warning damage tag supports only 63 index!");
             }
         }
+
+        public readonly override string ToString() => $"Key: {key} << Index: {index}";
         public readonly override int GetHashCode() => key != null ? key.GetHashCode() : 0;
         public readonly bool Equals(DamageTag other) => key == other.key;
         public readonly override bool Equals(object obj) => obj is DamageTag other && Equals(other);
