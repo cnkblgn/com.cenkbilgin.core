@@ -53,6 +53,24 @@ namespace Core.Graphics
             UpdateLights();
             UpdateMeshes();
         }
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            if (Application.isPlaying)
+            {
+                return;
+            }
+
+            for (int i = 0; i < lights.Length; i++)
+            {
+                UpdateLight(lights[i], 1);
+            }
+
+            UpdateMeshes();
+        }
+#endif
+
         public void Enable()
         {
             if (isActive)
