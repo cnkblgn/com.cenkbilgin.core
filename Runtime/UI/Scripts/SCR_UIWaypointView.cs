@@ -173,6 +173,8 @@ namespace Core.UI
 
         private void Complete()
         {
+            Debug.Log($"COMPLETE {name}");
+
             IsCompleted = true;
             thisCanvas.Show(false, false);
             gameObject.SetActive(false);

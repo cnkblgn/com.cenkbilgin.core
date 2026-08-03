@@ -77,6 +77,8 @@ namespace Core
 
         public void Release(T item)
         {
+            Debug.Log($"RELEASE {item.name}");
+
             if (Type != PoolType.RELEASE)
             {
                 Debug.LogWarning($"Pool [{ID}] does not support Release");
@@ -165,6 +167,8 @@ namespace Core
         }
         private T GetRelease()
         {
+            Debug.Log($"GET  Available:{availableItems.Count}");
+
             if (availableItems.Count == 0)
             {
                 Debug.LogWarning($"Pool [{ID}] exhausted!");
