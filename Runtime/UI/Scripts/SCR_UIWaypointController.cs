@@ -4,8 +4,6 @@ using UnityEngine;
 
 namespace Core.UI
 {
-    using static CoreUtility;
-
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Canvas))]
     internal sealed class UIWaypointController : MonoBehaviour
@@ -39,17 +37,23 @@ namespace Core.UI
 
             for (int i = 0; i < waypointCapacity; i++)
             {
-                if (waypointPool.Pool.TryGet(i, out UIWaypointView entity) && !entity.gameObject.activeSelf)
+                if (!waypointPool.Pool.TryGet(i, out UIWaypointView entity))
+                {
+                    continue;
+                }
+
+                if (entity.IsCompleted)
+                {
+                    waypointPool.Pool.Release(entity);
+                    continue;
+                }
+
+                if (!entity.gameObject.activeSelf)
                 {
                     continue;
                 }
 
                 entity.Tick(cameraController, cameraTransform);
-
-                if (entity.IsCompleted)
-                {
-                    waypointPool.Pool.Release(entity);
-                }
             }
         }
 
