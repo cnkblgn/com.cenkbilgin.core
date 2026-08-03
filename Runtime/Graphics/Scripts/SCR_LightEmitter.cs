@@ -55,6 +55,24 @@ namespace Core.Graphics
         }
 
 #if UNITY_EDITOR
+        [ContextMenu("Enable All Lights")]
+        private void ContextMenu_EnableAllLights()
+        {
+            for (int i = 0; i < lights.Length; i++)
+            {
+                lights[i].enabled = true;
+            }
+        }
+
+        [ContextMenu("Disable All Lights")]
+        private void ContextMenu_DisableAllLights()
+        {
+            for (int i = 0; i < lights.Length; i++)
+            {
+                lights[i].enabled = false;
+            }
+        }
+
         private void OnValidate()
         {
             if (Application.isPlaying)
