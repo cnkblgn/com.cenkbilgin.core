@@ -25,7 +25,7 @@ namespace Core.Graphics
         [Header("_")]
         [SerializeField] private bool updateAlways = false;
         [SerializeField] private LightAnimation animationStyle = LightAnimation.DEFAULT;
-        [SerializeField, Range(10, 60)] private float animationRate = 1;
+        [SerializeField, Range(10, 60)] private float animationRate = 10;
 
         private bool isActive = true;
         private float[] defaultIntensities;
@@ -57,6 +57,11 @@ namespace Core.Graphics
 #if UNITY_EDITOR
         private void OnValidate()
         {
+            if (Application.isPlaying)
+            {
+                return;
+            }
+
             InitializeLights();
             UpdateLights();
             UpdateMeshes();
