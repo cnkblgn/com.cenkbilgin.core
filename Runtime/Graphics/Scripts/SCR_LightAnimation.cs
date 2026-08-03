@@ -1,6 +1,6 @@
 namespace Core.Graphics
 {
-    public enum LightAnimation : int
+    public enum LightAnimation
     {
         DEFAULT,
         FLICKER_GENERIC,
