@@ -20,7 +20,7 @@ namespace Core.UI
 
             Hide();
         }
-        public void Move(Vector2 screenPosition)
+        public void Move(Vector2 screenPosition, Camera camera = null)
         {
             if (thisCanvas == null)
             {
@@ -32,13 +32,13 @@ namespace Core.UI
                 return;
             }
 
-            textBox.UpdateBounds(screenPosition);
+            textBox.UpdateBounds(screenPosition, camera);
         }
-        public void Show(string text, Vector2 screenPosition)
+        public void Show(string text, Vector2 screenPosition, Camera camera = null)
         {
             thisCanvas.Show();
             textBox.Set(text);
-            textBox.UpdateBounds(screenPosition);
+            textBox.UpdateBounds(screenPosition, camera);
         }
         public void Hide()
         {

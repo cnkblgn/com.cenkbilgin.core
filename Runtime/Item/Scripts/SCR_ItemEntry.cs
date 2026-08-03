@@ -15,6 +15,7 @@ namespace Core.Item
         public ItemTag[] Tags;
         public PrefabID EntityID;
         public PrefabID EquipableID;
+        public PrefabID ModelID;
         public IconID IconID;
         public LocalizedID NameID;
         public LocalizedID DescID;
@@ -24,12 +25,13 @@ namespace Core.Item
         [Range(InventoryData.MIN_WEIGHT, InventoryData.MAX_WEIGHT)] public float Weight;
         [SerializeReference, Reference] public ItemComponent Component;
 
-        public ItemEntry(ItemID id, ItemTag[] tags, PrefabID entityID, PrefabID equipableID, IconID iconID, LocalizedID nameID, LocalizedID descID, int width, int height, int stack, float weight, ItemComponent component)
+        public ItemEntry(ItemID id, ItemTag[] tags, PrefabID entityID, PrefabID equipableID, PrefabID modelID, IconID iconID, LocalizedID nameID, LocalizedID descID, int width, int height, int stack, float weight, ItemComponent component)
         {
             ID = id;
             Tags = tags;
             EntityID = entityID;
             EquipableID = equipableID;
+            ModelID = modelID;
             IconID = iconID;
             NameID = nameID;
             DescID = descID;
