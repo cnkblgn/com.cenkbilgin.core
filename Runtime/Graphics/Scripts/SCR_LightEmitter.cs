@@ -79,8 +79,8 @@ namespace Core.Graphics
         }
         public void Enable(LightAnimation id, float rate)
         {
-            this.animationStyle = id;
-            this.animationRate = Mathf.Clamp(rate, 10, 60);
+            SetAnimationID(id);
+            SetAnimationRate(rate);
 
             Enable();
         }
@@ -95,7 +95,13 @@ namespace Core.Graphics
 
             DisableLights();
             UpdateMeshes();
-        }    
+        }
+
+        public LightAnimation GetAnimationID() => animationStyle;
+        public void SetAnimationID(LightAnimation id) => animationStyle = id;
+
+        public float GetAnimationRate() => animationRate;
+        public void SetAnimationRate(float rate) => this.animationRate = Mathf.Clamp(rate, 10, 60);
 
         private void InitializeLights()
         {
