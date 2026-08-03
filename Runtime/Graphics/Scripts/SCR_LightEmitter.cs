@@ -48,10 +48,7 @@ namespace Core.Graphics
                 return;
             }
 
-            currentBrightness = LightAnimator.Calculate(animationStyle, animationRate);
-
-            UpdateLights();
-            UpdateMeshes();
+            Refresh();
         }
 
 #if UNITY_EDITOR
@@ -123,12 +120,27 @@ namespace Core.Graphics
             UpdateMeshes();
         }
 
+        private void Refresh()
+        {
+            currentBrightness = LightAnimator.Calculate(animationStyle, animationRate);
+            UpdateLights();
+            UpdateMeshes();
+        }
+
         public LightAnimation GetAnimationID() => animationStyle;
         public void SetAnimationID(LightAnimation id) => animationStyle = id;
-        public void SetAnimationID(int id) => animationStyle = (LightAnimation)id;
+        public void SetAnimationID(int id)
+        {
+            animationStyle = (LightAnimation)id;
+            Refresh();
+        }
 
         public float GetAnimationRate() => animationRate;
-        public void SetAnimationRate(float rate) => this.animationRate = Mathf.Clamp(rate, 10, 60);
+        public void SetAnimationRate(float rate)
+        {
+            animationRate = Mathf.Clamp(rate, 10, 60);
+            Refresh();
+        }
 
         private void InitializeLights()
         {
