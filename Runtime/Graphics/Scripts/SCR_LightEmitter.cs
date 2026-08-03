@@ -99,6 +99,7 @@ namespace Core.Graphics
 
         public LightAnimation GetAnimationID() => animationStyle;
         public void SetAnimationID(LightAnimation id) => animationStyle = id;
+        public void SetAnimationID(int id) => animationStyle = (LightAnimation)id;
 
         public float GetAnimationRate() => animationRate;
         public void SetAnimationRate(float rate) => this.animationRate = Mathf.Clamp(rate, 10, 60);
