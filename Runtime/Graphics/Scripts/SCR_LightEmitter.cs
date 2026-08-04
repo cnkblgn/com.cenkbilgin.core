@@ -12,14 +12,15 @@ namespace Core.Graphics
         public float Brightness => currentBrightness;
 
         [Header("_")]
-        [SerializeField] private bool disableOnAwake = false;
+        [SerializeField] private bool disableOnAwake = false; 
 
         [Header("_")]
         [SerializeField] private Light[] lights = new Light[0];
         [SerializeField] private MeshRenderer[] meshes = new MeshRenderer[0];
 
         [Header("_")]
-        [SerializeField, ColorUsage(false, true)] private Color lightColor = COLOR_WHITE;
+        [SerializeField, ColorUsage(false, true)] private Color meshColor = COLOR_WHITE;
+        [SerializeField, ColorUsage(false, false)] private Color lightColor = COLOR_WHITE;
         [SerializeField, Min(0)] private float lightIntensity = 1;
 
         [Header("_")]
@@ -28,13 +29,12 @@ namespace Core.Graphics
         [SerializeField, Range(10, 60)] private float animationRate = 10;
 
         private bool isActive = true;
-        private float[] defaultIntensities;
         private float currentBrightness = 1;
 
         private void Awake()
         {
-            InitializeLights();
-            InitializeMeshes();
+            UpdateLights();
+            UpdateMeshes();
 
             if (disableOnAwake)
             {
@@ -53,22 +53,10 @@ namespace Core.Graphics
 
 #if UNITY_EDITOR
         [ContextMenu("Enable All Lights")]
-        private void ContextMenu_EnableAllLights()
-        {
-            for (int i = 0; i < lights.Length; i++)
-            {
-                lights[i].enabled = true;
-            }
-        }
+        private void EnableAll() => EnableLights();
 
         [ContextMenu("Disable All Lights")]
-        private void ContextMenu_DisableAllLights()
-        {
-            for (int i = 0; i < lights.Length; i++)
-            {
-                lights[i].enabled = false;
-            }
-        }
+        private void DisableAll() => DisableLights();
 
         private void OnValidate()
         {
@@ -77,14 +65,16 @@ namespace Core.Graphics
                 return;
             }
 
-            for (int i = 0; i < lights.Length; i++)
-            {
-                UpdateLight(lights[i], 1);
-            }
-
-            UpdateMeshes();
+            UpdateLights();
         }
 #endif
+
+        private void Refresh()
+        {
+            currentBrightness = LightAnimator.Calculate(animationStyle, animationRate);
+            UpdateLights();
+            UpdateMeshes();
+        }
 
         public void Enable()
         {
@@ -97,7 +87,6 @@ namespace Core.Graphics
 
             EnableLights();
             UpdateLights();
-
             UpdateMeshes();
         }
         public void Enable(LightAnimation id, float rate)
@@ -120,13 +109,6 @@ namespace Core.Graphics
             UpdateMeshes();
         }
 
-        private void Refresh()
-        {
-            currentBrightness = LightAnimator.Calculate(animationStyle, animationRate);
-            UpdateLights();
-            UpdateMeshes();
-        }
-
         public LightAnimation GetAnimationID() => animationStyle;
         public void SetAnimationID(LightAnimation id) => animationStyle = id;
         public void SetAnimationID(int id)
@@ -142,17 +124,6 @@ namespace Core.Graphics
             Refresh();
         }
 
-        private void InitializeLights()
-        {
-            defaultIntensities = new float[lights.Length];
-
-            for (int i = 0; i < lights.Length; i++)
-            {
-                defaultIntensities[i] = lights[i].intensity;
-            }
-
-            currentBrightness = 1;
-        }
         private void EnableLights()
         {
             for (int i = 0; i < lights.Length; i++)
@@ -171,10 +142,10 @@ namespace Core.Graphics
         {
             for (int i = 0; i < lights.Length; i++)
             {
-                UpdateLight(lights[i], defaultIntensities[i]);
+                UpdateLight(lights[i]);
             }
         }
-        private void UpdateLight(Light light, float intensity)
+        private void UpdateLight(Light light)
         {
             if (light == null)
             {
@@ -187,19 +158,10 @@ namespace Core.Graphics
             if (light.isActiveAndEnabled)
             {
                 light.color = lightColor;
-                light.intensity = intensity * lightIntensity * currentBrightness;
+                light.intensity = lightIntensity * currentBrightness;
             }
         }
 
-        private void InitializeMeshes()
-        {
-            if (meshes == null)
-            {
-                return;
-            }
-
-            UpdateMeshes();
-        }
         private void UpdateMeshes()
         {
             for (int i = 0; i < meshes.Length; i++)
@@ -217,7 +179,7 @@ namespace Core.Graphics
                 return;
             }
 
-            Color targetColor = isActive ? lightColor * currentBrightness : COLOR_BLACK;
+            Color targetColor = isActive ? meshColor * currentBrightness : COLOR_BLACK;
 
             mesh.SetShaderUserValue(EncodeColorWithFlag(targetColor, true));
         }
