@@ -150,7 +150,7 @@ namespace Core.Graphics
             if (light == null)
             {
 #if UNITY_EDITOR
-                Debug.LogError("Light emitter light update failed! light is null!");
+                Debug.LogError("Light emitter light update failed! light is null!", gameobject);
 #endif
                 return;
             }
@@ -174,7 +174,7 @@ namespace Core.Graphics
             if (mesh == null)
             {
 #if UNITY_EDITOR
-                Debug.LogError("Light emitter mesh update failed! mesh is null!");
+                Debug.LogError("Light emitter mesh update failed! mesh is null!", gameobject);
 #endif
                 return;
             }
