@@ -335,6 +335,14 @@ namespace Core.Editor
             }
         }
 
+        public static void DrawArrow(Vector3 position, Vector3 direction, float length = 0.25f, float angle = 20.0f)
+        {
+            Gizmos.DrawRay(position, direction);
+            Vector3 right = Quaternion.LookRotation(direction) * Quaternion.Euler(0, 180 + angle, 0) * new Vector3(0, 0, 1);
+            Vector3 left = Quaternion.LookRotation(direction) * Quaternion.Euler(0, 180 - angle, 0) * new Vector3(0, 0, 1);
+            Gizmos.DrawRay(position + direction, right * length);
+            Gizmos.DrawRay(position + direction, left * length);
+        }
         public static void DrawFieldOfView(Transform origin, float radius, float angle)
         {
             if (origin == null)
