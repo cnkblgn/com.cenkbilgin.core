@@ -337,6 +337,11 @@ namespace Core.Editor
 
         public static void DrawArrow(Vector3 position, Vector3 direction, float length = 0.25f, float angle = 20.0f)
         {
+            if (direction.sqrMagnitude < 0.01f)
+            {
+                return;
+            }
+
             Gizmos.DrawRay(position, direction);
             Vector3 right = Quaternion.LookRotation(direction) * Quaternion.Euler(0, 180 + angle, 0) * new Vector3(0, 0, 1);
             Vector3 left = Quaternion.LookRotation(direction) * Quaternion.Euler(0, 180 - angle, 0) * new Vector3(0, 0, 1);
