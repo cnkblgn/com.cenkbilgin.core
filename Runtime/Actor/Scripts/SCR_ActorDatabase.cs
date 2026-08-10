@@ -73,6 +73,17 @@ namespace Core.Actors
         }
         public static SearchCollection<string> GetIDs() => idSearch;
         public static SearchCollection<string> GetTags() => tagSearch;
+        public static ActorID GetID(int index)
+        {
+            if (index >= database.Length || index < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(index), index, $"Actor id not found index out of range");
+            }
+
+            string key = idSearch.Entries[index].Value;
+
+            return new(key, GetIDIndex(key));
+        }
         public static int GetIDIndex(string id)
         {
             if (idLookup.TryGetValue(id, out int a))
@@ -81,6 +92,17 @@ namespace Core.Actors
             }
 
             return -1;
+        }
+        public static ActorID GetTag(int index)
+        {
+            if (index >= tagSearch.Entries.Length || index < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(index), index, $"Actor tag not found index out of range");
+            }
+
+            string key = tagSearch.Entries[index].Value;
+
+            return new(key, GetTagIndex(key));
         }
         public static int GetTagIndex(string id)
         {

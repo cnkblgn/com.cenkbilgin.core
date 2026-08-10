@@ -14,10 +14,10 @@ namespace Core.Actors
         [SerializeField, Required] private string key;
         [SerializeField, ReadOnly] private int index;
 
-        public ActorID(string key, uint index)
+        public ActorID(string key, int index)
         {
             this.key = key;
-            this.index = (int)index;
+            this.index = index;
         }
 
         public readonly override string ToString() => $"Key: {key} << Index: {index}";

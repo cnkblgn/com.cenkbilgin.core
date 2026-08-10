@@ -54,6 +54,17 @@ namespace Core.Prefab
 
             return -1;
         }
+        public static PrefabID GetID(int index)
+        {
+            if (index >= database.Length || index < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(index), index, $"Prefab id not found index out of range");
+            }
+
+            string key = idSearch.Entries[index].Value;
+
+            return new(key, GetIndex(key));
+        }
         internal static GameObject GetPrefab(int index)
         {
             if (index >= database.Length || index < 0)

@@ -53,6 +53,17 @@ namespace Core.Graphics
 
             return -1;
         }
+        public static IconID GetID(int index)
+        {
+            if (index >= database.Length || index < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(index), index, $"Icon id not found index out of range");
+            }
+
+            string key = idSearch.Entries[index].Value;
+
+            return new(key, GetIndex(key));
+        }
 
         public static Sprite GetSprite(int index)
         {

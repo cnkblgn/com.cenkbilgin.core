@@ -1,3 +1,4 @@
+using Core.Graphics;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -77,6 +78,17 @@ namespace Core.Item
             }
 
             return -1;
+        }
+        public static ItemTag GetTag(int index)
+        {
+            if (index >= database.Length || index < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(index), index, $"Item tag not found index out of range");
+            }
+
+            string key = tagSearch.Entries[index].Value;
+
+            return new(key, GetTagIndex(key));
         }
         public static ItemDefinition GetDefinition(int index)
         {

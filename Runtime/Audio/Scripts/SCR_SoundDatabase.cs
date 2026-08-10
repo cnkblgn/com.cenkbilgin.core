@@ -54,7 +54,7 @@ namespace Core.Audio
 
             return -1;
         }
-        public static SoundID GetID(int index) => GetEntry(index).ID
+        public static SoundID GetID(int index) => GetEntry(index).ID;
         internal static SoundEntry GetEntry(int index)
         {
             if (index >= database.Length || index < 0)
