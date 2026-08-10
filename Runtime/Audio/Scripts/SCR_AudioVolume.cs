@@ -89,6 +89,16 @@ namespace Core.Audio
         }
 
 #if UNITY_EDITOR
+        private static GUIStyle GizmosStyle
+        {
+            get
+            {
+                gizmosStyle ??= new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, };
+                gizmosStyle.normal.textColor = COLOR_GREEN;
+
+                return gizmosStyle;
+            }
+        } private static GUIStyle gizmosStyle;
 
         private void OnValidate()
         {
@@ -130,9 +140,9 @@ namespace Core.Audio
 
             Gizmos.matrix = oldMatrix;
 
-            if (selected && Application.isPlaying)
+            if (selected)
             {
-                UnityEditor.Handles.Label(thisTransform.position + Vector3.up * (outerSize.y * 0.5f + 0.3f), $"Vol: {currentVolume:F2}");
+                UnityEditor.Handles.Label(thisTransform.position + Vector3.up * (outerSize.y * 0.5f + 0.3f), $"Volume: {currentVolume:F2}", GizmosStyle);
             }
         }
 #endif

@@ -13,6 +13,7 @@ namespace Core.Audio
         public bool IsFading => thisCoroutine != null;
 
         [Header("_")]
+        [Info("Optional, but if its missing player tries to play via manager")]
         [SerializeField, FormerlySerializedAs("audioObject")] private AudioEmitter emitter = null;
 
         [Header("_")]
