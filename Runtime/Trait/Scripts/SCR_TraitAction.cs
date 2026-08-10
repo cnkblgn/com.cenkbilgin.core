@@ -14,7 +14,7 @@ namespace Core.Trait
     }
 
     [Serializable]
-    public sealed class TraitActionEmpty : TraitAction
+    public sealed class TraitActionNone : TraitAction
     {
         public override string Description => STRING_EMPTY;
         public override void Apply(Actor character, ref TraitInstance instance) { }
