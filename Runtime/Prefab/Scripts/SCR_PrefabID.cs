@@ -6,7 +6,7 @@ namespace Core.Prefab
     using static CoreUtility;
 
     [Serializable]
-    public partial struct PrefabID : IEquatable<PrefabID>
+    public struct PrefabID : IEquatable<PrefabID>
     {
         public static readonly PrefabID NONE = new(STRING_EMPTY, -1);
 

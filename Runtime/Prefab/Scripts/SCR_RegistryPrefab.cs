@@ -24,10 +24,10 @@ namespace Core.Prefab
         public override void Reload()
         {
             BuildDatabase();
-            Generate();
+            GenerateIDs();
         }
 
-        private void Generate()
+        private void GenerateIDs()
         {
             SourceGenerator generator = new();
 

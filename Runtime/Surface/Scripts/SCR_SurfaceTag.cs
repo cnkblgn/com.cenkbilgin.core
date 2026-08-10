@@ -3,10 +3,8 @@ using UnityEngine;
 
 namespace Core.Surface
 {
-    using static CoreUtility;
-
     [Serializable]
-    public partial struct SurfaceTag : IEquatable<SurfaceTag>
+    public struct SurfaceTag : IEquatable<SurfaceTag>
     {
         public readonly string Key => key;
         public readonly int Index => index;

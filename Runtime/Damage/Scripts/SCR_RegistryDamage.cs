@@ -23,10 +23,10 @@ namespace Core.Damage
         public override void Reload()
         {
             BuildDatabase();
-            Generate();
+            GenerateTags();
         }
 
-        private void Generate()
+        private void GenerateTags()
         {
             SourceGenerator generator = new();
 

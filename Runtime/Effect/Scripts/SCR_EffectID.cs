@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Core.Effect
 {
     [Serializable]
-    public partial struct EffectID : IEquatable<EffectID>
+    public struct EffectID : IEquatable<EffectID>
     {
         public readonly string Key => key;
         public readonly int Index => index;

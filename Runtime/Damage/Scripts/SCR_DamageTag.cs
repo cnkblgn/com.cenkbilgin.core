@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Core.Damage
 {
     [Serializable]
-    public partial struct DamageTag : IEquatable<DamageTag>
+    public struct DamageTag : IEquatable<DamageTag>
     {
         public readonly string Key => key;
         public readonly int Index => index;

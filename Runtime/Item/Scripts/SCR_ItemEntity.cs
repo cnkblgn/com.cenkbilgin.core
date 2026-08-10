@@ -8,8 +8,9 @@ namespace Core.Item
         public ItemID ID => id;
 
         [Header("_")]
+        [Info("Toggle 'overrideData' only if you want to keep overrides.")]
         [SerializeField] private ItemID id;
-        [SerializeField, Info("Only if you want to keep overrides.")] private bool overrideData;
+        [SerializeField] private bool overrideData;
 
         private ItemData thisData;
         private IItemHandler thisHandler;

@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Core.Actors
 {
     [Serializable]
-    public partial struct ActorID : IEquatable<ActorID>
+    public struct ActorID : IEquatable<ActorID>
     {
         public readonly string Key => key;
         public readonly int Index => index;

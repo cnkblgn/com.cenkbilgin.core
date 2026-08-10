@@ -2,15 +2,15 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Core.Stat
+namespace Core.Trait
 {
-    public static class StatDatabase
+    public static class TraitDatabase
     {
         private static readonly Dictionary<string, int> idLookup = new();
         private static SearchCollection<string> idSearch = new(Array.Empty<SearchEntry<string>>());
-        private static StatDefinition[] database = Array.Empty<StatDefinition>();
+        private static TraitDefinition[] database = Array.Empty<TraitDefinition>();
 
-        internal static void Build(string[] idCollection, StatEntry[] entries)
+        internal static void Build(string[] idCollection, TraitEntry[] entries)
         {
             if (idCollection == null || entries == null)
             {
@@ -18,8 +18,8 @@ namespace Core.Stat
             }
 
             idLookup.Clear();
-            idSearch = new(new SearchEntry<string>[idCollection.Length]);            
-            database = new StatDefinition[idCollection.Length];
+            idSearch = new(new SearchEntry<string>[idCollection.Length]);
+            database = new TraitDefinition[idCollection.Length];
 
             for (int i = 0; i < idCollection.Length; i++)
             {
@@ -34,10 +34,10 @@ namespace Core.Stat
                 database[i] = new(entries[i]);
             }
 
-            Debug.Log($"Effect database build successfull!");
+            Debug.Log($"Trait database build successfull!");
         }
 
-        public static IReadOnlyList<StatDefinition> GetDatabase() => database;
+        public static IReadOnlyList<TraitDefinition> GetDatabase() => database;
         public static SearchCollection<string> GetIDs() => idSearch;
         public static int GetIndex(string id)
         {
@@ -48,21 +48,22 @@ namespace Core.Stat
 
             return -1;
         }
-        public static StatDefinition GetDefinition(int index)
+        public static TraitInstance CreateInstance(TraitID id) => new(GetDefinition(id).ID);
+        public static TraitDefinition GetDefinition(int index)
         {
             if (index >= database.Length || index < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(index), index, $"Stat not found index out of range");
+                throw new ArgumentOutOfRangeException(nameof(index), index, $"Trait not found index out of range");
             }
 
 
             return database[index];
         }
-        public static StatDefinition GetDefinition(StatID id)
+        public static TraitDefinition GetDefinition(TraitID id)
         {
             if (!id.IsValid)
             {
-                throw new ArgumentNullException($"Stat id [{nameof(id)}] is not valid!");
+                throw new ArgumentNullException($"Trait id [{nameof(id)}] is not valid!");
             }
 
             return GetDefinition(id.Index);

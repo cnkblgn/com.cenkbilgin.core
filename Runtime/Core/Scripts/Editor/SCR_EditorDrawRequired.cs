@@ -3,13 +3,14 @@ using UnityEngine;
 
 namespace Core.Editor
 {
-    using static CoreUtility;
-
     [CustomPropertyDrawer(typeof(Required))]
     internal sealed class EditorDrawRequired : PropertyDrawer
     {
         private static Texture2D iconTexture = null;
         private readonly string iconName = "TEX_IconWarning";
+
+        private static readonly Color color01 = new(0.9f, 0.3f, 0.3f);
+        private static readonly Color color02 = new(0.9f, 0.75f, 0.3f);
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -22,14 +23,14 @@ namespace Core.Editor
 
             if (isEmpty)
             {
-                EditorGUI.DrawRect(fieldRect, COLOR_RED);
+                EditorGUI.DrawRect(fieldRect, color01);
             }
 
             EditorGUI.PropertyField(fieldRect, property, label);
             
             if (isEmpty)
             {
-                EditorUtility.DrawOutline(fieldRect, COLOR_YELLOW, 1);
+                EditorUtility.DrawOutline(fieldRect, color02, 1);
                 
                 Rect iconRect = new(position.xMax - 18, fieldRect.y, 16, 16);
 

@@ -6,7 +6,7 @@ namespace Core.Quest
     using static CoreUtility;
 
     [Serializable]
-    public partial struct QuestID : IEquatable<QuestID>
+    public struct QuestID : IEquatable<QuestID>
     {
         public readonly string Key => key;
         public readonly int Index => index;

@@ -11,7 +11,8 @@ namespace Core.Item
     {
         [HideInInspector] public string Name;
 
-        [Info("Please generate id if its not visible")] public ItemID ID;
+        [Info("Please generate id if its not visible")] 
+        public ItemID ID;
         public ItemTag[] Tags;
         public PrefabID EntityID;
         public PrefabID EquipableID;

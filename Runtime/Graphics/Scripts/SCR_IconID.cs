@@ -6,7 +6,7 @@ namespace Core.Graphics
     using static CoreUtility;
 
     [Serializable]
-    public partial struct IconID : IEquatable<IconID>
+    public struct IconID : IEquatable<IconID>
     {
         public static readonly IconID NONE = new(STRING_EMPTY, -1);
 

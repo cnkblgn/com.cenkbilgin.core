@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Core.Item
 {
     [Serializable]
-    public partial struct ItemID : IEquatable<ItemID>
+    public struct ItemID : IEquatable<ItemID>
     {
         public readonly string Key => key;
         public readonly int Index => index;

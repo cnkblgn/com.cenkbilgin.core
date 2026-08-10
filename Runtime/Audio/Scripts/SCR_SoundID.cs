@@ -6,7 +6,7 @@ namespace Core.Audio
     using static CoreUtility;
 
     [Serializable]
-    public partial struct SoundID : IEquatable<SoundID> 
+    public struct SoundID : IEquatable<SoundID> 
     {
         public static readonly SoundID NONE = new(STRING_EMPTY, -1);
 

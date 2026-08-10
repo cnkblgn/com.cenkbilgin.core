@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Core.Stat
 {
     [Serializable]
-    public partial struct StatID : IEquatable<StatID>
+    public struct StatID : IEquatable<StatID>
     {
         public readonly string Key => key;
         public readonly int Index => index;

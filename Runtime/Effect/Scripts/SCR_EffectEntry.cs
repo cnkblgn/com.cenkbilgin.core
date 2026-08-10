@@ -10,7 +10,8 @@ namespace Core.Effect
     {
         [HideInInspector] public string Name;
 
-        [Info("Please generate id if its not visible")] public EffectID ID;
+        [Info("Please generate id if its not visible")] 
+        public EffectID ID;
         public LocalizedID NameID;
         public IconID IconID;
         public EffectTag Tag;

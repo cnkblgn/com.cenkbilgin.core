@@ -8,7 +8,8 @@ namespace Core.Stat
     {
         [HideInInspector] public string Name;
 
-        [Info("Please generate id if its not visible")] public StatID ID;
+        [Info("Please generate id if its not visible")] 
+        public StatID ID;
         public float Default;
         public float Min;
         public float Max;

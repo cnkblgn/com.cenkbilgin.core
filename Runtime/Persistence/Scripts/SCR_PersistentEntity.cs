@@ -14,7 +14,8 @@ namespace Core.Persistence
         public Guid InstanceID => instanceID;
 
         [Header("_")]
-        [SerializeField, Info("Only for debug purposes! don't touch")] private string _instanceID = "";
+        [Info("Only for debug purposes! don't touch")]
+        [SerializeField] private string _instanceID = "";
 
         private Guid instanceID = default;
         private bool isQuitting = false;

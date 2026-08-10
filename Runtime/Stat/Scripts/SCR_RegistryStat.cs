@@ -31,10 +31,10 @@ namespace Core.Stat
         public override void Reload()
         {
             BuildDatabase();
-            Generate();
+            GenerateIDs();
         }
 
-        private void Generate()
+        private void GenerateIDs()
         {
             SourceGenerator generator = new();
 
@@ -82,7 +82,7 @@ namespace Core.Stat
         }
 
         /// <summary> Overrides entries </summary>
-        public void Override(StatEntry[] entries)
+        public void OverrideEntries(StatEntry[] entries)
         {
             if (entries == null)
             {
