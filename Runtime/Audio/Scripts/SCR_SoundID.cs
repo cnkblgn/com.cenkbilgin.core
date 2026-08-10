@@ -12,7 +12,7 @@ namespace Core.Audio
 
         public readonly string Key => key;
         public readonly int Index => index;
-        public readonly bool IsValid => !string.IsNullOrEmpty(key);
+        public readonly bool IsValid => !string.IsNullOrEmpty(key) && index >= 0;
 
         [SerializeField, Required] private string key;
         [SerializeField, ReadOnly] private int index;
@@ -24,9 +24,9 @@ namespace Core.Audio
         }
 
         public readonly override string ToString() => $"Key: {key} << Index: {index}";
-        public readonly override int GetHashCode() => key != null ? key.GetHashCode() : 0;
+        public readonly override int GetHashCode() => index;
         public readonly override bool Equals(object obj) => obj is SoundID other && Equals(other);
-        public readonly bool Equals(SoundID other) => key == other.key;
+        public readonly bool Equals(SoundID other) => index == other.index;
         public static bool operator ==(SoundID left, SoundID right) => left.Equals(right);
         public static bool operator !=(SoundID left, SoundID right) => !left.Equals(right);
 

@@ -45,8 +45,9 @@ namespace Core.Prefab
                 foreach (SearchEntry<string> entry in PrefabDatabase.GetIDs().Entries)
                 {
                     string id = entry.Value;
+                    int index = PrefabDatabase.GetIndex(id);
 
-                    generator.Field($"public static readonly PrefabID {id.ToIdentifier()} = new({id.ToLiteral()})");
+                    generator.Field($"public static readonly PrefabID {id.ToIdentifier()} = new({id.ToLiteral()},{index})");
                 }
             }
 

@@ -7,7 +7,8 @@ namespace Core.Graphics
     public static class IconDatabase
     {
         private static SearchCollection<string> idSearch = new(Array.Empty<SearchEntry<string>>());
-        private static readonly Dictionary<IconID, Sprite> database = new();
+        private static readonly Dictionary<string, int> idLookup = new();
+        private static Sprite[] database = Array.Empty<Sprite>();
 
         internal static void Build(Sprite[] spriteCollection)
         {
@@ -16,9 +17,9 @@ namespace Core.Graphics
                 return;
             }
 
-            database.Clear();
-
+            database = new Sprite[spriteCollection.Length];
             idSearch = new SearchCollection<string>(new SearchEntry<string>[spriteCollection.Length]);
+            idLookup.Clear();
 
             for (int i = 0; i < spriteCollection.Length; i++)
             {
@@ -31,9 +32,10 @@ namespace Core.Graphics
                 }
 #endif
                 string key = spriteCollection[i].name;
-                IconID id = new(key);
+                IconID id = new(key, i);
 
-                database.Add(id, spriteCollection[i]);
+                idLookup[key] = i;
+                database[i] = spriteCollection[i];
                 idSearch.Entries[i] = new SearchEntry<string>(key, key);
             }
 
@@ -42,6 +44,26 @@ namespace Core.Graphics
         }
 
         public static SearchCollection<string> GetIDs() => idSearch;
+        public static int GetIndex(string id)
+        {
+            if (idLookup.TryGetValue(id, out int a))
+            {
+                return a;
+            }
+
+            return -1;
+        }
+
+        public static Sprite GetSprite(int index)
+        {
+            if (index >= database.Length || index < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(index), index, $"Icon not found index out of range");
+            }
+
+            return database[index];
+        }
+        public static Sprite GetSprite(string id) => GetSprite(GetIndex(id));
         public static Sprite GetSprite(IconID id)
         {
             if (!id.IsValid)
@@ -49,13 +71,7 @@ namespace Core.Graphics
                 throw new ArgumentNullException($"[{nameof(id)}] iconID is not valid!");
             }
 
-            if (database.TryGetValue(id, out Sprite sprite))
-            {
-                return sprite;
-            }
-
-            Debug.LogError($"icon not found! [{id.Key}]");
-            return null;
+            return GetSprite(id);
         }
     }
 }

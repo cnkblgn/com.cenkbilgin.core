@@ -6,8 +6,9 @@ namespace Core.Audio
 {
     public static class SoundDatabase
     {
+        private static readonly Dictionary<string, int> idLookup = new();
         private static SearchCollection<string> idSearch = new(Array.Empty<SearchEntry<string>>());
-        private static readonly Dictionary<SoundID, SoundEntry> database = new();
+        private static SoundEntry[] database = Array.Empty<SoundEntry>();
 
         internal static void Build(AudioClip[] clipCollection)
         {
@@ -16,9 +17,9 @@ namespace Core.Audio
                 return;
             }
 
-            database.Clear();
-
+            database = new SoundEntry[clipCollection.Length];
             idSearch = new SearchCollection<string>(new SearchEntry<string>[clipCollection.Length]);
+            idLookup.Clear();
 
             for (int i = 0; i < clipCollection.Length; i++)
             {
@@ -35,52 +36,43 @@ namespace Core.Audio
                 string key = clipCollection[i].name;
                 SoundID id = new(key, i);
 
-                database.Add(id, new(id, clipCollection[i]));
-                idSearch.Entries[i] = new SearchEntry<string>(key, key);
+                idLookup[key] = i;
+                database[i] = new(id, clipCollection[i]);
+                idSearch.Entries[i] = new(key, key);
             }
 
             Debug.Log($"SoundDatabase build successfull!");
         }
  
         public static SearchCollection<string> GetIDs() => idSearch;
-        public static SoundID GetID(int index)
-        {
-            if (index >= idSearch.Entries.Length || index < 0)
-            {
-                throw new ArgumentOutOfRangeException($"sound database index out of range {nameof(index)}");
-            }
-
-            if (!database.TryGetValue(new(idSearch.Entries[index].Value, -1), out SoundEntry entry))
-            {
-                return SoundID.NONE;
-            }
-
-            return entry.ID;
-        }
-        public static AudioClip GetClip(SoundID id)
-        {
-            if (!id.IsValid)
-            {
-                throw new ArgumentNullException($"[{nameof(id)}] soundID is not valid!");
-            }
-
-            if (database.TryGetValue(id, out SoundEntry entry))
-            {
-                return entry.Clip;
-            }
-
-            Debug.LogError($"Audio clip not found! [{id.Key}]");
-            return null;
-        }
         public static int GetIndex(string key)
         {
-            if (database.TryGetValue(CreateID(key), out SoundEntry entry))
+            if (idLookup.TryGetValue(key, out int index))
             {
-                return entry.ID.Index;
+                return index;
             }
 
             return -1;
         }
-        internal static SoundID CreateID(string key) => new(key, -1);
+        internal static SoundEntry GetEntry(int index)
+        {
+            if (index >= database.Length || index < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(index), index, $"Sound not found index out of range");
+            }
+
+            return database[index];
+        }
+        internal static SoundEntry GetEntry(SoundID id)
+        {
+            if (!id.IsValid)
+            {
+                throw new ArgumentNullException($"[{nameof(id)}] SoundID is not valid!");
+            }
+
+            return GetEntry(id.Index);
+        }
+        public static AudioClip GetClip(int index) => GetEntry(index).Clip;
+        public static AudioClip GetClip(SoundID id) => GetEntry(id).Clip;
     }
 }

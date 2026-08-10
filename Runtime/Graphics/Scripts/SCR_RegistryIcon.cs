@@ -43,8 +43,9 @@ namespace Core.Graphics
                 foreach (SearchEntry<string> entry in IconDatabase.GetIDs().Entries)
                 {
                     string id = entry.Value;
- 
-                    generator.Field($"public static readonly IconID {id.ToIdentifier()} = new({id.ToLiteral()})");
+                    int index = IconDatabase.GetIndex(id);
+
+                    generator.Field($"public static readonly IconID {id.ToIdentifier()} = new({id.ToLiteral()},{index})");
                 }
             }
 

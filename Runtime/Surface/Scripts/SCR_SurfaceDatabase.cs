@@ -6,8 +6,9 @@ namespace Core.Surface
 {
     public static class SurfaceDatabase
     {
+        private static readonly Dictionary<string, int> tagLookup = new();
         private static SearchCollection<string> tagSearch = new(Array.Empty<SearchEntry<string>>());
-        private static readonly Dictionary<string, SurfaceTag> database = new();
+        private static SurfaceTag[] database = Array.Empty<SurfaceTag>();
 
         internal static void Build(string[] tagCollection)
         {
@@ -16,10 +17,11 @@ namespace Core.Surface
                 return;
             }
 
-            database.Clear();
+            tagLookup.Clear();
             tagSearch = new SearchCollection<string>(new SearchEntry<string>[tagCollection.Length + 1]);
+            database = new SurfaceTag[tagCollection.Length + 1];
 
-            database["GENERIC"] = new("GENERIC", 0);
+            database[0] = new("GENERIC", 0);
             tagSearch.Entries[0] = new("GENERIC", "GENERIC");
 
             for (int i = 0; i < tagCollection.Length; i++)
@@ -27,28 +29,29 @@ namespace Core.Surface
                 string key = tagCollection[i];
                 int index = i + 1;
 
-                database[key] = new(key, index);
-                tagSearch.Entries[index] = new SearchEntry<string>(key, key);
+                tagLookup[key] = index;
+                database[index] = new(key, index);
+                tagSearch.Entries[index] = new(key, key);
             }
 
             Debug.Log($"Surface database build successfull!");
         }
 
         public static SearchCollection<string> GetTags() => tagSearch;
-        public static string GetTagKey(int index)
+        public static SurfaceTag GetTag(int index)
         {
-            if (index < 0 || index >= database.Count)
+            if (index >= database.Length || index < 0)
             {
-                throw new IndexOutOfRangeException($"SurfaceTag index [{index}] is not valid!");
+                throw new ArgumentOutOfRangeException(nameof(index), index, $"Surface  tag not found index out of range");
             }
 
-            return tagSearch.Entries[index].Value;
+            return database[index];
         }
         public static int GetTagIndex(string id)
         {
-            if (database.TryGetValue(id, out SurfaceTag tag))
+            if (tagLookup.TryGetValue(id, out int a))
             {
-                return tag.Index;
+                return a;
             }
 
             return -1;

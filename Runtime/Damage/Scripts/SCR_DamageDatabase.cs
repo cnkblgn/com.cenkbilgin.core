@@ -6,8 +6,9 @@ namespace Core.Damage
 {
     public static class DamageDatabase
     {
+        private static readonly Dictionary<string, int> tagLookup = new();
         private static SearchCollection<string> tagSearch = new(Array.Empty<SearchEntry<string>>());
-        private static readonly Dictionary<string, DamageTag> database = new();
+        private static DamageTag[] database = Array.Empty<DamageTag>();
 
         internal static void Build(string[] tagCollection)
         {
@@ -16,10 +17,11 @@ namespace Core.Damage
                 return;
             }
 
-            database.Clear();
+            database = new DamageTag[tagCollection.Length + 1];
             tagSearch = new(new SearchEntry<string>[tagCollection.Length + 1]);
+            tagLookup.Clear();
 
-            database["GENERIC"] = new("GENERIC", 0);
+            database[0] = new("GENERIC", 0);
             tagSearch.Entries[0] = new("GENERIC", "GENERIC");
 
             for (int i = 0; i < tagCollection.Length; i++)
@@ -27,28 +29,29 @@ namespace Core.Damage
                 string key = tagCollection[i];
                 int index = i + 1;
 
-                database[key] = new(key, index);
-                tagSearch.Entries[index] = new SearchEntry<string>(key, key);
+                tagLookup[key] = index;
+                database[index] = new(key, index);
+                tagSearch.Entries[index] = new(key, key);
             }
 
             Debug.Log($"Damage database build successfull!");
         }
 
         public static SearchCollection<string> GetTags() => tagSearch;
-        public static string GetTagKey(int index)
+        public static DamageTag GetTag(int index)
         {
-            if (index < 0 || index >= database.Count)
+            if (index >= database.Length || index < 0)
             {
-                throw new IndexOutOfRangeException($"DamageTag index [{index}] is not valid!");
+                throw new ArgumentOutOfRangeException(nameof(index), index, $"Damage tag not found index out of range");
             }
 
-            return tagSearch.Entries[index].Value;
+            return database[index];
         }
         public static int GetTagIndex(string key)
         {
-            if (database.TryGetValue(key, out DamageTag tag))
+            if (tagLookup.TryGetValue(key, out int index))
             {
-                return tag.Index;
+                return index;
             }
 
             return -1;

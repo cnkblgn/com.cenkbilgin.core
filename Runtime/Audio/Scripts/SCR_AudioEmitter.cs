@@ -20,14 +20,14 @@ namespace Core.Audio
         private const float MAX_CUTOFF = 22000f;
 
         public string AudioGroup => thisAudioGroup != null ? thisAudioGroup.name : STRING_NULL;
-        public bool IsPlaying => isPlaying; 
-        public bool IsPaused => isPaused; 
+        public bool IsPlaying => isPlaying;
+        public bool IsPaused => isPaused;
 
         [Header("_")]
         [SerializeField] private bool useGizmos = false;
-        [SerializeField, HideInInspector] private Transform thisTransform = null;
-        [SerializeField, HideInInspector] private AudioSource thisAudioSource = null;
-        [SerializeField, HideInInspector] private AudioLowPassFilter thisAudioFilter = null;
+        [SerializeField, HideInInspector] internal Transform thisTransform = null;
+        [SerializeField, HideInInspector] internal AudioSource thisAudioSource = null;
+        [SerializeField, HideInInspector] internal AudioLowPassFilter thisAudioFilter = null;
 
         private AudioClip thisAudioClip = null;
         private Transform thisAudioListener = null;
@@ -51,24 +51,23 @@ namespace Core.Audio
         private float maxDistanceSqr = 0f;
         private float volumeMultiplier = 1;
         private float pitchMultiplier = 1;
-        private float lowpassMultiplier = 1;
-        private float resonanceMultiplier = 1;
+        private float lowpassMultiplier = 1;   
         private float occlusionVolumeMultiplier = 1;
         private float occlusionLowpassMultiplier = 1;
         private bool occlusionEnabled = false;
         private bool occlusionFront = false;
         private bool occlusionLeft = false;
         private bool occlusionRight = false;
-        private bool isInitialized = false; 
+        private bool isInitialized = false;
         private bool isPlaying = false;
         private bool isPaused = false;
         private bool hasFocus = true;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void OnRuntimeInitialize() 
-        { 
-            OnCreated = null; 
-            OnDestroyed = null; 
+        private static void OnRuntimeInitialize()
+        {
+            OnCreated = null;
+            OnDestroyed = null;
         }
 
         private void Start() => OnCreated?.Invoke(this);
@@ -137,7 +136,6 @@ namespace Core.Audio
             ApplyVolume(false);
             ApplyLowpass(false);
             ApplyPitch();
-            ApplyResonance();
         }
         internal void TickOcclusion()
         {
@@ -194,10 +192,6 @@ namespace Core.Audio
 
             thisAudioSource.pitch = pitch;
         }
-        private void ApplyResonance()
-        {
-            thisAudioFilter.lowpassResonanceQ = resonanceMultiplier;
-        }
 
         public void Play(AudioClip clip, Transform listener, AudioMixerGroup group, float blend, float volume, float pitch, float minDistance, float maxDistance, bool loop, LayerMask occlusionMask, float occlusionAngle, float occlusionBlend, AnimationCurve occlusionLowpass, AnimationCurve occlusionVolume)
         {
@@ -215,7 +209,7 @@ namespace Core.Audio
             this.occlusionVolumeCurve = occlusionVolume;
             this.occlusionBlend = occlusionBlend;
             this.occlusionAngle = occlusionAngle;
-            
+
             occlusionUpdateTime = 0f;
             Occlude(true);
         }
@@ -339,7 +333,6 @@ namespace Core.Audio
                 ApplyLowpass(true);
                 ApplyVolume(true);
                 ApplyPitch();
-                ApplyResonance();
             }
         }
 
@@ -356,8 +349,7 @@ namespace Core.Audio
             volumeMultiplier = 1;
             pitchMultiplier = 1;
             lowpassMultiplier = 1;
-            resonanceMultiplier = 1;
-
+  
             isPaused = false;
             isPlaying = false;
         }
@@ -365,32 +357,25 @@ namespace Core.Audio
         public Vector3 GetPosition() => thisTransform.position;
         public void SetPosition(Vector3 position) => thisTransform.position = position;
 
-        public float GetPitch() => pitchMultiplier;
-        public void SetPitch(float value)
+        public float GetPitchMult() => pitchMultiplier;
+        public void SetPitchMult(float value)
         {
             pitchMultiplier = value;
             ApplyPitch();
         }
 
-        public float GetVolume() => volumeMultiplier;
-        public void SetVolume(float value)
+        public float GetVolumeMult() => volumeMultiplier;
+        public void SetVolumeMult(float value)
         {
             volumeMultiplier = value;
             ApplyVolume(true);
         }
 
-        public float GetLowpass() => MAX_CUTOFF * lowpassMultiplier;
-        public void SetLowpass(float value)
+        public float GetLowpassMult() => MAX_CUTOFF * lowpassMultiplier;
+        public void SetLowpassMult(float value)
         {
             lowpassMultiplier = value;
             ApplyLowpass(true);
-        }
-
-        public float GetResonance() => resonanceMultiplier;
-        public void SetResonance(float value)
-        {
-            resonanceMultiplier = value;
-            ApplyResonance();
         }
     }
 }

@@ -8,18 +8,24 @@ namespace Core.Prefab
     [Serializable]
     public partial struct PrefabID : IEquatable<PrefabID>
     {
-        public static readonly PrefabID NONE = new(STRING_EMPTY);
+        public static readonly PrefabID NONE = new(STRING_EMPTY, -1);
 
         public readonly string Key => key;
-        public readonly bool IsValid => !string.IsNullOrEmpty(key);
+        public readonly int Index => Index;
+        public readonly bool IsValid => !string.IsNullOrEmpty(key) && index >= 0;
 
         [SerializeField, Required] private string key;
+        [SerializeField, ReadOnly] private int index;
 
-        public PrefabID(string key) => this.key = key;
+        public PrefabID(string key, int index)
+        {
+            this.key = key;
+            this.index = index;
+        }
 
-        public readonly override string ToString() => $"Key: {key}";
-        public readonly override int GetHashCode() => key != null ? key.GetHashCode() : 0;
-        public readonly bool Equals(PrefabID other) => key == other.key;
+        public readonly override string ToString() => $"Key: {key} << Index: {index}";
+        public readonly override int GetHashCode() => index;
+        public readonly bool Equals(PrefabID other) => index == other.index;
         public readonly override bool Equals(object obj) => obj is PrefabID other && Equals(other);
         public static bool operator ==(PrefabID left, PrefabID right) => left.Equals(right);
         public static bool operator !=(PrefabID left, PrefabID right) => !left.Equals(right);

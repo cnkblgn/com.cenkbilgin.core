@@ -10,7 +10,7 @@ namespace Core.Item
         private static SearchCollection<string> tagSearch = new(Array.Empty<SearchEntry<string>>());
         private static readonly Dictionary<string, int> idLookup = new();
         private static readonly Dictionary<string, int> tagLookup = new();
-        private static readonly Dictionary<ItemID, ItemDefinition> database = new();
+        private static ItemDefinition[] database = Array.Empty<ItemDefinition>();
         private static ItemProcessor processor;
         private static Transform root;
 
@@ -21,7 +21,7 @@ namespace Core.Item
                 return;
             }
 
-            database.Clear();
+            database = new ItemDefinition[entries.Length];
             tagLookup.Clear();
             idLookup.Clear();
 
@@ -51,13 +51,13 @@ namespace Core.Item
 
             for (int i = 0; i < entries.Length; i++)
             {
-                database[entries[i].ID] = new(entries[i]);
+                database[i] = new(entries[i]);
             }
 
             Debug.Log($"Item database build successfull!");
         }
 
-        public static IReadOnlyCollection<ItemDefinition> GetDatabase() => database.Values;
+        public static IReadOnlyList<ItemDefinition> GetDatabase() => database;
         public static SearchCollection<string> GetIDs() => idSearch;
         public static SearchCollection<string> GetTags() => tagSearch;
         public static int GetIDIndex(string id)
@@ -78,43 +78,26 @@ namespace Core.Item
 
             return -1;
         }
-        internal static string GetID(int index)
+        public static ItemDefinition GetDefinition(int index)
         {
-            if (index < 0 || index >= idLookup.Count)
+            if (index >= database.Length || index < 0)
             {
-                throw new IndexOutOfRangeException($"Item index [{index}] is not valid!");
+                throw new ArgumentOutOfRangeException(nameof(index), index, $"Item not found index out of range");
             }
 
-            return idSearch.Entries[index].Value;
+            return database[index];
         }
-        public static ItemDefinition GetDefinition(int index) => GetDefinition(CreateID(index));
         public static ItemDefinition GetDefinition(ItemID id)
         {
             if (!id.IsValid)
             {
-                throw new ArgumentNullException($"Item id [{nameof(id)}] is not valid!");
+                throw new ArgumentException($"Item id [{nameof(id)}] is not valid!");
             }
 
-            if (!database.TryGetValue(id, out ItemDefinition definition))
-            {
-                Debug.LogError($"Item id not found in database? [{id.Key}]");
-                return null;
-            }
-
-            return definition;
+            return GetDefinition(id.Index);
         }
-        internal static ItemData CreateData(ItemID id)
-        {
-            if (!database.ContainsKey(id))
-            {
-                throw new ArgumentNullException($"item definition not found for [{id.Key}]");
-            }
 
-            return new(id);
-        }
-        internal static ItemID CreateID(int index) => new(GetID(index), index);
-
-        public static ItemEntity CreateEntity(ItemID id, Vector3 position, Quaternion rotation, Transform parent = null) => CreateEntity(CreateData(id), position, rotation, parent);
+        public static ItemEntity CreateEntity(ItemID id, Vector3 position, Quaternion rotation, Transform parent = null) => CreateEntity(new ItemData(id), position, rotation, parent);
         public static ItemEntity CreateEntity(ItemData data, Vector3 position, Quaternion rotation, Transform parent = null)
         {
             if (data == null)
@@ -144,7 +127,7 @@ namespace Core.Item
         {
             List<ItemID> items = new();
 
-            foreach (ItemDefinition definition in database.Values)
+            foreach (ItemDefinition definition in database)
             {
                 if (definition.Tags.HasAny(tags))
                 {

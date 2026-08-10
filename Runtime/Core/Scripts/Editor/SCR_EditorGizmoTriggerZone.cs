@@ -7,7 +7,8 @@ namespace Core.Editor
     public static class EditorGizmoTriggerZone
     {
         private static readonly Mesh Mesh;
-        private static readonly Material Material;
+        private static readonly Material SelectedMaterial;
+        private static readonly Material DefaultMaterial;
         private static readonly Shader Shader;
 
         private const string SHADER_ID = "Hidden/FX_UnlitTrigger";
@@ -19,10 +20,18 @@ namespace Core.Editor
 
             if (Shader != null)
             {
-                Material = new(Shader)
+                DefaultMaterial = new Material(Shader)
                 {
                     hideFlags = HideFlags.HideAndDontSave
                 };
+
+                SelectedMaterial = new Material(Shader)
+                {
+                    hideFlags = HideFlags.HideAndDontSave
+                };
+
+                DefaultMaterial.color = Color.yellow;
+                SelectedMaterial.color = Color.red;
             }
         }
 
@@ -54,13 +63,16 @@ namespace Core.Editor
                 return;
             }
 
+            bool selected = (gizmoType & GizmoType.Selected) != 0;
+            Material material = selected ? SelectedMaterial : DefaultMaterial;
+
             Matrix4x4 matrix = Matrix4x4.TRS(zone.transform.TransformPoint(zone.GetCenter()), zone.transform.rotation, Vector3.Scale(zone.GetSize(), zone.transform.lossyScale));
 
-            Material.SetPass(0);
+            material.SetPass(0);
 
             Graphics.DrawMeshNow(Mesh, matrix);
 
-            Handles.color = (gizmoType & GizmoType.Selected) != 0 ? new Color(1f, 0.6f, 0f) : Color.yellow;
+            Handles.color = selected ? Color.red : Color.yellow;
 
             using (new Handles.DrawingScope(matrix))
             {

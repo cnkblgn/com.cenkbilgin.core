@@ -12,28 +12,6 @@ namespace Core.Audio
     [DisallowMultipleComponent]
     public class ManagerAudio : Manager<ManagerAudio>
     {
-        public Transform AudioListener
-        {
-            get
-            {
-                if (audioListener == null)
-                {
-                    AudioListener listener = FindAnyObjectByType<AudioListener>();
-
-                    if (listener != null)
-                    {
-                        audioListener = listener.transform;
-                    }
-                    else
-                    {
-                        Debug.LogError("AudioListener not found in scene!");
-                    }
-                }
-
-                return audioListener;
-            }
-        }
-
         private const string LOWPASS_MASTER = "MasterLowpass";
         private const string LOWPASS_GAME = "GameLowpass";
         private const string LOWPASS_MUSIC = "MusicLowpass";
@@ -96,6 +74,7 @@ namespace Core.Audio
 
         private AudioPool audioEmitterPool = null;
         private readonly List<AudioEmitter> audioEmitterCollection = new();
+        private readonly SwapBackArray<AudioVolume> audioVolumeCollection = new(32);
         private readonly Dictionary<string, AudioGroup> audioGroups = new();
         private Transform audioListener = null;
         private AudioReverbZone audioLastReverbZone = null;
@@ -130,6 +109,7 @@ namespace Core.Audio
         private float ambientPitchBase = 1;
         private float ambientPitchMult = 1;
         private float ambientLowpass = 22000f;
+        private float volumeTimer = 0f;
         private int updateEmitterIndex = 0;
 
         protected override void Awake()
@@ -151,34 +131,14 @@ namespace Core.Audio
         }
         private void Update()
         {
-            const int updatesPerFrame = 8;
-
-            for (int i = 0; i < audioEmitterCollection.Count; i++)
+#if UNITY_EDITOR
+            if (audioListener == null)
             {
-                audioEmitterCollection[i].TickState();
+                Debug.LogWarning("Audio listener is missing in scene? Please assign through ManagerAudio.SetListener()");
             }
-
-            for (int i = 0; i < updatesPerFrame; i++)
-            {
-                if (audioEmitterCollection.Count == 0)
-                {
-                    return;
-                }
-
-                updateEmitterIndex %= audioEmitterCollection.Count;
-
-                AudioEmitter emitter = audioEmitterCollection[updateEmitterIndex];
-
-                updateEmitterIndex++;
-
-                if (emitter == null)
-                {
-                    Debug.LogError($"Invalid (ghost) emitter detected! at: [{i}]");
-                    continue;
-                }
-
-                emitter.TickOcclusion();               
-            }
+#endif
+            TickEmitters();
+            TickVolumes();
         }
         private void OnEnable()
         {
@@ -308,6 +268,91 @@ namespace Core.Audio
 
         private void ResetPool() => audioEmitterPool.Pool.Reset(false, true);
         private void InitializePool() => audioEmitterPool = new(PoolType.RING_BUFFER, audioEmitterPrefab, audioEmitterContainer, 128);
+
+        private void TickEmitters()
+        {
+            const int updatesPerFrame = 8;
+
+            for (int i = 0; i < audioEmitterCollection.Count; i++)
+            {
+                audioEmitterCollection[i].TickState();
+            }
+
+            for (int i = 0; i < updatesPerFrame; i++)
+            {
+                if (audioEmitterCollection.Count == 0)
+                {
+                    return;
+                }
+
+                updateEmitterIndex %= audioEmitterCollection.Count;
+
+                AudioEmitter emitter = audioEmitterCollection[updateEmitterIndex];
+
+                updateEmitterIndex++;
+
+                if (emitter == null)
+                {
+                    Debug.LogError($"Invalid (ghost) audio emitter detected! at: [{i}]");
+                    continue;
+                }
+
+                emitter.TickOcclusion();
+            }
+        }
+        private void TickVolumes()
+        {
+            const float interval = 0.1f;
+
+            float dt = Time.deltaTime;
+
+            Vector3 listenerPosition = audioListener.position;
+
+            volumeTimer += dt;
+
+            if (volumeTimer >= interval)
+            {
+                volumeTimer = 0f;
+
+                for (int i = 0; i < audioVolumeCollection.Count; i++)
+                {
+                    audioVolumeCollection[i].TickCheck(listenerPosition);
+                }
+            }
+
+            for (int i = 0; i < audioVolumeCollection.Count; i++)
+            {
+                audioVolumeCollection[i].TickState(dt);
+            }
+        }
+
+        internal void RegisterVolume(AudioVolume volume)
+        {
+            if (volume == null)
+            {
+                Debug.LogError("Registering audio volume failed! AudioVolume is missing?");
+                return;
+            }
+
+            audioVolumeCollection.Add(volume);
+        }
+        internal void UnregisterVolume(AudioVolume volume)
+        {
+            if (volume == null)
+            {
+                Debug.LogError("Unregistering audio volume failed! AudioVolume is missing?");
+                return;
+            }
+
+            for (int i = 0; i < audioVolumeCollection.Count; i++)
+            {
+                if (audioVolumeCollection[i] == volume)
+                {
+                    audioVolumeCollection.RemoveAt(i);
+                    return;
+                }
+            }
+        }
 
         private void InitializeGroups()
         {
@@ -660,6 +705,17 @@ namespace Core.Audio
             SetVolume(target, @base * mult);
         }
 
+        public Transform GetListener() => audioListener;
+        public void SetListener(Transform listener)
+        {
+            if (listener == null)
+            {
+                throw new ArgumentNullException($"Set listener failed! target listener is null!? {nameof(listener)}");
+            }
+
+            audioListener = listener;
+        }
+
         private void ClearReverb()
         {
             audioMixer.SetFloat(REVERB_LF_REFERENCE, 250.00f);
@@ -774,11 +830,11 @@ namespace Core.Audio
         {
             if (!occulusion)
             {
-                return audioEmitterPool.Spawn(clip, AudioListener, GetAudioGroup(group), position, blend, volume, pitch, minDistance, maxDistance);
+                return audioEmitterPool.Spawn(clip, audioListener, GetAudioGroup(group), position, blend, volume, pitch, minDistance, maxDistance);
             }
             else
             {
-                return audioEmitterPool.Spawn(clip, AudioListener, GetAudioGroup(group), position, blend, volume, pitch, minDistance, maxDistance, occlusionMask, occlusionAngle, occlusionBlend, occlusionLowpass, occlusionVolume);
+                return audioEmitterPool.Spawn(clip, audioListener, GetAudioGroup(group), position, blend, volume, pitch, minDistance, maxDistance, occlusionMask, occlusionAngle, occlusionBlend, occlusionLowpass, occlusionVolume);
             }
         }
         public AudioEmitter PlaySound(AudioClip[] clip, AudioGroup group, Vector3 position, float blend, float volume, float pitch, float minDistance, float maxDistance, bool occulusion)

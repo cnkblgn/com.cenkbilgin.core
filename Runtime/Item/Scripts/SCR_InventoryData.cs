@@ -142,6 +142,12 @@ namespace Core.Item
                 return false;
             }
 
+            if (result == InventoryResult.OUT_OF_BOUNDS)
+            {
+                registered.IsRotated = oldRotation;
+                return false;
+            }
+
             registered.Position = position;
             SetTileItem(registered, position, newScale);
             result = InventoryResult.SUCCESS;
@@ -151,6 +157,7 @@ namespace Core.Item
         private void RegisterItem(ItemData item, Vector2Int position, out ItemData registered)
         {
             registered = new(item, position);
+
             SetTileItem(registered, registered.Position, registered.GetScale());
 
             itemTable[registered.InstanceID] = registered;
@@ -160,7 +167,7 @@ namespace Core.Item
         {
             if (!IsTileInsideBoundary(position.x, position.y, scale.x, scale.y))
             {
-                throw new IndexOutOfRangeException($"Tile placement out of bounds! pos = {position} scale = {scale}");
+                throw new IndexOutOfRangeException($"Item tile placement out of bounds! pos = {position} scale = {scale}");
             }
 
             for (int y = 0; y < scale.y; y++)
@@ -293,7 +300,7 @@ namespace Core.Item
                 if (item.Tags.HasAny(tags))
                 {
                     items.Add(item);
-                    result = InventoryResult.SUCCESS;
+                    found = true;
                 }
             }
 

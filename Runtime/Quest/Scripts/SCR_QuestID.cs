@@ -9,16 +9,22 @@ namespace Core.Quest
     public partial struct QuestID : IEquatable<QuestID>
     {
         public readonly string Key => key;
-        public readonly bool IsValid => !string.IsNullOrEmpty(key);
+        public readonly int Index => index;
+        public readonly bool IsValid => !string.IsNullOrEmpty(key) && index >= 0;
 
         [SerializeField, Required] private string key;
+        [SerializeField, ReadOnly] private int index;
 
-        public QuestID(string key) => this.key = key;
+        public QuestID(string key, int index)
+        {
+            this.key = key;
+            this.index = index;
+        }
 
-        public readonly override string ToString() => $"Key: {key}";
-        public readonly override int GetHashCode() => key != null ? key.GetHashCode() : 0;
+        public readonly override string ToString() => $"Key: {key} << Index: {index}";
+        public readonly override int GetHashCode() => index;
         public readonly override bool Equals(object obj) => obj is QuestID other && Equals(other);
-        public readonly bool Equals(QuestID other) => key == other.key;
+        public readonly bool Equals(QuestID other) => index == other.index;
         public static bool operator ==(QuestID left, QuestID right) => left.Equals(right);
         public static bool operator !=(QuestID left, QuestID right) => !left.Equals(right);
 

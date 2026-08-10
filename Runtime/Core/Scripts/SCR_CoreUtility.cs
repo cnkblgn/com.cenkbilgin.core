@@ -186,7 +186,32 @@ namespace Core
         }
         #endregion
 
-        #region PHYSICS
+        #region MATH
+        public static Vector3 Clamp(this Vector3 a, float length)
+        {
+            a.x = Mathf.Clamp(a.x, -length, length);
+            a.y = Mathf.Clamp(a.y, -length, length);
+            a.z = Mathf.Clamp(a.z, -length, length);
+
+            return a;
+        }
+        public static Vector2 Clamp(this Vector2 a, float length)
+        {
+            a.x = Mathf.Clamp(a.x, -length, length);
+            a.y = Mathf.Clamp(a.y, -length, length);
+
+            return a;
+        }
+        public static Vector3 Multiply(this Vector3 a, Vector3 b) => new(a.x * b.x, a.y * b.y, a.z * b.z);
+        public static Vector2 Multiply(this Vector2 a, Vector2 b) => new(a.x * b.x, a.y * b.y);
+        public static Vector3 ClearX(this Vector3 a) { a.x = 0; return a; }
+        public static Vector3 ClearY(this Vector3 a) { a.y = 0; return a; }
+        public static Vector3 ClearZ(this Vector3 a) { a.z = 0; return a; }
+        public static Vector3 ClearX(this Vector3Int a) { a.x = 0; return a; }
+        public static Vector3 ClearY(this Vector3Int a) { a.y = 0; return a; }
+        public static Vector3 ClearZ(this Vector3Int a) { a.z = 0; return a; }
+
+
         public static Vector3 GetRequiredLaunchVelocity(Vector3 targetPosition, Vector3 launchPosition, float forceMax)
         {
             Vector3 displacement = Vector3.zero;
@@ -323,33 +348,66 @@ namespace Core
 
             return -Vector3.Dot(aFwd, aToB) >= threshold && Vector3.Dot(bFwd, bToA) >= threshold;
         }
-        #endregion
-
-        #region MATH
-        public static Vector3 Clamp(this Vector3 a, float length)
+        public static float SafeInverseLerp(float inner, float outer, float dist)
         {
-            a.x = Mathf.Clamp(a.x, -length, length);
-            a.y = Mathf.Clamp(a.y, -length, length);
-            a.z = Mathf.Clamp(a.z, -length, length);
+            if (outer <= inner)
+            {
+                return dist > inner ? 1f : 0f;
+            }
 
-            return a;
+            return Mathf.Clamp01((dist - inner) / (outer - inner));
         }
-        public static Vector2 Clamp(this Vector2 a, float length)
+
+        public static Vector3 GetClosest(this Vector3[] positions, Vector3 position, float threshold = -1)
         {
-            a.x = Mathf.Clamp(a.x, -length, length);
-            a.y = Mathf.Clamp(a.y, -length, length);
+            Vector3 c = default;
+            float d = threshold > 0 ? (threshold * threshold) : float.MaxValue;
 
-            return a;
+            foreach (Vector3 p in positions)
+            {
+                float v = (p - position).sqrMagnitude;
+
+                if (v < d)
+                {
+                    d = v;
+                    c = p;
+                }
+            }
+
+            return c;
         }
-        public static Vector3 Multiply(this Vector3 a, Vector3 b) => new(a.x * b.x, a.y * b.y, a.z * b.z);
-        public static Vector2 Multiply(this Vector2 a, Vector2 b) => new(a.x * b.x, a.y * b.y);
-        public static Vector3 ClearX(this Vector3 a) { a.x = 0; return a; }
-        public static Vector3 ClearY(this Vector3 a) { a.y = 0; return a; }
-        public static Vector3 ClearZ(this Vector3 a) { a.z = 0; return a; }
-        public static Vector3 ClearX(this Vector3Int a) { a.x = 0; return a; }
-        public static Vector3 ClearY(this Vector3Int a) { a.y = 0; return a; }
-        public static Vector3 ClearZ(this Vector3Int a) { a.z = 0; return a; }
+        public static Vector3 GetHighest(this Vector3[] positions)
+        {
+            Vector3 c = default;
+            float d = float.MinValue;
 
+            foreach (Vector3 p in positions)
+            {
+                if (p.y > d)
+                {
+                    d = p.y;
+                    c = p;
+                }
+            }
+
+            return c;
+        }
+        public static Vector3 GetLowest(this Vector3[] positions)
+        {
+            Vector3 c = default;
+            float d = float.MaxValue;
+
+            foreach (Vector3 p in positions)
+            {
+                if (p.y < d)
+                {
+                    d = p.y;
+                    c = p;
+                }
+            }
+
+            return c;
+        }
 
         public static bool HasAll(this ulong @base, ulong target) => (@base & target) == target;
         public static bool HasAny(this ulong @base, ulong target) => (@base & target) != 0;
@@ -397,42 +455,42 @@ namespace Core
         #endregion
 
         #region MESH
-        public static void StitchTo(this SkinnedMeshRenderer thisSkinnedRenderer, SkinnedMeshRenderer targetSkinnedRenderer)
+        public static void StitchTo(this SkinnedMeshRenderer a, SkinnedMeshRenderer b)
         {
-            thisSkinnedRenderer.bones = targetSkinnedRenderer.bones;
-            thisSkinnedRenderer.rootBone = targetSkinnedRenderer.rootBone;
+            a.bones = b.bones;
+            a.rootBone = b.rootBone;
         }
-        public static void SwapTo(this SkinnedMeshRenderer thisSkinnedRenderer, SkinnedMeshRenderer targetSkinnedRenderer)
+        public static void SwapTo(this SkinnedMeshRenderer a, SkinnedMeshRenderer b)
         {
-            StitchTo(thisSkinnedRenderer, targetSkinnedRenderer);
-            thisSkinnedRenderer.sharedMesh = targetSkinnedRenderer.sharedMesh;
+            StitchTo(a, b);
+            a.sharedMesh = b.sharedMesh;
         }
-        public static void BakeToDefault(this SkinnedMeshRenderer thisSkinnedRenderer, MeshFilter targetMeshFilter, bool cleanOldMesh, string suffix = STRING_EMPTY)
+        public static void BakeToDefault(this SkinnedMeshRenderer a, MeshFilter b, bool cleanOldMesh, string suffix = STRING_EMPTY)
         {
-            if (targetMeshFilter == null)
+            if (b == null)
             {
-                Debug.LogError("targetMeshFilter == null");
+                Debug.LogError("SkinnedMeshRenderer bake failed! target mesh filter is missing?");
                 return;
             }
 
-            Mesh bakedMesh = new() {  name = thisSkinnedRenderer.sharedMesh.name + suffix};
+            Mesh bakedMesh = new() {  name = a.sharedMesh.name + suffix};
 
-            thisSkinnedRenderer.BakeMesh(bakedMesh);
+            a.BakeMesh(bakedMesh);
 
             bakedMesh.RecalculateBounds();
 
             if (cleanOldMesh)
             {
-                GameObject.Destroy(targetMeshFilter.sharedMesh);
+                GameObject.Destroy(b.sharedMesh);
             }
 
-            targetMeshFilter.sharedMesh = bakedMesh;
+            b.sharedMesh = bakedMesh;
         } 
-        public static void BakeToCollider(this MeshRenderer thisMeshRenderer, MeshCollider targetCollider)
+        public static void BakeToCollider(this MeshRenderer a, MeshCollider b)
         {
-            targetCollider.sharedMesh = null;
-            targetCollider.sharedMesh = thisMeshRenderer.GetComponent<MeshFilter>().sharedMesh;
-            targetCollider.convex = true;
+            b.sharedMesh = null;
+            b.sharedMesh = a.GetComponent<MeshFilter>().sharedMesh;
+            b.convex = true;
         }
 
         public static Mesh CreateQuad()
@@ -743,10 +801,10 @@ namespace Core
         public readonly static Color COLOR_BLACK = Color.black;
         public readonly static Color COLOR_WHITE = Color.white;
         public readonly static Color COLOR_GRAY = Color.gray;
-        public readonly static Color COLOR_YELLOW = new(1f, 0.8465738f, 0.5686275f);
-        public readonly static Color COLOR_BLUE = new(0.4666667F, 0.627451f, 1f);
-        public readonly static Color COLOR_RED = new(0.909f, 0.309f, 0.309f);
-        public readonly static Color COLOR_GREEN = new(0.313f, 0.784f, 0.470f);
+        public readonly static Color COLOR_YELLOW = Color.yellow;
+        public readonly static Color COLOR_BLUE = Color.blue;
+        public readonly static Color COLOR_RED = Color.red;
+        public readonly static Color COLOR_GREEN = Color.green;
 
         public static Color32 Randomize(this Color32 color, float threshold = 0f)
         {
@@ -812,7 +870,7 @@ namespace Core
             {
                 if (Count >= items.Length)
                 {
-                    Debug.LogError("capacity exceeded!");
+                    Debug.LogError($"Array capacity exceeded! Capacity: {items.Length}");
                     return;
                 }
 
@@ -1040,6 +1098,25 @@ namespace Core
         #endregion
 
         #region TRANSFORM
+        public static void SnapToGround(this Transform transform, Vector3 point, Vector3 normal)
+        {
+            Renderer[] renderers = transform.GetComponentsInChildren<Renderer>();
+            float offset = 0;
+
+            if (renderers.Length > 0)
+            {
+                Bounds bounds = renderers[0].bounds;
+
+                for (int i = 1; i < renderers.Length; i++)
+                {
+                    bounds.Encapsulate(renderers[i].bounds);
+                }
+
+                offset = transform.position.y - bounds.min.y;
+            }
+
+            transform.SetPositionAndRotation(point + normal * offset, Quaternion.FromToRotation(transform.up, normal) * transform.rotation);
+        }
         public static void SetGlobalScale(this Transform transform, Transform parentTransform, Vector3 globalScale)
         {
             if (parentTransform == null)
@@ -1101,25 +1178,6 @@ namespace Core
             }
 
             return c;
-        }
-        public static void SnapToGround(this Transform transform, Vector3 point, Vector3 normal)
-        {
-            Renderer[] renderers = transform.GetComponentsInChildren<Renderer>();
-            float offset = 0;
-
-            if (renderers.Length > 0)
-            {
-                Bounds bounds = renderers[0].bounds;
-
-                for (int i = 1; i < renderers.Length; i++)
-                {
-                    bounds.Encapsulate(renderers[i].bounds);
-                }
-
-                offset = transform.position.y - bounds.min.y;
-            }
-
-            transform.SetPositionAndRotation(point + normal * offset, Quaternion.FromToRotation(transform.up, normal) * transform.rotation);
         }
         #endregion
     }

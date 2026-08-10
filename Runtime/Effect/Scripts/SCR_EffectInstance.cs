@@ -13,12 +13,12 @@ namespace Core.Effect
         public float TickTimer;
         public int TickCount;
 
-        public EffectInstance(EffectID id, float duration)
+        public EffectInstance(EffectDefinition definition, float duration)
         {
-            ID = id;
+            ID = definition.ID;
             Duration = duration;
             TimeRemaining = duration;
-            TickInterval = id.GetDefinition().Interval;
+            TickInterval = definition.Interval;
             TickTimer = 0;
             TickCount = 0;
         }

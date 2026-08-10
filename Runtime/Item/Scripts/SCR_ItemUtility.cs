@@ -117,7 +117,7 @@ namespace Core.Item
                 throw new ArgumentNullException(nameof(data));
             }
 
-            data.SetInt(BASE_ID, obj.BaseID.Index);
+            data.SetString(BASE_ID, obj.BaseID.Key);
             data.SetGuid(INSTANCE_ID, obj.InstanceID);
             data.SetVector2(POS, new(obj.Position.x, obj.Position.y));
             data.SetBool(ROT, obj.IsRotated);
@@ -128,7 +128,9 @@ namespace Core.Item
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
 
-            ItemID baseID = ItemDatabase.CreateID(data.GetInt(BASE_ID));
+            string id = data.GetString(BASE_ID);
+
+            ItemID baseID = new(id, (uint)ItemDatabase.GetIDIndex(id));
             Guid instanceID = data.GetGuid(INSTANCE_ID);
             Vector2Int position = new((int)data.GetVector2(POS).x, (int)data.GetVector2(POS).y);
             bool isRotated = data.GetBool(ROT);

@@ -33,7 +33,6 @@ namespace Core.Item
         [SerializeField] private float dropForce = 5;
 
         private InventoryData thisInventory = new(MIN_WIDTH, MIN_HEIGHT, MIN_WEIGHT);
-        private InventoryEntity targetInventory = null;
         private IInventoryHandler thisHandler = null;
         private ulong whitelistTag;
 

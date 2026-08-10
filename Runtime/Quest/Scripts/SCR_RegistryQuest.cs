@@ -55,8 +55,9 @@ namespace Core.Quest
                 foreach (SearchEntry<string> entry in QuestDatabase.GetIDs().Entries)
                 {
                     string id = entry.Value;
+                    int index = QuestDatabase.GetIndex(id);
 
-                    generator.Field($"public static readonly QuestID {id.ToIdentifier()} = new({id.ToLiteral()})");
+                    generator.Field($"public static readonly QuestID {id.ToIdentifier()} = new({id.ToLiteral()},{index})");
                 }
             }
 

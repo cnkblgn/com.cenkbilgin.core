@@ -13,20 +13,20 @@ namespace Core.Item
         [SerializeField, Required] private string key;
         [SerializeField, ReadOnly] private int index;
 
-        public ItemID(string key, int index)
+        public ItemID(string key, uint index)
         {
             this.key = key;
-            this.index = index;
+            this.index = (int)index;
         }
 
         public readonly override string ToString() => $"Key: {key} << Index: {index}";
-        public readonly override int GetHashCode() => key != null ? key.GetHashCode() : 0;
+        public readonly override int GetHashCode() => index;
         public readonly override bool Equals(object obj) => obj is ItemID other && Equals(other);
-        public readonly bool Equals(ItemID other) => key == other.key;
+        public readonly bool Equals(ItemID other) => index == other.index;
         public static bool operator ==(ItemID left, ItemID right) => left.Equals(right);
         public static bool operator !=(ItemID left, ItemID right) => !left.Equals(right);
 
         public readonly ItemDefinition GetDefinition() => ItemDatabase.GetDefinition(this);
-        public readonly ItemData CreateData() => ItemDatabase.CreateData(this);
+        public readonly ItemData CreateData() => new(this);
     }
 }

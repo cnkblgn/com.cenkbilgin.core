@@ -2,7 +2,7 @@ Shader "Hidden/FX_UnlitTrigger"
 {
     Properties
     {
-        _ColorA ("Color A", Color) = (1,1,0,0.18)
+        [MainColor] _ColorA ("Color A", Color) = (1,1,0,0.18)
         _ColorB ("Color B", Color) = (0,0,0,0.18)
         _StripeScale("Stripe Scale", Float) = 1
     }

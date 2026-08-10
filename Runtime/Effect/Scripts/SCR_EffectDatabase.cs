@@ -8,7 +8,7 @@ namespace Core.Effect
     {
         private static SearchCollection<string> idSearch = new(Array.Empty<SearchEntry<string>>());
         private static readonly Dictionary<string, int> idLookup = new();
-        private static readonly Dictionary<EffectID, EffectDefinition> database = new();
+        private static EffectDefinition[] database = Array.Empty<EffectDefinition>();
 
         internal static void Build(string[] idCollection, EffectEntry[] entries)
         {
@@ -17,9 +17,9 @@ namespace Core.Effect
                 return;
             }
 
-            database.Clear();
             idLookup.Clear();
             idSearch = new(new SearchEntry<string>[idCollection.Length]);
+            database = new EffectDefinition[idCollection.Length];
 
             for (int i = 0; i < idCollection.Length; i++)
             {
@@ -32,23 +32,14 @@ namespace Core.Effect
 
             for (int i = 0; i < entries.Length; i++)
             {
-                database[entries[i].ID] = new(entries[i]);
+                database[i] = new(entries[i]);
             }
 
             Debug.Log($"Effect database build successfull!");
         }
 
-        public static IReadOnlyCollection<EffectDefinition> GetDatabase() => database.Values;
+        public static IReadOnlyList<EffectDefinition> GetDatabase() => database;
         public static SearchCollection<string> GetIDs() => idSearch;
-        public static EffectID GetID(int index)
-        {
-            if (index < 0 || index >= idSearch.Entries.Length)
-            {
-                throw new ArgumentOutOfRangeException("Effect get id failed! index out of bounds!");
-            }
-
-            return new(idSearch.Entries[index].Value, index);
-        }
         public static int GetIDIndex(string id)
         {
             if (idLookup.TryGetValue(id, out int a))
@@ -58,6 +49,16 @@ namespace Core.Effect
 
             return -1;
         }
+
+        public static EffectDefinition GetDefinition(int index)
+        {
+            if (index >= database.Length || index < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(index), index, $"Effect database index out of range");
+            }
+
+            return database[index];
+        }
         public static EffectDefinition GetDefinition(EffectID id)
         {
             if (!id.IsValid)
@@ -65,21 +66,8 @@ namespace Core.Effect
                 throw new ArgumentNullException($"Effect id [{nameof(id)}] is not valid!");
             }
 
-            if (!database.TryGetValue(id, out EffectDefinition definition))
-            {
-                throw new ArgumentNullException($"undefined effect id [{id.Key}]");
-            }
-
-            return definition;
+            return GetDefinition(id.Index);
         }
-        public static EffectInstance CreateInstance(EffectID id, float duration)
-        {
-            if (!database.ContainsKey(id))
-            {
-                throw new ArgumentNullException($"effect definition not found for [{id}]");
-            }
-
-            return new(id, duration);
-        }
+        public static EffectInstance CreateInstance(EffectID id, float duration) => new(GetDefinition(id), duration);
     }
 }

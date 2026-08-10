@@ -20,24 +20,24 @@ namespace Core.Audio
         [SerializeField] private AudioGroup audioGroup = AudioGroup.EFFECT;
 
         [Header("_")]
-        [SerializeField] private bool playOnEnable = false;
-        [SerializeField] private bool playOnLoop = false;
-        [SerializeField] private bool useOcculusion = true;
-        [SerializeField] private bool randomizePitch = false;
-        [SerializeField] private bool randomizeVolume = false;
+        [SerializeField] internal bool playOnEnable = false;
+        [SerializeField] internal bool playOnLoop = false;
+        [SerializeField] internal bool useOcculusion = true;
+        [SerializeField] internal bool randomizePitch = false;
+        [SerializeField] internal bool randomizeVolume = false;
 
         [Header("_")]
-        [SerializeField, Range(0, 1), Tooltip("0 - 2D, 1 - 3D")] private float blend = 1;
-        [SerializeField, Range(0, 1)] private float volume = 1;
-        [SerializeField, Range(-3, 3)] private float pitch = 1;
-        [SerializeField, Min(0)] private float minDistance = 1;
-        [SerializeField, Min(0)] private float maxDistance = 500;
-        [SerializeField, Min(0)] private float fadeIn = 0;
-        [SerializeField, Min(0)] private float fadeOut = 0;
-        [SerializeField, Range(0, 360)] private float spread = 0;
-        [SerializeField, Range(-1, 1)] private float pan = 0;
-        [SerializeField, Range(1, 22000f)] private float lowpass = 22000f;
-        [SerializeField, Range(0, 5)] private float rezonance = 1;
+        [SerializeField, Range(0, 1), Tooltip("0 - 2D, 1 - 3D")] internal float blend = 1;
+        [SerializeField, Range(0, 1)] internal float volume = 1;
+        [SerializeField, Range(-3, 3)] internal float pitch = 1;
+        [SerializeField, Min(0)] internal float minDistance = 1;
+        [SerializeField, Min(0)] internal float maxDistance = 500;
+        [SerializeField, Min(0)] internal float fadeIn = 0;
+        [SerializeField, Min(0)] internal float fadeOut = 0;
+        [SerializeField, Range(0, 360)] internal float spread = 0;
+        [SerializeField, Range(-1, 1)] internal float pan = 0;
+        [SerializeField, Range(1, 22000f)] internal float lowpass = 22000f;
+        [SerializeField, Range(0, 5)] internal float resonance = 1;
 
         private Transform thisTransform = null;
         private Coroutine thisCoroutine = null;
@@ -66,12 +66,17 @@ namespace Core.Audio
                 return;
             }
 
-            if (emitter.TryGetComponent(out AudioSource source))
+            if (emitter.thisAudioSource != null)
             {
-                source.spread = spread;
-                source.panStereo = pan;
-                source.minDistance = minDistance;
-                source.maxDistance = maxDistance;
+                emitter.thisAudioSource.spread = spread;
+                emitter.thisAudioSource.panStereo = pan;
+                emitter.thisAudioSource.minDistance = minDistance;
+                emitter.thisAudioSource.maxDistance = maxDistance;
+            }
+
+            if (emitter.thisAudioFilter != null)
+            {
+                emitter.thisAudioFilter.lowpassResonanceQ = resonance;
             }
         }
 #endif
@@ -128,7 +133,7 @@ namespace Core.Audio
                 emitter.Play
                 (
                     clip,
-                    m.AudioListener,
+                    m.GetListener(),
                     m.GetAudioGroup(audioGroup),
                     blend,
                     volume * (randomizeVolume ? Random.Range(0.75f, 1.15f) : 1),
@@ -148,7 +153,7 @@ namespace Core.Audio
                 emitter.Play
                 (
                     clip,
-                    m.AudioListener,
+                    m.GetListener(),
                     m.GetAudioGroup(audioGroup),
                     blend,
                     volume * (randomizeVolume ? Random.Range(0.75f, 1.15f) : 1),
@@ -159,8 +164,7 @@ namespace Core.Audio
                 );
             }
 
-            SetLowpass(lowpass / 22000f);
-            SetResonance(rezonance);
+            SetLowpassMult(lowpass / 22000f);
         }
         public void Stop()
         {
@@ -182,17 +186,44 @@ namespace Core.Audio
         public AudioClip GetClip() => audioClip;
         public void SetClip(AudioClip clip) => audioClip = clip;
 
-        public float GetVolume() => emitter.GetVolume();
-        public void SetVolume(float value) => emitter.SetVolume(value);
+        public float GetVolumeMult() => emitter.GetVolumeMult();
+        public void SetVolumeMult(float value) => emitter.SetVolumeMult(value);
 
-        public float GetPitch() => emitter.GetPitch();
-        public void SetPitch(float value) => emitter.SetPitch(value);
+        public float GetPitchMult() => emitter.GetPitchMult();
+        public void SetPitchMult(float value) => emitter.SetPitchMult(value);
 
-        public float GetLowpass() => emitter.GetLowpass();
-        public void SetLowpass(float value) => emitter.SetLowpass(value);
+        public float GetLowpassMult() => emitter.GetLowpassMult();
+        public void SetLowpassMult(float value) => emitter.SetLowpassMult(value);
 
-        public float GetResonance() => emitter.GetResonance();
-        public void SetResonance(float value) => emitter.SetResonance(value);
+        public float GetStereoPan()
+        {
+            return pan;
+        }
+        public void SetStereoPan(float value)
+        {
+            pan = value;
+            emitter.thisAudioSource.panStereo = pan;
+        }
+
+        public float GetSpread()
+        {
+            return spread;
+        }
+        public void SetSpread(float value)
+        {
+            spread = value;
+            emitter.thisAudioSource.spread = spread;
+        }
+
+        public float GetBlend()
+        {
+            return blend;
+        }
+        public void SetBlend(float value)
+        {
+            blend = value;
+            emitter.thisAudioSource.panStereo = blend;
+        }
 
         private void FadeIn()
         {
@@ -202,7 +233,7 @@ namespace Core.Audio
                 thisCoroutine = null;
             }
 
-            SetVolume(0);
+            SetVolumeMult(0);
             thisCoroutine = StartCoroutine(Fade(fadeIn, 1));
         }
         private void FadeOut()
@@ -217,21 +248,21 @@ namespace Core.Audio
         }
         private IEnumerator Fade(float duration, float volume)
         {
-            float startVolume = GetVolume();
+            float startVolume = GetVolumeMult();
             float timer = 0;
 
             while (timer < duration)
             {
-                SetVolume(Mathf.Lerp(startVolume, volume, timer / duration));
+                SetVolumeMult(Mathf.Lerp(startVolume, volume, timer / duration));
 
                 timer += Time.deltaTime;
 
                 yield return null;
             }
 
-            SetVolume(volume);
+            SetVolumeMult(volume);
 
-            if (GetVolume() <= 0)
+            if (GetVolumeMult() <= 0)
             {
                 emitter.Stop();
             }

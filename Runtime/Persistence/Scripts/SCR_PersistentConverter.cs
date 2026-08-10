@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Core.Prefab;
 
 namespace Core.Persistence
 {
@@ -31,9 +32,11 @@ namespace Core.Persistence
                 throw new ArgumentNullException(nameof(data));
             }
 
+            string id = data.GetString(KEY_PREFAB);
+
             return new
             (
-                new(data.GetString(KEY_PREFAB)),
+                new(id, PrefabDatabase.GetIndex(id)),
                 data.GetGuid(KEY_ID),
                 data.GetBool(KEY_DESTROYED),
                 data.GetData(KEY_DATA)
