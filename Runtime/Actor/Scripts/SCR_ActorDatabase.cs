@@ -220,9 +220,21 @@ namespace Core.Actors
                 throw new ArgumentNullException(nameof(actor));
             }
 
-#if UNITY_EDITOR
+            if (!id.IsValid)
+            {
+                Debug.LogError($"Cannot register actor with invalid ID: [{id}]");
+                return;
+            }
+
+            if (id.Index < 0 || id.Index >= database.Length)
+            {
+                Debug.LogError($"Cannot register actor. ID [{id.Key}] has invalid index [{id.Index}]. " + $"Database length: {database.Length}");
+                return;
+            }
+
             List<ActorEntry> entries = GetEntries(id);
 
+#if UNITY_EDITOR
             if (entries != null)
             {
                 foreach (ActorEntry entry in entries)
@@ -241,13 +253,6 @@ namespace Core.Actors
                 }
             }
 #endif
-            if (id.Index < 0 || id.Index >= database.Length)
-            {
-                Debug.LogError($"Cannot register actor with invalid ID: [{id}]");
-                return;
-            }
-
-            entries = GetEntries(id);
 
             if (entries == null)
             {
