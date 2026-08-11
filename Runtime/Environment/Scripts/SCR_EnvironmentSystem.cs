@@ -142,7 +142,7 @@ namespace Core.Environment
             directionalLight.intensity = isDay ? settings.Sun.Intensity : settings.Moon.Intensity;
 
             Debug.Log(
-                $"[EnvironmentSystem] After={directionalLight.intensity}"
+                $"[EnvironmentSystem] After={directionalLight.intensity}";
         }
         private static void ApplyAmbient(EnvironmentSettings settings)
         {
