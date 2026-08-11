@@ -60,6 +60,16 @@ namespace Core.Environment
         private static bool hasInitialized;
         private float timer;
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void OnRuntimeInitialize()
+        {
+            cachedSettings = null;
+            cachedFogTexture = null;
+            cachedCloudTexture = null;
+            cachedCloudTextureB = null;
+            hasInitialized = false;
+        }
+
         private void Awake()
         {
             cachedSettings = settings;
@@ -91,11 +101,11 @@ namespace Core.Environment
         {
             if (!hasInitialized)
             {
-                Debug.LogError("EnvironmentSystem is not found in scene! please assign it!");
+                Debug.LogWarning("EnvironmentSystem is not found in scene! please assign it!");
                 return EnvironmentSettings.Default;
             }
 
-            return cachedSettings;
+            return cachedSettings = settings;
         }
 
         private void Refresh()
