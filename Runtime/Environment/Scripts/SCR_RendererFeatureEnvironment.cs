@@ -10,7 +10,7 @@ namespace Core.Environment
         private const string SKY_SHADER_PATH = "Hidden/FX_UnlitSky";
 
         [Info("Use environment system to update global constants!\nRequires depth texture and injection point 'AfterOpaques'\nAlso this feature disables unity fog!")]
-        [SerializeField, ReadOnly] private bool hasInitialized;
+        [ReadOnly] public bool hasInitialized;
 
         private Material fogMaterial;
         private Material skyMaterial;

@@ -70,14 +70,13 @@ namespace Core.Environment
             hasInitialized = false;
         }
 
-        private void Awake()
-        {
-            cachedSettings = settings;
-            hasInitialized = true;
-        }
         private void Update()
         {
-            hasInitialized = true;
+            if (!hasInitialized)
+            {
+                cachedSettings = settings;
+                hasInitialized = true;
+            }           
 
 #if UNITY_EDITOR
             if (Application.isEditor && !Application.isPlaying)
@@ -95,7 +94,7 @@ namespace Core.Environment
                 Refresh();
             }
         }
-        private void OnDestroy() => hasInitialized = false;
+        private void OnDisable() => hasInitialized = false;
 
         public static EnvironmentSettings GetSettings()
         {
@@ -105,7 +104,7 @@ namespace Core.Environment
                 return EnvironmentSettings.Default;
             }
 
-            return cachedSettings = settings;
+            return cachedSettings;
         }
 
         private void Refresh()
