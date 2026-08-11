@@ -39,6 +39,7 @@ namespace Core.Actors
 
                 idLookup[key] = index;
                 idSearch.Entries[i] = new(key, key);
+                database[i] = new();
             }
 
             for (int i = 0; i < tagCollection.Length; i++)
