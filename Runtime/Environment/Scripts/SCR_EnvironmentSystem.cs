@@ -129,8 +129,20 @@ namespace Core.Environment
             sunDirection = direction;
             moonDirection = -direction;
 
+            Debug.Log(
+                $"[EnvironmentSystem] " +
+                $"Light={directionalLight.name} " +
+                $"isDay={isDay} " +
+                $"MoonIntensity={settings.Moon.Intensity} " +
+                $"Before={directionalLight.intensity}"
+            );
+
+
             directionalLight.color = isDay ? settings.Sun.Color : settings.Moon.Color;
             directionalLight.intensity = isDay ? settings.Sun.Intensity : settings.Moon.Intensity;
+
+            Debug.Log(
+                $"[EnvironmentSystem] After={directionalLight.intensity}"
         }
         private static void ApplyAmbient(EnvironmentSettings settings)
         {
