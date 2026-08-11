@@ -15,22 +15,6 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [
-        {
-            "name": "com.unity.render-pipelines.universal",
-            "expression": "",
-            "define": ""
-        },
-        {
-            "name": "com.unity.render-pipelines.core",
-            "expression": "",
-            "define": ""
-        },
-        {
-            "name": "com.unity.render-pipelines.universal-config",
-            "expression": "",
-            "define": ""
-        }
-    ],
+    "versionDefines": [],
     "noEngineReferences": false
 }
