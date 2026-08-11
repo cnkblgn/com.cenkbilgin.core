@@ -67,6 +67,8 @@ namespace Core.Environment
         }
         private void Update()
         {
+            hasInitialized = true;
+
 #if UNITY_EDITOR
             if (Application.isEditor && !Application.isPlaying)
             {
