@@ -7,9 +7,37 @@ namespace Core.Damage
     public struct DamageTag : IEquatable<DamageTag>
     {
         public readonly string Key => key;
-        public readonly int Index => index;
-        public readonly ulong Mask => IsValid ? 1UL << index : 0;
-        public readonly bool IsValid => !string.IsNullOrEmpty(key) && index >= 0;
+
+        public int Index
+        {
+            get
+            {
+                if (index < 0)
+                {
+                    index = DamageDatabase.GetTagIndex(key);
+                }
+
+                return index;
+            }
+        }
+        public ulong Mask
+        {
+            get
+            {
+                int value = Index;
+
+                return value >= 0 && value < 64 ? 1UL << value : 0;
+            }
+        }
+        public bool IsValid
+        {
+            get
+            {
+                int value = Index;
+
+                return !string.IsNullOrEmpty(key) && value >= 0 && value < 64;
+            }
+        }
 
         [SerializeField] private string key;
         [SerializeField, ReadOnly] private int index;
@@ -17,17 +45,13 @@ namespace Core.Damage
         public DamageTag(string key, int index)
         {
             this.key = key;
-            this.index = (int)index;
-
-            if (index >= 64)
-            {
-                Debug.LogWarning("Warning damage tag supports only 63 index!");
-            }
+            this.index = index;
         }
 
-        public readonly override string ToString() => $"Key: {key} << Index: {index}";
-        public readonly override int GetHashCode() => index;
-        public readonly bool Equals(DamageTag other) => index == other.index;
+        public override string ToString() => $"Key: {key} << Index: {Index}";
+
+        public readonly override int GetHashCode() => key?.GetHashCode() ?? 0;
+        public readonly bool Equals(DamageTag other) => string.Equals(key, other.key, StringComparison.Ordinal);
         public readonly override bool Equals(object obj) => obj is DamageTag other && Equals(other);
         public static bool operator ==(DamageTag left, DamageTag right) => left.Equals(right);
         public static bool operator !=(DamageTag left, DamageTag right) => !left.Equals(right);
@@ -35,6 +59,11 @@ namespace Core.Damage
         public static ulong CreateMask(DamageTag[] tags)
         {
             ulong mask = 0;
+
+            if (tags == null)
+            {
+                return mask;
+            }
 
             for (int i = 0; i < tags.Length; i++)
             {

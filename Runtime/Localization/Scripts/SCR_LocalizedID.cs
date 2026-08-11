@@ -22,6 +22,7 @@ namespace Core.Localization
         public readonly override bool Equals(object obj) => obj is LocalizedID other && Equals(other);
         public static bool operator ==(LocalizedID left, LocalizedID right) => left.Equals(right);
         public static bool operator !=(LocalizedID left, LocalizedID right) => !left.Equals(right);
+
         public readonly override string ToString() => Get();
 
         public readonly string Get() => LocalizationDatabase.GetString(key);

@@ -47,12 +47,10 @@ namespace Core.Stat
             using (generator.Namespace("Core.Stat"))
             using (generator.Class("public static class StatIDs"))
             {
-                generator.Line();
-
                 foreach (SearchEntry<string> entry in StatDatabase.GetIDs().Entries)
                 {
                     string id = entry.Value;
-                    int index = StatDatabase.GetIndex(id);
+                    int index = StatDatabase.GetTagIndex(id);
 
                     generator.Field($"public static readonly StatID {id.ToIdentifier()} = new({id.ToLiteral()},{index})");
                 }

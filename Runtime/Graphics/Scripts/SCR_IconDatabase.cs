@@ -39,20 +39,10 @@ namespace Core.Graphics
                 idSearch.Entries[i] = new SearchEntry<string>(key, key);
             }
 
-
             Debug.Log($"IconDatabase build successfull!");
         }
 
         public static SearchCollection<string> GetIDs() => idSearch;
-        public static int GetIndex(string id)
-        {
-            if (idLookup.TryGetValue(id, out int a))
-            {
-                return a;
-            }
-
-            return -1;
-        }
         public static IconID GetID(int index)
         {
             if (index >= database.Length || index < 0)
@@ -60,11 +50,9 @@ namespace Core.Graphics
                 throw new ArgumentOutOfRangeException(nameof(index), index, $"Icon id not found index out of range");
             }
 
-            string key = idSearch.Entries[index].Value;
-
-            return new(key, GetIndex(key));
+            return new(idSearch.Entries[index].Value, index);
         }
-
+        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
         public static Sprite GetSprite(int index)
         {
             if (index >= database.Length || index < 0)
@@ -74,7 +62,7 @@ namespace Core.Graphics
 
             return database[index];
         }
-        public static Sprite GetSprite(string id) => GetSprite(GetIndex(id));
+        public static Sprite GetSprite(string key) => GetSprite(GetIDIndex(key));
         public static Sprite GetSprite(IconID id)
         {
             if (!id.IsValid)
@@ -82,7 +70,7 @@ namespace Core.Graphics
                 throw new ArgumentNullException($"[{nameof(id)}] iconID is not valid!");
             }
 
-            return GetSprite(id);
+            return GetSprite(id.Index);
         }
     }
 }

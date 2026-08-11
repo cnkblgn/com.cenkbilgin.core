@@ -11,7 +11,7 @@ namespace Core.Prefab.Editor
         protected override void OnApply(SerializedProperty property, string key, int index)
         {
             SerializedProperty indexProperty = property.FindPropertyRelative("index");
-            indexProperty.intValue = PrefabDatabase.GetIndex(key);
+            indexProperty.intValue = PrefabDatabase.GetIDIndex(key);
         }
 
         protected override string GetEmpty() => STRING_EMPTY;

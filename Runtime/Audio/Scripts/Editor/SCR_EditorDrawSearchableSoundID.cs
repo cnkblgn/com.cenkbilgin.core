@@ -8,12 +8,6 @@ namespace Core.Audio.Editor
     [CustomPropertyDrawer(typeof(SoundID))]
     internal sealed class EditorDrawSearchableSoundID : EditorDrawSearchable<string>
     {
-        protected override void OnApply(SerializedProperty property, string key, int index)
-        {
-            SerializedProperty indexProperty = property.FindPropertyRelative("index");
-            indexProperty.intValue = SoundDatabase.GetIndex(key);
-        }
-
         protected override string GetEmpty() => STRING_EMPTY;
 
         protected override string GetKey() => "key";

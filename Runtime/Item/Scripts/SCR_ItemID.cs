@@ -6,23 +6,35 @@ namespace Core.Item
     [Serializable]
     public struct ItemID : IEquatable<ItemID>
     {
+        public int Index
+        {
+            get
+            {
+                if (index < 0)
+                {
+                    index = ItemDatabase.GetIDIndex(key);
+                }
+
+                return index;
+            }
+        }
         public readonly string Key => key;
-        public readonly int Index => index;
-        public readonly bool IsValid => !string.IsNullOrEmpty(key);
+        public bool IsValid => !string.IsNullOrEmpty(key) && Index >= 0;
 
         [SerializeField, Required] private string key;
-        [SerializeField, ReadOnly] private int index;
+        [NonSerialized] private int index;
 
-        public ItemID(string key, uint index)
+        public ItemID(string key, int index)
         {
             this.key = key;
-            this.index = (int)index;
+            this.index = index;
         }
 
-        public readonly override string ToString() => $"Key: {key} << Index: {index}";
-        public readonly override int GetHashCode() => index;
+        public override string ToString() => $"Key: {key} << Index: {Index}";
+
+        public readonly override int GetHashCode() => key?.GetHashCode() ?? 0;
         public readonly override bool Equals(object obj) => obj is ItemID other && Equals(other);
-        public readonly bool Equals(ItemID other) => index == other.index;
+        public readonly bool Equals(ItemID other) => string.Equals(key, other.key, StringComparison.Ordinal);
         public static bool operator ==(ItemID left, ItemID right) => left.Equals(right);
         public static bool operator !=(ItemID left, ItemID right) => !left.Equals(right);
 

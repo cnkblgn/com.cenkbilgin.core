@@ -45,15 +45,6 @@ namespace Core.Prefab
         internal static void Build(List<GameObject> gameObjectCollection) => Build(gameObjectCollection.ToArray());
 
         public static SearchCollection<string> GetIDs() => idSearch;
-        public static int GetIndex(string id)
-        {
-            if (idLookup.TryGetValue(id, out int a))
-            {
-                return a;
-            }
-
-            return -1;
-        }
         public static PrefabID GetID(int index)
         {
             if (index >= database.Length || index < 0)
@@ -61,10 +52,9 @@ namespace Core.Prefab
                 throw new ArgumentOutOfRangeException(nameof(index), index, $"Prefab id not found index out of range");
             }
 
-            string key = idSearch.Entries[index].Value;
-
-            return new(key, GetIndex(key));
+            return new(idSearch.Entries[index].Value, index);
         }
+        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
         internal static GameObject GetPrefab(int index)
         {
             if (index >= database.Length || index < 0)

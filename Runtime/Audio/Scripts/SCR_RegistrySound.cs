@@ -38,12 +38,10 @@ namespace Core.Audio
             using (generator.Namespace("Core.Audio"))
             using (generator.Class("public static class SoundIDs"))
             {
-                generator.Line();
-
                 foreach (SearchEntry<string> entry in SoundDatabase.GetIDs().Entries)
                 {
                     string id = entry.Value;
-                    int index = SoundDatabase.GetIndex(id);
+                    int index = SoundDatabase.GetIDIndex(id);
 
                     generator.Field($"public static readonly SoundID {id.ToIdentifier()} = new({id.ToLiteral()},{index})");
                 }

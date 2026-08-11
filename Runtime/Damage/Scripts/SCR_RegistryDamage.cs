@@ -39,8 +39,6 @@ namespace Core.Damage
             using (generator.Namespace("Core.Damage"))
             using (generator.Class("public static class DamageTags"))
             {
-                generator.Line();
-
                 foreach (SearchEntry<string> entry in DamageDatabase.GetTags().Entries)
                 {
                     string id = entry.Value;

@@ -45,16 +45,8 @@ namespace Core.Audio
         }
  
         public static SearchCollection<string> GetIDs() => idSearch;
-        public static int GetIndex(string key)
-        {
-            if (idLookup.TryGetValue(key, out int index))
-            {
-                return index;
-            }
-
-            return -1;
-        }
         public static SoundID GetID(int index) => GetEntry(index).ID;
+        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
         internal static SoundEntry GetEntry(int index)
         {
             if (index >= database.Length || index < 0)

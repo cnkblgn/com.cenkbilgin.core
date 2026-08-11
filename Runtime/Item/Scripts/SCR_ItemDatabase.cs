@@ -1,4 +1,3 @@
-using Core.Graphics;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -61,24 +60,8 @@ namespace Core.Item
         public static IReadOnlyList<ItemDefinition> GetDatabase() => database;
         public static SearchCollection<string> GetIDs() => idSearch;
         public static SearchCollection<string> GetTags() => tagSearch;
-        public static int GetIDIndex(string id)
-        {
-            if (idLookup.TryGetValue(id, out int a))
-            {
-                return a;
-            }
-
-            return -1;
-        }
-        public static int GetTagIndex(string id)
-        {
-            if (tagLookup.TryGetValue(id, out int a))
-            {
-                return a;
-            }
-
-            return -1;
-        }
+        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
+        public static int GetTagIndex(string key) => tagLookup.TryGetValue(key, out int index) ? index : -1;
         public static ItemTag GetTag(int index)
         {
             if (index >= database.Length || index < 0)
@@ -86,9 +69,7 @@ namespace Core.Item
                 throw new ArgumentOutOfRangeException(nameof(index), index, $"Item tag not found index out of range");
             }
 
-            string key = tagSearch.Entries[index].Value;
-
-            return new(key, GetTagIndex(key));
+            return new(tagSearch.Entries[index].Value, index);
         }
         public static ItemDefinition GetDefinition(int index)
         {

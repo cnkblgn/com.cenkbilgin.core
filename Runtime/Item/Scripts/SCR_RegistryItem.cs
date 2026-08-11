@@ -50,8 +50,6 @@ namespace Core.Item
             using (generator.Namespace("Core.Item"))
             using (generator.Class("public static class ItemTags"))
             {
-                generator.Line();
-
                 foreach (SearchEntry<string> entry in ItemDatabase.GetTags().Entries)
                 {
                     string id = entry.Value;
@@ -76,8 +74,6 @@ namespace Core.Item
             using (generator.Namespace("Core.Item"))
             using (generator.Class("public static class ItemIDs"))
             {
-                generator.Line();
-
                 foreach (SearchEntry<string> entry in ItemDatabase.GetIDs().Entries)
                 {
                     string id = entry.Value;

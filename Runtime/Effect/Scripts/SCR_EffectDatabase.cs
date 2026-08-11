@@ -41,16 +41,7 @@ namespace Core.Effect
 
         public static IReadOnlyList<EffectDefinition> GetDatabase() => database;
         public static SearchCollection<string> GetIDs() => idSearch;
-        public static int GetIDIndex(string id)
-        {
-            if (idLookup.TryGetValue(id, out int a))
-            {
-                return a;
-            }
-
-            return -1;
-        }
-
+        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
         public static EffectDefinition GetDefinition(int index)
         {
             if (index >= database.Length || index < 0)

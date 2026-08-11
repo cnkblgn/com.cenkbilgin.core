@@ -51,14 +51,10 @@ namespace Core.Trait
             using (generator.Namespace("Core.Trait"))
             using (generator.Class("public static class TraitIDs"))
             {
-                generator.Line();
-
                 foreach (SearchEntry<string> entry in TraitDatabase.GetIDs().Entries)
                 {
-                    string id = entry.Value;
-                    int index = TraitDatabase.GetIndex(id);
-
-                    generator.Field($"public static readonly TraitID {id.ToIdentifier()} = new({id.ToLiteral()},{index})");
+                    string id = entry.Value;    
+                    generator.Field($"public static readonly TraitID {id.ToIdentifier()} = new({id.ToLiteral()})");
                 }
             }
 

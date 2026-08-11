@@ -8,12 +8,6 @@ namespace Core.Quest.Editor
     [CustomPropertyDrawer(typeof(QuestID))]
     internal sealed class EditorDrawSearchableQuestID : EditorDrawSearchable<string>
     {
-        protected override void OnApply(SerializedProperty property, string key, int index)
-        {
-            SerializedProperty indexProperty = property.FindPropertyRelative("index");
-            indexProperty.intValue = QuestDatabase.GetIndex(key);
-        }
-
         protected override string GetEmpty() => STRING_EMPTY;
 
         protected override string GetKey() => "key";

@@ -18,7 +18,7 @@ namespace Core.Stat
             }
 
             idLookup.Clear();
-            idSearch = new(new SearchEntry<string>[idCollection.Length]);            
+            idSearch = new(new SearchEntry<string>[idCollection.Length]);
             database = new StatDefinition[idCollection.Length];
 
             for (int i = 0; i < idCollection.Length; i++)
@@ -39,22 +39,13 @@ namespace Core.Stat
 
         public static IReadOnlyList<StatDefinition> GetDatabase() => database;
         public static SearchCollection<string> GetIDs() => idSearch;
-        public static int GetIndex(string id)
-        {
-            if (idLookup.TryGetValue(id, out int a))
-            {
-                return a;
-            }
-
-            return -1;
-        }
+        public static int GetTagIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
         public static StatDefinition GetDefinition(int index)
         {
             if (index >= database.Length || index < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(index), index, $"Stat not found index out of range");
             }
-
 
             return database[index];
         }

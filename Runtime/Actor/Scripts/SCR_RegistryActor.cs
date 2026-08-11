@@ -42,8 +42,6 @@ namespace Core.Actors
             using (generator.Namespace("Core.Actors"))
             using (generator.Class("public static class ActorTags"))
             {
-                generator.Line();
-
                 foreach (SearchEntry<string> entry in ActorDatabase.GetTags().Entries)
                 {
                     string id = entry.Value;
@@ -68,8 +66,6 @@ namespace Core.Actors
             using (generator.Namespace("Core.Actors"))
             using (generator.Class("public static class ActorIDs"))
             {
-                generator.Line();
-
                 foreach (SearchEntry<string> entry in ActorDatabase.GetIDs().Entries)
                 {
                     string id = entry.Value;

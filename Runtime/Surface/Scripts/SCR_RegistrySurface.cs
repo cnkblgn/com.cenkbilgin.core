@@ -40,8 +40,6 @@ namespace Core.Surface
             using (generator.Namespace("Core.Surface"))
             using (generator.Class("public static class SurfaceTags"))
             {
-                generator.Line();
-
                 foreach (SearchEntry<string> entry in SurfaceDatabase.GetTags().Entries)
                 {
                     string id = entry.Value;

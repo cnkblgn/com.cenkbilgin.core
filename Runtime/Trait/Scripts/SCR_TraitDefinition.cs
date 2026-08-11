@@ -19,7 +19,7 @@ namespace Core.Trait
         public void Apply(Actor character, ref TraitInstance instance) => Action.Apply(character, ref instance);
         public void Remove(Actor character, ref TraitInstance instance) => Action.Remove(character, ref instance);
 
-        public TraitDefinition(TraitID id, TraitID[] incompatibleIDs, IconID iconID, LocalizedID nameID, LocalizedID descID, int cost, TraitAction action)
+        private TraitDefinition(TraitID id, TraitID[] incompatibleIDs, IconID iconID, LocalizedID nameID, LocalizedID descID, int cost, TraitAction action)
         {
             ID = id;
             IncompatibleIDs = incompatibleIDs ?? (new TraitID[] { });

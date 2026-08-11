@@ -47,14 +47,6 @@ namespace Core.Surface
 
             return database[index];
         }
-        public static int GetTagIndex(string id)
-        {
-            if (tagLookup.TryGetValue(id, out int a))
-            {
-                return a;
-            }
-
-            return -1;
-        }
+        public static int GetTagIndex(string key) => tagLookup.TryGetValue(key, out int index) ? index : -1;
     }
 }

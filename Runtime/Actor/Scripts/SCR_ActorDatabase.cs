@@ -67,7 +67,7 @@ namespace Core.Actors
         {
             if (!id.IsValid)
             {
-                throw new ArgumentNullException($"Actor id is not valid! {nameof(id)}");
+                throw new ArgumentNullException(nameof(id), $"Actor id [{id.Key}] is not valid!");
             }
 
             return GetEntries(id.Index);
@@ -81,19 +81,9 @@ namespace Core.Actors
                 throw new ArgumentOutOfRangeException(nameof(index), index, $"Actor id not found index out of range");
             }
 
-            string key = idSearch.Entries[index].Value;
-
-            return new(key, GetIDIndex(key));
+            return new(idSearch.Entries[index].Value, index);
         }
-        public static int GetIDIndex(string id)
-        {
-            if (idLookup.TryGetValue(id, out int a))
-            {
-                return a;
-            }
-
-            return -1;
-        }
+        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : 1;
         public static ActorID GetTag(int index)
         {
             if (index >= tagSearch.Entries.Length || index < 0)
@@ -101,19 +91,9 @@ namespace Core.Actors
                 throw new ArgumentOutOfRangeException(nameof(index), index, $"Actor tag not found index out of range");
             }
 
-            string key = tagSearch.Entries[index].Value;
-
-            return new(key, GetTagIndex(key));
+            return new(tagSearch.Entries[index].Value, index);
         }
-        public static int GetTagIndex(string id)
-        {
-            if (tagLookup.TryGetValue(id, out int a))
-            {
-                return a;
-            }
-
-            return -1;
-        }
+        public static int GetTagIndex(string key) => tagLookup.TryGetValue(key, out int index) ? index : -1;
 
         internal static bool TryGetAnyActor(ActorID id, out Actor actor)
         {
@@ -218,18 +198,6 @@ namespace Core.Actors
             if (actor == null)
             {
                 throw new ArgumentNullException(nameof(actor));
-            }
-
-            if (!id.IsValid)
-            {
-                Debug.LogError($"Cannot register actor with invalid ID: [{id}]");
-                return;
-            }
-
-            if (id.Index < 0 || id.Index >= database.Length)
-            {
-                Debug.LogError($"Cannot register actor. ID [{id.Key}] has invalid index [{id.Index}]. " + $"Database length: {database.Length}");
-                return;
             }
 
             List<ActorEntry> entries = GetEntries(id);

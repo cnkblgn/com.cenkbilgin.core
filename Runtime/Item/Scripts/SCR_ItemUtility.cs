@@ -130,7 +130,7 @@ namespace Core.Item
 
             string id = data.GetString(BASE_ID);
 
-            ItemID baseID = new(id, (uint)ItemDatabase.GetIDIndex(id));
+            ItemID baseID = new(id, ItemDatabase.GetIDIndex(id));
             Guid instanceID = data.GetGuid(INSTANCE_ID);
             Vector2Int position = new((int)data.GetVector2(POS).x, (int)data.GetVector2(POS).y);
             bool isRotated = data.GetBool(ROT);

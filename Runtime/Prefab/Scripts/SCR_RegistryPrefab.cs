@@ -40,12 +40,10 @@ namespace Core.Prefab
             using (generator.Namespace("Core.Prefab"))
             using (generator.Class("public static class PrefabIDs"))
             {
-                generator.Line();
-
                 foreach (SearchEntry<string> entry in PrefabDatabase.GetIDs().Entries)
                 {
                     string id = entry.Value;
-                    int index = PrefabDatabase.GetIndex(id);
+                    int index = PrefabDatabase.GetIDIndex(id);
 
                     generator.Field($"public static readonly PrefabID {id.ToIdentifier()} = new({id.ToLiteral()},{index})");
                 }

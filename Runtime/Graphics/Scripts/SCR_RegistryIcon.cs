@@ -38,12 +38,10 @@ namespace Core.Graphics
             using (generator.Namespace("Core.Graphics"))
             using (generator.Class("public static class IconIDs"))
             {
-                generator.Line();
-
                 foreach (SearchEntry<string> entry in IconDatabase.GetIDs().Entries)
                 {
                     string id = entry.Value;
-                    int index = IconDatabase.GetIndex(id);
+                    int index = IconDatabase.GetIDIndex(id);
 
                     generator.Field($"public static readonly IconID {id.ToIdentifier()} = new({id.ToLiteral()},{index})");
                 }

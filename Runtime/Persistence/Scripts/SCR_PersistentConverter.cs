@@ -36,7 +36,7 @@ namespace Core.Persistence
 
             return new
             (
-                new(id, PrefabDatabase.GetIndex(id)),
+                new(id, PrefabDatabase.GetIDIndex(id)),
                 data.GetGuid(KEY_ID),
                 data.GetBool(KEY_DESTROYED),
                 data.GetData(KEY_DATA)

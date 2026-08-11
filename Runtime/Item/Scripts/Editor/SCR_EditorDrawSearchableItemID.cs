@@ -8,12 +8,6 @@ namespace Core.Item.Editor
     [CustomPropertyDrawer(typeof(ItemID))]
     internal sealed class EditorDrawSearchableItemID : EditorDrawSearchable<string>
     {
-        protected override void OnApply(SerializedProperty property, string key, int index)
-        {
-            SerializedProperty indexProperty = property.FindPropertyRelative("index");
-            indexProperty.intValue = ItemDatabase.GetIDIndex(key);
-        }
-
         protected override string GetEmpty() => STRING_EMPTY;
 
         protected override string GetKey() => "key";

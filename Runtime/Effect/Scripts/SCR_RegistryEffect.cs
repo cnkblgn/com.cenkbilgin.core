@@ -47,8 +47,6 @@ namespace Core.Effect
             using (generator.Namespace("Core.Effect"))
             using (generator.Class("public static class EffectIDs"))
             {
-                generator.Line();
-
                 foreach (SearchEntry<string> entry in EffectDatabase.GetIDs().Entries)
                 {
                     string id = entry.Value;

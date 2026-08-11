@@ -9,13 +9,6 @@ namespace Core.Graphics.Editor
     [CustomPropertyDrawer(typeof(IconID))]
     public sealed class EditorDrawSearchableIconID : EditorDrawSearchable<string>
     {
-        protected override void OnApply(SerializedProperty property, string key, int index)
-        {
-            SerializedProperty indexProperty = property.FindPropertyRelative("index");
-            indexProperty.intValue = IconDatabase.GetIndex(key);
-        }
-
-
         protected override string GetEmpty() => STRING_EMPTY;
 
         protected override string GetKey() => "key";

@@ -51,12 +51,10 @@ namespace Core.Quest
             using (generator.Namespace("Core.Quest"))
             using (generator.Class("public static class QuestIDs"))
             {
-                generator.Line();
-
                 foreach (SearchEntry<string> entry in QuestDatabase.GetIDs().Entries)
                 {
                     string id = entry.Value;
-                    int index = QuestDatabase.GetIndex(id);
+                    int index = QuestDatabase.GetIDIndex(id);
 
                     generator.Field($"public static readonly QuestID {id.ToIdentifier()} = new({id.ToLiteral()},{index})");
                 }

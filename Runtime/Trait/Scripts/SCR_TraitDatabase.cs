@@ -39,16 +39,7 @@ namespace Core.Trait
 
         public static IReadOnlyList<TraitDefinition> GetDatabase() => database;
         public static SearchCollection<string> GetIDs() => idSearch;
-        public static int GetIndex(string id)
-        {
-            if (idLookup.TryGetValue(id, out int a))
-            {
-                return a;
-            }
-
-            return -1;
-        }
-        public static TraitInstance CreateInstance(TraitID id) => new(GetDefinition(id).ID);
+        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
         public static TraitDefinition GetDefinition(int index)
         {
             if (index >= database.Length || index < 0)
@@ -56,17 +47,17 @@ namespace Core.Trait
                 throw new ArgumentOutOfRangeException(nameof(index), index, $"Trait not found index out of range");
             }
 
-
             return database[index];
         }
         public static TraitDefinition GetDefinition(TraitID id)
         {
             if (!id.IsValid)
             {
-                throw new ArgumentNullException($"Trait id [{nameof(id)}] is not valid!");
+                throw new ArgumentNullException(nameof(id), $"Trait id [{nameof(id)}] is not valid!");
             }
 
             return GetDefinition(id.Index);
         }
+        public static TraitInstance CreateInstance(TraitID id) => new(GetDefinition(id).ID);
     }
 }

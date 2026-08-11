@@ -1,19 +1,29 @@
 using System;
 using UnityEngine;
+using Core.Actors;
 
 namespace Core.Quest
 {
-    using static CoreUtility;
-
     [Serializable]
     public struct QuestID : IEquatable<QuestID>
     {
+        public int Index
+        {
+            get
+            {
+                if (index < 0)
+                {
+                    index = QuestDatabase.GetIDIndex(key);
+                }
+
+                return index;
+            }
+        }
         public readonly string Key => key;
-        public readonly int Index => index;
-        public readonly bool IsValid => !string.IsNullOrEmpty(key) && index >= 0;
+        public bool IsValid => !string.IsNullOrEmpty(key) && Index >= 0;
 
         [SerializeField, Required] private string key;
-        [SerializeField, ReadOnly] private int index;
+        [NonSerialized] private int index;
 
         public QuestID(string key, int index)
         {
@@ -21,10 +31,11 @@ namespace Core.Quest
             this.index = index;
         }
 
-        public readonly override string ToString() => $"Key: {key} << Index: {index}";
-        public readonly override int GetHashCode() => index;
-        public readonly override bool Equals(object obj) => obj is QuestID other && Equals(other);
-        public readonly bool Equals(QuestID other) => index == other.index;
+        public override string ToString() => $"Key: {key} << Index: {Index}";
+
+        public readonly override int GetHashCode() => key?.GetHashCode() ?? 0;
+        public readonly override bool Equals(object obj) => obj is ActorID other && Equals(other);
+        public readonly bool Equals(QuestID other) => string.Equals(key, other.key, StringComparison.Ordinal);
         public static bool operator ==(QuestID left, QuestID right) => left.Equals(right);
         public static bool operator !=(QuestID left, QuestID right) => !left.Equals(right);
 

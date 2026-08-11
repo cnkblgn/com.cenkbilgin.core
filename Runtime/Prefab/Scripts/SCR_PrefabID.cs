@@ -10,12 +10,23 @@ namespace Core.Prefab
     {
         public static readonly PrefabID NONE = new(STRING_EMPTY, -1);
 
+        public int Index
+        {
+            get
+            {
+                if (index < 0)
+                {
+                    index = PrefabDatabase.GetIDIndex(key);
+                }
+
+                return index;
+            }
+        }
         public readonly string Key => key;
-        public readonly int Index => Index;
-        public readonly bool IsValid => !string.IsNullOrEmpty(key) && index >= 0;
+        public bool IsValid => !string.IsNullOrEmpty(key) && Index >= 0;
 
         [SerializeField, Required] private string key;
-        [SerializeField, ReadOnly] private int index;
+        [NonSerialized] private int index;
 
         public PrefabID(string key, int index)
         {
@@ -23,10 +34,11 @@ namespace Core.Prefab
             this.index = index;
         }
 
-        public readonly override string ToString() => $"Key: {key} << Index: {index}";
-        public readonly override int GetHashCode() => index;
-        public readonly bool Equals(PrefabID other) => index == other.index;
+        public override string ToString() => $"Key: {key} << Index: {Index}";
+
+        public readonly override int GetHashCode() => key?.GetHashCode() ?? 0;
         public readonly override bool Equals(object obj) => obj is PrefabID other && Equals(other);
+        public readonly bool Equals(PrefabID other) => string.Equals(key, other.key, StringComparison.Ordinal);
         public static bool operator ==(PrefabID left, PrefabID right) => left.Equals(right);
         public static bool operator !=(PrefabID left, PrefabID right) => !left.Equals(right);
 
