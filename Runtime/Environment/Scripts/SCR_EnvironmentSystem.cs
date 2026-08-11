@@ -57,9 +57,14 @@ namespace Core.Environment
         private static readonly int _CLOUD_DARKNESS = Shader.PropertyToID("_CLOUD_DARKNESS");
         private static readonly int _CLOUD_RIM_WIDTH = Shader.PropertyToID("_CLOUD_RIM_WIDTH");
         private static readonly int _CLOUD_RIM_STRENGTH = Shader.PropertyToID("_CLOUD_RIM_STRENGTH");
+        private static bool hasInitialized;
         private float timer;
 
-        private void Awake() => cachedSettings = settings;
+        private void Awake()
+        {
+            cachedSettings = settings;
+            hasInitialized = true;
+        }
         private void Update()
         {
 #if UNITY_EDITOR
@@ -78,8 +83,18 @@ namespace Core.Environment
                 Refresh();
             }
         }
+        private void OnDestroy() => hasInitialized = false;
 
-        public static EnvironmentSettings GetSettings() => cachedSettings;
+        public static EnvironmentSettings GetSettings()
+        {
+            if (!hasInitialized)
+            {
+                Debug.LogError("EnvironmentSystem is not found in scene! please assign it!");
+                return EnvironmentSettings.Default;
+            }
+
+            return cachedSettings;
+        }
 
         private void Refresh()
         {

@@ -6,6 +6,8 @@ namespace Core.Environment
     [Serializable]
     public sealed class EnvironmentSettings
     {
+        internal static readonly EnvironmentSettings Default = new();
+
         [Header("_")]
         [Info("R -> Mask, G -> Distortion (X), B -> Distortion (Y)")]
         public Texture2D CloudTexture;
@@ -23,7 +25,7 @@ namespace Core.Environment
         [HideInInspector] public float Blend;
         [HideInInspector] public Texture2D CloudTextureB;
 
-        public EnvironmentSettings()
+        internal EnvironmentSettings()
         {
             CloudTexture = default;
             FogTexture = default;
