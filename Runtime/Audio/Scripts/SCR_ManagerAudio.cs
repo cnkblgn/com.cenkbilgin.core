@@ -131,12 +131,14 @@ namespace Core.Audio
         }
         private void Update()
         {
-#if UNITY_EDITOR
             if (audioListener == null)
             {
+#if UNITY_EDITOR
                 Debug.LogWarning("Audio listener is missing in scene? Please assign through ManagerAudio.SetListener()");
-            }
 #endif
+                return;
+            }
+
             TickEmitters();
             TickVolumes();
         }
