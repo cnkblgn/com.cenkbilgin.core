@@ -19,7 +19,7 @@ namespace Core.Trait
 
             idLookup.Clear();
             idSearch = new(new SearchEntry<string>[idCollection.Length]);
-            database = new TraitDefinition[idCollection.Length];
+            database = new TraitDefinition[entries.Length];
 
             for (int i = 0; i < idCollection.Length; i++)
             {

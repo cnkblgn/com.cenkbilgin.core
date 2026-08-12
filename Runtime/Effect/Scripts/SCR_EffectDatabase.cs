@@ -20,7 +20,7 @@ namespace Core.Effect
 
             idLookup.Clear();
             idSearch = new(new SearchEntry<string>[idCollection.Length]);
-            database = new EffectDefinition[idCollection.Length];
+            database = new EffectDefinition[entries.Length];
 
             for (int i = 0; i < idCollection.Length; i++)
             {

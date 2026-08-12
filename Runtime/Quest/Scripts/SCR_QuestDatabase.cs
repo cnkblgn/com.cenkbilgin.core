@@ -19,7 +19,7 @@ namespace Core.Quest
 
             idLookup.Clear();
             idSearch = new(new SearchEntry<string>[idCollection.Length]);
-            database = new QuestDefinition[idCollection.Length];
+            database = new QuestDefinition[entries.Length];
 
             for (int i = 0; i < idCollection.Length; i++)
             {

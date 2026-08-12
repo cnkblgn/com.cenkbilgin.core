@@ -21,10 +21,10 @@ namespace Core.Item
                 return;
             }
 
-            database = new ItemDefinition[entries.Length];
             tagLookup.Clear();
             idLookup.Clear();
 
+            database = new ItemDefinition[entries.Length];
             tagSearch = new(new SearchEntry<string>[tagCollection.Length + 1]);
             idSearch = new(new SearchEntry<string>[idCollection.Length]);
 

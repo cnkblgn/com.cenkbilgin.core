@@ -19,7 +19,7 @@ namespace Core.Stat
 
             idLookup.Clear();
             idSearch = new(new SearchEntry<string>[idCollection.Length]);
-            database = new StatDefinition[idCollection.Length];
+            database = new StatDefinition[entries.Length];
 
             for (int i = 0; i < idCollection.Length; i++)
             {
