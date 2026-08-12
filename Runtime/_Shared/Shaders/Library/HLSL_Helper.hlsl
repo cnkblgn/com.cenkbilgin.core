@@ -20,6 +20,44 @@ static const float4x4 Bayer4x4 = float4x4
     float4(15.0 / 16.0, 7.0 / 16.0, 13.0 / 16.0, 5.0 / 16.0)
 );
 
+float Hash31(float3 _p)
+{
+    _p = frac(_p * 0.3183099 + 0.1);
+    _p *= 17.0;
+    return frac(_p.x * _p.y * _p.z * (_p.x + _p.y + _p.z));
+}
+void GetHash31_float(float3 _p, out float value)
+{
+    value = Hash31(_p);
+}
+void GetHash31_half(half3 _p, out half value)
+{
+    GetHash31_float(_p, value);
+}
+
+void GetSimpleNoise_float(float3 _p, out float value)
+{
+    float3 i = floor(_p);
+    float3 f = frac(_p);
+
+    float a = Hash31(i);
+    float b = Hash31(i + float3(1, 0, 0));
+    float c = Hash31(i + float3(0, 1, 0));
+    float d = Hash31(i + float3(1, 1, 0));
+
+    float u = f.x;
+    float v = f.y;
+
+    float x1 = lerp(a, b, u);
+    float x2 = lerp(c, d, u);
+
+    value = lerp(x1, x2, v);
+}
+void GetSimpleNoise_half(float3 _p, out float value)
+{
+    GetSimpleNoise_float(_p, value);
+}
+
 float2 Hash22(float2 p)
 {
     p = float2(dot(p, float2(127.1, 311.7)), dot(p, float2(269.5, 183.3)));
