@@ -3,27 +3,27 @@
 
 #include "HLSL_RSUVHelper.hlsl"
 
-uint4 ColorToBytes(float4 c)
+uint4 ColorToBytes(float4 _c)
 {
-    c = saturate(c);
+    _c = saturate(_c);
     
-    return (uint4) (c * 255.0 + 0.5);
+    return (uint4) (_c * 255.0 + 0.5);
 }
-uint ColorRToByte(float4 c)
+uint ColorRToByte(float4 _c)
 {
-    return (uint) (saturate(c.r) * 255.0 + 0.5);
+    return (uint) (saturate(_c.r) * 255.0 + 0.5);
 }
-uint ColorGToByte(float4 c)
+uint ColorGToByte(float4 _c)
 {
-    return (uint) (saturate(c.g) * 255.0 + 0.5);
+    return (uint) (saturate(_c.g) * 255.0 + 0.5);
 }
-uint ColorBToByte(float4 c)
+uint ColorBToByte(float4 _c)
 {
-    return (uint) (saturate(c.b) * 255.0 + 0.5);
+    return (uint) (saturate(_c.b) * 255.0 + 0.5);
 }
-uint ColorAToByte(float4 c)
+uint ColorAToByte(float4 _c)
 {
-    return (uint) (saturate(c.a) * 255.0 + 0.5);
+    return (uint) (saturate(_c.a) * 255.0 + 0.5);
 }
 
 void Get_float(out float4 Color)

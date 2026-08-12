@@ -8,7 +8,7 @@ namespace Core.Environment
 {
     internal sealed class RendererPassEnvironment : ScriptableRenderPass
     {
-        private const string PASS_NAME = "CenkFogPass";
+        private const string PASS_NAME = "FogPass";
         private const string TEXTURE_NAME = "CameraColor" + "_" + PASS_NAME;
 
         private Material fogMaterial;

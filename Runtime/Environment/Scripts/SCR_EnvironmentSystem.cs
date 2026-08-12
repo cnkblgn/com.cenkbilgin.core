@@ -7,15 +7,19 @@ namespace Core.Environment
     {
         private const float UPDATE_FPS = 24;
         private const float UPDATE_RATE = 1 / UPDATE_FPS;
+        private const float LIGHT_EPSILON = 0.001f;
 
         [Header("_")]
-        [SerializeField, Required] private Light directionalLight;
+        [SerializeField, Required] private Light sunLight;
+        [SerializeField, Required] private Light moonLight;
         [SerializeField] private EnvironmentSettings settings;
 
         private static EnvironmentSettings cachedSettings;
         private static Texture2D cachedFogTexture;
         private static Texture2D cachedCloudTexture;
         private static Texture2D cachedCloudTextureB;
+        private static Light cachedSunLight;
+        private static Light cachedMoonLight;
         private static Vector3 sunDirection;
         private static Vector3 moonDirection;
         private static readonly int _FOG_COLOR = Shader.PropertyToID("_FOG_COLOR");
@@ -67,11 +71,16 @@ namespace Core.Environment
             cachedFogTexture = null;
             cachedCloudTexture = null;
             cachedCloudTextureB = null;
+            cachedSunLight = null;
+            cachedMoonLight = null;
             hasInitialized = false;
         }
 
         private void Update()
         {
+            cachedSunLight = sunLight;
+            cachedMoonLight = moonLight;
+
             if (!hasInitialized)
             {
                 cachedSettings = settings;
@@ -96,11 +105,37 @@ namespace Core.Environment
         }
         private void OnDisable() => hasInitialized = false;
 
-        public static EnvironmentSettings GetSettings()
+        private static bool IsValid()
         {
             if (!hasInitialized)
             {
                 Debug.LogWarning("EnvironmentSystem is not found in scene! please assign it!");
+            }
+
+            return hasInitialized;
+        }
+        public static Light GetSun()
+        {
+            if (!IsValid())
+            {
+                return null;
+            }
+
+            return cachedSunLight;
+        }
+        public static Light GetMoon()
+        {
+            if (!IsValid())
+            {
+                return null;
+            }
+
+            return cachedMoonLight;
+        }
+        public static EnvironmentSettings GetSettings()
+        {
+            if (!IsValid())
+            {
                 return EnvironmentSettings.Default;
             }
 
@@ -109,40 +144,43 @@ namespace Core.Environment
 
         private void Refresh()
         {
-            ApplyCelestial(settings, directionalLight);
+            ApplyCelestial(settings);
             ApplyAmbient(settings);
             ApplyFog(settings);
             ApplySky(settings);
         }
 
-        private static void ApplyCelestial(EnvironmentSettings settings, Light directionalLight)
+        private static void ApplyCelestial(EnvironmentSettings settings)
         {
-            if (directionalLight == null)
+            static float GetIntensity(float direction)
             {
-                Debug.LogWarning("Please assign directional light!");
-                return;
+                float height = Mathf.Clamp01(direction);
+                return height * height * (3f - 2f * height);
             }
 
-            Vector3 direction = -directionalLight.transform.forward;
-            bool isDay = Vector3.Dot(direction, Vector3.up) > -0.1f;
+            if (cachedSunLight != null)
+            {
+                sunDirection = -cachedSunLight.transform.forward;
 
-            sunDirection = direction;
-            moonDirection = -direction;
+                float multiplier = GetIntensity(sunDirection.y);
+                float intensity = settings.Sun.Intensity * multiplier;
 
-            Debug.Log(
-                $"[EnvironmentSystem] " +
-                $"Light={directionalLight.name} " +
-                $"isDay={isDay} " +
-                $"MoonIntensity={settings.Moon.Intensity} " +
-                $"Before={directionalLight.intensity}"
-            );
+                cachedSunLight.color = settings.Sun.Color;
+                cachedSunLight.intensity = intensity;
+                cachedSunLight.enabled = intensity > LIGHT_EPSILON;
+            }
 
+            if (cachedMoonLight != null)
+            {
+                moonDirection = -cachedMoonLight.transform.forward;
 
-            directionalLight.color = isDay ? settings.Sun.Color : settings.Moon.Color;
-            directionalLight.intensity = isDay ? settings.Sun.Intensity : settings.Moon.Intensity;
+                float multiplier = GetIntensity(moonDirection.y);
+                float intensity = settings.Moon.Intensity * multiplier;
 
-            Debug.Log(
-                $"[EnvironmentSystem] After={directionalLight.intensity}");
+                cachedMoonLight.color = settings.Moon.Color;
+                cachedMoonLight.intensity = intensity;
+                cachedMoonLight.enabled = intensity > LIGHT_EPSILON;
+            }
         }
         private static void ApplyAmbient(EnvironmentSettings settings)
         {
@@ -156,6 +194,12 @@ namespace Core.Environment
             FogSettings fog = settings.Fog;
             Texture2D texture = settings.FogTexture;
 
+            if (cachedFogTexture != texture)
+            {
+                Shader.SetGlobalTexture(_FOG_NOISE_TEX, texture);
+                cachedFogTexture = texture;
+            }
+
             Shader.SetGlobalColor(_FOG_COLOR, fog.Color);
             Shader.SetGlobalFloat(_FOG_DENSITY, fog.Density);
             Shader.SetGlobalFloat(_FOG_DISTANCE_START, fog.DistanceStart);
@@ -163,13 +207,6 @@ namespace Core.Environment
             Shader.SetGlobalFloat(_FOG_HEIGHT_START, fog.HeightStart);
             Shader.SetGlobalFloat(_FOG_HEIGHT_FALLOFF, fog.HeightFalloff);
             Shader.SetGlobalFloat(_FOG_SCATTERING, fog.Scattering);
-
-            if (cachedFogTexture != texture)
-            {
-                Shader.SetGlobalTexture(_FOG_NOISE_TEX, texture);
-                cachedFogTexture = texture;
-            }
-
             Shader.SetGlobalFloat(_FOG_NOISE_STRENGTH, fog.NoiseStrength);
             Shader.SetGlobalFloat(_FOG_NOISE_SPEED, fog.NoiseTurbulance);
             Shader.SetGlobalFloat(_FOG_NOISE_SCALE, fog.NoiseScale);
@@ -184,6 +221,18 @@ namespace Core.Environment
             Texture2D cloudTexture = settings.CloudTexture;
             Texture2D cloudTextureB = settings.CloudTextureB != null ? settings.CloudTextureB : settings.CloudTexture;
 
+            if (cachedCloudTexture != cloudTexture)
+            {
+                Shader.SetGlobalTexture(_CLOUD_TEX_A, cloudTexture);
+                cachedCloudTexture = cloudTexture;
+            }
+
+            if (cachedCloudTextureB != cloudTextureB)
+            {
+                Shader.SetGlobalTexture(_CLOUD_TEX_B, cloudTextureB);
+                cachedCloudTextureB = cloudTextureB;
+            }
+
             Shader.SetGlobalColor(_ZENITH_COLOR, sky.ZenithColor);
             Shader.SetGlobalColor(_HORIZON_COLOR, sky.HorizonColor);
             Shader.SetGlobalFloat(_HORIZON_THICKNESS, sky.HorizonThickness);
@@ -196,18 +245,6 @@ namespace Core.Environment
             Shader.SetGlobalVector(_MOON_DIRECTION, -moonDirection);
             Shader.SetGlobalFloat(_MOON_SIZE, moon.Size);
             Shader.SetGlobalFloat(_MOON_GLOW, moon.Glow);
-
-            if (cachedCloudTexture != cloudTexture)
-            {
-                Shader.SetGlobalTexture(_CLOUD_TEX_A, cloudTexture);
-                cachedCloudTexture = cloudTexture;
-            }
-
-            if (cachedCloudTextureB != cloudTextureB)
-            {
-                Shader.SetGlobalTexture(_CLOUD_TEX_B, cloudTextureB);
-                cachedCloudTextureB = cloudTextureB;
-            }
 
             Shader.SetGlobalFloat(_CLOUD_BLEND, settings.Blend);
             Shader.SetGlobalColor(_CLOUD_TINT, cloud.Tint);

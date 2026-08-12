@@ -180,34 +180,6 @@
         {
             "m_OutputSlot": {
                 "m_Node": {
-                    "m_Id": "e3ac5d9cd57e4657b964870d42276d70"
-                },
-                "m_SlotId": 2
-            },
-            "m_InputSlot": {
-                "m_Node": {
-                    "m_Id": "83f18658d5b54a8eba0805b70008bc4f"
-                },
-                "m_SlotId": 4
-            }
-        },
-        {
-            "m_OutputSlot": {
-                "m_Node": {
-                    "m_Id": "e3ac5d9cd57e4657b964870d42276d70"
-                },
-                "m_SlotId": 3
-            },
-            "m_InputSlot": {
-                "m_Node": {
-                    "m_Id": "83f18658d5b54a8eba0805b70008bc4f"
-                },
-                "m_SlotId": 5
-            }
-        },
-        {
-            "m_OutputSlot": {
-                "m_Node": {
                     "m_Id": "f3bb6f0fb661423284851f817212441d"
                 },
                 "m_SlotId": 2
@@ -1047,12 +1019,6 @@
             "m_Id": "8bf3253f42c44b88ac656947a91f2486"
         },
         {
-            "m_Id": "9c3313f2395c4578a7f4f6d7e9c0db1d"
-        },
-        {
-            "m_Id": "ee44b11f5f3b4e12aba08a287423ae78"
-        },
-        {
             "m_Id": "5dbe1f5b614b42af94b121048621dd4d"
         },
         {
@@ -1206,29 +1172,6 @@
     "m_depthWriteMode": 0,
     "m_AllowMaterialOverride": false,
     "m_DepthTestMode": 0
-}
-
-{
-    "m_SGVersion": 0,
-    "m_Type": "UnityEditor.ShaderGraph.Vector3MaterialSlot",
-    "m_ObjectId": "9c3313f2395c4578a7f4f6d7e9c0db1d",
-    "m_Id": 4,
-    "m_DisplayName": "LightDirection",
-    "m_SlotType": 0,
-    "m_Hidden": false,
-    "m_ShaderOutputName": "LightDirection",
-    "m_StageCapability": 3,
-    "m_Value": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-    },
-    "m_DefaultValue": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-    },
-    "m_Labels": []
 }
 
 {
@@ -1513,29 +1456,6 @@
     "m_DefaultValue": 1.0,
     "m_Labels": [],
     "m_LiteralMode": false
-}
-
-{
-    "m_SGVersion": 0,
-    "m_Type": "UnityEditor.ShaderGraph.Vector3MaterialSlot",
-    "m_ObjectId": "ee44b11f5f3b4e12aba08a287423ae78",
-    "m_Id": 5,
-    "m_DisplayName": "LightColor",
-    "m_SlotType": 0,
-    "m_Hidden": false,
-    "m_ShaderOutputName": "LightColor",
-    "m_StageCapability": 3,
-    "m_Value": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-    },
-    "m_DefaultValue": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-    },
-    "m_Labels": []
 }
 
 {
