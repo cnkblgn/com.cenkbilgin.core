@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Core.Graphics
 {
     [Serializable]
-    public struct IconID : IEquatable<IconID>
+    public struct MeshID : IEquatable<MeshID>
     {
         public int Index
         {
@@ -12,7 +12,7 @@ namespace Core.Graphics
             {
                 if (index < 0)
                 {
-                    index = IconDatabase.GetIDIndex(key);
+                    index = MeshDatabase.GetIDIndex(key);
                 }
 
                 return index;
@@ -24,7 +24,7 @@ namespace Core.Graphics
         [SerializeField, Required] private string key;
         [NonSerialized] private int index;
 
-        public IconID(string key, int index)
+        public MeshID(string key, int index)
         {
             this.key = key;
             this.index = index;
@@ -33,11 +33,11 @@ namespace Core.Graphics
         public override string ToString() => $"Key: {key} << Index: {Index}";
 
         public readonly override int GetHashCode() => key?.GetHashCode() ?? 0;
-        public readonly override bool Equals(object obj) => obj is IconID other && Equals(other);
-        public readonly bool Equals(IconID other) => string.Equals(key, other.key, StringComparison.Ordinal);
-        public static bool operator ==(IconID left, IconID right) => left.Equals(right);
-        public static bool operator !=(IconID left, IconID right) => !left.Equals(right);
+        public readonly override bool Equals(object obj) => obj is MeshID other && Equals(other);
+        public readonly bool Equals(MeshID other) => string.Equals(key, other.key, StringComparison.Ordinal);
+        public static bool operator ==(MeshID left, MeshID right) => left.Equals(right);
+        public static bool operator !=(MeshID left, MeshID right) => !left.Equals(right);
 
-        public readonly Sprite GetSprite() => IconDatabase.GetSprite(this);
+        public readonly Mesh Get() => MeshDatabase.GetMesh(this);
     }
 }

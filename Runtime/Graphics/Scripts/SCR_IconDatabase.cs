@@ -62,7 +62,6 @@ namespace Core.Graphics
 
             return database[index];
         }
-        public static Sprite GetSprite(string key) => GetSprite(GetIDIndex(key));
         public static Sprite GetSprite(IconID id)
         {
             if (!id.IsValid)

@@ -3,13 +3,9 @@ using UnityEngine;
 
 namespace Core.Prefab
 {
-    using static CoreUtility;
-
     [Serializable]
     public struct PrefabID : IEquatable<PrefabID>
     {
-        public static readonly PrefabID NONE = new(STRING_EMPTY, -1);
-
         public int Index
         {
             get

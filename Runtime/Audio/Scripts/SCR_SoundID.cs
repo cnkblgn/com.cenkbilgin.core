@@ -3,13 +3,9 @@ using UnityEngine;
 
 namespace Core.Audio
 {
-    using static CoreUtility;
-
     [Serializable]
     public struct SoundID : IEquatable<SoundID> 
     {
-        public static readonly SoundID NONE = new(STRING_EMPTY, -1);
-
         public int Index
         {
             get

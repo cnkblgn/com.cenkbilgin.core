@@ -8,7 +8,7 @@ namespace Core.Audio
     {
         private static readonly Dictionary<string, int> idLookup = new();
         private static SearchCollection<string> idSearch = new(Array.Empty<SearchEntry<string>>());
-        private static SoundEntry[] database = Array.Empty<SoundEntry>();
+        private static AudioClip[] database = Array.Empty<AudioClip>();
 
         internal static void Build(AudioClip[] clipCollection)
         {
@@ -17,7 +17,7 @@ namespace Core.Audio
                 return;
             }
 
-            database = new SoundEntry[clipCollection.Length];
+            database = new AudioClip[clipCollection.Length];
             idSearch = new SearchCollection<string>(new SearchEntry<string>[clipCollection.Length]);
             idLookup.Clear();
 
@@ -37,7 +37,7 @@ namespace Core.Audio
                 SoundID id = new(key, i);
 
                 idLookup[key] = i;
-                database[i] = new(id, clipCollection[i]);
+                database[i] = clip;
                 idSearch.Entries[i] = new(key, key);
             }
 
@@ -45,9 +45,17 @@ namespace Core.Audio
         }
  
         public static SearchCollection<string> GetIDs() => idSearch;
-        public static SoundID GetID(int index) => GetEntry(index).ID;
+        public static SoundID GetID(int index)
+        {
+            if (index >= database.Length || index < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(index), index, $"sOUND id not found index out of range");
+            }
+
+            return new(idSearch.Entries[index].Value, index);
+        }
         public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
-        internal static SoundEntry GetEntry(int index)
+        public static AudioClip GetClip(int index)
         {
             if (index >= database.Length || index < 0)
             {
@@ -56,16 +64,14 @@ namespace Core.Audio
 
             return database[index];
         }
-        internal static SoundEntry GetEntry(SoundID id)
+        public static AudioClip GetClip(SoundID id)
         {
             if (!id.IsValid)
             {
                 throw new ArgumentNullException($"[{nameof(id)}] SoundID is not valid!");
             }
 
-            return GetEntry(id.Index);
+            return GetClip(id.Index);
         }
-        public static AudioClip GetClip(int index) => GetEntry(index).Clip;
-        public static AudioClip GetClip(SoundID id) => GetEntry(id).Clip;
     }
 }

@@ -20,6 +20,6 @@ namespace Core.Persistence
             IsMarkedForDestroy = isMarkedForDestroy;
             Data = data == null ? new() : new(data);
         }
-        public PersistentEntityData() : this(PrefabID.NONE, Guid.Empty, false, new()) { }
+        public PersistentEntityData() : this(default, Guid.Empty, false, new()) { }
     }
 }
