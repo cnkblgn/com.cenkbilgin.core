@@ -22,7 +22,7 @@ struct FogDensity
 float3 GetFogScatter(float3 _worldPosition, float3 _cameraPosition, float3 _sunDirection, float3 _sunColor, float _scattering)
 {
     float3 direction = normalize(_worldPosition - _cameraPosition);
-    float d = saturate(dot(direction, _sunDirection));
+    float d = saturate(dot(direction, -_sunDirection));
     float s = pow(d, 8) * _scattering;
     
     return _sunColor * s;
@@ -32,7 +32,7 @@ float3 GetFogAmbient(float3 _worldPosition, float3 _cameraPosition, float3 _sunD
 {
     float3 direction = normalize(_worldPosition - _cameraPosition);
 
-    float sunDot = saturate(dot(direction, _sunDirection));
+    float sunDot = saturate(dot(direction, -_sunDirection));
     sunDot = pow(sunDot, 16);
 
     float3 warmColor = _ambientColor + (_ambientColor * _sunColor);
