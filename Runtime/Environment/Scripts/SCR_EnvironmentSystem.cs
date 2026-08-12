@@ -7,7 +7,8 @@ namespace Core.Environment
     {
         private const float UPDATE_FPS = 24;
         private const float UPDATE_RATE = 1 / UPDATE_FPS;
-        private const float LIGHT_EPSILON = 0.001f;
+        private const float LIGHT_THRESHOLD = 0.0025f;
+        private const float SHADOW_THRESHOLD = 0.050f;
 
         [Header("_")]
         [SerializeField, Required] private Light sunLight;
@@ -167,7 +168,8 @@ namespace Core.Environment
 
                 cachedSunLight.color = settings.Sun.Color;
                 cachedSunLight.intensity = intensity;
-                cachedSunLight.enabled = intensity > LIGHT_EPSILON;
+                cachedSunLight.enabled = intensity > LIGHT_THRESHOLD;
+                cachedSunLight.shadows = intensity >= SHADOW_THRESHOLD ? LightShadows.Soft : LightShadows.None;
             }
 
             if (cachedMoonLight != null)
@@ -179,7 +181,8 @@ namespace Core.Environment
 
                 cachedMoonLight.color = settings.Moon.Color;
                 cachedMoonLight.intensity = intensity;
-                cachedMoonLight.enabled = intensity > LIGHT_EPSILON;
+                cachedMoonLight.enabled = intensity > LIGHT_THRESHOLD;
+                cachedMoonLight.shadows = intensity >= SHADOW_THRESHOLD ? LightShadows.Soft : LightShadows.None;
             }
         }
         private static void ApplyAmbient(EnvironmentSettings settings)
