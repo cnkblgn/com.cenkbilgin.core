@@ -14,7 +14,7 @@ namespace Core.Trait
         public readonly int Cost;
         public readonly TraitAction Action;
 
-        private TraitDefinition(TraitID id, TraitID[] incompatibleIDs, IconID iconID, LocalizedID nameID, LocalizedID descID, int cost, TraitAction action)
+        internal TraitDefinition(TraitID id, TraitID[] incompatibleIDs, IconID iconID, LocalizedID nameID, LocalizedID descID, int cost, TraitAction action)
         {
             ID = id;
             IncompatibleIDs = incompatibleIDs ?? (new TraitID[] { });

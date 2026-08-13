@@ -12,7 +12,7 @@ namespace Core.Quest
         internal readonly QuestCondition[] Conditions;
         internal readonly QuestAction[] Actions;
 
-        public QuestDefinition(QuestID id, QuestID nextID, LocalizedID nameID, LocalizedID descID, QuestRequirement[] requirements, QuestCondition[] conditions, QuestAction[] actions)
+        internal QuestDefinition(QuestID id, QuestID nextID, LocalizedID nameID, LocalizedID descID, QuestRequirement[] requirements, QuestCondition[] conditions, QuestAction[] actions)
         {
             ID = id;
             NextID = nextID;
@@ -22,7 +22,7 @@ namespace Core.Quest
             NameID = nameID;
             DescID = descID;
         }
-        public QuestDefinition(QuestID id, QuestID nextID, LocalizedID nameID, LocalizedID descID) : this(id, nextID, nameID, descID, default, default, default) { }
-        public QuestDefinition(QuestEntry entry) : this (entry.ID, entry.NextID, entry.NameID, entry.DescID, entry.Requirements, entry.Conditions, entry.Actions) { }
+        internal QuestDefinition(QuestID id, QuestID nextID, LocalizedID nameID, LocalizedID descID) : this(id, nextID, nameID, descID, default, default, default) { }
+        internal QuestDefinition(QuestEntry entry) : this (entry.ID, entry.NextID, entry.NameID, entry.DescID, entry.Requirements, entry.Conditions, entry.Actions) { }
     }
 }

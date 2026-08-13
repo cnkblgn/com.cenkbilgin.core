@@ -24,7 +24,7 @@ namespace Core.Item
 
         public readonly ItemComponent Component;
 
-        public ItemDefinition(ItemID id, ItemTag[] tags, PrefabID entityID, PrefabID equipableID, PrefabID modelID, IconID iconID,  LocalizedID nameID, LocalizedID descID, int width, int height, int stack, float weight, ItemComponent component)
+        internal ItemDefinition(ItemID id, ItemTag[] tags, PrefabID entityID, PrefabID equipableID, PrefabID modelID, IconID iconID,  LocalizedID nameID, LocalizedID descID, int width, int height, int stack, float weight, ItemComponent component)
         {
             ID = id;
             Tags = tags.CreateMask();
@@ -40,7 +40,7 @@ namespace Core.Item
             Weight = weight;
             Component = component ?? ItemComponent.DEFAULT;
         }
-        public ItemDefinition(ItemEntry entry) : this
+        internal ItemDefinition(ItemEntry entry) : this
         (
             entry.ID,
             entry.Tags,

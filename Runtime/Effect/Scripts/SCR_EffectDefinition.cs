@@ -13,7 +13,7 @@ namespace Core.Effect
         public readonly EffectAction Action;
         public readonly int Interval;
 
-        public EffectDefinition(EffectID id, EffectTag tag, IconID iconID, LocalizedID nameID, EffectAction action, int interval)
+        internal EffectDefinition(EffectID id, EffectTag tag, IconID iconID, LocalizedID nameID, EffectAction action, int interval)
         {
             ID = !id.IsValid ? throw new NullReferenceException("Effect id is null or empty! please assign new id!") : id;
             Tag = tag;
@@ -22,6 +22,6 @@ namespace Core.Effect
             Action = action ?? throw new ArgumentNullException($"Effect action cannot be null! please assign action via effect entry! {nameof(action)}");
             Interval = interval;
         }
-        public EffectDefinition(EffectEntry entry) : this(entry.ID, entry.Tag, entry.IconID, entry.NameID, entry.Action, entry.Interval) { }
+        internal EffectDefinition(EffectEntry entry) : this(entry.ID, entry.Tag, entry.IconID, entry.NameID, entry.Action, entry.Interval) { }
     }
 }
