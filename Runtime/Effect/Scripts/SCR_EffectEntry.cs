@@ -12,18 +12,18 @@ namespace Core.Effect
 
         [Info("Please generate id if its not visible")] 
         public EffectID ID;
+        public EffectTag Tag;
         public LocalizedID NameID;
         public IconID IconID;
-        public EffectTag Tag;
         [Min(0)] public int Interval;
         [SerializeReference, Reference] public EffectAction Action;
 
-        public EffectEntry(EffectID id, LocalizedID nameID, IconID iconID, EffectTag tag, int interval, EffectAction action)
+        public EffectEntry(EffectID id, EffectTag tag, LocalizedID nameID, IconID iconID, int interval, EffectAction action)
         {
             ID = id;
+            Tag = tag;
             NameID = nameID;
             IconID = iconID;
-            Tag = tag;
             Interval = interval;
             Action = action;
 

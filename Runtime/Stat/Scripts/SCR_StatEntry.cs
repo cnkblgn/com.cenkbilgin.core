@@ -11,14 +11,16 @@ namespace Core.Stat
 
         [Info("Please generate id if its not visible")] 
         public StatID ID;
+        public StatTag Tag;
         public LocalizedID NameID;
         public float Default;
         public float Min;
         public float Max;
 
-        public StatEntry(StatID id, LocalizedID nameID, float @default, float min, float max)
+        public StatEntry(StatID id, StatTag tag, LocalizedID nameID, float @default, float min, float max)
         {
             ID = id;
+            Tag = tag;
             NameID = nameID;
             Default = @default;
             Min = min;
