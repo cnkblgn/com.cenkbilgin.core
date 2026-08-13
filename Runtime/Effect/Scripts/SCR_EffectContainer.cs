@@ -11,7 +11,17 @@ namespace Core.Effect
 
         private readonly SwapBackArray<EffectInstance> effects;
 
-        public EffectContainer(uint capacity = 16) => effects = new SwapBackArray<EffectInstance>(capacity);
+        public EffectContainer(uint capacity = 16) : this(new SwapBackArray<EffectInstance>(capacity)) { }
+        public EffectContainer(EffectContainer container) : this(container.effects) { }
+        public EffectContainer(SwapBackArray<EffectInstance> traits)
+        {
+            this.effects = new((uint)traits.Capacity);
+
+            for (int i = 0; i < traits.Count; i++)
+            {
+                this.effects[i] = traits[i];
+            }
+        }
 
         private void SetState(EffectState state, EffectInstance instance) => OnChanged?.Invoke(new(state, instance));
 

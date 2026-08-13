@@ -1,5 +1,7 @@
-using System;
 using Core.Actors;
+using System;
+using System.ComponentModel;
+using System.Linq;
 
 namespace Core.Trait
 {
@@ -11,7 +13,17 @@ namespace Core.Trait
 
         private readonly SwapBackArray<TraitInstance> traits;
 
-        public TraitContainer(uint capacity = 16) => traits = new SwapBackArray<TraitInstance>(capacity);
+        public TraitContainer(uint capacity = 16) : this(new SwapBackArray<TraitInstance>(capacity)) { }
+        public TraitContainer(TraitContainer container) : this(container.traits) { }
+        public TraitContainer(SwapBackArray<TraitInstance> traits)
+        {
+            this.traits = new((uint)traits.Capacity);
+
+            for (int i = 0; i < traits.Count; i++)
+            {
+                this.traits[i] = traits[i];
+            }
+        }
 
         private void SetState(TraitState state, TraitInstance instance) => OnChanged?.Invoke(new(state, instance));
 
