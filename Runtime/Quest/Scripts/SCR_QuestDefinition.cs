@@ -8,9 +8,9 @@ namespace Core.Quest
         public readonly QuestID NextID;
         public readonly LocalizedID NameID;
         public readonly LocalizedID DescID;
-        public readonly QuestRequirement[] Requirements;
-        public readonly QuestCondition[] Conditions;
-        public readonly QuestAction[] Actions;
+        internal readonly QuestRequirement[] Requirements;
+        internal readonly QuestCondition[] Conditions;
+        internal readonly QuestAction[] Actions;
 
         public QuestDefinition(QuestID id, QuestID nextID, LocalizedID nameID, LocalizedID descID, QuestRequirement[] requirements, QuestCondition[] conditions, QuestAction[] actions)
         {

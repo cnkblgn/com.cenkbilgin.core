@@ -59,7 +59,7 @@ namespace Core.Trait
 
             traits.Add(id, instance);
 
-            id.GetDefinition().Apply(actor, ref instance);
+            id.GetDefinition().Action.Apply(actor, ref instance);
 
             SetState(TraitState.ADDED, instance);
 
@@ -72,7 +72,7 @@ namespace Core.Trait
                 return false;
             }
 
-            id.GetDefinition().Remove(actor, ref registered);
+            id.GetDefinition().Action.Remove(actor, ref registered);
 
             traits.Remove(id);
 
