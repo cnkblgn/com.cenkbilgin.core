@@ -50,7 +50,7 @@ namespace Core.Stat
                 foreach (SearchEntry<string> entry in StatDatabase.GetIDs().Entries)
                 {
                     string id = entry.Value;
-                    int index = StatDatabase.GetTagIndex(id);
+                    int index = StatDatabase.GetIDIndex(id);
 
                     generator.Field($"public static readonly StatID {id.ToIdentifier()} = new({id.ToLiteral()},{index})");
                 }

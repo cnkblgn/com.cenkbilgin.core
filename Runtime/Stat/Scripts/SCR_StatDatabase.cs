@@ -34,12 +34,12 @@ namespace Core.Stat
                 database[i] = new(entries[i]);
             }
 
-            Debug.Log($"Effect database build successfull!");
+            Debug.Log($"Stat database build successfull!");
         }
 
         public static IReadOnlyList<StatDefinition> GetDatabase() => database;
         public static SearchCollection<string> GetIDs() => idSearch;
-        public static int GetTagIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
+        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
         public static StatDefinition GetDefinition(int index)
         {
             if (index >= database.Length || index < 0)

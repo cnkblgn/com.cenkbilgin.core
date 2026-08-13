@@ -40,7 +40,7 @@ namespace Core.Graphics
                 database[i] = obj;
             }
 
-            Debug.Log($"Mesh build successfull!");
+            Debug.Log($"Mesh database build successfull!");
         }
 
         public static SearchCollection<string> GetIDs() => idSearch;

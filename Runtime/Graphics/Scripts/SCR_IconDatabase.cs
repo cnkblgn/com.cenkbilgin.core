@@ -39,7 +39,7 @@ namespace Core.Graphics
                 idSearch.Entries[i] = new SearchEntry<string>(key, key);
             }
 
-            Debug.Log($"IconDatabase build successfull!");
+            Debug.Log($"Icon database build successfull!");
         }
 
         public static SearchCollection<string> GetIDs() => idSearch;

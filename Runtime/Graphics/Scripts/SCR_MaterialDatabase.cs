@@ -40,7 +40,7 @@ namespace Core.Graphics
                 database[i] = obj;
             }
 
-            Debug.Log($"Material build successfull!");
+            Debug.Log($"Material database build successfull!");
         }
 
         public static SearchCollection<string> GetIDs() => idSearch;

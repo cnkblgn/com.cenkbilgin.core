@@ -8,12 +8,6 @@ namespace Core.Prefab.Editor
     [CustomPropertyDrawer(typeof(PrefabID))]
     internal sealed class EditorDrawSearchablePrefabID : EditorDrawSearchable<string>
     {
-        protected override void OnApply(SerializedProperty property, string key, int index)
-        {
-            SerializedProperty indexProperty = property.FindPropertyRelative("index");
-            indexProperty.intValue = PrefabDatabase.GetIDIndex(key);
-        }
-
         protected override string GetEmpty() => STRING_EMPTY;
         protected override string GetKey() => "key";
         protected override SearchCollection<string> GetKeys() => PrefabDatabase.GetIDs();

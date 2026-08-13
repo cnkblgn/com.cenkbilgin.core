@@ -41,7 +41,7 @@ namespace Core.Audio
                 idSearch.Entries[i] = new(key, key);
             }
 
-            Debug.Log($"SoundDatabase build successfull!");
+            Debug.Log($"Sound database build successfull!");
         }
  
         public static SearchCollection<string> GetIDs() => idSearch;
@@ -49,7 +49,7 @@ namespace Core.Audio
         {
             if (index >= database.Length || index < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(index), index, $"sOUND id not found index out of range");
+                throw new ArgumentOutOfRangeException(nameof(index), index, $"Sound id not found index out of range");
             }
 
             return new(idSearch.Entries[index].Value, index);

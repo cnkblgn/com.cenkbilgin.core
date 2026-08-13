@@ -12,7 +12,7 @@ namespace Core.Stat
             {
                 if (index < 0)
                 {
-                    index = StatDatabase.GetTagIndex(key);
+                    index = StatDatabase.GetIDIndex(key);
                 }
 
                 return index;
