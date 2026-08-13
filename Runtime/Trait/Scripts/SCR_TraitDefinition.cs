@@ -23,7 +23,7 @@ namespace Core.Trait
         {
             ID = id;
             IncompatibleIDs = incompatibleIDs ?? (new TraitID[] { });
-            Action = Action = action ?? throw new ArgumentNullException(nameof(action), "Trait action cannot be null! please assign!");
+            Action = action ?? new TraitActionNone();
             Cost = cost;
             IconID = iconID;
             NameID = nameID;
