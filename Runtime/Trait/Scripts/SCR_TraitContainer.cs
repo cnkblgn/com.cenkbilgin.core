@@ -42,6 +42,18 @@ namespace Core.Trait
 
             return false;
         }
+        public bool IsIncompatibleWith(TraitID id)
+        {
+            foreach (TraitID registered in traits.Keys)
+            {
+                if (registered.IsIncompatibleWith(id))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         public bool TryAddTrait(TraitID id, Actor actor)
         {

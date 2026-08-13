@@ -1,6 +1,8 @@
-using System;
-using UnityEngine;
 using Core.Actors;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using UnityEngine;
 
 namespace Core.Trait
 {
@@ -47,15 +49,48 @@ namespace Core.Trait
 
             for (int i = 0; i < definition.IncompatibleIDs.Length; i++)
             {
-                TraitID incompatibleID = definition.IncompatibleIDs[i];
-
-                if (incompatibleID == id)
+                if (definition.IncompatibleIDs[i] == id)
                 {
                     return false;
                 }
             }
 
             return true;
+        }
+        public readonly bool IsIncompatibleWith(TraitID id)
+        {
+            TraitDefinition definition = GetDefinition();
+
+            for (int i = 0; i < definition.IncompatibleIDs.Length; i++)
+            {
+                if (definition.IncompatibleIDs[i] == id)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        public readonly void GetIncompatibleDesc(StringBuilder sb)
+        {
+            if (sb == null)
+            {
+                Debug.LogError("Get compatible races failed! string builder is null!?");
+                return;
+            }
+
+            IReadOnlyList<TraitDefinition> database = TraitDatabase.GetDatabase();
+
+            foreach (TraitDefinition trait in database)
+            {
+                if (!IsIncompatibleWith(trait.ID))
+                {
+                    continue;
+                }
+
+                sb.Append(" -> ".ToRed());
+                sb.AppendLine(trait.NameID.Get().ToRed());
+            }
         }
     }
 }
