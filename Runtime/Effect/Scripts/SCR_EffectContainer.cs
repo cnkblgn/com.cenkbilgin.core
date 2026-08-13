@@ -15,7 +15,7 @@ namespace Core.Effect
 
         private void SetState(EffectState state, EffectInstance instance) => OnChanged?.Invoke(new(state, instance));
 
-        public void Tick(Actor entity, float deltaTime)
+        public void Tick(Actor actor, float deltaTime)
         {
             for (int i = effects.Count - 1; i >= 0; i--)
             {
@@ -34,18 +34,18 @@ namespace Core.Effect
 
                         registered.TickCount++;
 
-                        definition.Action.Tick(entity, ref registered);
+                        TickAction(actor, definition, ref registered);
                     }
                 }
 
                 if (registered.TimeRemaining <= 0 && registered.Duration > 0)
                 {
-                    RemoveEffect(entity, i, registered);
+                    RemoveEffect(actor, i, ref registered);
                 }
             }
         }
 
-        public bool TryAddEffect(Actor entity, EffectInstance instance)
+        public bool TryAddEffect(Actor actor, EffectInstance instance)
         {
             for (int i = 0; i < effects.Count; i++)
             {
@@ -61,13 +61,13 @@ namespace Core.Effect
 
             ref EffectInstance added = ref effects.GetRef(effects.Count - 1);
 
-            added.ID.GetDefinition().Action.Apply(entity, ref added);
+            ApplyAction(actor, added.ID.GetDefinition(), ref added);
 
             SetState(EffectState.ADDED, added);
 
             return true;
         }
-        public bool TryRemoveEffect(Actor entity, EffectID id)
+        public bool TryRemoveEffect(Actor actor, EffectID id)
         {
             for (int i = 0; i < effects.Count; i++)
             {
@@ -75,19 +75,46 @@ namespace Core.Effect
 
                 if (registered.ID == id)
                 {
-                    RemoveEffect(entity, i, registered);
+                    RemoveEffect(actor, i, ref registered);
                     return true;
                 }
             }
 
             return false;
         }
-
-        private void RemoveEffect(Actor entity, int index, EffectInstance registered)
+        
+        private void TickAction(Actor actor, EffectDefinition definition, ref EffectInstance instance)
         {
-            SetState(EffectState.REMOVED, registered);
+            EffectAction[] actions = definition.Actions;
 
-            registered.ID.GetDefinition().Action.Removed(entity, ref registered);
+            for (int i = 0; i < actions.Length; i++)
+            {
+                actions[i].Tick(actor, ref instance);
+            }
+        }
+        private void ApplyAction(Actor actor, EffectDefinition definition, ref EffectInstance instance)
+        {
+            EffectAction[] actions = definition.Actions;
+
+            for (int i = 0; i < actions.Length; i++)
+            {
+                actions[i].Apply(actor, ref instance);
+            }
+        }
+        private void RemoveAction(Actor actor, EffectDefinition definition, ref EffectInstance instance)
+        {
+            EffectAction[] actions = definition.Actions;
+
+            for (int i = 0; i < actions.Length; i++)
+            {
+                actions[i].Removed(actor, ref instance);
+            }
+        }
+        private void RemoveEffect(Actor actor, int index, ref EffectInstance instance)
+        {
+            SetState(EffectState.REMOVED, instance);
+
+            RemoveAction(actor, instance.ID.GetDefinition(), ref instance);
 
             effects.RemoveAt(index);
         }

@@ -18,9 +18,9 @@ namespace Core.Trait
         public LocalizedID DescID;
 
         [Min(0)] public int Cost;
-        [SerializeReference, Reference] public TraitAction Action;
+        [SerializeReference, Reference] public TraitAction[] Actions;
 
-        public TraitEntry(string name, TraitID iD, TraitID[] incompatibleIDs, IconID iconID, LocalizedID nameID, LocalizedID descID, int cost, TraitAction action)
+        public TraitEntry(string name, TraitID iD, TraitID[] incompatibleIDs, IconID iconID, LocalizedID nameID, LocalizedID descID, int cost, TraitAction[] actions)
         {
             Name = name;
             ID = iD;
@@ -29,7 +29,7 @@ namespace Core.Trait
             NameID = nameID;
             DescID = descID;
             Cost = cost;
-            Action = action;
+            Actions = actions;
         }
     }
 }

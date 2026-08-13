@@ -1,4 +1,3 @@
-using Core.Actors;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -36,7 +35,7 @@ namespace Core.Trait
         public override string ToString() => $"Key: {key} << Index: {Index}";
 
         public readonly override int GetHashCode() => key?.GetHashCode() ?? 0;
-        public readonly override bool Equals(object obj) => obj is ActorID other && Equals(other);
+        public readonly override bool Equals(object obj) => obj is TraitID other && Equals(other);
         public readonly bool Equals(TraitID other) => string.Equals(key, other.key, StringComparison.Ordinal);
         public static bool operator ==(TraitID left, TraitID right) => left.Equals(right);
         public static bool operator !=(TraitID left, TraitID right) => !left.Equals(right);

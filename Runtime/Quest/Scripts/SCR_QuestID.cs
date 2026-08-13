@@ -34,7 +34,7 @@ namespace Core.Quest
         public override string ToString() => $"Key: {key} << Index: {Index}";
 
         public readonly override int GetHashCode() => key?.GetHashCode() ?? 0;
-        public readonly override bool Equals(object obj) => obj is ActorID other && Equals(other);
+        public readonly override bool Equals(object obj) => obj is QuestID other && Equals(other);
         public readonly bool Equals(QuestID other) => string.Equals(key, other.key, StringComparison.Ordinal);
         public static bool operator ==(QuestID left, QuestID right) => left.Equals(right);
         public static bool operator !=(QuestID left, QuestID right) => !left.Equals(right);

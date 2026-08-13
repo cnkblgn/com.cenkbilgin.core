@@ -2,7 +2,7 @@ namespace Core.Effect
 {
     public struct EffectInstance
     {
-        public static readonly EffectInstance Empty = new();
+        public static readonly EffectInstance EMPTY = new();
 
         public readonly EffectID ID;
         public readonly float Duration;

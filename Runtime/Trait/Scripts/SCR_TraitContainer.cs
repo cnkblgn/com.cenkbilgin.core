@@ -1,23 +1,17 @@
 using System;
-using System.Collections.Generic;
 using Core.Actors;
 
 namespace Core.Trait
 {
+    using static CoreUtility;
+
     public sealed class TraitContainer
     {
         public event Action<TraitContext> OnChanged = null;
 
-        private readonly Dictionary<TraitID, TraitInstance> traits;
+        private readonly SwapBackArray<TraitInstance> traits;
 
-        public TraitContainer() : this(new Dictionary<TraitID, TraitInstance>()) { }
-        public TraitContainer(TraitContainer container) : this(container == null ? throw new ArgumentNullException() : container.traits) { }
-        public TraitContainer(Dictionary<TraitID, TraitInstance> traits)
-        {
-            if (traits == null) throw new ArgumentNullException();
-
-            this.traits = new(traits);
-        }
+        public TraitContainer(uint capacity = 16) => traits = new SwapBackArray<TraitInstance>(capacity);
 
         private void SetState(TraitState state, TraitInstance instance) => OnChanged?.Invoke(new(state, instance));
 
@@ -28,13 +22,21 @@ namespace Core.Trait
                 return false;
             }
 
-            return traits.ContainsKey(id);
+            for (int i = 0; i < traits.Count; i++)
+            {
+                if (traits[i].ID == id)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
         public bool IsCompatibleWith(TraitID id)
         {
-            foreach (TraitID registered in traits.Keys)
+            for (int i = 0; i < traits.Count; i++)
             {
-                if (registered.IsCompatibleWith(id))
+                if (traits[i].ID.IsCompatibleWith(id))
                 {
                     return true;
                 }
@@ -44,9 +46,9 @@ namespace Core.Trait
         }
         public bool IsIncompatibleWith(TraitID id)
         {
-            foreach (TraitID registered in traits.Keys)
+            for (int i = 0; i < traits.Count; i++)
             {
-                if (registered.IsIncompatibleWith(id))
+                if (traits[i].ID.IsIncompatibleWith(id))
                 {
                     return true;
                 }
@@ -69,28 +71,57 @@ namespace Core.Trait
 
             TraitInstance instance = id.CreateInstance();
 
-            traits.Add(id, instance);
+            traits.Add(instance);
 
-            id.GetDefinition().Action.Apply(actor, ref instance);
+            ref TraitInstance added = ref traits.GetRef(traits.Count - 1);
 
-            SetState(TraitState.ADDED, instance);
+            ApplyAction(actor, ref added);
+
+            SetState(TraitState.ADDED, added);
 
             return true;
         }
         public bool TryRemoveTrait(TraitID id, Actor actor)
         {
-            if (!traits.TryGetValue(id, out TraitInstance registered))
+            for (int i = 0; i < traits.Count; i++)
             {
-                return false;
+                ref TraitInstance registered = ref traits.GetRef(i);
+
+                if (registered.ID == id)
+                {
+                    RemoveTrait(actor, i, ref registered);
+                    return true;
+                }
             }
 
-            id.GetDefinition().Action.Remove(actor, ref registered);
+            return false;
+        }
 
-            traits.Remove(id);
+        private void ApplyAction(Actor actor, ref TraitInstance instance)
+        {
+            TraitAction[] actions = instance.ID.GetDefinition().Actions;
 
-            SetState(TraitState.REMOVED, registered);
+            for (int i = 0; i < actions.Length; i++)
+            {
+                actions[i].Apply(actor, ref instance);
+            }
+        }
+        private void RemoveAction(Actor actor, ref TraitInstance instance)
+        {
+            TraitAction[] actions = instance.ID.GetDefinition().Actions;
 
-            return true;
+            for (int i = 0; i < actions.Length; i++)
+            {
+                actions[i].Remove(actor, ref instance);
+            }
+        }
+        private void RemoveTrait(Actor actor, int index, ref TraitInstance instance)
+        {
+            SetState(TraitState.REMOVED, instance);
+
+            RemoveAction(actor, ref instance);
+
+            traits.RemoveAt(index);
         }
     }
 }

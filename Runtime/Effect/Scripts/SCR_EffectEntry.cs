@@ -15,17 +15,18 @@ namespace Core.Effect
         public EffectTag Tag;
         public LocalizedID NameID;
         public IconID IconID;
-        [Min(0)] public int Interval;
-        [SerializeReference, Reference] public EffectAction Action;
 
-        public EffectEntry(EffectID id, EffectTag tag, LocalizedID nameID, IconID iconID, int interval, EffectAction action)
+        [Min(0)] public int Interval;
+        [SerializeReference, Reference] public EffectAction[] Actions;
+
+        public EffectEntry(EffectID id, EffectTag tag, LocalizedID nameID, IconID iconID, int interval, EffectAction[] actions)
         {
             ID = id;
             Tag = tag;
             NameID = nameID;
             IconID = iconID;
             Interval = interval;
-            Action = action;
+            Actions = actions;
 
             Name = ID.Key;
         }
