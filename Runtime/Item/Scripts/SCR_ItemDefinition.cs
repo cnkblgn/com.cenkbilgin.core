@@ -27,7 +27,7 @@ namespace Core.Item
         internal ItemDefinition(ItemID id, ItemTag[] tags, PrefabID entityID, PrefabID equipableID, PrefabID modelID, IconID iconID,  LocalizedID nameID, LocalizedID descID, int width, int height, int stack, float weight, ItemComponent component)
         {
             ID = id;
-            Tags = tags.CreateMask();
+            Tags = tags == null ? 0 : tags.CreateMask();
             EntityID = entityID.IsValid ? entityID : throw new ArgumentNullException($"Item entity id is not valid! [{entityID.Key}]");
             EquipableID = equipableID;
             ModelID = modelID;
