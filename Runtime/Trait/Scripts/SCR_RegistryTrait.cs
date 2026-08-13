@@ -53,8 +53,10 @@ namespace Core.Trait
             {
                 foreach (SearchEntry<string> entry in TraitDatabase.GetIDs().Entries)
                 {
-                    string id = entry.Value;    
-                    generator.Field($"public static readonly TraitID {id.ToIdentifier()} = new({id.ToLiteral()})");
+                    string id = entry.Value;
+                    int index = TraitDatabase.GetIDIndex(id);
+
+                    generator.Field($"public static readonly TraitID {id.ToIdentifier()} = new({id.ToLiteral()},{index})");
                 }
             }
 
