@@ -4,21 +4,11 @@ namespace Core.Actors
 {
     using static CoreUtility;
 
-    public class Actor : MonoBehaviour
+    [DisallowMultipleComponent]
+    [DefaultExecutionOrder(-1)]
+    public sealed class Actor : MonoBehaviour
     {
-        public Transform ThisTransform
-        {
-            get
-            {
-                if (thisTransform == null)
-                {
-                    thisTransform = transform;
-                }
-
-                return thisTransform;
-            }
-        } private Transform thisTransform = null;
-
+        public Transform Origin => origin; private Transform origin = null;
         public ActorID ID => id;
         public ulong Tags { get; private set; }
 
@@ -28,7 +18,10 @@ namespace Core.Actors
 
         private void Awake()
         {
+            origin = GetComponent<Transform>();
+
             Tags = ActorTag.CreateMask(tags);
+
             ActorDatabase.RegisterActor(id, this);
         }
         private void OnDestroy() => ActorDatabase.RemoveActor(this);
@@ -50,11 +43,11 @@ namespace Core.Actors
         private void DrawGizmos(bool selected)
         {
             Gizmos.color = selected ? Color.red : Color.greenYellow;
-            Gizmos.DrawWireSphere(ThisTransform.position, 0.1f);
+            Gizmos.DrawWireSphere(Origin.position, 0.1f);
 
             using (new UnityEditor.Handles.DrawingScope())
             {
-                UnityEditor.Handles.Label(ThisTransform.position + Vector3.up, id.Key, GizmosStyle);
+                UnityEditor.Handles.Label(Origin.position + Vector3.up, id.Key, GizmosStyle);
             }
         }
 #endif
