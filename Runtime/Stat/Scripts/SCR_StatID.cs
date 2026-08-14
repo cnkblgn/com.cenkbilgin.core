@@ -10,10 +10,14 @@ namespace Core.Stat
         {
             get
             {
-                if (index < 0)
+                if (resolved)
                 {
-                    index = StatDatabase.GetIDIndex(key);
+                    return index;
                 }
+
+                index = StatDatabase.GetIDIndex(key);
+
+                resolved = index >= 0;
 
                 return index;
             }
@@ -23,11 +27,13 @@ namespace Core.Stat
 
         [SerializeField, Required] private string key;
         [NonSerialized] private int index;
+        [NonSerialized] private bool resolved;
 
         public StatID(string key, int index)
         {
             this.key = key;
             this.index = index;
+            this.resolved = true;
         }
 
         public override string ToString() => $"Key: {key} << Index: {Index}";

@@ -8,15 +8,18 @@ namespace Core.Actors
     public struct ActorTag : IEquatable<ActorTag>
     {
         public readonly string Key => key;
-
         public int Index
         {
             get
             {
-                if (index < 0)
+                if (resolved)
                 {
-                    index = ActorDatabase.GetTagIndex(key);
+                    return index;
                 }
+
+                index = ActorDatabase.GetTagIndex(key);
+
+                resolved = index >= 0;
 
                 return index;
             }
@@ -30,23 +33,16 @@ namespace Core.Actors
                 return value >= 0 && value < 64 ? 1UL << value : 0;
             }
         }
-        public bool IsValid
-        {
-            get
-            {
-                int value = Index;
-
-                return !string.IsNullOrEmpty(key) && value >= 0 && value < 64;
-            }
-        }
 
         [SerializeField, Required] private string key;
         [NonSerialized] private int index;
+        [NonSerialized] private bool resolved;
 
         public ActorTag(string key, int index)
         {
             this.key = key;
             this.index = index;
+            this.resolved = true;
         }
 
         public override string ToString() => $"Key: {key} << Index: {Index}";

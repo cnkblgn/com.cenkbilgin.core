@@ -12,10 +12,14 @@ namespace Core.Trait
         {
             get
             {
-                if (index < 0)
+                if (resolved)
                 {
-                    index = TraitDatabase.GetIDIndex(key);
+                    return index;
                 }
+
+                index = TraitDatabase.GetIDIndex(key);
+
+                resolved = index >= 0;
 
                 return index;
             }
@@ -25,11 +29,13 @@ namespace Core.Trait
 
         [SerializeField, Required] private string key;
         [NonSerialized] private int index;
+        [NonSerialized] private bool resolved;
 
         public TraitID(string key, int index)
         {
             this.key = key;
             this.index = index;
+            this.resolved = true;
         }
 
         public override string ToString() => $"Key: {key} << Index: {Index}";

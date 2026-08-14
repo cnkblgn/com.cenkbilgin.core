@@ -6,28 +6,34 @@ namespace Core.Graphics
     [Serializable]
     public struct MaterialID : IEquatable<MaterialID>
     {
+        public readonly string Key => key;
+        public bool IsValid => !string.IsNullOrEmpty(key) && Index >= 0;
         public int Index
         {
             get
             {
-                if (index < 0)
+                if (resolved)
                 {
-                    index = MaterialDatabase.GetIDIndex(key);
+                    return index;
                 }
+
+                index = MaterialDatabase.GetIDIndex(key);
+
+                resolved = index >= 0;
 
                 return index;
             }
         }
-        public readonly string Key => key;
-        public bool IsValid => !string.IsNullOrEmpty(key) && Index >= 0;
 
         [SerializeField, Required] private string key;
         [NonSerialized] private int index;
+        [NonSerialized] private bool resolved;
 
         public MaterialID(string key, int index)
         {
             this.key = key;
             this.index = index;
+            this.resolved = true;
         }
 
         public override string ToString() => $"Key: {key} << Index: {Index}";

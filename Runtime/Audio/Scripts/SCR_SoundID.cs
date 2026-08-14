@@ -6,28 +6,34 @@ namespace Core.Audio
     [Serializable]
     public struct SoundID : IEquatable<SoundID> 
     {
+        public readonly string Key => key;
+        public bool IsValid => !string.IsNullOrEmpty(key) && Index >= 0;
         public int Index
         {
             get
             {
-                if (index < 0)
+                if (resolved)
                 {
-                    index = SoundDatabase.GetIDIndex(key);
+                    return index;
                 }
+
+                index = SoundDatabase.GetIDIndex(key);
+
+                resolved = index >= 0;
 
                 return index;
             }
         }
-        public readonly string Key => key;
-        public bool IsValid => !string.IsNullOrEmpty(key) && Index >= 0;
 
         [SerializeField, Required] private string key;
         [SerializeField, ReadOnly] private int index;
+        [SerializeField, ReadOnly] private bool resolved;
 
         public SoundID(string key, int index)
         {
             this.key = key;
             this.index = index;
+            this.resolved = true;
         }
 
         public override string ToString() => $"Key: {key} << Index: {Index}";

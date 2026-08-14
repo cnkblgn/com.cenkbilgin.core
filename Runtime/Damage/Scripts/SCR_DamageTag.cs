@@ -7,15 +7,18 @@ namespace Core.Damage
     public struct DamageTag : IEquatable<DamageTag>
     {
         public readonly string Key => key;
-
         public int Index
         {
             get
             {
-                if (index < 0)
+                if (resolved)
                 {
-                    index = DamageDatabase.GetTagIndex(key);
+                    return index;
                 }
+
+                index = DamageDatabase.GetTagIndex(key);
+
+                resolved = index >= 0;
 
                 return index;
             }
@@ -29,23 +32,16 @@ namespace Core.Damage
                 return value >= 0 && value < 64 ? 1UL << value : 0;
             }
         }
-        public bool IsValid
-        {
-            get
-            {
-                int value = Index;
 
-                return !string.IsNullOrEmpty(key) && value >= 0 && value < 64;
-            }
-        }
-
-        [SerializeField] private string key;
-        [SerializeField, ReadOnly] private int index;
+        [SerializeField, Required] private string key;
+        [NonSerialized] private int index;
+        [NonSerialized] private bool resolved;
 
         public DamageTag(string key, int index)
         {
             this.key = key;
             this.index = index;
+            this.resolved = true;
         }
 
         public override string ToString() => $"Key: {key} << Index: {Index}";
