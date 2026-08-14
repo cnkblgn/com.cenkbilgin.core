@@ -15,8 +15,6 @@ namespace Core.Effect
         public EffectContainer(EffectContainer container) : this(container.effects) { }
         public EffectContainer(SwapBackArray<EffectInstance> traits)
         {
-            UnityEngine.Debug.Log("EffectContainer: 1231321");
-
             this.effects = new((uint)traits.Capacity);
 
             for (int i = 0; i < traits.Count; i++)

@@ -1,7 +1,5 @@
-using Core.Actors;
 using System;
-using System.ComponentModel;
-using System.Linq;
+using Core.Actors;
 
 namespace Core.Trait
 {
