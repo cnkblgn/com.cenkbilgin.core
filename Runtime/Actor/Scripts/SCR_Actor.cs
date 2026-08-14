@@ -8,7 +8,18 @@ namespace Core.Actors
     [DefaultExecutionOrder(-1)]
     public sealed class Actor : MonoBehaviour
     {
-        public Transform Origin => origin; private Transform origin = null;
+        public Transform Origin
+        {
+            get
+            {
+                if (origin == null)
+                {
+                    origin = transform;
+                }
+
+                return origin;
+            }
+        } 
         public ActorID ID => id;
         public ulong Tags { get; private set; }
 
@@ -16,10 +27,10 @@ namespace Core.Actors
         [SerializeField] private ActorID id;
         [SerializeField] private ActorTag[] tags;
 
+        private Transform origin = null;
+
         private void Awake()
         {
-            origin = GetComponent<Transform>();
-
             Tags = ActorTag.CreateMask(tags);
 
             ActorDatabase.RegisterActor(id, this);
