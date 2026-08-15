@@ -1,3 +1,4 @@
+using UnityEditor;
 using UnityEngine;
 
 namespace Core
@@ -35,7 +36,20 @@ namespace Core
 
             return found;
         }
-            
+
+        [MenuItem("Tools/Reload Registries", priority = -10)]
+        private static void TryReload()
+        {
+            TryCache();
+
+            for (int i = 0; i < registries.Length; i++)
+            {
+                registries[i].OnAfterScriptLoad();
+            }
+
+            Debug.Log("Registries reloaded!");
+        }
+
         [UnityEditor.Callbacks.DidReloadScripts(1)]
         private static void OnAfterScriptLoad()
         {
