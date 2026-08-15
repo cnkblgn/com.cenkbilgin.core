@@ -6,6 +6,8 @@ namespace Core.Stat
     [Serializable]
     public struct StatID : IEquatable<StatID>
     {
+        public readonly string Key => key;
+        public bool IsValid => !string.IsNullOrEmpty(key) && Index >= 0;
         public int Index
         {
             get
@@ -22,19 +24,13 @@ namespace Core.Stat
                 return index;
             }
         }
-        public readonly string Key => key;
-        public bool IsValid => !string.IsNullOrEmpty(key) && Index >= 0;
 
         [SerializeField, Required] private string key;
         [NonSerialized] private int index;
         [NonSerialized] private bool resolved;
 
-        public StatID(string key, int index)
-        {
-            this.key = key;
-            this.index = index;
-            this.resolved = true;
-        }
+        public StatID(string key, int index) => (this.key, this.index, this.resolved) = (key, index, index >= 0);
+        public StatID(string key) : this (key, -1) { }
 
         public override string ToString() => $"Key: {key} << Index: {Index}";
 

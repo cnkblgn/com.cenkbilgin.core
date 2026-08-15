@@ -29,12 +29,8 @@ namespace Core.Graphics
         [NonSerialized] private int index;
         [NonSerialized] private bool resolved;
 
-        public MaterialID(string key, int index)
-        {
-            this.key = key;
-            this.index = index;
-            this.resolved = true;
-        }
+        public MaterialID(string key, int index) => (this.key, this.index, this.resolved) = (key, index, index >= 0);
+        public MaterialID(string key) : this(key, -1) { }
 
         public override string ToString() => $"Key: {key} << Index: {Index}";
 

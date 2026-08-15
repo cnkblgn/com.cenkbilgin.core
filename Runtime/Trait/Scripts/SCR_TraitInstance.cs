@@ -4,9 +4,9 @@ namespace Core.Trait
     {
         public readonly TraitID ID;
 
-        public TraitInstance(TraitID id)
+        public TraitInstance(TraitDefinition definition)
         {
-            ID = id;
+            ID = definition.ID;
         }
     }
 }

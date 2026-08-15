@@ -20,10 +20,10 @@ namespace Core.Trait
         [Min(0)] public int Cost;
         [SerializeReference, Reference] public TraitAction[] Actions;
 
-        public TraitEntry(string name, TraitID iD, TraitID[] incompatibleIDs, IconID iconID, LocalizedID nameID, LocalizedID descID, int cost, TraitAction[] actions)
+        public TraitEntry(string name, TraitID id, TraitID[] incompatibleIDs, IconID iconID, LocalizedID nameID, LocalizedID descID, int cost, TraitAction[] actions)
         {
             Name = name;
-            ID = iD;
+            ID = id;
             IncompatibleIDs = incompatibleIDs;
             IconID = iconID;
             NameID = nameID;

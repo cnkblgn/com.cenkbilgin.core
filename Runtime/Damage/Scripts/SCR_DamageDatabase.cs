@@ -7,8 +7,7 @@ namespace Core.Damage
     public static class DamageDatabase
     {
         private static readonly Dictionary<string, int> tagLookup = new();
-        private static SearchCollection<string> tagSearch = new(Array.Empty<SearchEntry<string>>());
-        private static DamageTag[] database = Array.Empty<DamageTag>();
+        private static DamageTag[] tags = Array.Empty<DamageTag>();
 
         internal static void Build(string[] tagCollection)
         {
@@ -17,35 +16,38 @@ namespace Core.Damage
                 return;
             }
 
-            database = new DamageTag[tagCollection.Length + 1];
-            tagSearch = new(new SearchEntry<string>[tagCollection.Length + 1]);
             tagLookup.Clear();
-
-            database[0] = new("GENERIC", 0);
-            tagSearch.Entries[0] = new("GENERIC", "GENERIC");
+            tags = new DamageTag[tagCollection.Length + 1];
+            tags[0] = new("GENERIC", 0);
 
             for (int i = 0; i < tagCollection.Length; i++)
             {
                 string key = tagCollection[i];
                 int index = i + 1;
 
+
+                if (string.IsNullOrEmpty(key))
+                {
+                    Debug.LogError("Damage database tag key is invalid!?");
+                    continue;
+                }
+
                 tagLookup[key] = index;
-                database[index] = new(key, index);
-                tagSearch.Entries[index] = new(key, key);
+                tags[index] = new(key, index);
             }
 
             Debug.Log($"Damage database build successfull!");
         }
 
-        public static SearchCollection<string> GetTags() => tagSearch;
+        public static IReadOnlyList<DamageTag> GetTags() => tags;
         public static DamageTag GetTag(int index)
         {
-            if (index >= database.Length || index < 0)
+            if (index >= tags.Length || index < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(index), index, $"Damage tag not found index out of range");
             }
 
-            return database[index];
+            return tags[index];
         }
         public static int GetTagIndex(string key) => tagLookup.TryGetValue(key, out int index) ? index : -1;
     }

@@ -1,181 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
-using UnityEditor;
 using UnityEngine;
 
 namespace Core
-{ 
+{
     public static class CoreUtility
     {
-        #region EDITOR
-#if UNITY_EDITOR
-
-        /// <summary>
-        /// Generates a text file at the specified path.
-        /// </summary>
-        /// <param name="path">
-        /// Full output path of the generated file, including the file name and extension.
-        /// <para>Example: <c>Assets/Scripts/GeneratedIDs.cs</c></para>
-        /// </param>
-        /// <param name="content">
-        /// Text content to write into the generated file.
-        /// </param>
-        [HideInCallstack]
-        public static void GenerateTextFile(string path, StringBuilder content) => GenerateTextFile(path, content.ToString());
-        /// <summary>
-        /// Generates a text file at the specified path.
-        /// </summary>
-        /// <param name="path">
-        /// Full output path of the generated file, including the file name and extension.
-        /// <para>Example: <c>Assets/Scripts/GeneratedIDs.cs</c></para>
-        /// </param>
-        /// <param name="content">
-        /// Text content to write into the generated file.
-        /// </param>
-        [HideInCallstack]
-        public static void GenerateTextFile(string path, string content)
-        {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path), "Text file generation failed. Path is null.");
-            }
-
-            if (string.IsNullOrWhiteSpace(path))
-            {
-                throw new ArgumentException("Text file generation failed. Path is empty.", nameof(path));
-            }
-
-            if (content == null)
-            {
-                throw new ArgumentNullException(nameof(content), "Text file generation failed. Content is null.");
-            }
-
-            string directory = Path.GetDirectoryName(path);
-
-            if (string.IsNullOrEmpty(directory))
-            {
-                throw new InvalidOperationException($"Text file generation failed. Invalid path [{path}]");
-            }
-
-            directory = directory.Replace("\\", "/");
-
-            if (!Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
-
-            File.WriteAllText(path, content);
-
-            AssetDatabase.Refresh();
-
-            Debug.Log($"Text generated at [{path}]");
-        }
-        public static bool TryCreateAsset<T>(string path, out T asset) where T : ScriptableObject
-        {
-            // Klasör kısmını al
-            string folderPath = Path.GetDirectoryName(path);
-
-            if (!Directory.Exists(folderPath))
-            {
-                Directory.CreateDirectory(folderPath);
-            }
-
-            try
-            {
-                asset = ScriptableObject.CreateInstance<T>();
-
-                AssetDatabase.CreateAsset(asset, path);
-                AssetDatabase.SaveAssets();
-                AssetDatabase.Refresh();
-
-                Selection.activeObject = asset;
-                EditorGUIUtility.PingObject(asset);
-
-                Debug.Log($"EditorUtility.CreateAsset() [{nameof(T)}] created at [{folderPath}]");
-
-                return true;
-            }
-            catch (System.Exception e)
-            {
-                Debug.Log($"EditorUtility.CreateAsset() [{nameof(T)}] created at [{folderPath}] << e: {e}");
-                throw;
-            }
-        }
-        public static bool TryFindAssetByKeyword<T>(out T asset, string keyword, string folder = "Assets") where T : UnityEngine.Object
-        {
-            string filter = "t:" + typeof(T).Name;
-            string query = keyword + " " + filter;
-            asset = null;
-
-            GUID[] guids = AssetDatabase.FindAssetGUIDs(query, new[] { folder });
-
-            if (guids == null || guids.Length == 0)
-            {
-                Debug.LogError($"EditorUtility.FindAssetByKeyword() No asset found with keyword: " + keyword);
-                return false;
-            }
-
-            return TryGetAssetFromGuid(guids[0], out asset);
-        }
-        public static bool TryFindAssetByType<T>(out T asset, string folder = "Assets") where T : UnityEngine.Object
-        {
-            string filter = "t:" + typeof(T).Name;
-            GUID[] guids = AssetDatabase.FindAssetGUIDs(filter, new[] { folder });
-            asset = null;
-
-            if (guids.Length == 0)
-            {
-                Debug.LogError($"EditorUtility.FindAssetByName() No asset found with type: [{filter}]");
-                return false;
-            }
-
-            return TryGetAssetFromGuid(guids[0], out asset);
-        }
-        public static bool TryFindAssetsByType<T>(out T[] assets, string folder = "Assets") where T : UnityEngine.Object
-        {
-            string filter = "t:" + typeof(T).Name;
-            GUID[] guids = AssetDatabase.FindAssetGUIDs(filter, new[] { folder });
-            assets = null;
-
-            if (guids.Length == 0)
-            {
-                Debug.LogWarning($"EditorUtility.FindAssetByName() No asset found with type: [{filter}]");
-                return false;
-            }
-
-            bool found = false;
-            assets = new T[guids.Length];
-
-            for (int i = 0; i < guids.Length; i++)
-            {
-                if (TryGetAssetFromGuid<T>(guids[i], out T asset))
-                {
-                    assets[i] = asset;
-                    found = true;
-                }
-            }
-
-            return found;
-        }
-        private static bool TryGetAssetFromGuid<T>(GUID guid, out T asset) where T : UnityEngine.Object
-        {
-            string path = AssetDatabase.GUIDToAssetPath(guid);
-            asset = AssetDatabase.LoadAssetAtPath<T>(path);
-
-            if (asset == null)
-            {
-                Debug.LogWarning($"EditorUtility.GetAssetFromGuid() No asset found with path: [{path}]");
-                return false;
-            }
-
-            return true;
-        }
-#endif
-        #endregion
-
         #region SCENE
         [Serializable]
         public class Scene
@@ -473,7 +305,7 @@ namespace Core
                 return;
             }
 
-            Mesh bakedMesh = new() {  name = a.sharedMesh.name + suffix};
+            Mesh bakedMesh = new() { name = a.sharedMesh.name + suffix };
 
             a.BakeMesh(bakedMesh);
 
@@ -485,7 +317,7 @@ namespace Core
             }
 
             b.sharedMesh = bakedMesh;
-        } 
+        }
         public static void BakeToCollider(this MeshRenderer a, MeshCollider b)
         {
             b.sharedMesh = null;
@@ -554,7 +386,7 @@ namespace Core
             if (length <= 0 || length > 32)
             {
                 throw new ArgumentOutOfRangeException(nameof(length), "Length must be between 1 and 32.");
-            }                
+            }
             if (bitOffset < 0 || bitOffset > 31)
             {
                 throw new ArgumentOutOfRangeException(nameof(bitOffset), "Offset must be between 0 and 31.");
@@ -837,6 +669,111 @@ namespace Core
             }
         }
 
+        /// <summary> Validates and appends entries to a keyed collection, overriding duplicate keys. </summary>
+        public static void AppendEntries<TEntry>(IReadOnlyList<TEntry> baseEntries, Dictionary<string, TEntry> extraEntries, Func<TEntry, string> getKey, Func<TEntry, bool> getValid)
+        {
+            if (baseEntries == null || baseEntries.Count == 0)
+            {
+                return;
+            }
+
+            for (int i = 0; i < baseEntries.Count; i++)
+            {
+                TEntry entry = baseEntries[i];
+
+                if (!getValid(entry))
+                {
+                    Debug.LogError($"Failed to append entry [{nameof(entry)}]. ID is empty.");
+                    continue;
+                }
+
+                extraEntries[getKey(entry)] = entry;
+            }
+        }
+        /// <summary> Appends unique entries to a collection, ignoring duplicates. </summary>
+        public static void AppendUnique<TEntry>(IReadOnlyList<TEntry> baseEntries, ICollection<TEntry> extraEntries, IEqualityComparer<TEntry> comparer = null)
+        {
+            if (baseEntries == null || baseEntries.Count == 0)
+            {
+                return;
+            }
+
+            HashSet<TEntry> existing = new(extraEntries, comparer);
+
+            for (int i = 0; i < baseEntries.Count; i++)
+            {
+                TEntry entry = baseEntries[i];
+
+                if (existing.Add(entry))
+                {
+                    extraEntries.Add(entry);
+                }
+            }
+        }
+        /// <summary> Merges keyed entries, overriding existing keys and appending new ones. </summary>
+        public static TEntry[] MergeEntries<TEntry>(TEntry[] baseEntries, IReadOnlyDictionary<string, TEntry> extraEntries, Func<TEntry, string> getKey)
+        {
+            if (extraEntries.Count == 0)
+            {
+                return baseEntries;
+            }
+
+            int baseCount = baseEntries.Length;
+            TEntry[] totalEntries = new TEntry[baseCount + extraEntries.Count];
+            Dictionary<string, int> totalLookup = new(baseCount);
+
+            for (int i = 0; i < baseCount; i++)
+            {
+                TEntry entry = baseEntries[i];
+
+                totalEntries[i] = entry;
+                totalLookup[getKey(entry)] = i;
+            }
+
+            int appendIndex = baseCount;
+
+            foreach (KeyValuePair<string, TEntry> pair in extraEntries)
+            {
+                if (totalLookup.TryGetValue(pair.Key, out int index))
+                {
+                    totalEntries[index] = pair.Value;
+                }
+                else
+                {
+                    totalEntries[appendIndex] = pair.Value;
+                    appendIndex++;
+                }
+            }
+
+            if (appendIndex != totalEntries.Length)
+            {
+                Array.Resize(ref totalEntries, appendIndex);
+            }
+
+            return totalEntries;
+        }
+        /// <summary> Merges string entries, ignoring duplicates. </summary>
+        public static string[] MergeEntries(string[] baseEntries, IReadOnlyCollection<string> extraEntries)
+        {
+            if (extraEntries.Count == 0)
+            {
+                return baseEntries;
+            }
+
+            List<string> totalEntries = new(baseEntries);
+            HashSet<string> existingEntries = new(baseEntries, StringComparer.Ordinal);
+
+            foreach (string entry in extraEntries)
+            {
+                if (existingEntries.Add(entry))
+                {
+                    totalEntries.Add(entry);
+                }
+            }
+
+            return totalEntries.ToArray();
+        }
+
         public class SwapBackArray<T> : IEnumerable<T>
         {
             public T this[int index]
@@ -851,7 +788,8 @@ namespace Core
                     if (index < 0 || index >= Count) throw new IndexOutOfRangeException();
                     items[index] = value;
                 }
-            } private readonly T[] items;
+            }
+            private readonly T[] items;
             public int Count { get; private set; } = 0;
             public int Capacity => items.Length;
 
@@ -1074,7 +1012,7 @@ namespace Core
             public bool IsEnabled => blocker.Count == 0;
 
             private readonly HashSet<object> blocker = new();
-           
+
             public void Disable(object obj)
             {
                 if (blocker.Contains(obj))

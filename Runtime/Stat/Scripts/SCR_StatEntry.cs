@@ -9,7 +9,6 @@ namespace Core.Stat
     {
         [HideInInspector] public string Name;
 
-        [Info("Please generate id if its not visible")] 
         public StatID ID;
         public StatTag Tag;
         public LocalizedID NameID;
@@ -26,7 +25,7 @@ namespace Core.Stat
             Min = min;
             Max = max;
 
-            Name = ID.Key;
+            Name = NameID.Key;
         }
     }
 }

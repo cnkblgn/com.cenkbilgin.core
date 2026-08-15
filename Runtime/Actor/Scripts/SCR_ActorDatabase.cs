@@ -6,14 +6,19 @@ namespace Core.Actors
 {
     public static class ActorDatabase
     {
-        private static SearchCollection<string> idSearch = new(Array.Empty<SearchEntry<string>>());
-        private static SearchCollection<string> tagSearch = new(Array.Empty<SearchEntry<string>>());
         private static readonly Dictionary<string, int> idLookup = new();
         private static readonly Dictionary<string, int> tagLookup = new();
-        private static List<ActorEntry>[] database = Array.Empty<List<ActorEntry>>();
+        private static ActorTag[] tags = Array.Empty<ActorTag>();
+        private static ActorGroup[] groups = Array.Empty<ActorGroup>();
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void OnRuntimeInitialize() => database = Array.Empty<List<ActorEntry>>();
+        private static void OnRuntimeInitialize()
+        {
+            for (int i = 0; i < groups.Length; i++)
+            {
+                groups[i].Group.Clear();
+            }
+        }
 
         internal static void Build(string[] idCollection, string[] tagCollection)
         {
@@ -22,24 +27,27 @@ namespace Core.Actors
                 return;
             }
 
-            database = new List<ActorEntry>[idCollection.Length];
-
-            tagLookup.Clear();
             idLookup.Clear();
-            idSearch = new(new SearchEntry<string>[idCollection.Length]);
-            tagSearch = new(new SearchEntry<string>[tagCollection.Length + 1]);
+            tagLookup.Clear();
+            tags = new ActorTag[tagCollection.Length + 1];
+            groups = new ActorGroup[idCollection.Length];
 
             tagLookup["GENERIC"] = 0;
-            tagSearch.Entries[0] = new("GENERIC", "GENERIC");
+            tags[0] = new("GENERIC", 0);
 
             for (int i = 0; i < idCollection.Length; i++)
             {
                 string key = idCollection[i];
                 int index = i;
 
+                if (string.IsNullOrEmpty(key))
+                {
+                    Debug.LogError("Actor database id key is invalid!?");
+                    continue;
+                }
+
                 idLookup[key] = index;
-                idSearch.Entries[i] = new(key, key);
-                database[i] = new();
+                groups[i] = new(new(key, index));
             }
 
             for (int i = 0; i < tagCollection.Length; i++)
@@ -47,21 +55,29 @@ namespace Core.Actors
                 string key = tagCollection[i];
                 int index = i + 1;
 
+                if (string.IsNullOrEmpty(key))
+                {
+                    Debug.LogError("Actor database tag key is invalid!?");
+                    continue;
+                }
+
                 tagLookup[key] = index;
-                tagSearch.Entries[index] = new(key, key);
+                tags[index] = new(key, index);
             }
 
             Debug.Log($"Actor database build successfull!");
         }
 
+        public static IReadOnlyList<ActorTag> GetTags() => tags;
+        public static IReadOnlyList<ActorGroup> GetGroups() => groups;
         private static List<ActorEntry> GetEntries(int index)
         {
-            if (index >= database.Length || index < 0)
+            if (index >= groups.Length || index < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(index), index, $"Actor entries not found index out of range");
             }
 
-            return database[index];
+            return groups[index].Group;
         }
         private static List<ActorEntry> GetEntries(ActorID id)
         {
@@ -72,26 +88,24 @@ namespace Core.Actors
 
             return GetEntries(id.Index);
         }
-        public static SearchCollection<string> GetIDs() => idSearch;
-        public static SearchCollection<string> GetTags() => tagSearch;
         public static ActorID GetID(int index)
         {
-            if (index >= database.Length || index < 0)
+            if (index >= groups.Length || index < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(index), index, $"Actor id not found index out of range");
             }
 
-            return new(idSearch.Entries[index].Value, index);
+            return groups[index].ID;
         }
         public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : 1;
-        public static ActorID GetTag(int index)
+        public static ActorTag GetTag(int index)
         {
-            if (index >= tagSearch.Entries.Length || index < 0)
+            if (index >= tags.Length || index < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(index), index, $"Actor tag not found index out of range");
             }
 
-            return new(tagSearch.Entries[index].Value, index);
+            return tags[index];
         }
         public static int GetTagIndex(string key) => tagLookup.TryGetValue(key, out int index) ? index : -1;
 
@@ -128,11 +142,13 @@ namespace Core.Actors
                 return false;
             }
 
-            foreach (List<ActorEntry> entries in database)
+            for (int i = 0; i < groups.Length; i++)
             {
-                for (int i = 0; i < entries.Count; i++)
+                List<ActorEntry> entries = groups[i].Group;
+
+                for (int j = 0; j < entries.Count; j++)
                 {
-                    Actor tempActor = entries[i].Actor;
+                    Actor tempActor = entries[j].Actor;
 
                     if (tempActor.HasAny(tags))
                     {
@@ -171,14 +187,11 @@ namespace Core.Actors
 
             bool found = false;
 
-            foreach (List<ActorEntry> entries in database)
+            for (int i = 0; i < groups.Length; i++)
             {
-                if (entries == null)
-                {
-                    continue;
-                }
+                List<ActorEntry> entries = groups[i].Group;
 
-                for (int i = 0; i < entries.Count; i++)
+                for (int j = 0; j < entries.Count; j++)
                 {
                     Actor tempActor = entries[i].Actor;
 
@@ -203,30 +216,21 @@ namespace Core.Actors
             List<ActorEntry> entries = GetEntries(id);
 
 #if UNITY_EDITOR
-            if (entries != null)
+            foreach (ActorEntry entry in entries)
             {
-                foreach (ActorEntry entry in entries)
+                if (entry == null)
                 {
-                    if (entry == null)
-                    {
-                        Debug.LogError("Invalid null actor detected!");
-                        return;
-                    }
+                    Debug.LogError("Invalid null actor detected!");
+                    return;
+                }
 
-                    if (entry.ID == actor.GetInstanceID())
-                    {
-                        Debug.LogError($"Actor register failed! Duplicate detected! [{entry.ID}]");
-                        return;
-                    }
+                if (entry.ID == actor.GetInstanceID())
+                {
+                    Debug.LogError($"Actor register failed! Duplicate detected! [{entry.ID}]");
+                    return;
                 }
             }
 #endif
-
-            if (entries == null)
-            {
-                entries = new();
-                database[id.Index] = entries;
-            }
 
             entries.Add(new(actor));
         }
@@ -239,7 +243,7 @@ namespace Core.Actors
 
             List<ActorEntry> entries = GetEntries(actor.ID);
 
-            if (entries == null)
+            if (entries.Count == 0)
             {
                 Debug.LogError($"You are trying to remove invalid actor! [{actor.ID}]");
                 return;

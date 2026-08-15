@@ -26,15 +26,11 @@ namespace Core.Audio
         }
 
         [SerializeField, Required] private string key;
-        [SerializeField, ReadOnly] private int index;
-        [SerializeField, ReadOnly] private bool resolved;
+        [NonSerialized] private int index;
+        [NonSerialized] private bool resolved;
 
-        public SoundID(string key, int index)
-        {
-            this.key = key;
-            this.index = index;
-            this.resolved = true;
-        }
+        public SoundID(string key, int index) => (this.key, this.index, this.resolved) = (key, index, index >= 0);
+        public SoundID(string key) : this(key, -1) { }
 
         public override string ToString() => $"Key: {key} << Index: {Index}";
 

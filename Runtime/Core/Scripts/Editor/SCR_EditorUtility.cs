@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using UnityEditor;
 using UnityEngine;
 
@@ -334,7 +335,6 @@ namespace Core.Editor
                 }
             }
         }
-
         public static void DrawArrow(Vector3 position, Vector3 direction, float length = 0.25f, float angle = 20.0f)
         {
             if (direction.sqrMagnitude < 0.01f)
@@ -419,6 +419,166 @@ namespace Core.Editor
             DrawCapsule(t2, b2, radius);
 
             Gizmos.DrawLine((top + bottom) * 0.5f, ((t2 + b2) * 0.5f));
+        }
+        /// <summary>
+        /// Generates a text file at the specified path.
+        /// </summary>
+        /// <param name="path">
+        /// Full output path of the generated file, including the file name and extension.
+        /// <para>Example: <c>Assets/Scripts/GeneratedIDs.cs</c></para>
+        /// </param>
+        /// <param name="content">
+        /// Text content to write into the generated file.
+        /// </param>
+        [HideInCallstack]
+        public static void GenerateTextFile(string path, StringBuilder content) => GenerateTextFile(path, content.ToString());
+        /// <summary>
+        /// Generates a text file at the specified path.
+        /// </summary>
+        /// <param name="path">
+        /// Full output path of the generated file, including the file name and extension.
+        /// <para>Example: <c>Assets/Scripts/GeneratedIDs.cs</c></para>
+        /// </param>
+        /// <param name="content">
+        /// Text content to write into the generated file.
+        /// </param>
+        [HideInCallstack]
+        public static void GenerateTextFile(string path, string content)
+        {
+            if (path == null)
+            {
+                throw new ArgumentNullException(nameof(path), "Text file generation failed. Path is null.");
+            }
+
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                throw new ArgumentException("Text file generation failed. Path is empty.", nameof(path));
+            }
+
+            if (content == null)
+            {
+                throw new ArgumentNullException(nameof(content), "Text file generation failed. Content is null.");
+            }
+
+            string directory = Path.GetDirectoryName(path);
+
+            if (string.IsNullOrEmpty(directory))
+            {
+                throw new InvalidOperationException($"Text file generation failed. Invalid path [{path}]");
+            }
+
+            directory = directory.Replace("\\", "/");
+
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            File.WriteAllText(path, content);
+
+            AssetDatabase.Refresh();
+
+            Debug.Log($"Text generated at [{path}]");
+        }
+        public static bool TryCreateAsset<T>(string path, out T asset) where T : ScriptableObject
+        {
+            // Klasör kýsmýný al
+            string folderPath = Path.GetDirectoryName(path);
+
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+
+            try
+            {
+                asset = ScriptableObject.CreateInstance<T>();
+
+                AssetDatabase.CreateAsset(asset, path);
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+
+                Selection.activeObject = asset;
+                EditorGUIUtility.PingObject(asset);
+
+                Debug.Log($"EditorUtility.CreateAsset() [{nameof(T)}] created at [{folderPath}]");
+
+                return true;
+            }
+            catch (System.Exception e)
+            {
+                Debug.Log($"EditorUtility.CreateAsset() [{nameof(T)}] created at [{folderPath}] << e: {e}");
+                throw;
+            }
+        }
+        public static bool TryFindAssetByKeyword<T>(out T asset, string keyword, string folder = "Assets") where T : UnityEngine.Object
+        {
+            string filter = "t:" + typeof(T).Name;
+            string query = keyword + " " + filter;
+            asset = null;
+
+            GUID[] guids = AssetDatabase.FindAssetGUIDs(query, new[] { folder });
+
+            if (guids == null || guids.Length == 0)
+            {
+                Debug.LogError($"EditorUtility.FindAssetByKeyword() No asset found with keyword: " + keyword);
+                return false;
+            }
+
+            return TryGetAssetFromGuid(guids[0], out asset);
+        }
+        public static bool TryFindAssetByType<T>(out T asset, string folder = "Assets") where T : UnityEngine.Object
+        {
+            string filter = "t:" + typeof(T).Name;
+            GUID[] guids = AssetDatabase.FindAssetGUIDs(filter, new[] { folder });
+            asset = null;
+
+            if (guids.Length == 0)
+            {
+                Debug.LogError($"EditorUtility.FindAssetByName() No asset found with type: [{filter}]");
+                return false;
+            }
+
+            return TryGetAssetFromGuid(guids[0], out asset);
+        }
+        public static bool TryFindAssetsByType<T>(out T[] assets, string folder = "Assets") where T : UnityEngine.Object
+        {
+            string filter = "t:" + typeof(T).Name;
+            GUID[] guids = AssetDatabase.FindAssetGUIDs(filter, new[] { folder });
+            assets = null;
+
+            if (guids.Length == 0)
+            {
+                Debug.LogWarning($"EditorUtility.FindAssetByName() No asset found with type: [{filter}]");
+                return false;
+            }
+
+            bool found = false;
+            assets = new T[guids.Length];
+
+            for (int i = 0; i < guids.Length; i++)
+            {
+                if (TryGetAssetFromGuid<T>(guids[i], out T asset))
+                {
+                    assets[i] = asset;
+                    found = true;
+                }
+            }
+
+            return found;
+        }
+        private static bool TryGetAssetFromGuid<T>(GUID guid, out T asset) where T : UnityEngine.Object
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            asset = AssetDatabase.LoadAssetAtPath<T>(path);
+
+            if (asset == null)
+            {
+                Debug.LogWarning($"EditorUtility.GetAssetFromGuid() No asset found with path: [{path}]");
+                return false;
+            }
+
+            return true;
         }
     }
 }

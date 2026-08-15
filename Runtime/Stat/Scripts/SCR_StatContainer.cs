@@ -16,7 +16,7 @@ namespace Core.Stat
         {
             stats = new Dictionary<StatID, float>();
 
-            foreach (StatDefinition definition in StatDatabase.GetDatabase())
+            foreach (StatDefinition definition in StatDatabase.GetDefinitions())
             {
                 stats[definition.ID] = definition.Default;
             }

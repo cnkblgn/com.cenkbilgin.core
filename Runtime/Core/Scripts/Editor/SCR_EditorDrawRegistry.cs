@@ -10,6 +10,7 @@ namespace Core.Editor
             DrawDefaultInspector();
 
             Registry registry = target as Registry;
+
             EditorUtility.DrawButton("Reload", registry, registry.Reload);
         }
     }

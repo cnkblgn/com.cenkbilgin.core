@@ -18,7 +18,6 @@ namespace Core.Editor
         private static readonly Dictionary<Type, SearchCollection<Type>> database = new();
         static ReferenceDatabase() { AssemblyReloadEvents.beforeAssemblyReload += ClearCollection; }
 
-        /// <summary> Manual escape hatch (eg. menu item) if results ever look stale. </summary>
         public static void ClearCollection() => database.Clear();
         public static SearchCollection<Type> GetCollection(Type baseType)
         {

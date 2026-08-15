@@ -15,6 +15,7 @@ namespace Core.Stat
         internal StatDefinition(StatID id, StatTag tag, LocalizedID nameID, float @default, float min, float max)
         {
             ID = !id.IsValid ? throw new NullReferenceException("Stat id is null or empty! please assign new id!") : id;
+            Tag = tag;
             NameID = nameID;
             Default = @default;
             Min = min;

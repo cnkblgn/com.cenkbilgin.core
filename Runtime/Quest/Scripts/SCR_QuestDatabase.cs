@@ -6,48 +6,41 @@ namespace Core.Quest
 {
     public static class QuestDatabase
     {
-        private static SearchCollection<string> idSearch = new(Array.Empty<SearchEntry<string>>());
         private static readonly Dictionary<string, int> idLookup = new();
-        private static QuestDefinition[] database = Array.Empty<QuestDefinition>();
+        private static QuestDefinition[] definitions = Array.Empty<QuestDefinition>();
 
-        internal static void Build(string[] idCollection, QuestEntry[] entries)
+        internal static void Build(QuestEntry[] entries)
         {
-            if (idCollection == null || entries == null)
+            if (entries == null)
             {
                 return;
             }
 
             idLookup.Clear();
-            idSearch = new(new SearchEntry<string>[idCollection.Length]);
-            database = new QuestDefinition[entries.Length];
-
-            for (int i = 0; i < idCollection.Length; i++)
-            {
-                string key = idCollection[i];
-
-                idLookup[key] = i;
-                idSearch.Entries[i] = new SearchEntry<string>(key, key);
-            }
+            definitions = new QuestDefinition[entries.Length];
 
             for (int i = 0; i < entries.Length; i++)
             {
-                database[i] = new(entries[i]);
+                QuestEntry entry = entries[i];
+                string key = entry.ID.Key;
+
+                idLookup[key] = i;
+                definitions[i] = new(entry);
             }
 
             Debug.Log($"Quest database build successfull!");
         }
 
-        public static IReadOnlyList<QuestDefinition> GetDatabase() => database;
-        public static SearchCollection<string> GetIDs() => idSearch;
         public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
+        public static IReadOnlyList<QuestDefinition> GetDefinitions() => definitions;
         public static QuestDefinition GetDefinition(int index)
         {
-            if (index >= database.Length || index < 0)
+            if (index >= definitions.Length || index < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(index), index, $"Quest not found index out of range");
             }
 
-            return database[index];
+            return definitions[index];
         }
         public static QuestDefinition GetDefinition(QuestID id)
         {

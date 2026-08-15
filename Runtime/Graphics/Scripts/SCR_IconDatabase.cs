@@ -6,9 +6,8 @@ namespace Core.Graphics
 {
     public static class IconDatabase
     {
-        private static SearchCollection<string> idSearch = new(Array.Empty<SearchEntry<string>>());
         private static readonly Dictionary<string, int> idLookup = new();
-        private static Sprite[] database = Array.Empty<Sprite>();
+        private static Sprite[] sprites = Array.Empty<Sprite>();
 
         internal static void Build(Sprite[] spriteCollection)
         {
@@ -17,8 +16,7 @@ namespace Core.Graphics
                 return;
             }
 
-            database = new Sprite[spriteCollection.Length];
-            idSearch = new SearchCollection<string>(new SearchEntry<string>[spriteCollection.Length]);
+            sprites = new Sprite[spriteCollection.Length];
             idLookup.Clear();
 
             for (int i = 0; i < spriteCollection.Length; i++)
@@ -27,7 +25,7 @@ namespace Core.Graphics
 #if UNITY_EDITOR
                 if (clip == null)
                 {
-                    Debug.LogError("Icon database sprite is null!");
+                    Debug.LogError("Icon database sprite is invalid!");
                     continue;
                 }
 #endif
@@ -35,32 +33,31 @@ namespace Core.Graphics
                 IconID id = new(key, i);
 
                 idLookup[key] = i;
-                database[i] = spriteCollection[i];
-                idSearch.Entries[i] = new SearchEntry<string>(key, key);
+                sprites[i] = spriteCollection[i];
             }
 
             Debug.Log($"Icon database build successfull!");
         }
 
-        public static SearchCollection<string> GetIDs() => idSearch;
+        public static int GetSprites() => sprites.Length;
+        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
         public static IconID GetID(int index)
         {
-            if (index >= database.Length || index < 0)
+            if (index >= sprites.Length || index < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(index), index, $"Icon id not found index out of range");
             }
 
-            return new(idSearch.Entries[index].Value, index);
+            return new(sprites[index].name, index);
         }
-        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
         public static Sprite GetSprite(int index)
         {
-            if (index >= database.Length || index < 0)
+            if (index >= sprites.Length || index < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(index), index, $"Icon not found index out of range");
             }
 
-            return database[index];
+            return sprites[index];
         }
         public static Sprite GetSprite(IconID id)
         {

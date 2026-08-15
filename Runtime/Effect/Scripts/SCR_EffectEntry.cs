@@ -10,12 +10,10 @@ namespace Core.Effect
     {
         [HideInInspector] public string Name;
 
-        [Info("Please generate id if its not visible")] 
         public EffectID ID;
         public EffectTag Tag;
         public LocalizedID NameID;
         public IconID IconID;
-
         [Min(0)] public int Interval;
         [SerializeReference, Reference] public EffectAction[] Actions;
 
@@ -27,8 +25,7 @@ namespace Core.Effect
             IconID = iconID;
             Interval = interval;
             Actions = actions;
-
-            Name = ID.Key;
+            Name = NameID.Key;
         }
     }
 }

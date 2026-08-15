@@ -9,11 +9,11 @@ namespace Core.Localization
     public static class LocalizationDatabase
     {
         public static event Action<int> OnLocalizationChanged = null;
+
         internal static bool IsParsed => database != null;
 
         private static string[] languages = Array.Empty<string>();
         private static Dictionary<string, string>[] database = null;
-        private static SearchCollection<string> keys = new(Array.Empty<SearchEntry<string>>());
         private static readonly Dictionary<string, LocalizationInterpolator> interpolators = new(StringComparer.OrdinalIgnoreCase);
 
         private static Dictionary<string, string> currentLanguageData = null;
@@ -84,32 +84,77 @@ namespace Core.Localization
 
             Debug.LogWarning($"Missing localization for '{key}' in '{GetLanguage()}'");
             value = $"[{key}]";
-            return false;
+            return false; 
         }
 
-        internal static void Build(TextAsset file, IEnumerable<LocalizationInterpolator> values)
+        internal static void Merge(string content)
         {
-            BuildInterpolators(values);
-            BuildText(file);
+            if (!IsParsed)
+            {
+                Debug.LogError("Localization merge failed! Base database not built yet.");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(content))
+            {
+                return;
+            }
+
+            Dictionary<string, string>[] extraDatabase;
+            string[] extraLanguages;
+
+            try
+            {
+                extraDatabase = ParseAll(content, ',', out extraLanguages, out _);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Localization merge parse failed: {e.Message}");
+                return;
+            }
+
+            for (int extraLanguage = 0; extraLanguage < extraLanguages.Length; extraLanguage++)
+            {
+                int baseLanguage = Array.IndexOf(languages, extraLanguages[extraLanguage]);
+
+                if (baseLanguage < 0)
+                {
+                    Debug.LogWarning($"Localization merge: unknown language column '{extraLanguages[extraLanguage]}' skipped.");
+                    continue;
+                }
+    
+                foreach (KeyValuePair<string, string> pair in extraDatabase[extraLanguage])
+                {
+                    database[baseLanguage][pair.Key] = pair.Value;
+                }
+            }
         }
-        private static void BuildText(TextAsset file)
+        internal static void Build(TextAsset file, IEnumerable<LocalizationInterpolator> values)
         {
             if (file == null)
             {
-                Debug.LogError("Localization parse failed! file == null");
+                Debug.LogError("Localization database build file is invalid!");
+                return;
+            }
+
+            Build(file.text, values);
+        }
+        internal static void Build(string content, IEnumerable<LocalizationInterpolator> values)
+        {
+            BuildInterpolators(values);
+            BuildText(content);
+        }
+        private static void BuildText(string content)
+        {
+            if (content == null)
+            {
+                Debug.LogError("Localization parse failed! content == null");
                 return;
             }
 
             try
             {
-                database = ParseAll(file.text, ',', out languages, out string[] keys);
-
-                LocalizationDatabase.keys = new SearchCollection<string>(new SearchEntry<string>[keys.Length]);
-   
-                for (int i = 0; i < keys.Length; i++)
-                {
-                    LocalizationDatabase.keys.Entries[i] = new SearchEntry<string>(keys[i], keys[i]);
-                }
+                database = ParseAll(content, ',', out languages, out string[] keys);
 
                 currentLanguageIndex = 0;
                 currentLanguageData = GetLanguage(currentLanguageIndex);
@@ -119,8 +164,6 @@ namespace Core.Localization
             catch (Exception e)
             {
                 database = null;
-                
-                keys = new(Array.Empty<SearchEntry<string>>());
                 languages = Array.Empty<string>();
 
                 Debug.LogError($"Localization parse failed: {e.Message}");
@@ -357,7 +400,7 @@ namespace Core.Localization
             }
         }
 
-        public static SearchCollection<string> GetKeys() => keys;
+        public static IReadOnlyCollection<string> GetKeys() => GetLanguage(currentLanguageIndex).Keys;
         public static IReadOnlyList<string> GetLanguages() => languages;
         public static string GetLanguage() => GetLanguages()[currentLanguageIndex];
         public static void SetLanguage(int index)

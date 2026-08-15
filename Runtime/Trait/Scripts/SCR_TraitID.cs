@@ -8,6 +8,8 @@ namespace Core.Trait
     [Serializable]
     public struct TraitID : IEquatable<TraitID>
     {
+        public readonly string Key => key;
+        public bool IsValid => !string.IsNullOrEmpty(key) && Index >= 0;
         public int Index
         {
             get
@@ -24,19 +26,13 @@ namespace Core.Trait
                 return index;
             }
         }
-        public readonly string Key => key;
-        public bool IsValid => !string.IsNullOrEmpty(key) && Index >= 0;
 
         [SerializeField, Required] private string key;
         [NonSerialized] private int index;
         [NonSerialized] private bool resolved;
 
-        public TraitID(string key, int index)
-        {
-            this.key = key;
-            this.index = index;
-            this.resolved = true;
-        }
+        public TraitID(string key, int index) => (this.key, this.index, this.resolved) = (key, index, index >= 0);
+        public TraitID(string key) : this(key, -1) { }
 
         public override string ToString() => $"Key: {key} << Index: {Index}";
 
@@ -84,7 +80,7 @@ namespace Core.Trait
                 return;
             }
 
-            IReadOnlyList<TraitDefinition> database = TraitDatabase.GetDatabase();
+            IReadOnlyList<TraitDefinition> database = TraitDatabase.GetDefinitions();
 
             foreach (TraitDefinition trait in database)
             {

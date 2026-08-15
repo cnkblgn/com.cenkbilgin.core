@@ -88,7 +88,7 @@ namespace Core.Surface
                 }
             }
 
-            if (TryCreateAsset<SurfaceMap>($"Assets/SCO_SurfaceMap_{name}.asset", out SurfaceMap map))
+            if (Editor.EditorUtility.TryCreateAsset<SurfaceMap>($"Assets/SCO_SurfaceMap_{name}.asset", out SurfaceMap map))
             {
                 map.Initialize(terrain.transform.position, data.size, resolution, resolution, tags);
                 EditorUtility.SetDirty(map);

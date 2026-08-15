@@ -6,9 +6,8 @@ namespace Core.Prefab
 {
     public static class PrefabDatabase
     {
-        private static SearchCollection<string> idSearch = new(Array.Empty<SearchEntry<string>>());
         private static readonly Dictionary<string, int> idLookup = new();
-        private static GameObject[] database = Array.Empty<GameObject>();
+        private static GameObject[] prefabs = Array.Empty<GameObject>();
 
         internal static void Build(GameObject[] gameObjectCollection)
         {
@@ -18,53 +17,51 @@ namespace Core.Prefab
             }
 
             idLookup.Clear();
-            idSearch = new SearchCollection<string>(new SearchEntry<string>[gameObjectCollection.Length]);
-            database = new GameObject[gameObjectCollection.Length];
+            prefabs = new GameObject[gameObjectCollection.Length];
 
             for (int i = 0; i < gameObjectCollection.Length; i++)
             {
-                GameObject obj = gameObjectCollection[i];
+                GameObject gameObject = gameObjectCollection[i];
 
 #if UNITY_EDITOR
-                if (obj == null)
+                if (gameObject == null)
                 {
-                    Debug.LogError("Prefab database object is null!");
+                    Debug.LogError("Prefab database gameObject is invalid!");
                     continue;
                 }
 #endif
 
-                string key = obj.name;
+                string key = gameObject.name;
 
                 idLookup[key] = i;
-                idSearch.Entries[i] = new(key, key);
-                database[i] = obj;
+                prefabs[i] = gameObject;
             }
 
             Debug.Log($"Prefab build successfull!");
         }
         internal static void Build(List<GameObject> gameObjectCollection) => Build(gameObjectCollection.ToArray());
 
-        public static SearchCollection<string> GetIDs() => idSearch;
+        public static int GetPrefabs() => prefabs.Length;
+        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
         public static PrefabID GetID(int index)
         {
-            if (index >= database.Length || index < 0)
+            if (index >= prefabs.Length || index < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(index), index, $"Prefab id not found index out of range");
             }
 
-            return new(idSearch.Entries[index].Value, index);
+            return new(prefabs[index].name, index);
         }
-        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
-        internal static GameObject GetPrefab(int index)
+        public static GameObject GetPrefab(int index)
         {
-            if (index >= database.Length || index < 0)
+            if (index >= prefabs.Length || index < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(index), index, $"Prefab not found index out of range");
             }
 
-            return database[index];
+            return prefabs[index];
         }
-        internal static GameObject GetPrefab(PrefabID id)
+        public static GameObject GetPrefab(PrefabID id)
         {
             if (!id.IsValid)
             {
@@ -73,6 +70,6 @@ namespace Core.Prefab
 
             return GetPrefab(id.Index);
         }
-        internal static GameObject SpawnPrefab(PrefabID id, Vector3 position, Quaternion rotation, Transform parent) => GameObject.Instantiate(GetPrefab(id), position, rotation, parent);
+        public static GameObject SpawnPrefab(PrefabID id, Vector3 position, Quaternion rotation, Transform parent) => GameObject.Instantiate(GetPrefab(id), position, rotation, parent);
     }
 }

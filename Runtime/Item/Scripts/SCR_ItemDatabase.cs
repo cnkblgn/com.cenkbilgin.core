@@ -6,17 +6,16 @@ namespace Core.Item
 {
     public static class ItemDatabase
     {
-        private static SearchCollection<string> idSearch = new(Array.Empty<SearchEntry<string>>());
-        private static SearchCollection<string> tagSearch = new(Array.Empty<SearchEntry<string>>());
         private static readonly Dictionary<string, int> idLookup = new();
         private static readonly Dictionary<string, int> tagLookup = new();
-        private static ItemDefinition[] database = Array.Empty<ItemDefinition>();
+        private static ItemDefinition[] definitions = Array.Empty<ItemDefinition>();
+        private static ItemTag[] tags = Array.Empty<ItemTag>();
         private static ItemProcessor processor;
         private static Transform root;
 
-        internal static void Build(string[] idCollection, string[] tagCollection, ItemEntry[] entries)
+        internal static void Build(ItemEntry[] entries, string[] _tags)
         {
-            if (idCollection == null || tagCollection == null)
+            if (entries == null || _tags == null)
             {
                 return;
             }
@@ -24,61 +23,58 @@ namespace Core.Item
             tagLookup.Clear();
             idLookup.Clear();
 
-            database = new ItemDefinition[entries.Length];
-            tagSearch = new(new SearchEntry<string>[tagCollection.Length + 1]);
-            idSearch = new(new SearchEntry<string>[idCollection.Length]);
+            definitions = new ItemDefinition[entries.Length];
+            tags = new ItemTag[_tags.Length + 1];
+            tags[0] = new("GENERIC", 0);
 
-            tagLookup["GENERIC"] = 0;
-            tagSearch.Entries[0] = new("GENERIC", "GENERIC");
-
-            for (int i = 0; i < idCollection.Length; i++)
+            for (int i = 0; i < _tags.Length; i++)
             {
-                string key = idCollection[i];
-                int index = i;
-
-                idLookup[key] = index;
-                idSearch.Entries[i] = new SearchEntry<string>(key, key);
-            }
-
-            for (int i = 0; i < tagCollection.Length; i++)
-            {
-                string key = tagCollection[i];
+                string key = _tags[i];
                 int index = i + 1;
 
+                if (string.IsNullOrEmpty(key))
+                {
+                    Debug.LogError("Item database tag key is invalid!?");
+                    continue;
+                }
+
                 tagLookup[key] = index;
-                tagSearch.Entries[index] = new SearchEntry<string>(key, key);
+                tags[index] = new(key, index);
             }
 
             for (int i = 0; i < entries.Length; i++)
             {
-                database[i] = new(entries[i]);
+                ItemEntry entry = entries[i];
+                string key = entry.ID.Key;
+
+                idLookup[key] = i;
+                definitions[i] = new(entry);
             }
 
             Debug.Log($"Item database build successfull!");
         }
 
-        public static IReadOnlyList<ItemDefinition> GetDatabase() => database;
-        public static SearchCollection<string> GetIDs() => idSearch;
-        public static SearchCollection<string> GetTags() => tagSearch;
         public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
         public static int GetTagIndex(string key) => tagLookup.TryGetValue(key, out int index) ? index : -1;
         public static ItemTag GetTag(int index)
         {
-            if (index >= database.Length || index < 0)
+            if (index >= definitions.Length || index < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(index), index, $"Item tag not found index out of range");
             }
 
-            return new(tagSearch.Entries[index].Value, index);
+            return tags[index];
         }
+        public static IReadOnlyList<ItemTag> GetTags() => tags;
+        public static IReadOnlyList<ItemDefinition> GetDefinitions() => definitions;
         public static ItemDefinition GetDefinition(int index)
         {
-            if (index >= database.Length || index < 0)
+            if (index >= definitions.Length || index < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(index), index, $"Item not found index out of range");
             }
 
-            return database[index];
+            return definitions[index];
         }
         public static ItemDefinition GetDefinition(ItemID id)
         {
@@ -115,20 +111,23 @@ namespace Core.Item
             return entity;
         }
 
-        public static List<ItemID> GetItemsByTag(params ItemTag[] tags) => GetItemsByTag(tags.CreateMask());
-        public static List<ItemID> GetItemsByTag(ulong tags)
+        public static void GetItemsByTag(ref List<ItemID> items, params ItemTag[] tags) => GetItemsByTag(ref items, tags.CreateMask());
+        public static void GetItemsByTag(ref List<ItemID> items, ulong tags)
         {
-            List<ItemID> items = new();
+            if (items == null)
+            {
+                return;
+            }
 
-            foreach (ItemDefinition definition in database)
+            items.Clear();
+
+            foreach (ItemDefinition definition in definitions)
             {
                 if (definition.Tags.HasAny(tags))
                 {
                     items.Add(definition.ID);
                 }
             }
-
-            return items;
         }
 
         internal static ItemProcessor GetProcessor() => processor;

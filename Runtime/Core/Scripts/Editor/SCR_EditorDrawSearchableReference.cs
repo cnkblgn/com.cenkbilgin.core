@@ -16,11 +16,9 @@ namespace Core.Editor
     {
         private static readonly GUIStyle GUI_STYLE = new(EditorStyles.objectField);
 
-        // No nested "key" sub-property here — the property itself IS the reference.
-        protected override string GetKey() => null;
-
         protected override bool ShowPingButton => false;
 
+        protected override string GetKey() => null;
         protected override SearchCollection<Type> GetKeys() => ReferenceDatabase.GetCollection(ReferenceUtility.GetBaseType(fieldInfo));
 
         protected override Type GetValue(SerializedProperty keyProperty) => keyProperty.managedReferenceValue?.GetType();

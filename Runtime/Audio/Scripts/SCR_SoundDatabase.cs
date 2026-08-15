@@ -7,8 +7,7 @@ namespace Core.Audio
     public static class SoundDatabase
     {
         private static readonly Dictionary<string, int> idLookup = new();
-        private static SearchCollection<string> idSearch = new(Array.Empty<SearchEntry<string>>());
-        private static AudioClip[] database = Array.Empty<AudioClip>();
+        private static AudioClip[] clips = Array.Empty<AudioClip>();
 
         internal static void Build(AudioClip[] clipCollection)
         {
@@ -17,8 +16,7 @@ namespace Core.Audio
                 return;
             }
 
-            database = new AudioClip[clipCollection.Length];
-            idSearch = new SearchCollection<string>(new SearchEntry<string>[clipCollection.Length]);
+            clips = new AudioClip[clipCollection.Length];
             idLookup.Clear();
 
             for (int i = 0; i < clipCollection.Length; i++)
@@ -28,7 +26,7 @@ namespace Core.Audio
 #if UNITY_EDITOR
                 if (clip == null)
                 {
-                    Debug.LogError("Sound database clip is null!");
+                    Debug.LogError("Sound database clip is invalid!");
                     continue;
                 }
 #endif
@@ -37,32 +35,31 @@ namespace Core.Audio
                 SoundID id = new(key, i);
 
                 idLookup[key] = i;
-                database[i] = clip;
-                idSearch.Entries[i] = new(key, key);
+                clips[i] = clip;
             }
 
             Debug.Log($"Sound database build successfull!");
         }
  
-        public static SearchCollection<string> GetIDs() => idSearch;
+        public static int GetClips() => clips.Length;
+        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
         public static SoundID GetID(int index)
         {
-            if (index >= database.Length || index < 0)
+            if (index >= clips.Length || index < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(index), index, $"Sound id not found index out of range");
             }
 
-            return new(idSearch.Entries[index].Value, index);
+            return new(clips[index].name, index);
         }
-        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
         public static AudioClip GetClip(int index)
         {
-            if (index >= database.Length || index < 0)
+            if (index >= clips.Length || index < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(index), index, $"Sound not found index out of range");
             }
 
-            return database[index];
+            return clips[index];
         }
         public static AudioClip GetClip(SoundID id)
         {

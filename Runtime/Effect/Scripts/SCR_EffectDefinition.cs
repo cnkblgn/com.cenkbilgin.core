@@ -8,12 +8,12 @@ namespace Core.Effect
     {
         public readonly EffectID ID;
         public readonly EffectTag Tag;
-        public readonly IconID IconID;
         public readonly LocalizedID NameID;
+        public readonly IconID IconID;
         internal readonly EffectAction[] Actions;
         internal readonly int Interval;
 
-        internal EffectDefinition(EffectID id, EffectTag tag, IconID iconID, LocalizedID nameID, EffectAction[] actions, int interval)
+        internal EffectDefinition(EffectID id, EffectTag tag, LocalizedID nameID, IconID iconID, EffectAction[] actions, int interval)
         {
             ID = !id.IsValid ? throw new NullReferenceException("Effect id is null or empty! please assign new id!") : id;
             Tag = tag;
@@ -22,6 +22,6 @@ namespace Core.Effect
             Actions = actions ?? (new EffectAction[] { new EffectActionNone() });
             Interval = interval;
         }
-        internal EffectDefinition(EffectEntry entry) : this(entry.ID, entry.Tag, entry.IconID, entry.NameID, entry.Actions, entry.Interval) { }
+        internal EffectDefinition(EffectEntry entry) : this(entry.ID, entry.Tag, entry.NameID, entry.IconID, entry.Actions, entry.Interval) { }
     }
 }

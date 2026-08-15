@@ -7,7 +7,6 @@ namespace Core.Surface
     public static class SurfaceDatabase
     {
         private static readonly Dictionary<string, int> tagLookup = new();
-        private static SearchCollection<string> tagSearch = new(Array.Empty<SearchEntry<string>>());
         private static SurfaceTag[] database = Array.Empty<SurfaceTag>();
 
         internal static void Build(string[] tagCollection)
@@ -18,26 +17,28 @@ namespace Core.Surface
             }
 
             tagLookup.Clear();
-            tagSearch = new SearchCollection<string>(new SearchEntry<string>[tagCollection.Length + 1]);
             database = new SurfaceTag[tagCollection.Length + 1];
-
             database[0] = new("GENERIC", 0);
-            tagSearch.Entries[0] = new("GENERIC", "GENERIC");
 
             for (int i = 0; i < tagCollection.Length; i++)
             {
                 string key = tagCollection[i];
                 int index = i + 1;
 
+                if (string.IsNullOrEmpty(key))
+                {
+                    Debug.LogError("Surface database tag key is invalid!?");
+                    continue;
+                }
+
                 tagLookup[key] = index;
                 database[index] = new(key, index);
-                tagSearch.Entries[index] = new(key, key);
             }
 
             Debug.Log($"Surface database build successfull!");
         }
 
-        public static SearchCollection<string> GetTags() => tagSearch;
+        public static IReadOnlyList<SurfaceTag> GetTags() => database;
         public static SurfaceTag GetTag(int index)
         {
             if (index >= database.Length || index < 0)

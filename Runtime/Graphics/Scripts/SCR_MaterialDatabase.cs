@@ -6,9 +6,8 @@ namespace Core.Graphics
 {
     public static class MaterialDatabase
     {
-        private static SearchCollection<string> idSearch = new(Array.Empty<SearchEntry<string>>());
         private static readonly Dictionary<string, int> idLookup = new();
-        private static Material[] database = Array.Empty<Material>();
+        private static Material[] materials = Array.Empty<Material>();
 
         internal static void Build(Material[] materialCollection)
         {
@@ -18,50 +17,48 @@ namespace Core.Graphics
             }
 
             idLookup.Clear();
-            idSearch = new SearchCollection<string>(new SearchEntry<string>[materialCollection.Length]);
-            database = new Material[materialCollection.Length];
+            materials = new Material[materialCollection.Length];
 
             for (int i = 0; i < materialCollection.Length; i++)
             {
-                Material obj = materialCollection[i];
+                Material material = materialCollection[i];
 
 #if UNITY_EDITOR
-                if (obj == null)
+                if (material == null)
                 {
-                    Debug.LogError("Material database object is null!");
+                    Debug.LogError("Material database material is invalid!");
                     continue;
                 }
 #endif
 
-                string key = obj.name;
+                string key = material.name;
 
                 idLookup[key] = i;
-                idSearch.Entries[i] = new(key, key);
-                database[i] = obj;
+                materials[i] = material;
             }
 
             Debug.Log($"Material database build successfull!");
         }
 
-        public static SearchCollection<string> GetIDs() => idSearch;
+        public static int GetMaterials() => materials.Length;
+        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
         public static MaterialID GetID(int index)
         {
-            if (index >= database.Length || index < 0)
+            if (index >= materials.Length || index < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(index), index, $"Material id not found index out of range");
             }
 
-            return new(idSearch.Entries[index].Value, index);
+            return new(materials[index].name, index);
         }
-        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
         public static Material GetMaterial(int index)
         {
-            if (index >= database.Length || index < 0)
+            if (index >= materials.Length || index < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(index), index, $"Material not found index out of range");
             }
 
-            return database[index];
+            return materials[index];
         }
         public static Material GetMaterial(MaterialID id)
         {
