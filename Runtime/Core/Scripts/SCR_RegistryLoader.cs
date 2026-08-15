@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -34,6 +35,7 @@ namespace Core
                 }
             }
 
+            registries = registries.OfType<Registry>().OrderBy(x => x.Priority).ToArray();
             return found;
         }
 
@@ -68,7 +70,7 @@ namespace Core
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void OnBeforeSceneLoad()
         {
-            Registry[] registries = Resources.LoadAll<Registry>("Registry");
+            Registry[] registries = Resources.LoadAll<Registry>("Registry").OfType<Registry>().OrderBy(x => x.Priority).ToArray();
 
             for (int i = 0; i < registries.Length; i++)
             {
