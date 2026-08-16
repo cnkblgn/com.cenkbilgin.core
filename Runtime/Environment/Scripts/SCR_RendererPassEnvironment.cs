@@ -50,6 +50,11 @@ namespace Core.Environment
             }
 #endif
 
+            if (EnvironmentSystem.cachedSettings.Fog.Density <= 0.01f)
+            {
+                return;
+            }
+
             UniversalResourceData resourceData = frameData.Get<UniversalResourceData>();
 
             if (resourceData.isActiveTargetBackBuffer)

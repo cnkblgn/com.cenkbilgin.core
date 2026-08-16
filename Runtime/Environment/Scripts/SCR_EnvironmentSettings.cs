@@ -6,8 +6,6 @@ namespace Core.Environment
     [Serializable]
     public sealed class EnvironmentSettings
     {
-        internal static readonly EnvironmentSettings Default = new();
-
         [Header("_")]
         [Info("R -> Mask, G -> Distortion (X), B -> Distortion (Y)")]
         public Texture2D CloudTexture;
@@ -66,7 +64,7 @@ namespace Core.Environment
             Fog = new()
             {
                 Color = Color.gray,
-                Density = 1f,
+                Density = 0f,
                 DistanceStart = 512f,
                 DistanceFalloff = 1,
                 HeightStart = 10000f,

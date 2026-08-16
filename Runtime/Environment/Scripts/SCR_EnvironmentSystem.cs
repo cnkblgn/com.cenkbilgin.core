@@ -11,11 +11,11 @@ namespace Core.Environment
         private const float SHADOW_THRESHOLD = 0.050f;
 
         [Header("_")]
-        [SerializeField, Required] private Light sunLight;
-        [SerializeField, Required] private Light moonLight;
-        [SerializeField] private EnvironmentSettings settings;
+        [SerializeField] private Light sunLight;
+        [SerializeField] private Light moonLight;
+        [SerializeField] private EnvironmentSettings settings = new();
 
-        private static EnvironmentSettings cachedSettings;
+        internal static EnvironmentSettings cachedSettings = new();
         private static Texture2D cachedFogTexture;
         private static Texture2D cachedCloudTexture;
         private static Texture2D cachedCloudTextureB;
@@ -23,52 +23,53 @@ namespace Core.Environment
         private static Light cachedMoonLight;
         private static Vector3 sunDirection;
         private static Vector3 moonDirection;
-        private static readonly int _FOG_COLOR = Shader.PropertyToID("_FOG_COLOR");
-        private static readonly int _FOG_DENSITY = Shader.PropertyToID("_FOG_DENSITY");
-        private static readonly int _FOG_DISTANCE_START = Shader.PropertyToID("_FOG_DISTANCE_START");
-        private static readonly int _FOG_DISTANCE_FALLOFF = Shader.PropertyToID("_FOG_DISTANCE_FALLOFF");
-        private static readonly int _FOG_HEIGHT_START = Shader.PropertyToID("_FOG_HEIGHT_START");
-        private static readonly int _FOG_HEIGHT_FALLOFF = Shader.PropertyToID("_FOG_HEIGHT_FALLOFF");
-        private static readonly int _FOG_SCATTERING = Shader.PropertyToID("_FOG_SCATTERING");
-        private static readonly int _FOG_NOISE_TEX = Shader.PropertyToID("_FOG_NOISE_TEX");
-        private static readonly int _FOG_NOISE_STRENGTH = Shader.PropertyToID("_FOG_NOISE_STRENGTH");
-        private static readonly int _FOG_NOISE_SCALE = Shader.PropertyToID("_FOG_NOISE_SCALE");
-        private static readonly int _FOG_NOISE_SPEED = Shader.PropertyToID("_FOG_NOISE_SPEED");
-        private static readonly int _ZENITH_COLOR = Shader.PropertyToID("_ZENITH_COLOR");
-        private static readonly int _HORIZON_COLOR = Shader.PropertyToID("_HORIZON_COLOR");
-        private static readonly int _HORIZON_THICKNESS = Shader.PropertyToID("_HORIZON_THICKNESS");
-        private static readonly int _HORIZON_SOFTNESS = Shader.PropertyToID("_HORIZON_SOFTNESS");
-        private static readonly int _SUN_COLOR = Shader.PropertyToID("_SUN_COLOR");
-        private static readonly int _SUN_DIRECTION = Shader.PropertyToID("_SUN_DIRECTION");
-        private static readonly int _SUN_SIZE = Shader.PropertyToID("_SUN_SIZE");
-        private static readonly int _SUN_GLOW = Shader.PropertyToID("_SUN_GLOW");
-        private static readonly int _MOON_COLOR = Shader.PropertyToID("_MOON_COLOR");
-        private static readonly int _MOON_DIRECTION = Shader.PropertyToID("_MOON_DIRECTION");
-        private static readonly int _MOON_SIZE = Shader.PropertyToID("_MOON_SIZE");
-        private static readonly int _MOON_GLOW = Shader.PropertyToID("_MOON_GLOW");
-        private static readonly int _CLOUD_TEX_A = Shader.PropertyToID("_CLOUD_TEX_A");
-        private static readonly int _CLOUD_TEX_B = Shader.PropertyToID("_CLOUD_TEX_B");
-        private static readonly int _CLOUD_BLEND = Shader.PropertyToID("_CLOUD_BLEND");
-        private static readonly int _CLOUD_TINT = Shader.PropertyToID("_CLOUD_TINT");
-        private static readonly int _CLOUD_COVERAGE = Shader.PropertyToID("_CLOUD_COVERAGE");
-        private static readonly int _CLOUD_OPACITY = Shader.PropertyToID("_CLOUD_OPACITY");
-        private static readonly int _CLOUD_FADE = Shader.PropertyToID("_CLOUD_FADE");
-        private static readonly int _CLOUD_HEIGHT = Shader.PropertyToID("_CLOUD_HEIGHT");
-        private static readonly int _CLOUD_CURVE = Shader.PropertyToID("_CLOUD_CURVE");
-        private static readonly int _CLOUD_SCALE = Shader.PropertyToID("_CLOUD_SCALE");
-        private static readonly int _CLOUD_SPEED = Shader.PropertyToID("_CLOUD_SPEED");
-        private static readonly int _CLOUD_TURBULENCE = Shader.PropertyToID("_CLOUD_TURBULENCE");
-        private static readonly int _CLOUD_TRANSMITTANCE = Shader.PropertyToID("_CLOUD_TRANSMITTANCE");
-        private static readonly int _CLOUD_DARKNESS = Shader.PropertyToID("_CLOUD_DARKNESS");
-        private static readonly int _CLOUD_RIM_WIDTH = Shader.PropertyToID("_CLOUD_RIM_WIDTH");
-        private static readonly int _CLOUD_RIM_STRENGTH = Shader.PropertyToID("_CLOUD_RIM_STRENGTH");
         private static bool hasInitialized;
         private float timer;
+
+        internal static readonly int _FOG_COLOR_ID = Shader.PropertyToID("_FOG_COLOR");
+        internal static readonly int _FOG_DENSITY_ID = Shader.PropertyToID("_FOG_DENSITY");
+        internal static readonly int _FOG_DISTANCE_START_ID = Shader.PropertyToID("_FOG_DISTANCE_START");
+        internal static readonly int _FOG_DISTANCE_FALLOFF_ID = Shader.PropertyToID("_FOG_DISTANCE_FALLOFF");
+        internal static readonly int _FOG_HEIGHT_START_ID = Shader.PropertyToID("_FOG_HEIGHT_START");
+        internal static readonly int _FOG_HEIGHT_FALLOFF_ID = Shader.PropertyToID("_FOG_HEIGHT_FALLOFF");
+        internal static readonly int _FOG_SCATTERING_ID = Shader.PropertyToID("_FOG_SCATTERING");
+        internal static readonly int _FOG_NOISE_TEX_ID = Shader.PropertyToID("_FOG_NOISE_TEX");
+        internal static readonly int _FOG_NOISE_STRENGTH_ID = Shader.PropertyToID("_FOG_NOISE_STRENGTH");
+        internal static readonly int _FOG_NOISE_SCALE_ID = Shader.PropertyToID("_FOG_NOISE_SCALE");
+        internal static readonly int _FOG_NOISE_SPEED_ID = Shader.PropertyToID("_FOG_NOISE_SPEED");
+        internal static readonly int _ZENITH_COLOR_ID = Shader.PropertyToID("_ZENITH_COLOR");
+        internal static readonly int _HORIZON_COLOR_ID = Shader.PropertyToID("_HORIZON_COLOR");
+        internal static readonly int _HORIZON_THICKNESS_ID = Shader.PropertyToID("_HORIZON_THICKNESS");
+        internal static readonly int _HORIZON_SOFTNESS_ID = Shader.PropertyToID("_HORIZON_SOFTNESS");
+        internal static readonly int _SUN_COLOR_ID = Shader.PropertyToID("_SUN_COLOR");
+        internal static readonly int _SUN_DIRECTION_ID = Shader.PropertyToID("_SUN_DIRECTION");
+        internal static readonly int _SUN_SIZE_ID = Shader.PropertyToID("_SUN_SIZE");
+        internal static readonly int _SUN_GLOW_ID = Shader.PropertyToID("_SUN_GLOW");
+        internal static readonly int _MOON_COLOR_ID = Shader.PropertyToID("_MOON_COLOR");
+        internal static readonly int _MOON_DIRECTION_ID = Shader.PropertyToID("_MOON_DIRECTION");
+        internal static readonly int _MOON_SIZE_ID = Shader.PropertyToID("_MOON_SIZE");
+        internal static readonly int _MOON_GLOW_ID = Shader.PropertyToID("_MOON_GLOW");
+        internal static readonly int _CLOUD_TEX_A_ID = Shader.PropertyToID("_CLOUD_TEX_A");
+        internal static readonly int _CLOUD_TEX_B_ID = Shader.PropertyToID("_CLOUD_TEX_B");
+        internal static readonly int _CLOUD_BLEND_ID = Shader.PropertyToID("_CLOUD_BLEND");
+        internal static readonly int _CLOUD_TINT_ID = Shader.PropertyToID("_CLOUD_TINT");
+        internal static readonly int _CLOUD_COVERAGE_ID = Shader.PropertyToID("_CLOUD_COVERAGE");
+        internal static readonly int _CLOUD_OPACITY_ID = Shader.PropertyToID("_CLOUD_OPACITY");
+        internal static readonly int _CLOUD_FADE_ID = Shader.PropertyToID("_CLOUD_FADE");
+        internal static readonly int _CLOUD_HEIGHT_ID = Shader.PropertyToID("_CLOUD_HEIGHT");
+        internal static readonly int _CLOUD_CURVE_ID = Shader.PropertyToID("_CLOUD_CURVE");
+        internal static readonly int _CLOUD_SCALE_ID = Shader.PropertyToID("_CLOUD_SCALE");
+        internal static readonly int _CLOUD_SPEED_ID = Shader.PropertyToID("_CLOUD_SPEED");
+        internal static readonly int _CLOUD_TURBULENCE_ID = Shader.PropertyToID("_CLOUD_TURBULENCE");
+        internal static readonly int _CLOUD_TRANSMITTANCE_ID = Shader.PropertyToID("_CLOUD_TRANSMITTANCE");
+        internal static readonly int _CLOUD_DARKNESS_ID = Shader.PropertyToID("_CLOUD_DARKNESS");
+        internal static readonly int _CLOUD_RIM_WIDTH_ID = Shader.PropertyToID("_CLOUD_RIM_WIDTH");
+        internal static readonly int _CLOUD_RIM_STRENGTH_ID = Shader.PropertyToID("_CLOUD_RIM_STRENGTH");
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void OnRuntimeInitialize()
         {
-            cachedSettings = null;
+            cachedSettings = new();
             cachedFogTexture = null;
             cachedCloudTexture = null;
             cachedCloudTextureB = null;
@@ -86,7 +87,7 @@ namespace Core.Environment
             {
                 cachedSettings = settings;
                 hasInitialized = true;
-            }           
+            }
 
 #if UNITY_EDITOR
             if (Application.isEditor && !Application.isPlaying)
@@ -104,7 +105,7 @@ namespace Core.Environment
                 Refresh();
             }
         }
-        private void OnDisable() => hasInitialized = false;
+        private void OnDisable() => OnRuntimeInitialize();
 
         private static bool IsValid()
         {
@@ -115,32 +116,23 @@ namespace Core.Environment
 
             return hasInitialized;
         }
-        public static Light GetSun()
+        public static bool TryGetSun(out Light sun)
         {
-            if (!IsValid())
-            {
-                return null;
-            }
+            sun = cachedSunLight;
 
-            return cachedSunLight;
+            return IsValid();
         }
-        public static Light GetMoon()
+        public static bool TryGetMoon(out Light moon)
         {
-            if (!IsValid())
-            {
-                return null;
-            }
+            moon = cachedMoonLight;
 
-            return cachedMoonLight;
+            return IsValid();
         }
-        public static EnvironmentSettings GetSettings()
+        public static bool TryGetSettings(out EnvironmentSettings settings)
         {
-            if (!IsValid())
-            {
-                return EnvironmentSettings.Default;
-            }
+            settings = cachedSettings;
 
-            return cachedSettings;
+            return IsValid();
         }
 
         private void Refresh()
@@ -150,7 +142,6 @@ namespace Core.Environment
             ApplyFog(settings);
             ApplySky(settings);
         }
-
         private static void ApplyCelestial(EnvironmentSettings settings)
         {
             static float GetIntensity(float direction)
@@ -199,20 +190,20 @@ namespace Core.Environment
 
             if (cachedFogTexture != texture)
             {
-                Shader.SetGlobalTexture(_FOG_NOISE_TEX, texture);
+                Shader.SetGlobalTexture(_FOG_NOISE_TEX_ID, texture);
                 cachedFogTexture = texture;
             }
 
-            Shader.SetGlobalColor(_FOG_COLOR, fog.Color);
-            Shader.SetGlobalFloat(_FOG_DENSITY, fog.Density);
-            Shader.SetGlobalFloat(_FOG_DISTANCE_START, fog.DistanceStart);
-            Shader.SetGlobalFloat(_FOG_DISTANCE_FALLOFF, fog.DistanceFalloff);
-            Shader.SetGlobalFloat(_FOG_HEIGHT_START, fog.HeightStart);
-            Shader.SetGlobalFloat(_FOG_HEIGHT_FALLOFF, fog.HeightFalloff);
-            Shader.SetGlobalFloat(_FOG_SCATTERING, fog.Scattering);
-            Shader.SetGlobalFloat(_FOG_NOISE_STRENGTH, fog.NoiseStrength);
-            Shader.SetGlobalFloat(_FOG_NOISE_SPEED, fog.NoiseTurbulance);
-            Shader.SetGlobalFloat(_FOG_NOISE_SCALE, fog.NoiseScale);
+            Shader.SetGlobalColor(_FOG_COLOR_ID, fog.Color);
+            Shader.SetGlobalFloat(_FOG_DENSITY_ID, fog.Density);
+            Shader.SetGlobalFloat(_FOG_DISTANCE_START_ID, fog.DistanceStart);
+            Shader.SetGlobalFloat(_FOG_DISTANCE_FALLOFF_ID, fog.DistanceFalloff);
+            Shader.SetGlobalFloat(_FOG_HEIGHT_START_ID, fog.HeightStart);
+            Shader.SetGlobalFloat(_FOG_HEIGHT_FALLOFF_ID, fog.HeightFalloff);
+            Shader.SetGlobalFloat(_FOG_SCATTERING_ID, fog.Scattering);
+            Shader.SetGlobalFloat(_FOG_NOISE_STRENGTH_ID, fog.NoiseStrength);
+            Shader.SetGlobalFloat(_FOG_NOISE_SPEED_ID, fog.NoiseTurbulance);
+            Shader.SetGlobalFloat(_FOG_NOISE_SCALE_ID, fog.NoiseScale);
         }
         private static void ApplySky(EnvironmentSettings settings)
         {
@@ -221,48 +212,48 @@ namespace Core.Environment
             CelestialSettings moon = settings.Moon;
             CloudSettings cloud = settings.Cloud;
 
-            Texture2D cloudTexture = settings.CloudTexture;
+            Texture2D cloudTextureA = settings.CloudTexture;
             Texture2D cloudTextureB = settings.CloudTextureB != null ? settings.CloudTextureB : settings.CloudTexture;
 
-            if (cachedCloudTexture != cloudTexture)
+            if (cachedCloudTexture != cloudTextureA)
             {
-                Shader.SetGlobalTexture(_CLOUD_TEX_A, cloudTexture);
-                cachedCloudTexture = cloudTexture;
+                Shader.SetGlobalTexture(_CLOUD_TEX_A_ID, cloudTextureA);
+                cachedCloudTexture = cloudTextureA;
             }
 
             if (cachedCloudTextureB != cloudTextureB)
             {
-                Shader.SetGlobalTexture(_CLOUD_TEX_B, cloudTextureB);
+                Shader.SetGlobalTexture(_CLOUD_TEX_B_ID, cloudTextureB);
                 cachedCloudTextureB = cloudTextureB;
             }
 
-            Shader.SetGlobalColor(_ZENITH_COLOR, sky.ZenithColor);
-            Shader.SetGlobalColor(_HORIZON_COLOR, sky.HorizonColor);
-            Shader.SetGlobalFloat(_HORIZON_THICKNESS, sky.HorizonThickness);
-            Shader.SetGlobalFloat(_HORIZON_SOFTNESS, sky.HorizonSmoothness);
-            Shader.SetGlobalColor(_SUN_COLOR, sun.Color * sun.Power);
-            Shader.SetGlobalVector(_SUN_DIRECTION, -sunDirection);
-            Shader.SetGlobalFloat(_SUN_SIZE, sun.Size);
-            Shader.SetGlobalFloat(_SUN_GLOW, sun.Glow);
-            Shader.SetGlobalColor(_MOON_COLOR, moon.Color * moon.Power);
-            Shader.SetGlobalVector(_MOON_DIRECTION, -moonDirection);
-            Shader.SetGlobalFloat(_MOON_SIZE, moon.Size);
-            Shader.SetGlobalFloat(_MOON_GLOW, moon.Glow);
+            Shader.SetGlobalColor(_ZENITH_COLOR_ID, sky.ZenithColor);
+            Shader.SetGlobalColor(_HORIZON_COLOR_ID, sky.HorizonColor);
+            Shader.SetGlobalFloat(_HORIZON_THICKNESS_ID, sky.HorizonThickness);
+            Shader.SetGlobalFloat(_HORIZON_SOFTNESS_ID, sky.HorizonSmoothness);
+            Shader.SetGlobalColor(_SUN_COLOR_ID, sun.Color * sun.Power);
+            Shader.SetGlobalVector(_SUN_DIRECTION_ID, -sunDirection);
+            Shader.SetGlobalFloat(_SUN_SIZE_ID, sun.Size);
+            Shader.SetGlobalFloat(_SUN_GLOW_ID, sun.Glow);
+            Shader.SetGlobalColor(_MOON_COLOR_ID, moon.Color * moon.Power);
+            Shader.SetGlobalVector(_MOON_DIRECTION_ID, -moonDirection);
+            Shader.SetGlobalFloat(_MOON_SIZE_ID, moon.Size);
+            Shader.SetGlobalFloat(_MOON_GLOW_ID, moon.Glow);
 
-            Shader.SetGlobalFloat(_CLOUD_BLEND, settings.Blend);
-            Shader.SetGlobalColor(_CLOUD_TINT, cloud.Tint);
-            Shader.SetGlobalFloat(_CLOUD_COVERAGE, cloud.Coverage);
-            Shader.SetGlobalFloat(_CLOUD_OPACITY, cloud.Opacity);
-            Shader.SetGlobalFloat(_CLOUD_FADE, cloud.Fade);
-            Shader.SetGlobalFloat(_CLOUD_HEIGHT, cloud.Height);
-            Shader.SetGlobalFloat(_CLOUD_CURVE, cloud.Curve);
-            Shader.SetGlobalFloat(_CLOUD_SCALE, cloud.Scale);
-            Shader.SetGlobalFloat(_CLOUD_SPEED, cloud.Speed);
-            Shader.SetGlobalFloat(_CLOUD_TURBULENCE, cloud.Turbulance);
-            Shader.SetGlobalFloat(_CLOUD_TRANSMITTANCE, cloud.Transmittance);
-            Shader.SetGlobalFloat(_CLOUD_DARKNESS, cloud.Darkness);
-            Shader.SetGlobalFloat(_CLOUD_RIM_WIDTH, cloud.RimWidth);
-            Shader.SetGlobalFloat(_CLOUD_RIM_STRENGTH, cloud.RimStrength);
+            Shader.SetGlobalFloat(_CLOUD_BLEND_ID, settings.Blend);
+            Shader.SetGlobalColor(_CLOUD_TINT_ID, cloud.Tint);
+            Shader.SetGlobalFloat(_CLOUD_COVERAGE_ID, cloud.Coverage);
+            Shader.SetGlobalFloat(_CLOUD_OPACITY_ID, cloud.Opacity);
+            Shader.SetGlobalFloat(_CLOUD_FADE_ID, cloud.Fade);
+            Shader.SetGlobalFloat(_CLOUD_HEIGHT_ID, cloud.Height);
+            Shader.SetGlobalFloat(_CLOUD_CURVE_ID, cloud.Curve);
+            Shader.SetGlobalFloat(_CLOUD_SCALE_ID, cloud.Scale);
+            Shader.SetGlobalFloat(_CLOUD_SPEED_ID, cloud.Speed);
+            Shader.SetGlobalFloat(_CLOUD_TURBULENCE_ID, cloud.Turbulance);
+            Shader.SetGlobalFloat(_CLOUD_TRANSMITTANCE_ID, cloud.Transmittance);
+            Shader.SetGlobalFloat(_CLOUD_DARKNESS_ID, cloud.Darkness);
+            Shader.SetGlobalFloat(_CLOUD_RIM_WIDTH_ID, cloud.RimWidth);
+            Shader.SetGlobalFloat(_CLOUD_RIM_STRENGTH_ID, cloud.RimStrength);
         }
     }
 }
