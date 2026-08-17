@@ -7,6 +7,8 @@ namespace Core.Damage
     [CreateAssetMenu(fileName = "SCO_DamageRegistry", menuName = "Resources/Core/Damage Registry", order = 10)]
     public sealed class RegistryDamage : Registry
     {
+        public override int Priority => -10;
+
         [Header("_")]
         [SerializeField, Required] private string[] tags;
 

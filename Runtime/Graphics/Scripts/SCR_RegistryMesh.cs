@@ -6,6 +6,8 @@ namespace Core.Graphics
     [CreateAssetMenu(fileName = "SCO_MeshRegistry", menuName = "Resources/Core/Mesh Registry", order = 0)]
     public sealed class RegistryMesh : Registry
     {
+        public override int Priority => -10;
+
         [Header("_")]
         [SerializeField, Required] private Mesh[] entries = null;
 

@@ -70,7 +70,7 @@ namespace Core
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
         private static void AfterAssembliesLoaded()
         {
-            registries = Resources.LoadAll<Registry>("Registry").OfType<Registry>().OrderBy(x => x.Priority).ToArray();
+            registries = Resources.LoadAll<Registry>("Registry").OrderBy(x => x.Priority).ToArray();
 
             for (int i = 0; i < registries.Length; i++)
             {

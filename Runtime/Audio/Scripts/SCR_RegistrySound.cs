@@ -7,6 +7,8 @@ namespace Core.Audio
     [CreateAssetMenu(fileName = "SCO_SoundRegistry", menuName = "Resources/Core/Sound Registry", order = 0)]
     public sealed class RegistrySound : Registry
     {
+        public override int Priority => -10;
+
         [Header("_")]
         [SerializeField, Required] private AudioClip[] entries = null;
 

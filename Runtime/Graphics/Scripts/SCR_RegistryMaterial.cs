@@ -6,6 +6,8 @@ namespace Core.Graphics
     [CreateAssetMenu(fileName = "SCO_MaterialRegistry", menuName = "Resources/Core/Material Registry", order = 0)]
     public sealed class RegistryMaterial : Registry
     {
+        public override int Priority => -10;
+
         [Header("_")]
         [SerializeField, Required] private Material[] entries = null;
 

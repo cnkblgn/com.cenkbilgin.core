@@ -7,6 +7,8 @@ namespace Core.Item
     [CreateAssetMenu(fileName = "SCO_ItemRegistry", menuName = "Resources/Core/Item Registry", order = 10)]
     public sealed class RegistryItem : Registry
     {
+        public override int Priority => -2;
+
         [Header("_")]
         [SerializeField, Required] private string[] tags;
 
@@ -27,8 +29,10 @@ namespace Core.Item
         public void AppendTags(IReadOnlyList<string> tags) => CoreUtility.AppendUnique(tags, extraTags, StringComparer.Ordinal);
 
 #if UNITY_EDITOR
-        private void OnValidate()
+        protected override void OnValidate()
         {
+            base.OnValidate();
+
             for (int i = 0; i < entries.Length; i++) entries[i].Name = entries[i].ID.Key;
         }
 

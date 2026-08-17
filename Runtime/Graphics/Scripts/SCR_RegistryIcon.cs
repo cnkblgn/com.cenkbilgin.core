@@ -6,6 +6,8 @@ namespace Core.Graphics
     [CreateAssetMenu(fileName = "SCO_IconRegistry", menuName = "Resources/Core/Icon Registry", order = 0)]
     public sealed class RegistryIcon : Registry
     {
+        public override int Priority => -10;
+
         [Header("_")]
         [SerializeField, Required] private Sprite[] entries = null;
 

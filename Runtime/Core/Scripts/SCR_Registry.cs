@@ -4,10 +4,14 @@ namespace Core
 {
     public abstract class Registry : ScriptableObject
     {
-        internal int Priority => priority;
+        public abstract int Priority { get; }
 
-        [Header("_")]
-        [SerializeField, Min(0)] private int priority = 0;
+        [Info("Registry load order")]
+        [SerializeField, ReadOnly] private int priority;
+
+#if UNITY_EDITOR
+        protected virtual void OnValidate() => priority = Priority;
+#endif
 
         public abstract void Reload();
         public abstract void OnAfterScriptLoad();

@@ -6,6 +6,8 @@ namespace Core.Effect
     [CreateAssetMenu(fileName = "SCO_EffectRegistry", menuName = "Resources/Core/Effect Registry", order = 10)]
     public sealed class RegistryEffect : Registry
     {
+        public override int Priority => -3;
+
         [Header("_")]
         [SerializeField] private EffectEntry[] entries;
 
@@ -20,8 +22,10 @@ namespace Core.Effect
         public void AppendEntries(IReadOnlyList<EffectEntry> entries) => CoreUtility.AppendEntries(entries, extraEntries, static entry => entry.ID.Key, static entry => entry.ID.IsValid);
 
 #if UNITY_EDITOR
-        private void OnValidate()
+        protected override void OnValidate()
         {
+            base.OnValidate();
+
             for (int i = 0; i < entries.Length; i++) entries[i].Name = entries[i].ID.Key;
         }
 

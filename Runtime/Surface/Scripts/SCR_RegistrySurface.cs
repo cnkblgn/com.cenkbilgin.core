@@ -7,6 +7,8 @@ namespace Core.Surface
     [CreateAssetMenu(fileName = "SCO_SurfaceRegistry", menuName = "Resources/Core/Surface Registry", order = 10)]
     public sealed class RegistrySurface : Registry
     {
+        public override int Priority => -10;
+
         [Header("_")]
         [SerializeField, Required] private string[] tags;
 

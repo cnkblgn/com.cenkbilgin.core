@@ -7,6 +7,8 @@ namespace Core.Actors
     [CreateAssetMenu(fileName = "SCO_ActorRegistry", menuName = "Resources/Core/Actor Registry", order = 10)]
     public sealed class RegistryActor : Registry
     {
+        public override int Priority => -10;
+
         [Header("_")]
         [SerializeField, Required] private string[] ids;
         [SerializeField, Required] private string[] tags;

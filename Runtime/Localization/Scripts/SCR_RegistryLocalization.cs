@@ -6,6 +6,8 @@ namespace Core.Localization
     [CreateAssetMenu(fileName = "SCO_LocalizationRegistry", menuName = "Resources/Core/Localization Registry", order = 0)]
     public sealed class RegistryLocalization : Registry
     {
+        public override int Priority => -10;
+
         [Header("_")]
         [SerializeReference, Reference] private LocalizationInterpolator[] interpolators;
 
