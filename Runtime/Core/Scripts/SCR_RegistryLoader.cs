@@ -1,15 +1,15 @@
+using System.Collections.Generic;
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
 
 namespace Core
 {
-    internal static class RegistryLoader
+    public static class RegistryLoader
     {
         private static Registry[] registries;
 
 #if UNITY_EDITOR
-        private static bool TryCache()
+        private static bool TryCacheEditor()
         {
             string folder = "Assets";
             string filter = "t:" + typeof(Registry).Name;
@@ -39,10 +39,10 @@ namespace Core
             return found;
         }
 
-        [MenuItem("Tools/Reload Registries", priority = -10)]
-        private static void TryReload()
+        [UnityEditor.MenuItem("Tools/Reload Registries", priority = -10)]
+        private static void TryReloadEditor()
         {
-            TryCache();
+            TryCacheEditor();
 
             for (int i = 0; i < registries.Length; i++)
             {
@@ -55,7 +55,7 @@ namespace Core
         [UnityEditor.Callbacks.DidReloadScripts(1)]
         private static void OnAfterScriptLoad()
         {
-            if (!TryCache())
+            if (!TryCacheEditor())
             {
                 return;
             }
@@ -67,14 +67,14 @@ namespace Core
         }
 #endif
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void OnBeforeSceneLoad()
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        private static void AfterAssembliesLoaded()
         {
-            Registry[] registries = Resources.LoadAll<Registry>("Registry").OfType<Registry>().OrderBy(x => x.Priority).ToArray();
+            registries = Resources.LoadAll<Registry>("Registry").OfType<Registry>().OrderBy(x => x.Priority).ToArray();
 
             for (int i = 0; i < registries.Length; i++)
             {
-                registries[i].OnBeforeSceneLoad();
+                registries[i].OnAfterAssembliesLoaded();
             }
 
 #if UNITY_EDITOR
@@ -84,5 +84,27 @@ namespace Core
             }
 #endif
         }
+
+        public static bool TryGetRegistry<T>(out T registry) where T : Registry
+        {
+            registry = null;
+
+            if (registries == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < registries.Length; i++)
+            {
+                if (registries[i] is T typedRegistry)
+                {
+                    registry = typedRegistry;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        public static IReadOnlyList<Registry> GetRegistries() => registries;
     }
 }

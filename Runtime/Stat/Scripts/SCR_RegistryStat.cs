@@ -14,7 +14,7 @@ namespace Core.Stat
 
         private readonly Dictionary<string, StatEntry> extraEntries = new();
 
-        public override void OnBeforeSceneLoad() => BuildDatabase();
+        public override void OnAfterAssembliesLoaded() => BuildDatabase();
         public override void OnAfterScriptLoad() => BuildDatabase();
         public void BuildDatabase() => StatDatabase.Build(CoreUtility.MergeEntries(entries, extraEntries, static entry => entry.ID.Key));
         public void AppendEntries(IReadOnlyList<StatEntry> entries) => CoreUtility.AppendEntries(entries, extraEntries, static entry => entry.ID.Key, static entry => entry.ID.IsValid);

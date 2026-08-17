@@ -15,7 +15,7 @@ namespace Core.Damage
 
         private readonly HashSet<string> extraTags = new();
 
-        public override void OnBeforeSceneLoad() => BuildDatabase();
+        public override void OnAfterAssembliesLoaded() => BuildDatabase();
         public override void OnAfterScriptLoad() => BuildDatabase();
         public void BuildDatabase() => DamageDatabase.Build(CoreUtility.MergeEntries(tags, extraTags));
         public void AppendTags(IReadOnlyList<string> tags) => CoreUtility.AppendUnique(tags, extraTags, StringComparer.Ordinal);

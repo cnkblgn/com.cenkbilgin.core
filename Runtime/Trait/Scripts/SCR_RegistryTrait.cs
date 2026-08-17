@@ -17,7 +17,7 @@ namespace Core.Trait
 
         private readonly Dictionary<string, TraitEntry> extraEntries = new();
 
-        public override void OnBeforeSceneLoad() => BuildDatabase();
+        public override void OnAfterAssembliesLoaded() => BuildDatabase();
         public override void OnAfterScriptLoad() => BuildDatabase();
         public void BuildDatabase() => TraitDatabase.Build(CoreUtility.MergeEntries(entries, extraEntries, static entry => entry.ID.Key));
         public void AppendEntries(IReadOnlyList<TraitEntry> entries) => CoreUtility.AppendEntries(entries, extraEntries, static entry => entry.ID.Key, static entry => entry.ID.IsValid);

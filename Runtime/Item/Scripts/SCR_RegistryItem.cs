@@ -20,7 +20,7 @@ namespace Core.Item
         private readonly Dictionary<string, ItemEntry> extraEntries = new();
         private readonly HashSet<string> extraTags = new();
 
-        public override void OnBeforeSceneLoad() => BuildDatabase();
+        public override void OnAfterAssembliesLoaded() => BuildDatabase();
         public override void OnAfterScriptLoad() => BuildDatabase();
         public void BuildDatabase() => ItemDatabase.Build(CoreUtility.MergeEntries(entries, extraEntries, static entry => entry.ID.Key), CoreUtility.MergeEntries(tags, extraTags));
         public void AppendEntries(IReadOnlyList<ItemEntry> entries) => CoreUtility.AppendEntries(entries, extraEntries, static entry => entry.ID.Key, static entry => entry.ID.IsValid);

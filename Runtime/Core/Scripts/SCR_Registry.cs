@@ -11,6 +11,6 @@ namespace Core
 
         public abstract void Reload();
         public abstract void OnAfterScriptLoad();
-        public abstract void OnBeforeSceneLoad();
+        public abstract void OnAfterAssembliesLoaded();
     }
 }

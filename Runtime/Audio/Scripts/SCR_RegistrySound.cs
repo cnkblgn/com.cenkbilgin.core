@@ -15,7 +15,7 @@ namespace Core.Audio
 
         private readonly Dictionary<string, AudioClip> extraEntries = new();
 
-        public override void OnBeforeSceneLoad() => BuildDatabase();
+        public override void OnAfterAssembliesLoaded() => BuildDatabase();
         public override void OnAfterScriptLoad() => BuildDatabase();
         public void BuildDatabase() => SoundDatabase.Build(CoreUtility.MergeEntries(entries, extraEntries, static entry => entry != null ? entry.name : CoreUtility.STRING_NULL));
         public void AppendEntries(IReadOnlyList<AudioClip> clips) => CoreUtility.AppendEntries(clips, extraEntries, static entry => entry.name, static entry => entry != null);

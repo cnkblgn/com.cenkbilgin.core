@@ -18,7 +18,7 @@ namespace Core.Actors
         private readonly HashSet<string> extraIDs = new();
         private readonly HashSet<string> extraTags = new();
 
-        public override void OnBeforeSceneLoad() => BuildDatabase();
+        public override void OnAfterAssembliesLoaded() => BuildDatabase();
         public override void OnAfterScriptLoad() => BuildDatabase();
         public void BuildDatabase() => ActorDatabase.Build(CoreUtility.MergeEntries(ids, extraIDs), CoreUtility.MergeEntries(tags, extraTags));
         public void AppendIDs(IReadOnlyList<string> ids) => CoreUtility.AppendUnique(ids, extraIDs, StringComparer.Ordinal);

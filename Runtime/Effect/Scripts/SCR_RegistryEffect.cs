@@ -14,7 +14,7 @@ namespace Core.Effect
 
         private readonly Dictionary<string, EffectEntry> extraEntries = new();
 
-        public override void OnBeforeSceneLoad() => BuildDatabase();
+        public override void OnAfterAssembliesLoaded() => BuildDatabase();
         public override void OnAfterScriptLoad() => BuildDatabase();
         public void BuildDatabase() => EffectDatabase.Build(CoreUtility.MergeEntries(entries, extraEntries, static entry => entry.ID.Key));
         public void AppendEntries(IReadOnlyList<EffectEntry> entries) => CoreUtility.AppendEntries(entries, extraEntries, static entry => entry.ID.Key, static entry => entry.ID.IsValid);

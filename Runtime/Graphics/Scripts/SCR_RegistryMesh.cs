@@ -14,7 +14,7 @@ namespace Core.Graphics
 
         private readonly Dictionary<string, Mesh> extraEntries = new();
 
-        public override void OnBeforeSceneLoad() => BuildDatabase();
+        public override void OnAfterAssembliesLoaded() => BuildDatabase();
         public override void OnAfterScriptLoad() => BuildDatabase();
         public void BuildDatabase() => MeshDatabase.Build(CoreUtility.MergeEntries(entries, extraEntries, static entry => entry != null ? entry.name : CoreUtility.STRING_NULL));
         public void AppendEntries(IReadOnlyList<Mesh> meshes) => CoreUtility.AppendEntries(meshes, extraEntries, static entry => entry.name, static entry => entry != null);

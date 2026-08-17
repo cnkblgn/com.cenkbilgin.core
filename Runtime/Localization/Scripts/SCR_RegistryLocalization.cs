@@ -14,7 +14,7 @@ namespace Core.Localization
 
         private readonly List<string> extraEntries = new();
 
-        public override void OnBeforeSceneLoad() => Reload();
+        public override void OnAfterAssembliesLoaded() => Reload();
         public override void OnAfterScriptLoad() => Reload();
         public override void Reload() => LocalizationDatabase.Build(file.text, interpolators);
 
@@ -37,15 +37,15 @@ namespace Core.Localization
 
             LocalizationDatabase.Build(csvContent, interpolators);
         }
-        public void AppendEntries(string csvContet)
+        public void AppendEntries(string csvContent)
         {
-            if (string.IsNullOrEmpty(csvContet))
+            if (string.IsNullOrEmpty(csvContent))
             {
                 Debug.LogError("Failed to append localization entries. content is empty.");
                 return;
             }
 
-            extraEntries.Add(csvContet);
+            extraEntries.Add(csvContent);
         }
     }
 }

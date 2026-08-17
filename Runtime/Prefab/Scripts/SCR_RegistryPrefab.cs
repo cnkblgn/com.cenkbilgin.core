@@ -15,7 +15,7 @@ namespace Core.Prefab
 
         private readonly Dictionary<string, GameObject> extraEntries = new();
 
-        public override void OnBeforeSceneLoad() => BuildDatabase();
+        public override void OnAfterAssembliesLoaded() => BuildDatabase();
         public override void OnAfterScriptLoad() => BuildDatabase();
         public void BuildDatabase() => PrefabDatabase.Build(CoreUtility.MergeEntries(entries.ToArray(), extraEntries, static entry => entry != null ? entry.name : CoreUtility.STRING_NULL));
         public void AppendEntries(IReadOnlyList<GameObject> prefabs) => CoreUtility.AppendEntries(prefabs, extraEntries, static entry => entry.name, static entry => entry != null);
