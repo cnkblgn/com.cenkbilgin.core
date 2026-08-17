@@ -9,19 +9,19 @@ namespace Core.Graphics
         private static readonly Dictionary<string, int> idLookup = new();
         private static Material[] materials = Array.Empty<Material>();
 
-        internal static void Build(Material[] materialCollection)
+        internal static void Build(Material[] _materials)
         {
-            if (materialCollection == null)
+            if (_materials == null)
             {
                 return;
             }
 
             idLookup.Clear();
-            materials = new Material[materialCollection.Length];
+            materials = new Material[_materials.Length];
 
-            for (int i = 0; i < materialCollection.Length; i++)
+            for (int i = 0; i < _materials.Length; i++)
             {
-                Material material = materialCollection[i];
+                Material material = _materials[i];
 
 #if UNITY_EDITOR
                 if (material == null)

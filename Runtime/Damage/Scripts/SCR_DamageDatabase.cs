@@ -9,22 +9,21 @@ namespace Core.Damage
         private static readonly Dictionary<string, int> tagLookup = new();
         private static DamageTag[] tags = Array.Empty<DamageTag>();
 
-        internal static void Build(string[] tagCollection)
+        internal static void Build(string[] _tags)
         {
-            if (tagCollection == null)
+            if (_tags == null)
             {
                 return;
             }
 
             tagLookup.Clear();
-            tags = new DamageTag[tagCollection.Length + 1];
+            tags = new DamageTag[_tags.Length + 1];
             tags[0] = new("GENERIC", 0);
 
-            for (int i = 0; i < tagCollection.Length; i++)
+            for (int i = 0; i < _tags.Length; i++)
             {
-                string key = tagCollection[i];
+                string key = _tags[i];
                 int index = i + 1;
-
 
                 if (string.IsNullOrEmpty(key))
                 {

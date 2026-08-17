@@ -9,19 +9,19 @@ namespace Core.Prefab
         private static readonly Dictionary<string, int> idLookup = new();
         private static GameObject[] prefabs = Array.Empty<GameObject>();
 
-        internal static void Build(GameObject[] gameObjectCollection)
+        internal static void Build(GameObject[] _prefabs)
         {
-            if (gameObjectCollection == null)
+            if (_prefabs == null)
             {
                 return;
             }
 
             idLookup.Clear();
-            prefabs = new GameObject[gameObjectCollection.Length];
+            prefabs = new GameObject[_prefabs.Length];
 
-            for (int i = 0; i < gameObjectCollection.Length; i++)
+            for (int i = 0; i < _prefabs.Length; i++)
             {
-                GameObject gameObject = gameObjectCollection[i];
+                GameObject gameObject = _prefabs[i];
 
 #if UNITY_EDITOR
                 if (gameObject == null)

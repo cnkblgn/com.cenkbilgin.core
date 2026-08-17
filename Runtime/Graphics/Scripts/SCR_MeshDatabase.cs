@@ -9,19 +9,19 @@ namespace Core.Graphics
         private static readonly Dictionary<string, int> idLookup = new();
         private static Mesh[] meshes = Array.Empty<Mesh>();
 
-        internal static void Build(Mesh[] meshCollection)
+        internal static void Build(Mesh[] _meshes)
         {
-            if (meshCollection == null)
+            if (_meshes == null)
             {
                 return;
             }
 
             idLookup.Clear();
-            meshes = new Mesh[meshCollection.Length];
+            meshes = new Mesh[_meshes.Length];
 
-            for (int i = 0; i < meshCollection.Length; i++)
+            for (int i = 0; i < _meshes.Length; i++)
             {
-                Mesh mesh = meshCollection[i];
+                Mesh mesh = _meshes[i];
 #if UNITY_EDITOR
                 if (mesh == null)
                 {

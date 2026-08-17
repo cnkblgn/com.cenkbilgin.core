@@ -20,24 +20,24 @@ namespace Core.Actors
             }
         }
 
-        internal static void Build(string[] idCollection, string[] tagCollection)
+        internal static void Build(string[] ids, string[] _tags)
         {
-            if (idCollection == null || tagCollection == null)
+            if (ids == null || _tags == null)
             {
                 return;
             }
 
             idLookup.Clear();
             tagLookup.Clear();
-            tags = new ActorTag[tagCollection.Length + 1];
-            groups = new ActorGroup[idCollection.Length];
+            tags = new ActorTag[_tags.Length + 1];
+            groups = new ActorGroup[ids.Length];
 
             tagLookup["GENERIC"] = 0;
             tags[0] = new("GENERIC", 0);
 
-            for (int i = 0; i < idCollection.Length; i++)
+            for (int i = 0; i < ids.Length; i++)
             {
-                string key = idCollection[i];
+                string key = ids[i];
                 int index = i;
 
                 if (string.IsNullOrEmpty(key))
@@ -50,9 +50,9 @@ namespace Core.Actors
                 groups[i] = new(new(key, index));
             }
 
-            for (int i = 0; i < tagCollection.Length; i++)
+            for (int i = 0; i < _tags.Length; i++)
             {
-                string key = tagCollection[i];
+                string key = _tags[i];
                 int index = i + 1;
 
                 if (string.IsNullOrEmpty(key))

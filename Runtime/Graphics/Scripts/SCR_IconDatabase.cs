@@ -9,19 +9,19 @@ namespace Core.Graphics
         private static readonly Dictionary<string, int> idLookup = new();
         private static Sprite[] sprites = Array.Empty<Sprite>();
 
-        internal static void Build(Sprite[] spriteCollection)
+        internal static void Build(Sprite[] _sprites)
         {
-            if (spriteCollection == null)
+            if (_sprites == null)
             {
                 return;
             }
 
-            sprites = new Sprite[spriteCollection.Length];
+            sprites = new Sprite[_sprites.Length];
             idLookup.Clear();
 
-            for (int i = 0; i < spriteCollection.Length; i++)
+            for (int i = 0; i < _sprites.Length; i++)
             {
-                Sprite clip = spriteCollection[i];
+                Sprite clip = _sprites[i];
 #if UNITY_EDITOR
                 if (clip == null)
                 {
@@ -29,11 +29,11 @@ namespace Core.Graphics
                     continue;
                 }
 #endif
-                string key = spriteCollection[i].name;
+                string key = _sprites[i].name;
                 IconID id = new(key, i);
 
                 idLookup[key] = i;
-                sprites[i] = spriteCollection[i];
+                sprites[i] = _sprites[i];
             }
 
             Debug.Log($"Icon database build successfull!");

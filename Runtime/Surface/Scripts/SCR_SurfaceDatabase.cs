@@ -7,22 +7,22 @@ namespace Core.Surface
     public static class SurfaceDatabase
     {
         private static readonly Dictionary<string, int> tagLookup = new();
-        private static SurfaceTag[] database = Array.Empty<SurfaceTag>();
+        private static SurfaceTag[] tags = Array.Empty<SurfaceTag>();
 
-        internal static void Build(string[] tagCollection)
+        internal static void Build(string[] _tags)
         {
-            if (tagCollection == null)
+            if (_tags == null)
             {
                 return;
             }
 
             tagLookup.Clear();
-            database = new SurfaceTag[tagCollection.Length + 1];
-            database[0] = new("GENERIC", 0);
+            tags = new SurfaceTag[_tags.Length + 1];
+            tags[0] = new("GENERIC", 0);
 
-            for (int i = 0; i < tagCollection.Length; i++)
+            for (int i = 0; i < _tags.Length; i++)
             {
-                string key = tagCollection[i];
+                string key = _tags[i];
                 int index = i + 1;
 
                 if (string.IsNullOrEmpty(key))
@@ -32,21 +32,21 @@ namespace Core.Surface
                 }
 
                 tagLookup[key] = index;
-                database[index] = new(key, index);
+                tags[index] = new(key, index);
             }
 
             Debug.Log($"Surface database build successfull!");
         }
 
-        public static IReadOnlyList<SurfaceTag> GetTags() => database;
+        public static IReadOnlyList<SurfaceTag> GetTags() => tags;
         public static SurfaceTag GetTag(int index)
         {
-            if (index >= database.Length || index < 0)
+            if (index >= tags.Length || index < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(index), index, $"Surface  tag not found index out of range");
             }
 
-            return database[index];
+            return tags[index];
         }
         public static int GetTagIndex(string key) => tagLookup.TryGetValue(key, out int index) ? index : -1;
     }

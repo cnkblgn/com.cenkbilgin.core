@@ -9,19 +9,19 @@ namespace Core.Audio
         private static readonly Dictionary<string, int> idLookup = new();
         private static AudioClip[] clips = Array.Empty<AudioClip>();
 
-        internal static void Build(AudioClip[] clipCollection)
+        internal static void Build(AudioClip[] _clips)
         {
-            if (clipCollection == null)
+            if (_clips == null)
             {
                 return;
             }
 
-            clips = new AudioClip[clipCollection.Length];
+            clips = new AudioClip[_clips.Length];
             idLookup.Clear();
 
-            for (int i = 0; i < clipCollection.Length; i++)
+            for (int i = 0; i < _clips.Length; i++)
             {
-                AudioClip clip = clipCollection[i];
+                AudioClip clip = _clips[i];
 
 #if UNITY_EDITOR
                 if (clip == null)
@@ -31,7 +31,7 @@ namespace Core.Audio
                 }
 #endif
 
-                string key = clipCollection[i].name;
+                string key = _clips[i].name;
                 SoundID id = new(key, i);
 
                 idLookup[key] = i;
