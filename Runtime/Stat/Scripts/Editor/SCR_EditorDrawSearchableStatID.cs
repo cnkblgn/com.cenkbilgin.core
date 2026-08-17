@@ -1,7 +1,6 @@
-using Codice.Client.Common;
-using Core.Editor;
 using System.Collections.Generic;
 using UnityEditor;
+using Core.Editor;
 
 namespace Core.Stat.Editor
 {
