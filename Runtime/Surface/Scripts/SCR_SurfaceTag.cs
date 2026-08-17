@@ -6,6 +6,8 @@ namespace Core.Surface
     [Serializable]
     public struct SurfaceTag : IEquatable<SurfaceTag>
     {
+        public static readonly SurfaceTag GENERIC = new("GENERIC", 0);
+
         public readonly string Key => key;
         public int Index
         {

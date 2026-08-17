@@ -25,7 +25,8 @@ namespace Core.Item
 
             definitions = new ItemDefinition[entries.Length];
             tags = new ItemTag[_tags.Length + 1];
-            tags[0] = new("GENERIC", 0);
+            tags[0] = ItemTag.GENERIC;
+            tagLookup[ItemTag.GENERIC.Key] = 0;
 
             for (int i = 0; i < _tags.Length; i++)
             {

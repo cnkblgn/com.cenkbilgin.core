@@ -6,6 +6,8 @@ namespace Core.Item
     [Serializable]
     public struct ItemTag : IEquatable<ItemTag>
     {
+        public static readonly ItemTag GENERIC = new("GENERIC", 0);
+
         public readonly string Key => key;
         public int Index
         {

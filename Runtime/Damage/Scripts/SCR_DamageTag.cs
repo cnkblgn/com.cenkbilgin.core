@@ -6,6 +6,8 @@ namespace Core.Damage
     [Serializable]
     public struct DamageTag : IEquatable<DamageTag>
     {
+        public static readonly DamageTag GENERIC = new("GENERIC", 0);
+
         public readonly string Key => key;
         public int Index
         {

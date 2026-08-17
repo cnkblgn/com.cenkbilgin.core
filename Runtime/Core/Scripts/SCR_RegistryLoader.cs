@@ -6,6 +6,9 @@ namespace Core
 {
     public static class RegistryLoader
     {
+        public const string FOLDER = "Registry";
+        public const string PATH = "Assets/Resources/" + FOLDER;
+
         private static Registry[] registries;
 
 #if UNITY_EDITOR
@@ -70,7 +73,7 @@ namespace Core
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
         private static void AfterAssembliesLoaded()
         {
-            registries = Resources.LoadAll<Registry>("Registry").OrderBy(x => x.Priority).ToArray();
+            registries = Resources.LoadAll<Registry>(FOLDER).OrderBy(x => x.Priority).ToArray();
 
             for (int i = 0; i < registries.Length; i++)
             {
@@ -80,7 +83,7 @@ namespace Core
 #if UNITY_EDITOR
             if (registries.Length == 0)
             {
-                Debug.LogWarning($"Registry resources not found at path [{"Assets/Resources/Registry"}]. Ignore if its intented");
+                Debug.LogWarning($"Registry resources not found at path [{PATH}]. Ignore if its intented");
             }
 #endif
         }

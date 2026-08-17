@@ -18,7 +18,8 @@ namespace Core.Damage
 
             tagLookup.Clear();
             tags = new DamageTag[_tags.Length + 1];
-            tags[0] = new("GENERIC", 0);
+            tags[0] = DamageTag.GENERIC;
+            tagLookup[DamageTag.GENERIC.Key] = 0;
 
             for (int i = 0; i < _tags.Length; i++)
             {

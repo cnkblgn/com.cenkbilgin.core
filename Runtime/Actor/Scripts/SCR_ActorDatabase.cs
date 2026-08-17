@@ -30,25 +30,9 @@ namespace Core.Actors
             idLookup.Clear();
             tagLookup.Clear();
             tags = new ActorTag[_tags.Length + 1];
+            tags[0] = ActorTag.GENERIC;
+            tagLookup[ActorTag.GENERIC.Key] = 0;
             groups = new ActorGroup[ids.Length];
-
-            tagLookup["GENERIC"] = 0;
-            tags[0] = new("GENERIC", 0);
-
-            for (int i = 0; i < ids.Length; i++)
-            {
-                string key = ids[i];
-                int index = i;
-
-                if (string.IsNullOrEmpty(key))
-                {
-                    Debug.LogError("Actor database id key is invalid!?");
-                    continue;
-                }
-
-                idLookup[key] = index;
-                groups[i] = new(new(key, index));
-            }
 
             for (int i = 0; i < _tags.Length; i++)
             {
@@ -63,6 +47,21 @@ namespace Core.Actors
 
                 tagLookup[key] = index;
                 tags[index] = new(key, index);
+            }
+
+            for (int i = 0; i < ids.Length; i++)
+            {
+                string key = ids[i];
+                int index = i;
+
+                if (string.IsNullOrEmpty(key))
+                {
+                    Debug.LogError("Actor database id key is invalid!?");
+                    continue;
+                }
+
+                idLookup[key] = index;
+                groups[i] = new(new(key, index));
             }
 
             Debug.Log($"Actor database build successfull!");

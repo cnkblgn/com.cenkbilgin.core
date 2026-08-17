@@ -6,7 +6,7 @@ namespace Core
     {
         public abstract int Priority { get; }
 
-        [Info("Registry load order")]
+        [Info("Registry load order.\n" + "Path: " + RegistryLoader.PATH)]
         [SerializeField, ReadOnly] private int priority;
 
 #if UNITY_EDITOR
