@@ -46,20 +46,7 @@ namespace Core.Trait
 
         public readonly TraitDefinition GetDefinition() => TraitDatabase.GetDefinition(this);
         public readonly TraitInstance CreateInstance() => TraitDatabase.CreateInstance(this);
-        public readonly bool IsCompatibleWith(TraitID id)
-        {
-            TraitDefinition definition = GetDefinition();
-
-            for (int i = 0; i < definition.IncompatibleIDs.Length; i++)
-            {
-                if (definition.IncompatibleIDs[i] == id)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
+        public readonly bool IsCompatibleWith(TraitID id) => !IsIncompatibleWith(id);
         public readonly bool IsIncompatibleWith(TraitID id)
         {
             TraitDefinition definition = GetDefinition();
