@@ -633,10 +633,10 @@ namespace Core
         public readonly static Color COLOR_BLACK = Color.black;
         public readonly static Color COLOR_WHITE = Color.white;
         public readonly static Color COLOR_GRAY = Color.gray;
-        public readonly static Color COLOR_YELLOW = Color.yellow;
-        public readonly static Color COLOR_BLUE = Color.blue;
-        public readonly static Color COLOR_RED = Color.red;
-        public readonly static Color COLOR_GREEN = Color.green;
+        public readonly static Color COLOR_YELLOW = new(1f, 0.8465738f, 0.5686275f);
+        public readonly static Color COLOR_BLUE = new(0.4666667F, 0.627451f, 1f);
+        public readonly static Color COLOR_RED = new(0.909f, 0.309f, 0.309f);
+        public readonly static Color COLOR_GREEN = new(0.313f, 0.784f, 0.470f);
 
         public static Color32 Randomize(this Color32 color, float threshold = 0f)
         {
