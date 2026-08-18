@@ -5,6 +5,8 @@ using UnityEngine;
 
 namespace Core.Trait
 {
+    using static CoreUtility;
+
     [Serializable]
     public struct TraitID : IEquatable<TraitID>
     {
@@ -72,15 +74,16 @@ namespace Core.Trait
 
             return false;
         }
-        public readonly void GetIncompatibleDesc(StringBuilder sb)
+        public readonly bool TryGetIncompatibleDesc(StringBuilder sb)
         {
             if (sb == null)
             {
-                Debug.LogError("Get compatible races failed! string builder is null!?");
-                return;
+                Debug.LogError("Get incompatible races desc failed! string builder is null!?");
+                return false;
             }
 
             IReadOnlyList<TraitDefinition> database = TraitDatabase.GetDefinitions();
+            bool found = false;
 
             foreach (TraitDefinition trait in database)
             {
@@ -91,7 +94,35 @@ namespace Core.Trait
 
                 sb.Append(" -> ".ToRed());
                 sb.AppendLine(trait.NameID.Get().ToRed());
+                found = true;
             }
+
+            return found;
+        }
+        public readonly bool TryGetCompatibleDesc(StringBuilder sb)
+        {
+            if (sb == null)
+            {
+                Debug.LogError("Get compatible races desc failed! string builder is null!?");
+                return false;
+            }
+
+            IReadOnlyList<TraitDefinition> database = TraitDatabase.GetDefinitions();
+            bool found = false;
+
+            foreach (TraitDefinition trait in database)
+            {
+                if (!IsCompatibleWith(trait.ID))
+                {
+                    continue;
+                }
+
+                sb.Append(" -> ".ToGreen());
+                sb.AppendLine(trait.NameID.Get().ToGreen());
+                found = true;
+            }
+
+            return found;
         }
     }
 }
