@@ -48,7 +48,7 @@ namespace Core.Faction
             generator.Using("System");
             generator.Line();
 
-            using (generator.Namespace("Game"))
+            using (generator.Namespace("Core.Faction"))
             using (generator.Class("public static class FactionIDs"))
             {
                 foreach (FactionDefinition definition in FactionDatabase.GetDefinitions())
