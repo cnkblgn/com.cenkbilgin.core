@@ -141,6 +141,11 @@ namespace Core.Item
 
             if (entity.TryGetComponent(out Rigidbody body))
             {
+                if (body.isKinematic)
+                {
+                    body.isKinematic = false;
+                }
+
                 body.AddForce((dropForce * dropOrigin.forward) + (UnityEngine.Random.onUnitSphere * 0.25f), ForceMode.Impulse);
                 body.AddTorque((dropForce * dropOrigin.forward) + (UnityEngine.Random.onUnitSphere * 0.25f), ForceMode.Impulse);
             }
