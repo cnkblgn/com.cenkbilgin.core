@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Core.Faction
 {
-    [CreateAssetMenu(fileName = "SCO_FactionRegistry", menuName = "Resources/Game/Faction Registry", order = -10)]
+    [CreateAssetMenu(fileName = "SCO_FactionRegistry", menuName = "Resources/Core/Faction Registry", order = -10)]
     public sealed class RegistryFaction : Registry
     {
         public override int Priority => 0;
