@@ -5,32 +5,36 @@ using UnityEngine.UI;
 
 namespace Core.UI
 {
-    using static CoreUtility;
-
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Canvas))]
     internal sealed class UICursorController : MonoBehaviour
     {
         [Header("_")]
-        [SerializeField, Required] private RectTransform cursorTransform = null;
-        [SerializeField, Required] private Image cursorImage = null;
+        [SerializeField, Required] private RectTransform cursorTransform;
+        [SerializeField, Required] private Image cursorImage;
 
         [Header("_")]
-        [SerializeField] private UICursorData[] cursors = null;
+        [SerializeField] private UICursorData[] cursors;
 
         private readonly Dictionary<string, UICursorData> table = new();
-        private Canvas thisCanvas = null;
+        private Canvas canvas;
+        private bool hasFocus;
 
         private void Awake()
         {
-            thisCanvas = GetComponent<Canvas>();
-            thisCanvas.Hide();
+            hasFocus = Application.isFocused;
+
+            canvas = GetComponent<Canvas>();
+            canvas.Hide();
 
             foreach (UICursorData cursor in cursors)
             {
                 table[cursor.ID] = cursor;
             }
         }
+        private void OnApplicationFocus(bool focus) => hasFocus = focus;
+
+        private static bool IsValid(Vector2 value) => float.IsFinite(value.x) && float.IsFinite(value.y);
 
         private bool TryGetCursor(string id, out UICursorData cursor)
         {
@@ -47,14 +51,30 @@ namespace Core.UI
             Debug.LogWarning($"[{id}] is not defined");
             return false;
         }
+
         public void MoveCursor(Vector2 screenPosition)
         {
+            if (!hasFocus)
+            {
+                return;
+            }
+
             if (Cursor.lockState != CursorLockMode.Confined)
             {
                 return;
             }
 
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(thisCanvas.transform as RectTransform, screenPosition, null, out Vector2 position);
+            if (!IsValid(screenPosition))
+            {
+                return;
+            }
+
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(canvas.transform as RectTransform, screenPosition, null, out Vector2 position);
+
+            if (!IsValid(position))
+            {
+                return;
+            }
 
             cursorTransform.localPosition = position;
         }
@@ -67,14 +87,14 @@ namespace Core.UI
         }
         public void ShowCursor()
         {
-            thisCanvas.Show();
+            canvas.Show();
 
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Confined;
         }
         public void HideCursor()
         {
-            thisCanvas.Hide();
+            canvas.Hide();
 
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;

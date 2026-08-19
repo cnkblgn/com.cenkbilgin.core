@@ -8,7 +8,9 @@ namespace Core.Effect
     [Serializable]
     public struct EffectEntry
     {
+#if UNITY_EDITOR
         [HideInInspector] public string Name;
+#endif
 
         public EffectID ID;
         public EffectTag Tag;
@@ -25,7 +27,10 @@ namespace Core.Effect
             IconID = iconID;
             Interval = interval;
             Actions = actions;
+
+#if UNITY_EDITOR
             Name = NameID.Key;
+#endif
         }
     }
 }

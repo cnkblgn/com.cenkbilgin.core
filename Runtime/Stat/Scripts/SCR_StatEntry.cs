@@ -7,7 +7,9 @@ namespace Core.Stat
     [Serializable]
     public struct StatEntry
     {
+#if UNITY_EDITOR
         [HideInInspector] public string Name;
+#endif
 
         public StatID ID;
         public StatTag Tag;
@@ -25,7 +27,9 @@ namespace Core.Stat
             Min = min;
             Max = max;
 
+#if UNITY_EDITOR
             Name = NameID.Key;
+#endif
         }
     }
 }

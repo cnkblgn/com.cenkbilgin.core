@@ -8,9 +8,10 @@ namespace Core.Trait
     [Serializable]
     public struct TraitEntry
     {
+#if UNITY_EDITOR
         [HideInInspector] public string Name;
+#endif
 
-        [Info("Please generate id if its not visible")] 
         public TraitID ID;
         public TraitID[] IncompatibleIDs;
         public IconID IconID;
@@ -20,9 +21,8 @@ namespace Core.Trait
         [Min(0)] public int Cost;
         [SerializeReference, Reference] public TraitAction[] Actions;
 
-        public TraitEntry(string name, TraitID id, TraitID[] incompatibleIDs, IconID iconID, LocalizedID nameID, LocalizedID descID, int cost, TraitAction[] actions)
+        public TraitEntry(TraitID id, TraitID[] incompatibleIDs, IconID iconID, LocalizedID nameID, LocalizedID descID, int cost, TraitAction[] actions)
         {
-            Name = name;
             ID = id;
             IncompatibleIDs = incompatibleIDs;
             IconID = iconID;
@@ -30,6 +30,10 @@ namespace Core.Trait
             DescID = descID;
             Cost = cost;
             Actions = actions;
+
+#if UNITY_EDITOR
+            Name = id.Key;
+#endif
         }
     }
 }
