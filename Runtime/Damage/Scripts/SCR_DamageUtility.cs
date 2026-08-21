@@ -19,7 +19,7 @@ namespace Core.Damage
         {
             if (collider == null)
             {
-                Debug.LogWarning("DamageUtility.TryDamageDirect() collider == null");
+                Debug.LogWarning("damage area failed! collider == null");
                 return false;
             }
 
@@ -49,13 +49,13 @@ namespace Core.Damage
         {
             if (colliders == null)
             {
-                Debug.LogError("damage colliders == null");
+                Debug.LogError("damage area failed! damage colliders == null");
                 return false;
             }
 
             if (colliders.Length <= 0)
             {
-                Debug.LogWarning("damagecolliders.Length <= 0");
+                Debug.LogWarning("damage area failed! damagecolliders.Length <= 0");
                 return false;
             }
 
@@ -104,13 +104,13 @@ namespace Core.Damage
         {
             if (results == null)
             {
-                Debug.LogError("damage results == null");
+                Debug.LogError("damage area failed! damage results == null");
                 return false;
             }
 
             if (results.Length <= 0)
             {
-                Debug.LogWarning("damage results.Length <= 0");
+                Debug.LogWarning("damage area failed! damage results.Length <= 0");
                 return false;
             }
 
