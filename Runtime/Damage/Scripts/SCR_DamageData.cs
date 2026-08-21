@@ -30,6 +30,7 @@ namespace Core.Damage
             Damage = damage;
             Force = force;
         }
+        public DamageData(Transform owner, Collider collider, Vector3 position, Vector3 normal, Vector3 direction, DamageMode mode, DamageTag tag, uint context, float radius, float damage, float force) : this(owner, collider, position, normal, direction, mode, tag.Mask, context, radius, damage, force) { }
         public DamageData(Transform owner, Collider collider, Vector3 position, Vector3 normal, Vector3 direction, DamageMode mode, DamageTag[] tags, uint context, float radius, float damage, float force) : this(owner, collider, position, normal, direction, mode, tags.CreateMask(), context, radius, damage, force) { }
     }
 }
