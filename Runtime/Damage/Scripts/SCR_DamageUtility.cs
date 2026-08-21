@@ -55,7 +55,6 @@ namespace Core.Damage
 
             if (colliders.Length <= 0)
             {
-                Debug.LogWarning("damage area failed! damagecolliders.Length <= 0");
                 return false;
             }
 
@@ -110,7 +109,6 @@ namespace Core.Damage
 
             if (results.Length <= 0)
             {
-                Debug.LogWarning("damage area failed! damage results.Length <= 0");
                 return false;
             }
 
