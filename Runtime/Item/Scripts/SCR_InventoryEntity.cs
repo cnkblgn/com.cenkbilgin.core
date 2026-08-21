@@ -146,6 +146,8 @@ namespace Core.Item
                     body.isKinematic = false;
                 }
 
+                body.useGravity = true;
+
                 body.AddForce((dropForce * dropOrigin.forward) + (UnityEngine.Random.onUnitSphere * 0.25f), ForceMode.Impulse);
                 body.AddTorque((dropForce * dropOrigin.forward) + (UnityEngine.Random.onUnitSphere * 0.25f), ForceMode.Impulse);
             }
