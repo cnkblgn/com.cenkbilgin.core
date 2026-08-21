@@ -4,8 +4,6 @@ using UnityEngine;
 
 namespace Core.UI
 {
-    using static CoreUtility;
-
     [DisallowMultipleComponent]
     internal sealed class UIViewportController : MonoBehaviour
     {
@@ -146,7 +144,9 @@ namespace Core.UI
 
             if (ids.Contains(prefab.ID))
             {
-                Debug.LogWarning($"viewport [{prefab.ID}] is already added to manager!");
+#if UNITY_EDITOR
+                Debug.LogWarning($"viewport [{prefab.ID}] is already added to manager! ignore if its intented");
+#endif
                 return;
             }
 
@@ -161,7 +161,9 @@ namespace Core.UI
         {
             if (!ids.Contains(id))
             {
-                Debug.LogError("you are trying to remove stage object that does not exists!");
+#if UNITY_EDITOR
+                Debug.LogWarning("you are trying to remove stage object that does not exists! ignore if its intented");
+#endif
                 return;
             }
 
