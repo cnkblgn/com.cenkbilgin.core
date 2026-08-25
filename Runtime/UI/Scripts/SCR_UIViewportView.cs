@@ -13,7 +13,7 @@ namespace Core.UI
         internal bool IsRendering => isRendering;
         internal bool CanRender => !renderOnce || !hasRendered;
         internal float Size => canvasSize;
-        internal float FPS => Mathf.Lerp(maxFPS, minFPS, distanceRatio);
+        internal float FPS => isFocused ? maxFPS : Mathf.Lerp(maxFPS, minFPS, distanceRatio);
         protected Camera Camera => data[0].Camera;
         internal Canvas Canvas => data[0].Canvas;
         internal RectTransform Transform => data[0].Transform;
@@ -48,6 +48,7 @@ namespace Core.UI
         private bool isInitialized = false;
         private bool isRendering = false;
         private bool isActive = false;
+        private bool isFocused = false;
         private bool hasRendered = false;
 
         private void OnEnable()
@@ -79,8 +80,10 @@ namespace Core.UI
         internal void Tick(in UIInputContext ctx, Vector2 screenPosition, ViewportMesh mesh)
         {
             if (canvasInput)
-            {                
-                if (mesh == this.mesh)
+            {
+                isFocused = mesh == this.mesh;
+
+                if (isFocused)
                 {
                     UpdateInput(screenPosition, ctx.PointerScroll * 32f, ctx.KeyDown, ctx.KeyUp);
                 }
