@@ -11,7 +11,10 @@ namespace Core.UI
         internal string ID => id;
         internal bool IsActive => isActive;
         internal bool IsRendering => isRendering;
-        internal bool CanRender => !renderOnce || !hasRendered;
+        internal bool CanRender => !renderOnce || !hasRenderedOnce;
+        internal bool CanReceiveInput => receiveInput;
+        internal bool HasTickedOnce => hasTickedOnce;
+        internal bool HasRenderedOnce => hasRenderedOnce;
         internal float Size => canvasSize;
         internal float FPS => isFocused ? maxFPS : Mathf.Lerp(maxFPS, minFPS, distanceRatio);
         protected Camera Camera => data[0].Camera;
@@ -24,15 +27,13 @@ namespace Core.UI
         [Header("_")]
         [SerializeField, Required] private string id = string.Empty;
         [SerializeField, Required] private RenderTexture renderTexture = null;
+        [SerializeField, Min(1)] private float canvasSize = 165;
 
         [Header("_")]
+        [SerializeField] private bool receiveInput = false;
         [SerializeField] private bool renderOnce = false;
         [SerializeField, Range(0, 59)] private float minFPS = 1;
         [SerializeField, Range(0, 59)] private float maxFPS = 59;
-
-        [Header("_")]
-        [SerializeField] private bool canvasInput = false;
-        [SerializeField, Min(1)] private float canvasSize = 165;
 
         private UIViewportCanvas[] data = null;
         private ViewportMesh mesh = null;
@@ -50,7 +51,8 @@ namespace Core.UI
         private bool isRendering = false;
         private bool isActive = false;
         private bool isFocused = false;
-        private bool hasRendered = false;
+        private bool hasRenderedOnce = false;
+        private bool hasTickedOnce = false;
 
         private void OnEnable()
         {
@@ -75,34 +77,49 @@ namespace Core.UI
         protected abstract void OnShow(ViewportMesh mesh);
         /// <summary> Called when interaction exit. </summary>
         protected abstract void OnHide();
-
+        /// <summary> Called when game state changed. </summary>
         protected virtual void OnGameStateChanged(GameState gameState) { }
 
         internal void Tick()
         {
             OnTick();
+            hasTickedOnce = true;
         }
         internal void Render()
         {
             OnRender();
-            hasRendered = true;
+            hasRenderedOnce = true;
         }
 
-        protected void MarkDirty() => hasRendered = false;
-        protected void EnableInput() => canvasInput = true;
-        protected void DisableInput()
+        protected void MarkDirty() => hasRenderedOnce = false;
+        protected void EnableInput()
         {
-            if (!canvasInput)
+            if (receiveInput)
             {
                 return;
             }
 
-            canvasInput = false; 
+            receiveInput = true;
+            ClearInput();
+        }
+        protected void DisableInput()
+        {
+            if (!receiveInput)
+            {
+                return;
+            }
+
+            receiveInput = false; 
             ClearInput();
         }
         internal void UpdateInput(in UIInputContext ctx, Vector2 screenPosition)
         {
-            if (!isActive || !canvasInput)
+            if (!receiveInput)
+            {
+                return;
+            }
+
+            if (!isActive)
             {
                 return;
             }
@@ -262,6 +279,11 @@ namespace Core.UI
         }
         internal void ClearInput()
         {
+            if (!CanReceiveInput)
+            {
+                return;
+            }
+
             if (eventData == null)
             {
                 return;
@@ -383,12 +405,12 @@ namespace Core.UI
                 return;
             }
 
-            if (canvasInput)
+            if (receiveInput)
             {
                 ManagerUI.Instance.ShowCursor();
             }
 
-            hasRendered = false;
+            hasRenderedOnce = false;
             isActive = true;
 
             OnShow(this.mesh = mesh);
@@ -401,7 +423,7 @@ namespace Core.UI
                 return;
             }
 
-            if (canvasInput)
+            if (receiveInput)
             {
                 ManagerUI.Instance.HideCursor();
             }
