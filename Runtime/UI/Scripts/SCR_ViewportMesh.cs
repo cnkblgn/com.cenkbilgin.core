@@ -20,6 +20,7 @@ namespace Core.UI
         [SerializeField] private bool debugVisibility = false;
         [SerializeField] private bool addOnAwake = true;
         [SerializeField] private bool showOnAwake = false;
+        [SerializeField] private bool flipZ = false;
 
         private new MeshRenderer renderer = null;
         private new MeshCollider collider = null;
@@ -60,8 +61,16 @@ namespace Core.UI
         public void ShowViewport() => ManagerUI.Instance.ShowViewport(id, this);
         public void HideViewport() => ManagerUI.Instance.HideViewport(id);
 
-        internal void ShowRenderer() => renderer.enabled = true;
-        internal void HideRenderer() => renderer.enabled = false;
+        internal void ShowRenderer()
+        {
+            renderer.enabled = true;
+            collider.enabled = true;
+        }
+        internal void HideRenderer()
+        {
+            renderer.enabled = false;
+            collider.enabled = false;
+        }
 
         internal bool CheckVisibility(Transform target, float minDistance, out float actualDistance)
         {
@@ -85,9 +94,7 @@ namespace Core.UI
                 return true;
             }
 
-            Transform rendererOrigin = renderer.transform;
-
-            return IsFacingEachOther(rendererOrigin.position, target.position, rendererOrigin.forward, target.forward, 0.1f, debugVisibility);
+            return IsFacingEachOther(transform.position, target.position, flipZ ? -transform.forward : transform.forward, target.forward, 0.1f, debugVisibility);
         }
     }
 }
