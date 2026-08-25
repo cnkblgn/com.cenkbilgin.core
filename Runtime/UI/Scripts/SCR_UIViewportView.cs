@@ -315,7 +315,7 @@ namespace Core.UI
             isFocused = false;
         }
 
-        internal void Initialize(Camera renderCamera, Camera inputCamera)
+        internal void Initialize(Camera renderCamera)
         {
             if (isInitialized)
             {
@@ -333,7 +333,7 @@ namespace Core.UI
             {
                 data[i] = new
                 (
-                    inputCamera, 
+                    renderCamera, 
                     canvases[i], 
                     canvases[i].GetComponent<RectTransform>(), 
                     canvases[i].GetComponent<GraphicRaycaster>()

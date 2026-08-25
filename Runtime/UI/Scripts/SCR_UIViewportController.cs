@@ -9,7 +9,6 @@ namespace Core.UI
     {
         [Header("_")]
         [SerializeField, Required] private Camera rendererCamera = null;
-        [SerializeField, Required] private Camera inputCamera = null;
         [SerializeField, Min(0)] private float cullingDistance = 16;
         [SerializeField] private LayerMask viewportDetectionMask = 0;
 
@@ -30,13 +29,7 @@ namespace Core.UI
                 throw new NullReferenceException($"Viewport renderer camera not found! {nameof(rendererCamera)}");
             }
 
-            if (inputCamera == null)
-            {
-                throw new NullReferenceException($"Viewport renderer camera not found! {nameof(inputCamera)}");
-            }
-
             rendererCamera.enabled = false;
-            inputCamera.enabled = false;
         }
         private void OnEnable() => ManagerGame.OnBeforeSceneChanged += OnBeforeSceneChanged;
         private void OnDisable() => ManagerGame.OnBeforeSceneChanged -= OnBeforeSceneChanged;
@@ -301,7 +294,7 @@ namespace Core.UI
             }
 
             UIViewportView view = GameObject.Instantiate(prefab, container);
-            view.Initialize(rendererCamera, inputCamera);
+            view.Initialize(rendererCamera);
 
             rendererCamera.enabled = false;
 
