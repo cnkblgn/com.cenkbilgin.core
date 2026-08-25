@@ -62,12 +62,12 @@ namespace Core.UI
 
         internal void ShowRenderer()
         {
-            collider.enabled = true;
+            //collider.enabled = true;
             renderer.enabled = true;
         }
         internal void HideRenderer()
         {
-            collider.enabled = false;
+            //collider.enabled = false;
             renderer.enabled = false;
         }
 
