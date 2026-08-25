@@ -105,7 +105,7 @@ namespace Core.UI
                         continue;
                     }
 
-                    if (view.Mesh == targetMesh)
+                    if (view.Mesh != targetMesh)
                     {
                         continue;
                     }
