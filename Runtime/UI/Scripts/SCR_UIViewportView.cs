@@ -12,6 +12,7 @@ namespace Core.UI
         internal bool IsActive => isActive;
         internal bool IsRendering => isRendering;
         internal float Size => canvasSize;
+        internal float FPS => rendererFPS;
         protected Camera Camera => data[0].Camera;
         internal Canvas Canvas => data[0].Canvas;
         internal RectTransform Transform => data[0].Transform;
@@ -41,8 +42,6 @@ namespace Core.UI
         private bool isInitialized = false;
         private bool isRendering = false;
         private bool isActive = false;
-        private float renderTime = 0;
-        private float renderInterval = 1;
 
         private void OnEnable()
         {
@@ -86,17 +85,7 @@ namespace Core.UI
 
             OnTick();
         }
-        internal void Render()
-        {
-            renderTime += Time.deltaTime;
-
-            if (renderTime > renderInterval)
-            {
-                renderTime = 0;
-
-                OnRender();
-            }
-        }
+        internal void Render() => OnRender();
 
         protected void EnableInput() => canvasInput = true;
         protected void DisableInput() 
@@ -297,9 +286,6 @@ namespace Core.UI
             isRendering = false;
             isActive = false;
 
-            renderTime = 0f;
-            renderInterval = 1f / rendererFPS;
-
             Canvas[] canvases = GetComponentsInChildren<Canvas>();
             data = new UIViewportCanvas[canvases.Length];
 
@@ -346,9 +332,13 @@ namespace Core.UI
             }
 
             Canvas.Show();
+
             isRendering = true;
 
-            if (mesh != null) mesh.ShowRenderer();
+            if (mesh != null)
+            {
+                mesh.ShowRenderer();
+            }
         }
         internal void HideRenderer()
         {
@@ -363,9 +353,13 @@ namespace Core.UI
             }
 
             Canvas.Hide();
+
             isRendering = false;
 
-            if (mesh != null) mesh.HideRenderer();
+            if (mesh != null)
+            {
+                mesh.HideRenderer();
+            }
         }
 
         internal void ShowViewport(ViewportMesh mesh)

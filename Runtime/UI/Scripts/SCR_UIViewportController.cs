@@ -18,6 +18,8 @@ namespace Core.UI
         private readonly List<string> ids = new(4);
         private readonly List<UIViewportView> viewports = new(4);
         private readonly RaycastHit[] hits = new RaycastHit[5];
+        private float[] renderTimers = Array.Empty<float>();
+        private int renderIndex = 0;
 
         private void Awake()
         {
@@ -45,13 +47,17 @@ namespace Core.UI
                 return;
             }
 
+            float deltaTime = Time.deltaTime;
+
             for (int i = 0; i < viewports.Count; i++)
             {
                 UpdateTick(viewports[i], in ctx);
-                UpdateRender(viewports[i]);
+                UpdateRenderTimer(i, deltaTime);
             }
 
             CullRender(ctx.Camera);
+
+            NextRender();
         }
 
         private void UpdateTick(UIViewportView view, in UIInputContext ctx)
@@ -80,49 +86,132 @@ namespace Core.UI
 
             view.Tick(in ctx, position, mesh);
         }
-        private void UpdateRender(UIViewportView view)
+        private void UpdateRenderTimer(int index, float deltaTime)
         {
-            if (!view.IsActive)
+            if (index < 0 || index >= renderTimers.Length)
             {
                 return;
             }
 
-            PreRender(view);
-            StartRender(view);
-            PostRender(view);
+            renderTimers[index] += deltaTime;
         }
+        private void RebuildRenderTimers(int removedIndex)
+        {
+            float[] newTimers = new float[viewports.Count];
+
+            for (int i = 0; i < viewports.Count; i++)
+            {
+                int oldIndex = i;
+
+                if (oldIndex >= removedIndex)
+                {
+                    oldIndex++;
+                }
+
+                if (oldIndex >= renderTimers.Length)
+                {
+                    continue;
+                }
+
+                newTimers[i] = renderTimers[oldIndex];
+            }
+
+            int newIndex = renderIndex;
+
+            if (renderIndex > removedIndex)
+            {
+                newIndex--;
+            }
+
+            if (viewports.Count > 0)
+            {
+                newIndex = Mathf.Clamp(newIndex, 0, viewports.Count - 1);
+            }
+            else
+            {
+                newIndex = 0;
+            }
+
+            renderTimers = newTimers;
+            renderIndex = newIndex;
+        }
+        private void NextRender()
+        {
+            int count = viewports.Count;
+
+            if (count == 0)
+            {
+                return;
+            }
+
+            int safety = count;
+
+            while (safety-- > 0)
+            {
+                int index = renderIndex;
+
+                renderIndex = (renderIndex + 1) % count;
+
+                UIViewportView view = viewports[index];
+
+                if (!view.IsActive)
+                {
+                    continue;
+                }
+
+                if (!view.IsRendering)
+                {
+                    continue;
+                }
+
+                float interval = 1f / Mathf.Max(1f, view.FPS);
+
+                if (renderTimers[index] < interval)
+                {
+                    continue;
+                }
+
+                renderTimers[index] -= interval;
+
+                StartRender(view);
+                break;
+            }
+        }
+
         private void PreRender(UIViewportView view)
         {
-            foreach (UIViewportView i in viewports)
+            for (int i = 0; i < viewports.Count; i++)
             {
-                if (i != view)
+                UIViewportView current = viewports[i];
+
+                if (current != view)
                 {
-                    i.HideRenderer();
+                    current.HideRenderer();
                 }
             }
         }
         private void StartRender(UIViewportView view)
         {
-            foreach (UIViewportView i in viewports)
-            {
-                if (i == view)
-                {
-                    rendererCamera.targetTexture = view.Texture;
-                    rendererCamera.orthographicSize = view.Size;
-                    i.Render();
-                    break;
-                }
-            }
+            PreRender(view);
+
+            rendererCamera.targetTexture = view.Texture;
+            rendererCamera.orthographicSize = view.Size;
+
+            view.Render();
 
             rendererCamera.Render();
+
+            PostRender(view);
         }
         private void PostRender(UIViewportView view)
         {
-            foreach (UIViewportView i in viewports)
+            for (int i = 0; i < viewports.Count; i++)
             {
-                if (i != view)
+                UIViewportView current = viewports[i];
+
+                if (current != view)
                 {
-                    i.ShowRenderer();
+                    current.ShowRenderer();
                 }
             }
         }
@@ -145,7 +234,7 @@ namespace Core.UI
             if (ids.Contains(prefab.ID))
             {
 #if UNITY_EDITOR
-                Debug.LogWarning($"viewport [{prefab.ID}] is already added to manager! ignore if its intented");
+                Debug.LogWarning($"Viewport [{prefab.ID}] is already added to manager! ignore if its intented");
 #endif
                 return;
             }
@@ -154,8 +243,12 @@ namespace Core.UI
             view.Initialize(rendererCamera);
 
             rendererCamera.enabled = false;
+
             ids.Add(view.ID);
             viewports.Add(view);
+
+            Array.Resize(ref renderTimers, viewports.Count);
+            renderTimers[^1] = 0f;
         }
         public void Remove(string id)
         {
@@ -177,6 +270,7 @@ namespace Core.UI
                     viewports.Remove(view);
                     Destroy(view.gameObject);
 
+                    RebuildRenderTimers(i);
                     break;
                 }
             }
@@ -191,6 +285,9 @@ namespace Core.UI
 
             ids.Clear();
             viewports.Clear();
+
+            renderTimers = Array.Empty<float>();
+            renderIndex = 0;
         }
 
         public void Show(string id, ViewportMesh mesh)
@@ -209,12 +306,14 @@ namespace Core.UI
 
             for (int i = 0; i < viewports.Count; i++)
             {
-                if (viewports[i].ID == id)
+                if (viewports[i].ID != id)
                 {
-                    viewports[i].ShowViewport(mesh);
-
-                    UpdateRender(viewports[i]);
+                    continue;
                 }
+
+                viewports[i].ShowViewport(mesh);
+                renderTimers[i] = 1f / Mathf.Max(1f, viewports[i].FPS);
+                break;
             }
         }
         public void Hide(string id)
@@ -227,10 +326,13 @@ namespace Core.UI
 
             for (int i = 0; i < viewports.Count; i++)
             {
-                if (viewports[i].ID == id)
+                if (viewports[i].ID != id)
                 {
-                    viewports[i].HideViewport();
+                    continue;
                 }
+
+                viewports[i].HideViewport();
+                break;
             }
         }
     }
