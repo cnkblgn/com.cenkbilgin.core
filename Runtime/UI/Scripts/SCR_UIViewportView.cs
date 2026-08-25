@@ -315,7 +315,7 @@ namespace Core.UI
             isFocused = false;
         }
 
-        internal void Initialize(Camera camera)
+        internal void Initialize(Camera renderCamera, Camera inputCamera)
         {
             if (isInitialized)
             {
@@ -333,7 +333,7 @@ namespace Core.UI
             {
                 data[i] = new
                 (
-                    camera, 
+                    inputCamera, 
                     canvases[i], 
                     canvases[i].GetComponent<RectTransform>(), 
                     canvases[i].GetComponent<GraphicRaycaster>()
@@ -342,7 +342,8 @@ namespace Core.UI
 
             Canvas.Hide();
 
-            camera.targetTexture = renderTexture;
+            renderCamera.targetTexture = renderTexture;
+
             eventSystem = EventSystem.current;
             eventData = new(eventSystem);
 
