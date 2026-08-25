@@ -17,6 +17,7 @@ namespace Core.UI
         [SerializeField, Required] private GameObject connection = null;
 
         [Header("_")]
+        [SerializeField] private bool debugVisibility = false;
         [SerializeField] private bool addOnAwake = true;
         [SerializeField] private bool showOnAwake = false;
 
@@ -92,7 +93,7 @@ namespace Core.UI
 
             Transform rendererOrigin = renderer.transform;
 
-            return IsFacingEachOther(rendererOrigin.position, target.position, rendererOrigin.forward, target.forward, 0.1f);
+            return IsFacingEachOther(rendererOrigin.position, target.position, rendererOrigin.forward, target.forward, 0.1f, debugVisibility);
         }
     }
 }

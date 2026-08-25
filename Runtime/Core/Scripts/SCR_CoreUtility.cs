@@ -166,20 +166,41 @@ namespace Core
             return dot >= threshold;
         }
         public static bool IsFacingDot(Transform observer, Transform target, float threshold = 0.1f) => IsFacingDot(observer.position, observer.forward, target.position, threshold);
-        public static bool IsFacingDot(Vector3 observerPos, Vector3 observerFwd, Vector3 targetPos, float threshold = 0.1f)
+        public static bool IsFacingDot(Vector3 observerPos, Vector3 observerFwd, Vector3 targetPos, float threshold = 0.1f, bool debug = false)
         {
             Vector3 direction = (observerPos - targetPos).normalized;
+            float dot = Vector3.Dot(observerFwd, direction);
 
-            return Vector3.Dot(observerFwd, direction) >= threshold;
+#if UNITY_EDITOR
+            if (debug)
+            {
+                Debug.Log("dot: " + dot);
+            }
+#endif
+
+            return dot >= threshold;
         }
+        /// <summary> Based on forward +z axis </summary>
         public static bool IsFacingEachOther(Transform a, Transform b, float threshold = 0.1f) => IsFacingEachOther(a.position, b.position, a.forward, b.forward, threshold);
-        public static bool IsFacingEachOther(Vector3 aPos, Vector3 bPos, Vector3 aFwd, Vector3 bFwd, float threshold = 0.1f)
+        /// <summary> Based on forward +z axis </summary>
+        public static bool IsFacingEachOther(Vector3 aPos, Vector3 bPos, Vector3 aFwd, Vector3 bFwd, float threshold = 0.1f, bool debug = false)
         {
             Vector3 aToB = (bPos - aPos).normalized;
             Vector3 bToA = -aToB;
 
-            return -Vector3.Dot(aFwd, aToB) >= threshold && Vector3.Dot(bFwd, bToA) >= threshold;
+            float aDot = Vector3.Dot(aFwd, aToB);
+            float bDot = Vector3.Dot(bFwd, bToA);
+
+#if UNITY_EDITOR
+            if (debug)
+            {
+                Debug.Log("aDot: " + aDot + " << bDot: " + bDot);
+            }
+#endif
+
+            return aDot >= threshold && bDot >= threshold;
         }
+
         public static float SafeInverseLerp(float inner, float outer, float dist)
         {
             if (outer <= inner)

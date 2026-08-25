@@ -5,14 +5,12 @@ using UnityEngine.UI;
 
 namespace Core.UI
 {
-    using static CoreUtility;
-
     [DisallowMultipleComponent]
     public abstract class UIViewportView : MonoBehaviour
     {
         internal string ID => id;
-        internal bool IsActive => isRendering;
-        internal bool IsRendering => isActive;
+        internal bool IsActive => isActive;
+        internal bool IsRendering => isRendering;
         internal float Size => canvasSize;
         protected Camera Camera => data[0].Camera;
         internal Canvas Canvas => data[0].Canvas;
