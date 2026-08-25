@@ -10,11 +10,15 @@ namespace Core.UI
         public bool IsFocused { get; private set; } = false;
 
         [Header("_")]
+        [Info("Optional")]
+        [SerializeField] private UITooltipController targetTooltip = null;
+
+        [Header("_")]
         [SerializeField] private bool disableEventPosition = true;
         [SerializeField, Range(0, 4)] private int cornerIndex = 0;
 
         [Header("_")]
-        [SerializeField, TextArea()] private string baseText = STRING_EMPTY;
+        [SerializeField] private string baseText = STRING_EMPTY;
 
         private RectTransform thisTransform = null;
         private readonly Vector3[] cornerOrigins = new Vector3[4];
@@ -101,7 +105,15 @@ namespace Core.UI
                 return;
             }
 
-            ManagerUI.Instance.ShowTooltip(baseText + runtimeText, position ?? GetPosition());
+            if (targetTooltip != null)
+            {
+                targetTooltip.Show(baseText + runtimeText, position ?? GetPosition());
+            }
+            else
+            {
+                ManagerUI.Instance.ShowTooltip(baseText + runtimeText, position ?? GetPosition());
+            }
+            
             isOpened = true;
         }
         public void Hide()
@@ -111,7 +123,15 @@ namespace Core.UI
                 return;
             }
 
-            ManagerUI.Instance.HideTooltip();
+            if (targetTooltip != null)
+            {
+                targetTooltip.Hide();
+            }
+            else
+            {
+                ManagerUI.Instance.HideTooltip();
+            }
+            
             isOpened = false;
         }
     }
