@@ -60,16 +60,8 @@ namespace Core.UI
         public void ShowViewport() => ManagerUI.Instance.ShowViewport(id, this);
         public void HideViewport() => ManagerUI.Instance.HideViewport(id);
 
-        internal void ShowRenderer()
-        {
-            //collider.enabled = true;
-            renderer.enabled = true;
-        }
-        internal void HideRenderer()
-        {
-            //collider.enabled = false;
-            renderer.enabled = false;
-        }
+        internal void ShowRenderer() => renderer.enabled = true;
+        internal void HideRenderer() => renderer.enabled = false;
 
         internal bool CheckVisibility(Transform target, float minDistance, out float actualDistance)
         {

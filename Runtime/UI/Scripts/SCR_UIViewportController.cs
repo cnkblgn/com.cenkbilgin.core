@@ -17,6 +17,7 @@ namespace Core.UI
 
         private readonly List<string> ids = new(4);
         private readonly List<UIViewportView> viewports = new(4);
+        private UIViewportView focusedViewport = null;
         private readonly RaycastHit[] hits = new RaycastHit[5];
         private float[] renderTimers = Array.Empty<float>();
         private int renderIndex = 0;
@@ -49,44 +50,70 @@ namespace Core.UI
 
             float deltaTime = Time.deltaTime;
 
+            UpdateInput(in ctx);
+
             for (int i = 0; i < viewports.Count; i++)
             {
-                UpdateTick(viewports[i], in ctx);
-                UpdateRenderTimer(i, deltaTime);
+                if (viewports[i].IsActive)
+                {
+                    viewports[i].Tick();
+                }
+
+                UpdateTimer(i, deltaTime);
             }
 
             CullRender(ctx.Camera);
-
             NextRender();
         }
 
-        private void UpdateTick(UIViewportView view, in UIInputContext ctx)
+        private void UpdateInput(in UIInputContext ctx)
         {
-            if (!view.IsActive)
-            {
-                return;
-            }
-
             Ray ray = ctx.Camera.ScreenPointToRay(ctx.PointerPosition);
-            Vector2 position = Vector2.zero;
-            ViewportMesh mesh = null;
 
             int count = Physics.RaycastNonAlloc(ray, hits, 5.0f, viewportDetectionMask, QueryTriggerInteraction.Ignore);
 
+            ViewportMesh mesh = null;
+            Vector2 position = Vector2.zero;
+
             for (int i = 0; i < count; i++)
             {
-                RaycastHit hit = hits[i];
-
-                if (hit.collider.TryGetComponent(out mesh))
+                if (hits[i].collider.TryGetComponent(out mesh))
                 {
-                    position = hit.textureCoord;
+                    position = hits[i].textureCoord;
                     break;
                 }
             }
 
-            view.Tick(in ctx, position, mesh);
+            UIViewportView target = null;
+
+            if (mesh != null)
+            {
+                for (int i = 0; i < viewports.Count; i++)
+                {
+                    if (viewports[i].IsActive && viewports[i].Mesh == mesh)
+                    {
+                        target = viewports[i];
+                        break;
+                    }
+                }
+            }
+
+            if (target != focusedViewport)
+            {
+                if (focusedViewport != null)
+                {
+                    focusedViewport.ClearInput();
+                }
+
+                focusedViewport = target;
+            }
+
+            if (focusedViewport != null)
+            {
+                focusedViewport.UpdateInput(in ctx, position);
+            }
         }
-        private void UpdateRenderTimer(int index, float deltaTime)
+        private void UpdateTimer(int index, float deltaTime)
         {
             if (index < 0 || index >= renderTimers.Length)
             {
@@ -95,7 +122,7 @@ namespace Core.UI
 
             renderTimers[index] += deltaTime;
         }
-        private void RebuildRenderTimers(int removedIndex)
+        private void RebuildTimers(int removedIndex)
         {
             float[] newTimers = new float[viewports.Count];
 
@@ -135,6 +162,7 @@ namespace Core.UI
             renderTimers = newTimers;
             renderIndex = newIndex;
         }
+
         private void NextRender()
         {
             int count = viewports.Count;
@@ -182,7 +210,6 @@ namespace Core.UI
                 break;
             }
         }
-
         private void PreRender(UIViewportView view)
         {
             for (int i = 0; i < viewports.Count; i++)
@@ -275,7 +302,7 @@ namespace Core.UI
                     viewports.Remove(view);
                     Destroy(view.gameObject);
 
-                    RebuildRenderTimers(i);
+                    RebuildTimers(i);
                     break;
                 }
             }

@@ -18,6 +18,7 @@ namespace Core.UI
         internal Canvas Canvas => data[0].Canvas;
         internal RectTransform Transform => data[0].Transform;
         internal RenderTexture Texture => renderTexture;
+        internal ViewportMesh Mesh => mesh;
         protected Vector2 PointerPosition => pointerPosition;
 
         [Header("_")]
@@ -77,22 +78,8 @@ namespace Core.UI
 
         protected virtual void OnGameStateChanged(GameState gameState) { }
 
-        internal void Tick(in UIInputContext ctx, Vector2 screenPosition, ViewportMesh mesh)
+        internal void Tick()
         {
-            if (canvasInput)
-            {
-                isFocused = mesh == this.mesh;
-
-                if (isFocused)
-                {
-                    UpdateInput(screenPosition, ctx.PointerScroll * 32f, ctx.KeyDown, ctx.KeyUp);
-                }
-                else
-                {
-                    ClearInput();
-                }
-            }
-
             OnTick();
         }
         internal void Render()
@@ -113,8 +100,19 @@ namespace Core.UI
             canvasInput = false; 
             ClearInput();
         }
-        private void UpdateInput(Vector2 screenPosition, Vector2 scrollDelta, bool keyDown, bool keyUp)
+        internal void UpdateInput(in UIInputContext ctx, Vector2 screenPosition)
         {
+            if (!isActive || !canvasInput)
+            {
+                return;
+            }
+
+            isFocused = true;
+
+            Vector2 scrollDelta = ctx.PointerScroll * 32f;
+            bool keyDown = ctx.KeyDown;
+            bool keyUp = ctx.KeyUp;
+
             float renderWidth = Texture.width;
             float renderHeight = Texture.height;
 
@@ -262,7 +260,7 @@ namespace Core.UI
                 currentPressedObject = null;
             }
         }
-        private void ClearInput()
+        internal void ClearInput()
         {
             if (eventData == null)
             {
@@ -288,6 +286,7 @@ namespace Core.UI
             currentHoveredObject = null;
             eventData.Reset();
             hitResults.Clear();
+            isFocused = false;
         }
 
         internal void Initialize(Camera camera)
@@ -392,9 +391,7 @@ namespace Core.UI
             hasRendered = false;
             isActive = true;
 
-            this.mesh = mesh;
-
-            OnShow(this.mesh);
+            OnShow(this.mesh = mesh);
             ShowRenderer();
         }      
         internal void HideViewport()
@@ -411,6 +408,7 @@ namespace Core.UI
 
             OnHide();
             HideRenderer();
+            ClearInput();
 
             isActive = false;
         }
