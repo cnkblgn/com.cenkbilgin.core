@@ -280,11 +280,6 @@ namespace Core.UI
         }
         internal void ClearInput()
         {
-            if (!CanReceiveInput)
-            {
-                return;
-            }
-
             if (eventData == null)
             {
                 return;

@@ -129,6 +129,11 @@ namespace Core.UI
             {
                 focusedViewport.UpdateInput(in ctx, texturePosition);
             }
+
+            Debug.Log(
+                $"TARGET: {targetViewport?.ID ?? "NULL"} | " +
+                $"FOCUS: {focusedViewport?.ID ?? "NULL"} | " +
+                $"MouseDown: {ctx.KeyDown} | MouseUp: {ctx.KeyUp}");
         }
         private void UpdateTimer(int index, float deltaTime)
         {
