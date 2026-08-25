@@ -64,12 +64,12 @@ namespace Core.UI
         internal void ShowRenderer()
         {
             renderer.enabled = true;
-            collider.enabled = true;
+            //collider.enabled = true;
         }
         internal void HideRenderer()
         {
             renderer.enabled = false;
-            collider.enabled = false;
+            //collider.enabled = false;
         }
 
         internal bool CheckVisibility(Transform target, float minDistance, out float actualDistance)
