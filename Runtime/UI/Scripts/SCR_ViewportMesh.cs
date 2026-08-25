@@ -71,22 +71,24 @@ namespace Core.UI
             renderer.enabled = false;
         }
 
-        internal bool CheckVisibility(Transform target, float minDistance)
+        internal bool CheckVisibility(Transform target, float minDistance, out float actualDistance)
         {
+            actualDistance = float.MaxValue;
+
             if (renderer == null)
             {
                 return false;
             }
 
             Vector3 vector = (renderer.bounds.center - target.position);
-            float d = vector.magnitude;
+            actualDistance = vector.magnitude;
 
-            if (d > minDistance)
+            if (actualDistance > minDistance)
             {
                 return false;
             }
 
-            if (d < 3.0f)
+            if (actualDistance < 3.0f)
             {
                 return true;
             }

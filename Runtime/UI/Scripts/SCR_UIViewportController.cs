@@ -164,6 +164,11 @@ namespace Core.UI
                     continue;
                 }
 
+                if (!view.CanRender)
+                {
+                    continue;
+                }
+
                 float interval = 1f / Mathf.Max(1f, view.FPS);
 
                 if (renderTimers[index] < interval)

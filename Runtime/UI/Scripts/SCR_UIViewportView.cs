@@ -11,8 +11,9 @@ namespace Core.UI
         internal string ID => id;
         internal bool IsActive => isActive;
         internal bool IsRendering => isRendering;
+        internal bool CanRender => !renderOnce || !hasRendered;
         internal float Size => canvasSize;
-        internal float FPS => rendererFPS;
+        internal float FPS => Mathf.Lerp(maxFPS, minFPS, distanceRatio);
         protected Camera Camera => data[0].Camera;
         internal Canvas Canvas => data[0].Canvas;
         internal RectTransform Transform => data[0].Transform;
@@ -22,7 +23,11 @@ namespace Core.UI
         [Header("_")]
         [SerializeField, Required] private string id = string.Empty;
         [SerializeField, Required] private RenderTexture renderTexture = null;
-        [SerializeField, Range(0, 120)] private float rendererFPS = 59;
+
+        [Header("_")]
+        [SerializeField] private bool renderOnce = false;
+        [SerializeField, Range(0, 59)] private float minFPS = 1;
+        [SerializeField, Range(0, 59)] private float maxFPS = 59;
 
         [Header("_")]
         [SerializeField] private bool canvasInput = false;
@@ -39,9 +44,11 @@ namespace Core.UI
         private Vector2 pointerPosition = Vector2.zero;
         private Vector2 lastPixelPosition = Vector2.zero;
         private Vector2 lastPressedPosition = Vector2.zero;
+        private float distanceRatio = 0;
         private bool isInitialized = false;
         private bool isRendering = false;
         private bool isActive = false;
+        private bool hasRendered = false;
 
         private void OnEnable()
         {
@@ -85,10 +92,15 @@ namespace Core.UI
 
             OnTick();
         }
-        internal void Render() => OnRender();
+        internal void Render()
+        {
+            OnRender();
+            hasRendered = true;
+        }
 
+        protected void MarkDirty() => hasRendered = false;
         protected void EnableInput() => canvasInput = true;
-        protected void DisableInput() 
+        protected void DisableInput()
         {
             if (!canvasInput)
             {
@@ -374,7 +386,9 @@ namespace Core.UI
                 ManagerUI.Instance.ShowCursor();
             }
 
+            hasRendered = false;
             isActive = true;
+
             this.mesh = mesh;
 
             OnShow(this.mesh);
@@ -398,14 +412,16 @@ namespace Core.UI
             isActive = false;
         }
 
-        internal void TryCull(Transform target, float distance)
+        internal void TryCull(Transform target, float cullingDistance)
         {
             if (!IsActive)
             {
                 return;
             }
 
-            bool isInView = mesh.CheckVisibility(target, distance);
+            bool isInView = mesh.CheckVisibility(target, cullingDistance, out float actualDistance);
+
+            distanceRatio = Mathf.Clamp01(actualDistance / cullingDistance);
 
             if (!isInView)
             {
