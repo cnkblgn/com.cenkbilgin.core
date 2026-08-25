@@ -198,6 +198,14 @@ namespace Core.UI
             GameObject topObject = hitResults.Count > 0 ? hitResults[0].gameObject : null;
             RaycastResult topRaycast = hitResults.Count > 0 ? hitResults[0] : default;
 
+            Debug.Log(
+                $"VIEW={ID} " +
+                $"TOP={topObject?.name ?? "NULL"} " +
+                $"HITS={hitResults.Count} " +
+                $"CAMERA_TEXTURE={Camera.targetTexture?.name ?? "NULL"} " +
+                $"CAMERA_SIZE={Camera.pixelWidth}x{Camera.pixelHeight}"
+            );
+
             if (topObject != currentHoveredObject)
             {
                 if (currentHoveredObject != null)
