@@ -135,10 +135,11 @@ namespace Core.UI
 
             pointerPosition = new(Mathf.Clamp01(screenPosition.x) * renderWidth, Mathf.Clamp01(screenPosition.y) * renderHeight);
 
+            eventData.Reset();
+
             eventData.delta = pointerPosition - lastPixelPosition;
             lastPixelPosition = pointerPosition;
 
-            eventData.Reset();
             eventData.position = pointerPosition;
             eventData.scrollDelta = scrollDelta;
 

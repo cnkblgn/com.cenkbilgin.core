@@ -17,6 +17,7 @@ namespace Core.UI
 
         private readonly List<string> ids = new(4);
         private readonly List<UIViewportView> viewports = new(4);
+        private UIViewportView focusedViewport = null;
         private readonly RaycastHit[] collisionBuffer = new RaycastHit[5];
         private float[] renderTimers = Array.Empty<float>();
         private int renderIndex = 0;
@@ -106,34 +107,27 @@ namespace Core.UI
 
                     if (view.Mesh == targetMesh)
                     {
-                        targetViewport = view;
-                        break;
+                        continue;
                     }
+
+                    targetViewport = view;
+                    break;
                 }
             }
 
-            for (int i = 0; i < viewports.Count; i++)
+            if (focusedViewport != targetViewport)
             {
-                UIViewportView view = viewports[i];
-
-                if (!view.IsActive)
+                if (focusedViewport != null)
                 {
-                    continue;
+                    focusedViewport.ClearInput();
                 }
 
-                if (!view.CanReceiveInput)
-                {
-                    continue;
-                }
+                focusedViewport = targetViewport;
+            }
 
-                if (view == targetViewport)
-                {
-                    view.UpdateInput(in ctx, texturePosition);
-                }
-                else
-                {
-                    view.ClearInput();
-                }
+            if (focusedViewport != null)
+            {
+                focusedViewport.UpdateInput(in ctx, texturePosition);
             }
         }
         private void UpdateTimer(int index, float deltaTime)
@@ -321,6 +315,12 @@ namespace Core.UI
                 {
                     UIViewportView view = viewports[i];
 
+                    if (focusedViewport == view)
+                    {
+                        view.ClearInput();
+                        focusedViewport = null;
+                    }
+
                     ids.Remove(id);
                     viewports.Remove(view);
                     Destroy(view.gameObject);
@@ -337,6 +337,8 @@ namespace Core.UI
                 viewports[i].Deinitialize();
                 Destroy(viewports[i].gameObject);
             }
+
+            focusedViewport = null;
 
             ids.Clear();
             viewports.Clear();
