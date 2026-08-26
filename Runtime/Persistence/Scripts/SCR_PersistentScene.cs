@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Core.Persistence
 {
     [DisallowMultipleComponent]
-    internal sealed class PersistentScene : MonoBehaviour
+    public sealed class PersistentScene : MonoBehaviour
     {
         [Header("_")]
         [SerializeField, Required] private List<PersistentEntity> entities = new();

@@ -95,6 +95,17 @@ namespace Core.Sector
         }
 
 #if UNITY_EDITOR
+        private static GUIStyle GizmosStyle
+        {
+            get
+            {
+                gizmosStyle ??= new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, };
+                gizmosStyle.normal.textColor = COLOR_GREEN;
+
+                return gizmosStyle;
+            }
+        } private static GUIStyle gizmosStyle;
+
         private void OnDrawGizmos()
         {
             if (!showGizmos)
@@ -118,6 +129,8 @@ namespace Core.Sector
 
                 Gizmos.color = COLOR_YELLOW;
                 Gizmos.DrawWireCube(center, sector.Size);
+
+                UnityEditor.Handles.Label(center + Vector3.up, "Sector ID: " + i, GizmosStyle);
             }
         }
 #endif

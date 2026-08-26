@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Core.Editor
 {
     [InitializeOnLoad]
-    public static class EditorGizmoTriggerZone
+    internal static class EditorGizmoTriggerZone
     {
         private static readonly Mesh Mesh;
         private static readonly Material SelectedMaterial;
