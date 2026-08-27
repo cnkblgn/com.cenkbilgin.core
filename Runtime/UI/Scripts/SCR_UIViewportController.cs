@@ -9,6 +9,7 @@ namespace Core.UI
     {
         [Header("_")]
         [SerializeField, Required] private Camera rendererCamera = null;
+        [SerializeField, Required] private Camera inputCamera = null;
         [SerializeField, Min(0)] private float cullingDistance = 16;
         [SerializeField] private LayerMask viewportDetectionMask = 0;
 
@@ -29,7 +30,13 @@ namespace Core.UI
                 throw new NullReferenceException($"Viewport renderer camera not found! {nameof(rendererCamera)}");
             }
 
+            if (inputCamera == null)
+            {
+                throw new NullReferenceException($"Viewport input camera not found! {nameof(inputCamera)}");
+            }
+
             rendererCamera.enabled = false;
+            inputCamera.enabled = false;
         }
         private void OnEnable() => ManagerGame.OnBeforeSceneChanged += OnBeforeSceneChanged;
         private void OnDisable() => ManagerGame.OnBeforeSceneChanged -= OnBeforeSceneChanged;
@@ -74,17 +81,25 @@ namespace Core.UI
 
             ViewportMesh targetMesh = null;
             Vector2 texturePosition = Vector2.zero;
+            float closestDistance = float.MaxValue;
 
             for (int i = 0; i < count; i++)
             {
                 RaycastHit hit = collisionBuffer[i];
 
-                if (hit.collider.TryGetComponent(out ViewportMesh mesh))
+                if (hit.distance >= closestDistance)
                 {
-                    targetMesh = mesh;
-                    texturePosition = hit.textureCoord;
-                    break;
+                    continue;
                 }
+
+                if (!hit.collider.TryGetComponent(out ViewportMesh mesh))
+                {
+                    continue;
+                }
+
+                closestDistance = hit.distance;
+                targetMesh = mesh;
+                texturePosition = hit.textureCoord;
             }
 
             UIViewportView targetViewport = null;
@@ -127,6 +142,8 @@ namespace Core.UI
 
             if (focusedViewport != null)
             {
+                inputCamera.targetTexture = focusedViewport.Texture;
+                inputCamera.orthographicSize = focusedViewport.Size;
                 focusedViewport.UpdateInput(in ctx, texturePosition);
             }
 
@@ -294,7 +311,7 @@ namespace Core.UI
             }
 
             UIViewportView view = GameObject.Instantiate(prefab, container);
-            view.Initialize(rendererCamera);
+            view.Initialize(prefab.CanReceiveInput ? inputCamera : rendererCamera);
 
             rendererCamera.enabled = false;
 

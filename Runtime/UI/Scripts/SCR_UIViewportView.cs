@@ -342,8 +342,6 @@ namespace Core.UI
 
             Canvas.Hide();
 
-            renderCamera.targetTexture = renderTexture;
-
             eventSystem = EventSystem.current;
             eventData = new(eventSystem);
 
