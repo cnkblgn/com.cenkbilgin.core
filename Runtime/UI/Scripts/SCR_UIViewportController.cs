@@ -8,6 +8,9 @@ namespace Core.UI
     internal sealed class UIViewportController : MonoBehaviour
     {
         [Header("_")]
+        [SerializeField] private bool debug = false;
+
+        [Header("_")]
         [SerializeField, Required] private Camera rendererCamera = null;
         [SerializeField, Required] private Camera inputCamera = null;
         [SerializeField, Min(0)] private float cullingDistance = 16;
@@ -147,10 +150,15 @@ namespace Core.UI
                 focusedViewport.UpdateInput(in ctx, texturePosition);
             }
 
-            Debug.Log(
-                $"TARGET: {targetViewport?.ID ?? "NULL"} | " +
-                $"FOCUS: {focusedViewport?.ID ?? "NULL"} | " +
-                $"MouseDown: {ctx.KeyDown} | MouseUp: {ctx.KeyUp}");
+            if (debug)
+            {
+                Debug.Log
+                (
+                    $"TARGET: {(targetViewport != null ? targetViewport.ID : null ?? "NULL")} | " +
+                    $"FOCUS: {(focusedViewport != null ? focusedViewport.ID : null ?? "NULL")} | " +
+                    $"MouseDown: {ctx.KeyDown} | MouseUp: {ctx.KeyUp}"
+                );
+            }
         }
         private void UpdateTimer(int index, float deltaTime)
         {

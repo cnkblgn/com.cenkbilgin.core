@@ -25,6 +25,9 @@ namespace Core.UI
         protected Vector2 PointerPosition => pointerPosition;
 
         [Header("_")]
+        [SerializeField] private bool debug = false;
+
+        [Header("_")]
         [SerializeField, Required] private string id = string.Empty;
         [SerializeField, Required] private RenderTexture renderTexture = null;
         [SerializeField, Min(1)] private float canvasSize = 165;
@@ -198,13 +201,17 @@ namespace Core.UI
             GameObject topObject = hitResults.Count > 0 ? hitResults[0].gameObject : null;
             RaycastResult topRaycast = hitResults.Count > 0 ? hitResults[0] : default;
 
-            Debug.Log(
-                $"VIEW={ID} " +
-                $"TOP={topObject?.name ?? "NULL"} " +
-                $"HITS={hitResults.Count} " +
-                $"CAMERA_TEXTURE={Camera.targetTexture?.name ?? "NULL"} " +
-                $"CAMERA_SIZE={Camera.pixelWidth}x{Camera.pixelHeight}"
-            );
+            if (debug)
+            {
+                Debug.Log
+                (
+                    $"VIEW={ID} " +
+                    $"TOP={(topObject != null ? topObject.name : null ?? "NULL")} " +
+                    $"HITS={hitResults.Count} " +
+                    $"CAMERA_TEXTURE={(Camera.targetTexture != null ? Camera.targetTexture.name : null ?? "NULL")} " +
+                    $"CAMERA_SIZE={Camera.pixelWidth}x{Camera.pixelHeight}"
+                );
+            }
 
             if (topObject != currentHoveredObject)
             {
