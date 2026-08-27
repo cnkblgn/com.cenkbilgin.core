@@ -4,6 +4,7 @@ using UnityEngine.UI;
 namespace Core.UI
 {
     [DisallowMultipleComponent]
+    [RequireComponent(typeof(CanvasRenderer))]
     public sealed class UIGraphView : Graphic
     {
         [Header("_")]
