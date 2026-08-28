@@ -43,7 +43,14 @@ namespace Core.Environment
             {
                 SceneView sceneView = SceneView.lastActiveSceneView;
 
-                if (sceneView != null && !sceneView.sceneViewState.showImageEffects)
+                if (sceneView == null)
+                {
+                    return;
+                }
+
+                bool showFog = !sceneView.sceneViewState.showFog;
+
+                if (showFog)
                 {
                     return;
                 }
