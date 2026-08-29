@@ -29,31 +29,33 @@ namespace Core.Damage
             ignoredTagMask = ignoreTags.CreateMask();
         }
 
-        public void Bind(Resource health) => this.health = health ?? throw new ArgumentNullException(nameof(health));
+        public void Bind(Resource health) => this.health = health ?? throw new ArgumentNullException(nameof(health), "You are trying to bind null health resource!? please assign valid resource!");
 
-        public bool TryDamage(in DamageData data, out DamageContext ctx)
+        public void Damage(in DamageData data, out DamageContext ctx)
         {
             ctx = new(data);
 
-            if (!health.IsDepleted())
+            if (health.IsDepleted())
             {
-                float damage = ResolveDamage(data);
-                ctx.Damage = damage;
-
-                health.SetCurrent(health.GetCurrent() - damage);
-
-                if (health.IsDepleted())
-                {
-                    ctx.State = DamageState.DEATH;
-                    thisHandler?.HandleHit(ctx);
-                    OnHit?.Invoke(ctx);
-                }
+                return;
             }
 
-            ctx.State = DamageState.HIT;
-            thisHandler?.HandleHit(ctx);
+            float damage = ResolveDamage(in data);
+            ctx.Damage = damage;
+
+            health.SetCurrent(health.GetCurrent() - damage);
+
+            if (health.IsDepleted())
+            {
+                ctx.State = DamageState.DEATH;
+            }
+            else
+            {
+                ctx.State = DamageState.HIT;
+            }
+
+            thisHandler?.HandleHit(in ctx);
             OnHit?.Invoke(ctx);
-            return true;
         }
         private float ResolveDamage(in DamageData data)
         {
@@ -66,7 +68,7 @@ namespace Core.Damage
 
             if (thisHandler != null)
             {
-                value = thisHandler.HandleDamage(data);
+                value = thisHandler.HandleDamaged(data);
             }
 
             return value;

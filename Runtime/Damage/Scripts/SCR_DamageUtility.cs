@@ -15,7 +15,7 @@ namespace Core.Damage
         public static bool HasAll(this DamageTag[] @base, DamageTag[] target) => CreateMask(@base).HasAll(CreateMask(target));
         public static bool HasAny(this DamageTag[] @base, DamageTag[] target) => CreateMask(@base).HasAny(CreateMask(target));
 
-        public static bool TryDamageDirect(Transform owner, Collider collider, Vector3 point, Vector3 normal, Vector3 direction, int damageableMask, ulong tags, uint context, float radius, float damage, float force, IDamageListener listener = null, DamageProcessor processor = null)
+        public static bool TryDamageDirect(Transform owner, Collider collider, Vector3 point, Vector3 normal, Vector3 direction, int damageableMask, ulong tags, uint context, float radius, float damage, float force, IDamageProcessor processor = null)
         {
             if (collider == null)
             {
@@ -35,17 +35,19 @@ namespace Core.Damage
                 return false;
             }
 
-            if (processor != null && !processor(tags, collider, direction, damage))
+            DamageData data = new(owner, collider, point, normal, direction, DamageMode.DIRECT, tags, context, radius, damage, force);
+
+            if (processor != null && !processor.HandleCanDamageTarget(in data))
             {
                 return false;
             }
 
-            bool hit = entity.TryDamage(new(owner, collider, point, normal, direction, DamageMode.DIRECT, tags, context, radius, damage, force), out DamageContext ctx);
+            entity.Damage(in data, out DamageContext ctx);
+            processor?.HandleAfterDamagedTarget(ctx);
 
-            listener?.HandleDamage(ctx);
-            return hit;
+            return true;
         }
-        public static bool TryDamageArea(Transform owner, Collider[] colliders, Vector3 point, int damageableMask, ulong tags, uint context, float radius, float minDamage, float maxDamage, float minForce, float maxForce, IDamageListener listener = null, DamageProcessor processor = null)
+        public static bool TryDamageArea(Transform owner, Collider[] colliders, Vector3 point, int damageableMask, ulong tags, uint context, float radius, float minDamage, float maxDamage, float minForce, float maxForce, IDamageProcessor processor = null)
         {
             if (colliders == null)
             {
@@ -59,7 +61,7 @@ namespace Core.Damage
             }
 
             HashSet<Damageable> entities = new(32);
-            bool hit = false;
+            bool hasHit = false;
 
             foreach (Collider collider in colliders)
             {
@@ -87,19 +89,22 @@ namespace Core.Damage
 
                 direction = direction.normalized;
 
-                if (processor != null && !processor(tags, collider, direction, damage))
+                DamageData data = new(owner, collider, point, Vector3.up, direction, DamageMode.AREA, tags, context, radius, damage, force);
+
+                if (processor != null && !processor.HandleCanDamageTarget(in data))
                 {
                     continue;
                 }
 
-                hit = entity.TryDamage(new(owner, collider, point, Vector3.up, direction, DamageMode.AREA, tags, context, radius, damage, force), out DamageContext ctx);
+                entity.Damage(in data, out DamageContext ctx);
+                processor?.HandleAfterDamagedTarget(ctx);
 
-                listener?.HandleDamage(ctx);
+                hasHit = true;
             }
 
-            return hit;
+            return hasHit;
         }
-        public static bool TryDamageArea(Transform owner, HitData[] results, Vector3 point, int damageableMask, ulong tags, uint context, float radius, float minDamage, float maxDamage, float minForce, float maxForce, IDamageListener listener, DamageProcessor processor = null)
+        public static bool TryDamageArea(Transform owner, HitData[] results, Vector3 point, int damageableMask, ulong tags, uint context, float radius, float minDamage, float maxDamage, float minForce, float maxForce, IDamageProcessor processor = null)
         {
             if (results == null)
             {
@@ -113,7 +118,7 @@ namespace Core.Damage
             }
 
             HashSet<Damageable> entities = new(32);
-            bool hit = false;
+            bool hasHit = false;
 
             foreach (HitData result in results)
             {
@@ -142,17 +147,20 @@ namespace Core.Damage
 
                 direction = direction.normalized;
 
-                if (processor != null && !processor(tags, result.Collider, direction, damage))
+                DamageData data = new(owner, result.Collider, point, Vector3.up, direction, DamageMode.AREA, tags, context, radius, damage, force);
+
+                if (processor != null && !processor.HandleCanDamageTarget(in data))
                 {
                     continue;
                 }
 
-                hit = entity.TryDamage(new(owner, result.Collider, point, Vector3.up, direction, DamageMode.AREA, tags, context, radius, damage, force), out DamageContext ctx);
+                entity.Damage(in data, out DamageContext ctx);
+                processor?.HandleAfterDamagedTarget(ctx);
 
-                listener?.HandleDamage(ctx);
+                hasHit = true;
             }
 
-            return hit;
+            return hasHit;
         }
     }
 }

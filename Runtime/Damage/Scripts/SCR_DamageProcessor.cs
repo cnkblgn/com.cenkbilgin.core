@@ -1,6 +1,8 @@
-using UnityEngine;
-
 namespace Core.Damage
 {
-    public delegate bool DamageProcessor(ulong tags, Collider collider, Vector3 direction, float damage);
+    public interface IDamageProcessor
+    {
+        public bool HandleCanDamageTarget(in DamageData data);
+        public void HandleAfterDamagedTarget(in DamageContext ctx);
+    }
 }
