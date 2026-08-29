@@ -180,7 +180,7 @@ namespace Core.Persistence
             isLoading = false;
         }
 
-        internal static Transform GetRoot() => entityRoot;
+        public static Transform GetRoot() => entityRoot;
         public static void SetRoot(Transform transform) => entityRoot = transform;
     }
 }
