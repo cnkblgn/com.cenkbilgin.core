@@ -1088,55 +1088,109 @@ namespace Core
                 transform.localScale = new Vector3(globalScale.x / parentScale.x, globalScale.y / parentScale.y, globalScale.z / parentScale.z);
             }
         }
-        public static Transform GetClosest(this Transform[] transform, Vector3 position, float threshold = -1)
+        public static Transform GetClosest(this Transform[] transforms, Vector3 position, float threshold = -1)
         {
-            Transform c = null;
-            float d = threshold > 0 ? (threshold * threshold) : float.MaxValue;
+            Transform closestTransform = null;
+            float closestDistance = threshold > 0 ? (threshold * threshold) : float.MaxValue;
 
-            foreach (Transform p in transform)
+            foreach (Transform p in transforms)
             {
-                float v = (p.position - position).sqrMagnitude;
+                float distance = (p.position - position).sqrMagnitude;
 
-                if (v < d)
+                if (distance < closestDistance)
                 {
-                    d = v;
-                    c = p;
+                    closestDistance = distance;
+                    closestTransform = p;
                 }
             }
 
-            return c;
+            return closestTransform;
         }
-        public static Transform GetHighest(this Transform[] transform)
+        public static Transform GetHighest(this Transform[] transforms)
         {
-            Transform c = null;
-            float d = float.MinValue;
+            Transform closestTransform = null;
+            float closestDistance = float.MinValue;
 
-            foreach (Transform p in transform)
+            foreach (Transform transform in transforms)
             {
-                if (p.position.y > d)
+                if (transform.position.y > closestDistance)
                 {
-                    d = p.position.y;
-                    c = p;
+                    closestDistance = transform.position.y;
+                    closestTransform = transform;
                 }
             }
 
-            return c;
+            return closestTransform;
         }
-        public static Transform GetLowest(this Transform[] transform)
+        public static Transform GetLowest(this Transform[] transforms)
         {
-            Transform c = null;
-            float d = float.MaxValue;
+            Transform closestTransform = null;
+            float closestDistance = float.MaxValue;
 
-            foreach (Transform p in transform)
+            foreach (Transform p in transforms)
             {
-                if (p.position.y < d)
+                if (p.position.y < closestDistance)
                 {
-                    d = p.position.y;
-                    c = p;
+                    closestDistance = p.position.y;
+                    closestTransform = p;
                 }
             }
 
-            return c;
+            return closestTransform;
+        }
+        public static Collider GetClosest(this Collider[] colliders, Vector3 position, float threshold = -1)
+        {
+            Collider closestCollider = null;
+            float closestDistance = threshold > 0 ? (threshold * threshold) : float.MaxValue;
+
+            foreach (Collider collider in colliders)
+            {
+                float distance = (collider.transform.position - position).sqrMagnitude;
+
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closestCollider = collider;
+                }
+            }
+
+            return closestCollider;
+        }
+        public static Collider GetHighest(this Collider[] colliders)
+        {
+            Collider closestCollider = null;
+            float closestDistance = float.MinValue;
+
+            foreach (Collider collider in colliders)
+            {
+                Transform transform = collider.transform;
+
+                if (transform.position.y > closestDistance)
+                {
+                    closestDistance = transform.position.y;
+                    closestCollider = collider;
+                }
+            }
+
+            return closestCollider;
+        }
+        public static Collider GetLowest(this Collider[] colliders)
+        {
+            Collider closestCollider = null;
+            float closestDistance = float.MaxValue;
+
+            foreach (Collider collider in colliders)
+            {
+                Transform transform = collider.transform;
+
+                if (transform.position.y < closestDistance)
+                {
+                    closestDistance = transform.position.y;
+                    closestCollider = collider;
+                }
+            }
+
+            return closestCollider;
         }
         #endregion
     }

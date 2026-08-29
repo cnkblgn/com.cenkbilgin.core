@@ -21,6 +21,25 @@ namespace Core
 
             return hits > 0;
         }
+        public static bool HitScanClosest(Vector3 origin, Vector3 direction, float strength, float range, int mask, RaycastHit[] hitBuffer, HitData[] resultBuffer, QueryTriggerInteraction query, out HitData result, IHitListener listener = null, HitProcessor processor = null)
+        {
+            bool hasHit = HitScan(origin, direction, strength, range, mask, hitBuffer, resultBuffer, query, out int hits, processor);
+
+            result = default;
+
+            if (!hasHit)
+            {
+                return false;
+            }
+
+            if (resultBuffer.TryGetClosest(hits, out result))
+            {
+                listener?.HandleHit(result);
+                return true;
+            }
+
+            return false;
+        }
         public static bool HitCone(Vector3 origin, Vector3 forward, float strength, float angle, float radius, int mask, Collider[] overlapBuffer, HitData[] resultBuffer, QueryTriggerInteraction query, out int hits, HitProcessor processor = null)
         {
             hits = 0;
@@ -100,7 +119,26 @@ namespace Core
             }
 
             return hits > 0;
-        } 
+        }
+        public static bool HitSweepClosest(Vector3 start, Vector3 end, float strength, float radius, int mask, RaycastHit[] hitBuffer, HitData[] resultBuffer, QueryTriggerInteraction query, out HitData result, IHitListener listener = null, HitProcessor processor = null)
+        {
+            bool hasHit = HitSweep(start, end, strength, radius, mask, hitBuffer, resultBuffer, query, out int hits, processor);
+
+            result = default;
+
+            if (!hasHit)
+            {
+                return false;
+            }
+
+            if (resultBuffer.TryGetClosest(hits, out result))
+            {
+                listener?.HandleHit(result);
+                return true;
+            }
+
+            return false;
+        }
         public static bool HitArea(Vector3 origin, float strength, float radius, int overlapMask, int obstructionMask, Collider[] overlapBuffer, RaycastHit[] obstructionBuffer, HitData[] resultBuffer, QueryTriggerInteraction query, out int hits, HitProcessor processor = null)
         {
             int areaHits = Physics.OverlapSphereNonAlloc(origin, radius, overlapBuffer, overlapMask, query);
