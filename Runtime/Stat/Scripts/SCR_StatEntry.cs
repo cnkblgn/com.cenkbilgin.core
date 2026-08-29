@@ -31,5 +31,12 @@ namespace Core.Stat
             Name = NameID.Key;
 #endif
         }
+
+#if UNITY_EDITOR
+        public void OnValidate()
+        {
+            Name = NameID.Key;
+        }
+#endif
     }
 }

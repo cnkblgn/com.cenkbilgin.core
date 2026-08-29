@@ -14,6 +14,10 @@ namespace Core.Item
 
         /// <summary> Called when item thisData description requested. Builds description for item </summary>
         public abstract void GetDescription(Dictionary<string, DataNode> data, in StringBuilder sb);
+
+#if UNITY_EDITOR
+        public virtual void OnValidate() { }
+#endif
     }
 
     [Serializable]

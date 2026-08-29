@@ -11,6 +11,10 @@ namespace Core.Trait
         public abstract string Description { get; }
         public abstract void Apply(Actor actor, ref TraitInstance instance);
         public abstract void Remove(Actor actor, ref TraitInstance instance);
+
+#if UNITY_EDITOR
+        public virtual void OnValidate() { }
+#endif
     }
 
     [Serializable]

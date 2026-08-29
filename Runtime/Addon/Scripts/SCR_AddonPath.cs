@@ -1,12 +1,12 @@
 using System.IO;
 using UnityEngine;
 
-namespace Core.Mod
+namespace Core.Addon
 {
     public static class AddonPath
     {
-        private const string PATH_EDITOR = "ModTemplates";
-        private const string PATH_BUILD = "Mods";
+        private const string PATH_EDITOR = "AddonTemplates";
+        private const string PATH_BUILD = "Addons";
 
         public static string GetPath()
         {

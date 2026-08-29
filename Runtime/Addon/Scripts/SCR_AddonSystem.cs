@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
-namespace Core.Mod
+namespace Core.Addon
 {
     internal static class AddonSystem
     {

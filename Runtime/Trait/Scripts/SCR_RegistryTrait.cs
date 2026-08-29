@@ -29,7 +29,10 @@ namespace Core.Trait
         {
             base.OnValidate();
 
-            for (int i = 0; i < entries.Length; i++) entries[i].Name = entries[i].ID.Key;
+            for (int i = 0; i < entries.Length; i++)
+            {
+                entries[i].OnValidate();
+            }
         }
 
         public override void Reload()

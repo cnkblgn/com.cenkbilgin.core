@@ -32,5 +32,17 @@ namespace Core.Effect
             Name = NameID.Key;
 #endif
         }
+
+#if UNITY_EDITOR
+        public void OnValidate()
+        {
+            Name = NameID.Key;
+
+            for (int i = 0; i < Actions.Length; i++)
+            {
+                Actions[i].OnValidate();
+            }
+        }
+#endif
     }
 }

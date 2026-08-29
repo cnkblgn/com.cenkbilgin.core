@@ -7,5 +7,9 @@ namespace Core.Quest
     {
         public abstract void Started();
         public abstract void Completed();
+
+#if UNITY_EDITOR
+        public virtual void OnValidate() { }
+#endif
     }
 }

@@ -6,5 +6,9 @@ namespace Core.Quest
     public abstract class QuestCondition
     {
         public abstract bool IsSatisfied();
+
+#if UNITY_EDITOR
+        public virtual void OnValidate() { }
+#endif
     }
 }

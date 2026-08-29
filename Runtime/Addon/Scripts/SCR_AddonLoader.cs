@@ -1,4 +1,4 @@
-namespace Core.Mod
+namespace Core.Addon
 {
     public interface IAddonLoader
     {

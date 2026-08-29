@@ -1,6 +1,6 @@
 using System;
 
-namespace Core.Mod
+namespace Core.Addon
 {
     [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     public sealed class AddonLoader : Attribute

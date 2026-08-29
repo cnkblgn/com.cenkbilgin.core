@@ -12,6 +12,10 @@ namespace Core.Effect
         public abstract void Tick(Actor actor, ref EffectInstance instance);
         public abstract void Apply(Actor actor, ref EffectInstance instance);
         public abstract void Removed(Actor actor, ref EffectInstance instance);
+
+#if UNITY_EDITOR
+        public virtual void OnValidate() { }
+#endif
     }
 
     [Serializable]

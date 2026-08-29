@@ -1,6 +1,6 @@
 using System;
 
-namespace Core.Mod
+namespace Core.Addon
 {
     internal sealed class AddonLoaderEntry
     {
