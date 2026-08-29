@@ -1,2 +1,2 @@
 ## Assembly Graph
-![Assembly Graph](Docs/AssemblyGraph.svg)
+![Assembly Graph](Docs~/AssemblyGraph.svg)
