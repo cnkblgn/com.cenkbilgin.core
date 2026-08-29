@@ -47,24 +47,27 @@ namespace Core.Damage
 
             return true;
         }
-        public static bool TryDamageArea(Transform owner, Collider[] colliders, Vector3 point, int damageableMask, ulong tags, uint context, float radius, float minDamage, float maxDamage, float minForce, float maxForce, IDamageProcessor processor = null)
+        public static bool TryDamageArea(Transform owner, Collider[] buffer, int bufferCount, Vector3 point, int damageableMask, ulong tags, uint context, float radius, float minDamage, float maxDamage, float minForce, float maxForce, IDamageProcessor processor = null)
         {
-            if (colliders == null)
+            if (buffer == null)
             {
-                Debug.LogError("damage area failed! damage colliders == null");
+                Debug.LogError("damage area failed! damage collider buffer == null");
                 return false;
             }
 
-            if (colliders.Length <= 0)
+            if (bufferCount <= 0 || bufferCount > buffer.Length)
             {
                 return false;
             }
 
             HashSet<Damageable> entities = new(32);
+            float radiusSqr = radius * radius;
             bool hasHit = false;
 
-            foreach (Collider collider in colliders)
+            for (int i = 0; i < bufferCount; i++)
             {
+                Collider collider = buffer[i];
+
                 if (!collider.gameObject.IsInBitMask(damageableMask))
                 {
                     continue;
@@ -83,7 +86,7 @@ namespace Core.Damage
                 }
 
                 Vector3 direction = entity.Origin.position - point;
-                float t = Mathf.Clamp01(direction.sqrMagnitude / (radius * radius));
+                float t = Mathf.Clamp01(direction.sqrMagnitude / radiusSqr);
                 float damage = Mathf.Lerp(maxDamage, minDamage, t);
                 float force = Mathf.Lerp(maxForce, minForce, t);
 
@@ -104,24 +107,27 @@ namespace Core.Damage
 
             return hasHit;
         }
-        public static bool TryDamageArea(Transform owner, HitData[] results, Vector3 point, int damageableMask, ulong tags, uint context, float radius, float minDamage, float maxDamage, float minForce, float maxForce, IDamageProcessor processor = null)
+        public static bool TryDamageArea(Transform owner, HitData[] buffer, int bufferCount, Vector3 point, int damageableMask, ulong tags, uint context, float radius, float minDamage, float maxDamage, float minForce, float maxForce, IDamageProcessor processor = null)
         {
-            if (results == null)
+            if (buffer == null)
             {
-                Debug.LogError("damage area failed! damage results == null");
+                Debug.LogError("damage area failed! damage hit buffer == null");
                 return false;
             }
 
-            if (results.Length <= 0)
+            if (bufferCount <= 0 || bufferCount > buffer.Length)
             {
                 return false;
             }
 
             HashSet<Damageable> entities = new(32);
+            float radiusSqr = radius * radius;
             bool hasHit = false;
 
-            foreach (HitData result in results)
+            for (int i = 0; i < bufferCount; i++)
             {
+                HitData result = buffer[i];
+
                 if (!result.Collider.gameObject.IsInBitMask(damageableMask))
                 {
                     continue;
@@ -141,7 +147,7 @@ namespace Core.Damage
 
                 Vector3 direction = entity.Origin.position - point;
 
-                float t = Mathf.Clamp01(direction.sqrMagnitude / (radius * radius));
+                float t = Mathf.Clamp01(direction.sqrMagnitude / radiusSqr);
                 float damage = Mathf.Lerp(maxDamage, minDamage, t);
                 float force = Mathf.Lerp(maxForce, minForce, t);
 
