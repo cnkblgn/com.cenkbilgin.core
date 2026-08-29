@@ -795,7 +795,7 @@ namespace Core
             return totalEntries.ToArray();
         }
 
-        public class SwapBackArray<T> : IEnumerable<T>
+        public class SwapBackArray<T> : IEnumerable<T>, IReadOnlyList<T>
         {
             public T this[int index]
             {
@@ -864,8 +864,21 @@ namespace Core
             public IEnumerator<T> GetEnumerator() => throw new InvalidOperationException("Does not support for each loop!");
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
-        public class RingBufferArray<T>
+        public class RingBufferArray<T> : IReadOnlyList<T>
         {
+            public T this[int index]
+            {
+                get
+                {
+                    if (index < 0 || index >= Count) throw new IndexOutOfRangeException();
+                    return buffer[index];
+                }
+                set
+                {
+                    if (index < 0 || index >= Count) throw new IndexOutOfRangeException();
+                    buffer[index] = value;
+                }
+            }
             public int Count => count;
             public int Capacity => buffer.Length;
 
@@ -926,6 +939,9 @@ namespace Core
                 index = 0;
                 count = 0;
             }
+
+            public IEnumerator<T> GetEnumerator() => throw new InvalidOperationException("Does not support for each loop!");
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
 
         public sealed class StackMult

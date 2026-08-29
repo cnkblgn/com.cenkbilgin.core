@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Core.Actors;
 
 namespace Core.Trait
@@ -24,6 +25,8 @@ namespace Core.Trait
         }
 
         private void SetState(TraitState state, TraitInstance instance) => OnChanged?.Invoke(new(state, instance));
+
+        public IReadOnlyList<TraitInstance> GetTraits() => traits;
 
         public bool HasTrait(TraitID id)
         {

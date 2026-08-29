@@ -38,6 +38,7 @@ namespace Core.Stat
         }
         private void SetState(StatState state) => SetState(state, StatModifier.Empty);
 
+        public IReadOnlyCollection<StatID> GetStats() => stats.Keys;
         public float GetStat(StatID id)
         {
             StatDefinition definition = id.GetDefinition();

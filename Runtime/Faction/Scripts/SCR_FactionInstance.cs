@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Core.Faction
@@ -50,6 +51,7 @@ namespace Core.Faction
 
             return relations[target.Index].Relation;
         }
+        internal IReadOnlyList<FactionRelation> GetRelations() => relations;
 
         internal void SetRelation(FactionInstance target, int value)
         {

@@ -15,6 +15,12 @@ namespace Core.Quest
             Definition = definition ?? throw new ArgumentNullException(nameof(definition));
             Progress = new int[definition.Requirements.Length];
         }
+        internal QuestInstance(QuestID id, int[] progress, bool isCompleted)
+        {
+            Definition = !id.IsValid ? throw new ArgumentNullException(nameof(id)) : id.GetDefinition();
+            Progress = (int[])progress.Clone();
+            IsCompleted = isCompleted;
+        }
 
         public bool CanComplete()
         {

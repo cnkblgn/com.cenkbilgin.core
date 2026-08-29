@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Core.Faction
@@ -62,6 +63,7 @@ namespace Core.Faction
         }
 
         public FactionAttitude GetAttitude(FactionID id) => FactionDatabase.EvaluateAttitude(GetRelation(id));
+        public IReadOnlyList<FactionRelation> GetRelations() => relations;
         public int GetRelation(FactionID id)
         {
             if (!id.IsValid || id.Index >= relations.Length)
