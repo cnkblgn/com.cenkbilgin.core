@@ -154,5 +154,30 @@ namespace Core
 
             return hits > 0;
         }
+
+        public static bool TryGetClosest(this RaycastHit[] buffer, int count, out RaycastHit closest)
+        {
+            closest = default;
+
+            if (count <= 0)
+            {
+                return false;
+            }
+
+            float closestDistance = float.MaxValue;
+
+            for (int i = 0; i < count; i++)
+            {
+                RaycastHit hit = buffer[i];
+
+                if (hit.distance < closestDistance)
+                {
+                    closestDistance = hit.distance;
+                    closest = hit;
+                }
+            }
+
+            return true;
+        }
     }
 }
