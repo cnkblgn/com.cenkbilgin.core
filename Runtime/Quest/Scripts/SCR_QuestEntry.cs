@@ -37,7 +37,7 @@ namespace Core.Quest
 #if UNITY_EDITOR
         public void OnValidate()
         {
-            Name = NameID.Key;
+            Name = ID.Key;
 
             for (int i = 0; i < Conditions.Length; i++)
             {

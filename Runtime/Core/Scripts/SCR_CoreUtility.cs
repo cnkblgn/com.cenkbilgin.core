@@ -213,53 +213,53 @@ namespace Core
 
         public static Vector3 GetClosest(this Vector3[] positions, Vector3 position, float threshold = -1)
         {
-            Vector3 c = default;
-            float d = threshold > 0 ? (threshold * threshold) : float.MaxValue;
+            Vector3 closestPosition = default;
+            float closestDistance = threshold > 0 ? (threshold * threshold) : float.MaxValue;
 
             foreach (Vector3 p in positions)
             {
-                float v = (p - position).sqrMagnitude;
+                float distance = (p - position).sqrMagnitude;
 
-                if (v < d)
+                if (distance < closestDistance)
                 {
-                    d = v;
-                    c = p;
+                    closestDistance = distance;
+                    closestPosition = p;
                 }
             }
 
-            return c;
+            return closestPosition;
         }
         public static Vector3 GetHighest(this Vector3[] positions)
         {
-            Vector3 c = default;
-            float d = float.MinValue;
+            Vector3 closestPosition = default;
+            float closestDistance = float.MinValue;
 
-            foreach (Vector3 p in positions)
+            foreach (Vector3 position in positions)
             {
-                if (p.y > d)
+                if (position.y > closestDistance)
                 {
-                    d = p.y;
-                    c = p;
+                    closestDistance = position.y;
+                    closestPosition = position;
                 }
             }
 
-            return c;
+            return closestPosition;
         }
         public static Vector3 GetLowest(this Vector3[] positions)
         {
-            Vector3 c = default;
-            float d = float.MaxValue;
+            Vector3 closestPosition = default;
+            float closestDistance = float.MaxValue;
 
-            foreach (Vector3 p in positions)
+            foreach (Vector3 position in positions)
             {
-                if (p.y < d)
+                if (position.y < closestDistance)
                 {
-                    d = p.y;
-                    c = p;
+                    closestDistance = position.y;
+                    closestPosition = position;
                 }
             }
 
-            return c;
+            return closestPosition;
         }
 
         public static bool HasAll(this ulong @base, ulong target) => (@base & target) == target;
@@ -1109,14 +1109,14 @@ namespace Core
             Transform closestTransform = null;
             float closestDistance = threshold > 0 ? (threshold * threshold) : float.MaxValue;
 
-            foreach (Transform p in transforms)
+            foreach (Transform transform in transforms)
             {
-                float distance = (p.position - position).sqrMagnitude;
+                float distance = (transform.position - position).sqrMagnitude;
 
                 if (distance < closestDistance)
                 {
                     closestDistance = distance;
-                    closestTransform = p;
+                    closestTransform = transform;
                 }
             }
 
@@ -1143,12 +1143,12 @@ namespace Core
             Transform closestTransform = null;
             float closestDistance = float.MaxValue;
 
-            foreach (Transform p in transforms)
+            foreach (Transform transform in transforms)
             {
-                if (p.position.y < closestDistance)
+                if (transform.position.y < closestDistance)
                 {
-                    closestDistance = p.position.y;
-                    closestTransform = p;
+                    closestDistance = transform.position.y;
+                    closestTransform = transform;
                 }
             }
 

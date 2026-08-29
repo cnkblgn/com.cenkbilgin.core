@@ -28,14 +28,14 @@ namespace Core.Stat
             Max = max;
 
 #if UNITY_EDITOR
-            Name = NameID.Key;
+            Name = ID.Key;
 #endif
         }
 
 #if UNITY_EDITOR
         public void OnValidate()
         {
-            Name = NameID.Key;
+            Name = ID.Key;
         }
 #endif
     }

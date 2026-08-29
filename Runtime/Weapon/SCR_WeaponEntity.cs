@@ -19,7 +19,7 @@ namespace Core.Weapon
         private IWeaponHandler[] handlers = null;
         private bool isInitialized = false;
 
-        public void Initialize(Actor user, WeaponSettings settings = null)
+        public void Initialize(Actor user, WeaponSettings settings)
         {
             if (isInitialized)
             {
@@ -46,6 +46,13 @@ namespace Core.Weapon
             {
                 handlers[i].Initialize(this);
             }
+
+#if UNITY_EDITOR
+            if (settings == null)
+            {
+                Debug.LogWarning("Weapon settings is missing! Now using default weapon settings! Ignore if its intented!");
+            }
+#endif
         }
         public bool TryGetHandler<T>(out T handler) where T : IWeaponHandler
         {        

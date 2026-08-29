@@ -32,14 +32,14 @@ namespace Core.Trait
             Actions = actions;
 
 #if UNITY_EDITOR
-            Name = id.Key;
+            Name = ID.Key;
 #endif
         }
 
 #if UNITY_EDITOR
         public void OnValidate()
         {
-            Name = NameID.Key;
+            Name = ID.Key;
 
             for (int i = 0; i < Actions.Length; i++)
             {

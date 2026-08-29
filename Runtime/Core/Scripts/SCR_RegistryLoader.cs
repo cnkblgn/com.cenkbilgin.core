@@ -42,7 +42,7 @@ namespace Core
             return found;
         }
 
-        [UnityEditor.MenuItem("Tools/Reload Registries", priority = -10)]
+        [UnityEditor.MenuItem("Tools/Reload Registries", priority = -5)]
         private static void TryReloadEditor()
         {
             TryCacheEditor();

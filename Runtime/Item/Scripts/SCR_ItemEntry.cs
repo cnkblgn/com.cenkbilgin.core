@@ -52,7 +52,7 @@ namespace Core.Item
 #if UNITY_EDITOR
         public void OnValidate()
         {
-            Name = NameID.Key;
+            Name = ID.Key;
             Component?.OnValidate();
         }
 #endif
