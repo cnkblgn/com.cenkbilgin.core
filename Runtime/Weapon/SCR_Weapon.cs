@@ -85,7 +85,7 @@ namespace Core.Weapon
         }
 
         public IReadOnlyList<WeaponModule> GetModules() => modules;
-        public bool TryGetModule<T>(out T module) where T : WeaponModule
+        public bool TryGetModule<T>(out T module) where T : IWeaponModule
         {
             for (int i = 0; i < modules.Length; i++)
             {

@@ -2,8 +2,10 @@ using System;
 
 namespace Core.Weapon
 {
+    public interface IWeaponModule { }
+
     [Serializable]
-    public abstract class WeaponModule
+    public abstract class WeaponModule : IWeaponModule
     {
         public abstract WeaponModule Clone();
 
