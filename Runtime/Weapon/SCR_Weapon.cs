@@ -76,6 +76,11 @@ namespace Core.Weapon
         {
             this.settings = settings.Clone() ?? this.settings;
 
+            for (int i = 0; i < modules.Length; i++)
+            {
+                modules[i].Initialize(this);
+            }
+
 #if UNITY_EDITOR
             if (settings == null)
             {
