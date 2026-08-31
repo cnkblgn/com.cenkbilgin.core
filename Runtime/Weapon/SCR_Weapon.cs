@@ -27,11 +27,10 @@ namespace Core.Weapon
             WeaponDefinition definition = id.GetDefinition();
 
             settings = definition.ExportSettings();
-            modules = new WeaponModule[definition.Modules.Length];
+            modules = definition.ExportModules();
 
             for (int i = 0; i < modules.Length; i++)
             {
-                modules[i] = definition.Modules[i].Clone();
                 modules[i].Initialize(this);
             }
         }

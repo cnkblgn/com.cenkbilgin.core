@@ -24,7 +24,7 @@ namespace Core.Item
 
         public readonly ItemComponent Component;
 
-        internal ItemDefinition(ItemID id, ItemTag[] tags, PrefabID entityID, PrefabID equipableID, MeshID meshID, IconID iconID,  LocalizedID nameID, LocalizedID descID, int width, int height, int stack, float weight, ItemComponent component)
+        internal ItemDefinition(ItemID id, ItemTag[] tags, PrefabID entityID, PrefabID equipableID, MeshID meshID, IconID iconID, LocalizedID nameID, LocalizedID descID, int width, int height, int stack, float weight, ItemComponent component)
         {
             ID = id;
             Tags = tags == null ? 0 : tags.CreateMask();

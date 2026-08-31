@@ -33,6 +33,8 @@ namespace Core.Trait
             {
                 entries[i].OnValidate();
             }
+
+            Editor.ReferenceUtility.FixReferences(this);
         }
 
         public override void Reload()
