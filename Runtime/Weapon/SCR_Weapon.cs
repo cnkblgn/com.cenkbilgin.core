@@ -45,7 +45,7 @@ namespace Core.Weapon
             }
         }
 
-        public void Initialize(Actor user, WeaponSettings settings)
+        public void Initialize(Actor user)
         {
             if (isInitialized)
             {
@@ -68,7 +68,6 @@ namespace Core.Weapon
             this.handler = GetComponent<IWeaponHandler>();
             this.tags = id.GetDefinition().Tags;
 
-            SetSettings(settings);
             handler.HandleInitialize(this);
         }
 
