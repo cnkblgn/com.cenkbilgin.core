@@ -79,7 +79,9 @@ namespace Core.Editor
             string fullPath = Path.Combine(Directory.GetParent(Application.dataPath).FullName, PATH);
             File.WriteAllText(fullPath, sb.ToString());
 
-            UnityEditor.EditorUtility.RevealInFinder(fullPath);
+            string svgPath = Path.ChangeExtension(fullPath, ".svg");
+            TryExportSvg(fullPath, svgPath);
+
             Debug.Log($"Assembly graph created at: {fullPath}. Visualize with https://dreampuf.github.io/GraphvizOnline/");
         }
         private static string ResolveName(string reference, Dictionary<string, string> guidToName)
@@ -101,6 +103,42 @@ namespace Core.Editor
         }
         private static string SanitizeName(string s) => s.Replace("\"", "'");
         private static bool IsProjectAssembly(string assetPath) => assetPath.StartsWith("Assets/", StringComparison.OrdinalIgnoreCase);
+
+        private static bool TryExportSvg(string dotPath, string svgPath)
+        {
+            // PATH'te ararken kullanýlacak olasý dot çalýþtýrýlabilir adlarý
+            string dotExe = Application.platform == RuntimePlatform.WindowsEditor ? "dot.exe" : "dot";
+
+            try
+            {
+                var info = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = dotExe,
+                    Arguments = $"-Tsvg \"{dotPath}\" -o \"{svgPath}\"",
+                    UseShellExecute = false,
+                    RedirectStandardError = true,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true
+                };
+
+                using var process = System.Diagnostics.Process.Start(info);
+                process.WaitForExit(10000);
+
+                if (process.ExitCode == 0 && File.Exists(svgPath))
+                {
+                    return true;
+                }
+
+                string error = process.StandardError.ReadToEnd();
+                Debug.LogWarning($"Assembly graph .svg creation failed: {error}");
+                return false;
+            }
+            catch (System.ComponentModel.Win32Exception)
+            {
+                Debug.LogWarning("Assembly graph .svg creation failed: GraphViz not found in system! please download from: https://graphviz.org/download/");
+                return false;
+            }
+        }
 
         [Serializable]
         private class AsmdefData

@@ -5,9 +5,10 @@ using Core.Actors;
 namespace Core.Weapon
 {
     [DisallowMultipleComponent]
-    public sealed class WeaponEntity : MonoBehaviour
+    public sealed class Weapon : MonoBehaviour
     {
         public WeaponID ID => id;
+        public ulong Tags => tags;
         public Actor User => user;
         public WeaponSettings Settings => settings;
 
@@ -16,7 +17,8 @@ namespace Core.Weapon
 
         private Actor user = null;
         private WeaponSettings settings = null;
-        private IWeaponHandler[] handlers = null;
+        private IWeaponHandler handler = null;
+        private ulong tags = 0;
         private bool isInitialized = false;
 
         public void Initialize(Actor user, WeaponSettings settings)
@@ -40,12 +42,10 @@ namespace Core.Weapon
 
             this.user = user;
             this.settings = settings ?? id.GetDefinition().ExportSettings();
-            this.handlers = GetComponents<IWeaponHandler>();
+            this.handler = GetComponent<IWeaponHandler>();
+            this.tags = id.GetDefinition().Tags;
 
-            for (int i = 0; i < handlers.Length; i++)
-            {
-                handlers[i].Initialize(this);
-            }
+            handler.HandleInitialize(this);
 
 #if UNITY_EDITOR
             if (settings == null)
@@ -53,27 +53,6 @@ namespace Core.Weapon
                 Debug.LogWarning("Weapon settings is missing! Now using default weapon settings! Ignore if its intented!");
             }
 #endif
-        }
-        public bool TryGetHandler<T>(out T handler) where T : IWeaponHandler
-        {        
-            if (!isInitialized)
-            {
-                handler = default;
-                Debug.LogError("You are trying to get handler with uninitialized weapon! please initialize first!");
-                return false;
-            }
-
-            for (int i = 0; i < handlers.Length; i++)
-            {
-                if (handlers[i] is T typedHandler)
-                {
-                    handler = typedHandler;
-                    return true;
-                }
-            }
-
-            handler = default;
-            return false;
         }
     }
 }
