@@ -6,16 +6,18 @@ namespace Core.Weapon
     {
         public readonly WeaponID ID;
         public readonly ulong Tags;
-        private readonly WeaponSettings settings;
+        private readonly WeaponSettings Settings;
+        internal readonly WeaponModule[] Modules;
 
-        public WeaponDefinition(WeaponID id, ulong tags, WeaponSettings settings)
+        public WeaponDefinition(WeaponID id, ulong tags, WeaponSettings settings, WeaponModule[] modules)
         {
             ID = id;
             Tags = tags;
-            this.settings = settings ?? throw new ArgumentNullException(nameof(settings), "Weapon definiton ctor failed! settings missing!?");
+            Settings = settings ?? throw new ArgumentNullException(nameof(settings), "Weapon definiton ctor failed! settings missing!?");
+            Modules = modules ?? throw new ArgumentNullException(nameof(settings), "Weapon definiton ctor failed! modules missing!?");
         }
-        public WeaponDefinition(WeaponEntry entry) : this(entry.ID, entry.Tags.CreateMask(), entry.Settings) { }
+        public WeaponDefinition(WeaponEntry entry) : this(entry.ID, entry.Tags.CreateMask(), entry.Settings, entry.Modules) { }
 
-        public WeaponSettings ExportSettings() => settings.Clone();
+        public WeaponSettings ExportSettings() => Settings.Clone();
     }
 }
