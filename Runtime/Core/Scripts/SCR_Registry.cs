@@ -10,7 +10,10 @@ namespace Core
         [SerializeField, ReadOnly] private int priority;
 
 #if UNITY_EDITOR
-        protected virtual void OnValidate() => priority = Priority;
+        protected virtual void OnValidate()
+        {
+            priority = Priority;
+        }
 #endif
 
         public abstract void Reload();

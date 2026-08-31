@@ -1,21 +1,20 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Reflection;
 using UnityEditor;
 
 namespace Core.Editor
 {
-    /// <summary>
-    /// Finds every concrete (non-abstract, non-generic-definition) type assignable to a
-    /// given base type/interface across all loaded assemblies, and caches the result as
-    /// a SearchCollection&lt;Type&gt; so it's only built once per base type.
-    /// Cache is cleared automatically before every assembly reload (script recompile),
-    /// so it stays correct even with "Reload Domain" disabled on Enter Play Mode.
-    /// </summary>
     [InitializeOnLoad]
     internal static class ReferenceDatabase
     {
         private static readonly Dictionary<Type, SearchCollection<Type>> database = new();
+
+        internal static readonly ConditionalWeakTable<object, Dictionary<string, int>> LastRefSizes = new();
+        internal static readonly Dictionary<Type, FieldInfo[]> ArrayFieldsCache = new();
+        internal static readonly Dictionary<Type, FieldInfo[]> RefFieldsCache = new();
+
         static ReferenceDatabase() { AssemblyReloadEvents.beforeAssemblyReload += ClearCollection; }
 
         public static void ClearCollection() => database.Clear();
