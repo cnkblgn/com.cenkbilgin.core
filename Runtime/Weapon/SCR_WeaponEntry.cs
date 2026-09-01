@@ -15,14 +15,12 @@ namespace Core.Weapon
         public WeaponID ID;
         public WeaponTag[] Tags;
         [SerializeReference, Reference] public WeaponSettings Settings;
-        [SerializeReference, Reference] public WeaponModule[] Modules;
 
-        public WeaponEntry(WeaponID id, WeaponTag[] tags, WeaponSettings settings, WeaponModule[] modules)
+        public WeaponEntry(WeaponID id, WeaponTag[] tags, WeaponSettings settings)
         {
             ID = id;
             Tags = tags;
             Settings = settings;
-            Modules = modules;
 
 #if UNITY_EDITOR
             Name = ID.Key;

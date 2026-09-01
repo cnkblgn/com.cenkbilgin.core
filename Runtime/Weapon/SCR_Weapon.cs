@@ -16,18 +16,15 @@ namespace Core.Weapon
         [SerializeField] private WeaponID id;
 
         private Actor user;
-        private WeaponModule[] modules;
         private WeaponSettings settings;
-        private IWeaponHandler handler;
+        private IWeaponModule[] modules;
         private ulong tags;
         private bool isInitialized;
 
         private void Awake()
         {
-            WeaponDefinition definition = id.GetDefinition();
-
-            settings = definition.ExportSettings();
-            modules = definition.ExportModules();
+            settings = id.GetDefinition().ExportSettings();
+            modules = GetComponents<IWeaponModule>();
 
             for (int i = 0; i < modules.Length; i++)
             {
@@ -62,12 +59,8 @@ namespace Core.Weapon
             }
 
             isInitialized = true;
-
             this.user = user;
-            this.handler = GetComponent<IWeaponHandler>();
             this.tags = id.GetDefinition().Tags;
-
-            handler.HandleInitialize(this);
         }
 
         public WeaponSettings GetSettings() => settings;
@@ -88,7 +81,7 @@ namespace Core.Weapon
 #endif
         }
 
-        public IReadOnlyList<WeaponModule> GetModules() => modules;
+        public IReadOnlyList<IWeaponModule> GetModules() => modules;
         public bool TryGetModule<T>(out T module) where T : IWeaponModule
         {
             for (int i = 0; i < modules.Length; i++)
