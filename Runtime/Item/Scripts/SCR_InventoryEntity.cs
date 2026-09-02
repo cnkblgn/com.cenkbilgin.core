@@ -98,6 +98,36 @@ namespace Core.Item
         public bool TryGetItemByPosition(Vector2Int position, out ItemData registered) => thisInventory.TryGetItemByPosition(position, out registered);
         public bool TryGetItemByArea(Vector2Int scale, Vector2Int position, out ItemData overlapped, out InventoryResult ctx) => thisInventory.TryGetItemByArea(scale, position, out overlapped, out ctx);
 
+        /// <summary> Tries to get item stack. returns 0 if failed </summary>
+        public bool TryGetItemStack(Guid instanceID, out int stack, out InventoryResult result)
+        {
+            stack = 0;
+
+            if (!TryGetItemByInstanceID(instanceID, out ItemData registered))
+            {
+                result = InventoryResult.NOT_REGISTERED;
+                return false;
+            }
+
+            stack = registered.GetStack();
+            result = InventoryResult.SUCCESS;
+            return true;
+        }
+
+        /// <summary> Tries to set item stack. </summary>
+        public bool TrySetItemStack(Guid instanceID, int stack, out InventoryResult result)
+        {
+            if (!TryGetItemByInstanceID(instanceID, out ItemData registered))
+            {
+                result = InventoryResult.NOT_REGISTERED;
+                return false;
+            }
+
+            registered.SetStack(stack);
+            SetState(InventoryState.ITEM_CHANGED, result = InventoryResult.SUCCESS, registered);
+            return true;
+        }
+
         /// <summary> Tries to add item. Set position null if you want automatic positioning. </summary>
         public bool TryAddItem(ItemData item, Vector2Int? position, out ItemData registered, out InventoryResult result)
         {
@@ -154,7 +184,6 @@ namespace Core.Item
 
             return true;
         }
-
         /// <summary> Tries to completely remove existing item from inventory. </summary>
         public bool TryRemoveItem(Guid instanceID, out ItemData registered, out InventoryResult result)
         {
