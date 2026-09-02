@@ -113,7 +113,6 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return true;
         }
-
         /// <summary> Tries to set item stack. </summary>
         public bool TrySetItemStack(Guid instanceID, int stack, out InventoryResult result)
         {
@@ -127,7 +126,6 @@ namespace Core.Item
             SetState(InventoryState.ITEM_CHANGED, result = InventoryResult.SUCCESS, registered);
             return true;
         }
-
         /// <summary> Tries to add item. Set position null if you want automatic positioning. </summary>
         public bool TryAddItem(ItemData item, Vector2Int? position, out ItemData registered, out InventoryResult result)
         {
