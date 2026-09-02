@@ -69,11 +69,6 @@ namespace Core.Item
         public float GetWeight() => BaseID.GetDefinition().Weight * stack;
 
         public int GetStack() => stack;
-        public void SetStack(int value)
-        {
-            stack = Mathf.Clamp(value, 0, BaseID.GetDefinition().Stack);
-
-            Debug.Log("Stack Changed: " + stack);
-        }
+        public void SetStack(int value) => stack = Mathf.Clamp(value, 0, BaseID.GetDefinition().Stack);
     }
 }
