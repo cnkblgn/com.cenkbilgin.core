@@ -11,6 +11,7 @@ namespace Core.Animation
         private float frequency;
         private float damping;
         private const float EPS = 0.0001f;
+        private const float FREQ_EPS = 1e-5f;
 
         public void Start(SpringConfig config, float strength)
         {
@@ -26,6 +27,7 @@ namespace Core.Animation
             damping = Mathf.Clamp01(config.Damping);
             IsActive = true;
         }
+
         public Vector3 Update(float deltaTime)
         {
             if (!IsActive)
@@ -33,9 +35,44 @@ namespace Core.Animation
                 return currentValue;
             }
 
-            Vector3 acceleration = -frequency * frequency * currentValue - 2f * damping * frequency * currentVelocity;
-            currentVelocity += acceleration * deltaTime;
-            currentValue += currentVelocity * deltaTime;
+            float w = frequency;
+            float z = damping;
+
+            if (w < FREQ_EPS)
+            {
+                currentValue += currentVelocity * deltaTime;
+            }
+            else
+            {
+                float a = z * w;
+                Vector3 x0 = currentValue;
+                Vector3 v0 = currentVelocity;
+                float expTerm = Mathf.Exp(-a * deltaTime);
+
+                if (z < 0.999f)
+                {
+                    float wd = w * Mathf.Sqrt(1f - z * z);
+                    float cosT = Mathf.Cos(wd * deltaTime);
+                    float sinT = Mathf.Sin(wd * deltaTime);
+
+                    Vector3 B = (v0 + a * x0) / wd;
+
+                    Vector3 newValue = expTerm * (x0 * cosT + B * sinT);
+                    Vector3 C = (a * (v0 + a * x0) / wd) + x0 * wd;
+                    Vector3 newVelocity = expTerm * (v0 * cosT - C * sinT);
+
+                    currentValue = newValue;
+                    currentVelocity = newVelocity;
+                }
+                else
+                {
+                    Vector3 newValue = expTerm * (x0 + (v0 + a * x0) * deltaTime);
+                    Vector3 newVelocity = expTerm * (v0 - a * deltaTime * (v0 + a * x0));
+
+                    currentValue = newValue;
+                    currentVelocity = newVelocity;
+                }
+            }
 
             if (currentValue.sqrMagnitude < EPS && currentVelocity.sqrMagnitude < EPS)
             {
