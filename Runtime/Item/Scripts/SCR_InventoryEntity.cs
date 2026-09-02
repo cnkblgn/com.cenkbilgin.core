@@ -123,8 +123,10 @@ namespace Core.Item
             }
 
             registered.SetStack(stack);
+
             SetState(InventoryState.ITEM_CHANGED, result = InventoryResult.SUCCESS, registered);
-            return true;
+
+            return registered.GetStack() > 0 || TryRemoveItem(instanceID, out _, out result);
         }
         /// <summary> Tries to add item. Set position null if you want automatic positioning. </summary>
         public bool TryAddItem(ItemData item, Vector2Int? position, out ItemData registered, out InventoryResult result)
