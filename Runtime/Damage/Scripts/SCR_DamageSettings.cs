@@ -4,17 +4,30 @@ using UnityEngine;
 namespace Core.Damage
 {
     [Serializable]
-    public class DamageSettings
+    public struct DamageSettings
     {
-        public DamageMode Mode = DamageMode.DIRECT;
-        public DamageTag[] Tags = default;
-        [Min(0)] public float MinDamage = 1;
-        [Min(0)] public float MaxDamage = 1;
-        [Min(0)] public float MinForce = 1;
-        [Min(0)] public float MaxForce = 1;
-        [Min(0)] public float Radius = 1;
+        public static DamageSettings Default => new(DamageMode.DIRECT, default, 1, 1, 1, 1, 1);
 
-        public float GetDamage(float multiplier = 1) => UnityEngine.Random.Range(MinDamage, MaxDamage) * multiplier;
-        public float GetForce(float multiplier = 1) => UnityEngine.Random.Range(MinForce, MaxForce) * multiplier;
+        public DamageMode Mode;
+        public DamageTag[] Tags;
+        [Min(0)] public float MinDamage;
+        [Min(0)] public float MaxDamage;
+        [Min(0)] public float MinForce;
+        [Min(0)] public float MaxForce;
+        [Min(0)] public float Radius;
+
+        public DamageSettings(DamageMode mode, DamageTag[] tags, float minDamage, float maxDamage, float minForce, float maxForce, float radius)
+        {
+            Mode = mode;
+            Tags = tags;
+            MinDamage = minDamage;
+            MaxDamage = maxDamage;
+            MinForce = minForce;
+            MaxForce = maxForce;
+            Radius = radius;
+        }
+
+        public readonly float GetRandomDamage(float multiplier = 1) => UnityEngine.Random.Range(MinDamage, MaxDamage) * multiplier;
+        public readonly float GetRandomForce(float multiplier = 1) => UnityEngine.Random.Range(MinForce, MaxForce) * multiplier;
     }
 }

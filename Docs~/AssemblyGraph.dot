@@ -81,6 +81,9 @@ digraph Assemblies
   "ASM_PrefabEditor" -> "ASM_Core";
   "ASM_PrefabEditor" -> "ASM_CoreEditor";
   "ASM_PrefabEditor" -> "ASM_Prefab";
+  "ASM_Projectile" -> "ASM_Core";
+  "ASM_Projectile" -> "ASM_CoreEditor";
+  "ASM_Projectile" -> "ASM_Damage";
   "ASM_Quest" -> "ASM_Core";
   "ASM_Quest" -> "ASM_CoreEditor";
   "ASM_Quest" -> "ASM_Localization";
