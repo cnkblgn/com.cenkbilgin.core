@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Game
+namespace Core.Projectile
 {
     [Serializable]
     public struct ProjectileSettings

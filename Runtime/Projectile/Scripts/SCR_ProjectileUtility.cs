@@ -1,8 +1,7 @@
 using UnityEngine;
-using Core;
 using Core.Damage;
 
-namespace Game
+namespace Core.Projectile
 {
     using static HitUtility;
 
