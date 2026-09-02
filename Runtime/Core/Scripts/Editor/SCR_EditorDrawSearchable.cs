@@ -5,8 +5,6 @@ using UnityEngine;
 
 namespace Core.Editor
 {
-    using static CoreUtility;
-
     public abstract class EditorDrawSearchable<T> : PropertyDrawer
     {
         private const float PING_BUTTON_SIZE = 20f;

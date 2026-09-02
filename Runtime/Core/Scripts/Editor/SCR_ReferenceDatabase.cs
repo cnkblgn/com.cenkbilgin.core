@@ -15,9 +15,15 @@ namespace Core.Editor
         internal static readonly Dictionary<Type, FieldInfo[]> ArrayFieldsCache = new();
         internal static readonly Dictionary<Type, FieldInfo[]> RefFieldsCache = new();
 
-        static ReferenceDatabase() { AssemblyReloadEvents.beforeAssemblyReload += ClearCollection; }
+        static ReferenceDatabase() { AssemblyReloadEvents.beforeAssemblyReload += ClearAll; }
 
-        public static void ClearCollection() => database.Clear();
+        public static void ClearAll()
+        {
+            database.Clear();
+            ArrayFieldsCache.Clear();
+            RefFieldsCache.Clear();
+        }
+
         public static SearchCollection<Type> GetCollection(Type baseType)
         {
             if (database.TryGetValue(baseType, out SearchCollection<Type> collection))

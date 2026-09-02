@@ -152,6 +152,7 @@ namespace Core.Editor
 
             return fieldType;
         }
+
         internal static bool Validate(FieldInfo fieldInfo, out string error)
         {
             Type baseType = GetBaseType(fieldInfo);
