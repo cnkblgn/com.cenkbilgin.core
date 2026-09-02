@@ -23,13 +23,9 @@ namespace Core.Weapon
 
         private void Awake()
         {
-            settings = id.GetDefinition().ExportSettings();
             modules = GetComponents<IWeaponModule>();
 
-            for (int i = 0; i < modules.Length; i++)
-            {
-                modules[i].Initialize(this);
-            }
+            SetSettings(id.GetDefinition().ExportSettings());
         }
         private void Update()
         {
@@ -75,6 +71,11 @@ namespace Core.Weapon
                 return;
             }
 
+            if (settings == null)
+            {
+                SetSettings(id.GetDefinition().ExportSettings());
+            }
+
             settings.ExportTo(data);
 
             for (int i = 0; i < modules.Length; i++)
@@ -87,6 +88,11 @@ namespace Core.Weapon
             if (data == null)
             {
                 return;
+            }
+
+            if (settings == null)
+            {
+                SetSettings(id.GetDefinition().ExportSettings());
             }
 
             settings.ImportFrom(data);
