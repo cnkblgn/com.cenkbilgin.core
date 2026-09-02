@@ -33,6 +33,11 @@ namespace Core.Weapon
         }
         private void Update()
         {
+            if (!isInitialized)
+            {
+                return;
+            }
+
             float deltaTime = Time.deltaTime;
 
             for (int i = 0; i < modules.Length; i++)
@@ -61,6 +66,35 @@ namespace Core.Weapon
             isInitialized = true;
             this.user = user;
             this.tags = id.GetDefinition().Tags;
+        }
+
+        public void ExportTo(Dictionary<string, DataNode> data)
+        {
+            if (data == null)
+            {
+                return;
+            }
+
+            settings.ExportTo(data);
+
+            for (int i = 0; i < modules.Length; i++)
+            {
+                modules[i].ExportTo(data);
+            }
+        }
+        public void ImportFrom(Dictionary<string, DataNode> data)
+        {
+            if (data == null)
+            {
+                return;
+            }
+
+            settings.ImportFrom(data);
+
+            for (int i = 0; i < modules.Length; i++)
+            {
+                modules[i].ImportFrom(data);
+            }
         }
 
         public WeaponSettings GetSettings() => settings;
