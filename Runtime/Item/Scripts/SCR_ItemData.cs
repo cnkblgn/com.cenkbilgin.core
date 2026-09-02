@@ -66,7 +66,8 @@ namespace Core.Item
             return IsRotated ? new(height, width) : new(width, height);
         }
 
-        public float GetWeight() => BaseID.GetDefinition().Weight * stack;
+        public float GetWeight() => GetWeight(stack);
+        public float GetWeight(int stack) => BaseID.GetDefinition().Weight * stack;
 
         public int GetStack() => stack;
         public void SetStack(int value) => stack = Mathf.Clamp(value, 0, BaseID.GetDefinition().Stack);

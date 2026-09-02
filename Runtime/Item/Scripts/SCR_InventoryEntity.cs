@@ -99,20 +99,7 @@ namespace Core.Item
         public bool TryGetItemByArea(Vector2Int scale, Vector2Int position, out ItemData overlapped, out InventoryResult ctx) => thisInventory.TryGetItemByArea(scale, position, out overlapped, out ctx);
 
         /// <summary> Tries to get item stack. returns 0 if failed </summary>
-        public bool TryGetItemStack(Guid instanceID, out int stack, out InventoryResult result)
-        {
-            stack = 0;
-
-            if (!TryGetItemByInstanceID(instanceID, out ItemData registered))
-            {
-                result = InventoryResult.NOT_REGISTERED;
-                return false;
-            }
-
-            stack = registered.GetStack();
-            result = InventoryResult.SUCCESS;
-            return true;
-        }
+        public bool TryGetItemStack(Guid instanceID, out int stack, out InventoryResult result) => thisInventory.TryGetItemStack(instanceID, out stack, out result);
         /// <summary> Tries to set item stack. </summary>
         public bool TrySetItemStack(Guid instanceID, int stack, out InventoryResult result)
         {
@@ -122,7 +109,7 @@ namespace Core.Item
                 return false;
             }
 
-            registered.SetStack(stack);
+            thisInventory.TrySetItemStack(registered, stack, out _);
 
             SetState(InventoryState.ITEM_CHANGED, result = InventoryResult.SUCCESS, registered);
 

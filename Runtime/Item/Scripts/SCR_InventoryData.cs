@@ -59,6 +59,67 @@ namespace Core.Item
             CurrentWeight = 0;
         }
 
+        /// <summary> Tries to get item stack. returns 0 if failed </summary>
+        public bool TryGetItemStack(Guid instanceID, out int stack, out InventoryResult result)
+        {
+            stack = 0;
+
+            if (!TryGetItemByInstanceID(instanceID, out ItemData registered))
+            {
+                result = InventoryResult.NOT_REGISTERED;
+                return false;
+            }
+
+            stack = registered.GetStack();
+            result = InventoryResult.SUCCESS;
+            return true;
+        }
+        /// <summary> Tries to get item stack. returns 0 if failed </summary>
+        internal bool TryGetItemStack(ItemData itemData, out int stack, out InventoryResult result)
+        {
+            stack = 0;
+
+            if (itemData == null)
+            {
+                result = InventoryResult.NULL;
+                Debug.LogError("Try get item stack failed! item data is null!?");
+                return false;
+            }
+
+            return TryGetItemStack(itemData.InstanceID, out stack, out result);
+        }
+        /// <summary> Tries to set item stack. </summary>
+        public bool TrySetItemStack(Guid instanceID, int stack, out InventoryResult result)
+        {
+            if (!TryGetItemByInstanceID(instanceID, out ItemData registered))
+            {
+                result = InventoryResult.NOT_REGISTERED;
+                return false;
+            }
+
+            float previousWeight = registered.GetWeight();
+
+            registered.SetStack(stack);
+
+            float currentWeight = registered.GetWeight();
+
+            CurrentWeight = Mathf.Max(0f, CurrentWeight + (currentWeight - previousWeight));
+
+            result = InventoryResult.SUCCESS;
+            return true;
+        }
+        /// <summary> Tries to set item stack. </summary>
+        internal bool TrySetItemStack(ItemData itemData, int stack, out InventoryResult result)
+        {
+            if (itemData == null)
+            {
+                result = InventoryResult.NULL;
+                Debug.LogError("Try set item stack failed! item data is null!?");
+                return false;
+            }
+
+            return TrySetItemStack(itemData.InstanceID, stack, out result);
+        }
         /// <summary> Tries to add item. Set position null if you want automatic positioning. </summary>
         public bool TryAddItem(ItemData item, Vector2Int? position, out ItemData registered, out InventoryResult result)
         {
