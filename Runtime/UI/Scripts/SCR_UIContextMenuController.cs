@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Core.UI
 {
@@ -23,6 +24,8 @@ namespace Core.UI
         {
             thisCanvas = GetComponent<Canvas>();
             thisCanvas.Hide();
+
+            viewTemplate.gameObject.SetActive(false);
         }
         private void OnEnable()
         {
@@ -75,6 +78,7 @@ namespace Core.UI
             for (int i = 0; i < ctx.Items.Length; i++)
             {
                 UIContextItemView itemView = Instantiate(viewTemplate, viewContainer);
+                itemView.gameObject.SetActive(true);
                 itemView.Initialize(ctx.Items[i]);
 
                 thisItems.Add(itemView);
