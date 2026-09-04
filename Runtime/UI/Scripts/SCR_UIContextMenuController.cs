@@ -5,6 +5,7 @@ namespace Core.UI
 {
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Canvas))]
+    [RequireComponent(typeof(GraphicRaycaster))]
     internal sealed class UIContextMenuController : MonoBehaviour, IUIContextItemHandler, IUICursorStateHandler, IGameStateHandler
     {
         [Header("_")]
