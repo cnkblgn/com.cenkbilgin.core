@@ -23,8 +23,9 @@ namespace Core.Item
         public readonly float Weight;
 
         public readonly ItemComponent Component;
+        public readonly ItemAction[] Actions;
 
-        internal ItemDefinition(ItemID id, ItemTag[] tags, PrefabID entityID, PrefabID equipableID, MeshID meshID, IconID iconID, LocalizedID nameID, LocalizedID descID, int width, int height, int stack, float weight, ItemComponent component)
+        internal ItemDefinition(ItemID id, ItemTag[] tags, PrefabID entityID, PrefabID equipableID, MeshID meshID, IconID iconID, LocalizedID nameID, LocalizedID descID, int width, int height, int stack, float weight, ItemComponent component, ItemAction[] actions)
         {
             ID = id;
             Tags = tags == null ? 0 : tags.CreateMask();
@@ -39,6 +40,7 @@ namespace Core.Item
             Stack = stack;
             Weight = weight;
             Component = component ?? ItemComponent.DEFAULT;
+            Actions = actions ?? Array.Empty<ItemAction>();
         }
         internal ItemDefinition(ItemEntry entry) : this
         (
@@ -54,7 +56,8 @@ namespace Core.Item
             entry.Height,
             entry.Stack,
             entry.Weight,
-            entry.Component
+            entry.Component,
+            entry.Actions
         ) { }
     }
 }

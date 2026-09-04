@@ -13,7 +13,7 @@ namespace Core.Item
         [HideInInspector] public string Name;
 #endif
 
-        [Info("Please generate id if its not visible")] 
+        [Info("Please generate id if its not visible")]
         public ItemID ID;
         public ItemTag[] Tags;
         public PrefabID EntityID;
@@ -27,8 +27,9 @@ namespace Core.Item
         [Min(1)] public int Stack;
         [Range(InventoryData.MIN_WEIGHT, InventoryData.MAX_WEIGHT)] public float Weight;
         [SerializeReference, Reference] public ItemComponent Component;
+        [SerializeReference, Reference] public ItemAction[] Actions;
 
-        public ItemEntry(ItemID id, ItemTag[] tags, PrefabID entityID, PrefabID equipableID, MeshID meshID, IconID iconID, LocalizedID nameID, LocalizedID descID, int width, int height, int stack, float weight, ItemComponent component)
+        public ItemEntry(ItemID id, ItemTag[] tags, PrefabID entityID, PrefabID equipableID, MeshID meshID, IconID iconID, LocalizedID nameID, LocalizedID descID, int width, int height, int stack, float weight, ItemComponent component, ItemAction[] actions)
         {
             ID = id;
             Tags = tags;
@@ -43,6 +44,8 @@ namespace Core.Item
             Stack = stack;
             Weight = weight;
             Component = component;
+            Actions = actions;
+
 #if UNITY_EDITOR
             Name = ID.Key;
 #endif
