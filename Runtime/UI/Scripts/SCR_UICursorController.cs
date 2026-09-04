@@ -10,6 +10,9 @@ namespace Core.UI
     internal sealed class UICursorController : MonoBehaviour
     {
         [Header("_")]
+        [SerializeField] private bool debug;
+
+        [Header("_")]
         [SerializeField, Required] private RectTransform cursorTransform;
         [SerializeField, Required] private Image cursorImage;
 
@@ -119,6 +122,11 @@ namespace Core.UI
 
                 if (!handlers[i].HandleCanShowCursor())
                 {
+                    if (debug)
+                    {
+                        Debug.Log("Show Cursor Failed!");
+                    }
+
                     return;
                 }
             }
@@ -126,6 +134,11 @@ namespace Core.UI
             canvas.Show();
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Confined;
+
+            if (debug)
+            {
+                Debug.Log("Show Cursor Success!");
+            }
         }
         public void HideCursor()
         {
@@ -141,6 +154,11 @@ namespace Core.UI
 
                 if (!handlers[i].HandleCanHideCursor())
                 {
+                    if (debug)
+                    {
+                        Debug.Log("Hide Cursor Failed!");
+                    }
+
                     return;
                 }
             }
@@ -148,6 +166,11 @@ namespace Core.UI
             canvas.Hide();
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
+
+            if (debug)
+            {
+                Debug.Log("Hide Cursor Success!");
+            }
         }
     }
 }

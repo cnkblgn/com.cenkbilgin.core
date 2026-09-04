@@ -17,12 +17,14 @@ namespace Core.UI
 
         private CanvasGroup thisCanvas;
         private IUIPromptHandler thisHandler;
-        private bool isActive = true;
+        private bool isActive = false;
 
         private void Awake()
         {
             thisCanvas = GetComponent<CanvasGroup>();
             thisHandler = GetComponent<IUIPromptHandler>();
+
+            thisCanvas.Hide();
         }
         private void OnEnable()
         {
