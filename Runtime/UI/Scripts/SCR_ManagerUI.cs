@@ -18,6 +18,7 @@ namespace Core.UI
         [SerializeField, Required] private UITooltipController tooltipController = null;
         [SerializeField, Required] private UIWaypointController waypointController = null;
         [SerializeField, Required] private UINotificationController notificationController = null;
+        [SerializeField, Required] private UIContextMenuController contextMenuController = null;
         [SerializeField, Required] private UIPromptController promptController = null;
         [SerializeField, Required] private UITransitionController transitionController = null;
         [SerializeField, Required] private UISubtitleController subtitleController = null;
@@ -36,6 +37,7 @@ namespace Core.UI
             if (tooltipController == null) throw new NullReferenceException();
             if (waypointController == null) throw new NullReferenceException();
             if (notificationController == null) throw new NullReferenceException();
+            if (contextMenuController == null) throw new NullReferenceException();
             if (promptController == null) throw new NullReferenceException();
             if (transitionController == null) throw new NullReferenceException();
             if (viewportController == null) throw new NullReferenceException();
@@ -93,6 +95,9 @@ namespace Core.UI
 
         public void ShowPrompt<TContext>(string description, in TContext ctx) where TContext : struct => promptController.Show(description, in ctx);
         public void HidePrompt() => promptController.Hide();
+
+        public void ShowContextMenu(in UIContextMenuContext ctx) => contextMenuController.Show(in ctx);
+        public void HideContextMenu() => contextMenuController.Hide();
 
         public void ShowSubtitle(string text) => subtitleController.Show(text);
         public void HideSubtitle() => subtitleController.Hide();

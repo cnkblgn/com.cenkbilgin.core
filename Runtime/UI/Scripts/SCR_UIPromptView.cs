@@ -57,8 +57,6 @@ namespace Core.UI
                 return false;
             }
 
-            ManagerUI.Instance.ShowCursor();
-
             isActive = true;
             thisCanvas.Show();
             handler.Show(context);
@@ -76,8 +74,6 @@ namespace Core.UI
             {
                 return false;
             }
-
-            ManagerUI.Instance.HideCursor();
 
             isActive = false;
             thisCanvas.Hide();
