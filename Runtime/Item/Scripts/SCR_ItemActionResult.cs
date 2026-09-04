@@ -6,6 +6,6 @@ namespace Core.Item
         Failed,
         RequiresAmount,
         RequiresTarget,
-        RequiresSlot
+        RequiresSlot,
     }
 }
