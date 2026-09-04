@@ -241,6 +241,7 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return addedAny;
         }
+        public bool CanPlaceItem(ItemID id, Vector2Int position, bool isRotated, out InventoryResult result) => thisInventory.CanPlaceItem(id, position, isRotated, out result);
 
         public bool IsPositionValidForItem(ItemData item, Vector2Int position, out InventoryResult result) => this.thisInventory.IsPositionValidForItem(item, position, out result);
     }

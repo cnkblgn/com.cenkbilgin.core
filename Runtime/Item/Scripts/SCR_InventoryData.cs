@@ -214,6 +214,32 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return true;
         }
+        public bool CanPlaceItem(ItemID id, Vector2Int position, bool isRotated, out InventoryResult result)
+        {
+            if (!id.IsValid)
+            {
+                result = InventoryResult.NULL;
+                return false;
+            }
+
+            ItemDefinition definition = id.GetDefinition();
+
+            Vector2Int baseScale = new(definition.Width, definition.Height);
+            Vector2Int newScale = isRotated ? new(baseScale.y, baseScale.x) : baseScale;
+
+            if (TryGetItemByArea(newScale, position, out _, out result))
+            {
+                return false;
+            }
+
+            if (result == InventoryResult.OUT_OF_BOUNDS)
+            {
+                return false;
+            }
+
+            result = InventoryResult.SUCCESS;
+            return true;
+        }
 
         private void RegisterItem(ItemData item, Vector2Int position, out ItemData registered)
         {
