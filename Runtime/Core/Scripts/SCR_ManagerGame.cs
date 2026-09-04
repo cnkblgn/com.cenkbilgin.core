@@ -31,19 +31,9 @@ namespace Core
         [SerializeField, ReadOnly] private string[] playableScenes = null;
         [SerializeField, ReadOnly] private string[] buildScenes = null;
 
-        private readonly List<IGameStateHandler> thisHandlers = new();
+        private static readonly List<IGameStateHandler> thisHandlers = new();
         private string activeScene = STRING_EMPTY;
         private bool isLoading = false;
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void OnRuntimeInitialize()
-        {
-            OnGameStateChanged = null;
-            OnCurrentSceneLoading = null;
-            OnBeforeSceneChanged = null;
-            OnAfterSceneChanged = null;
-            OnTimeScaleChanged = null;
-        }
 
         private void Start() => SetCurrentScene(startingScene.Name, LoadSceneMode.Single);
         private void OnEnable() => SceneManager.activeSceneChanged += OnActiveSceneChanged;
@@ -80,9 +70,18 @@ namespace Core
         }
 #endif
 
-        private void OnActiveSceneChanged(UnityEngine.SceneManagement.Scene oldScene, UnityEngine.SceneManagement.Scene newScene) => activeScene = newScene.name;
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void OnRuntimeInitialize()
+        {
+            OnGameStateChanged = null;
+            OnCurrentSceneLoading = null;
+            OnBeforeSceneChanged = null;
+            OnAfterSceneChanged = null;
+            OnTimeScaleChanged = null;
 
-        public void BindHandler(IGameStateHandler value)
+            thisHandlers.Clear();
+        }
+        public static void BindHandler(IGameStateHandler value)
         {
             if (thisHandlers.Contains(value))
             {
@@ -91,7 +90,7 @@ namespace Core
 
             thisHandlers.Add(value);
         }
-        public void UnbindHandler(IGameStateHandler value)
+        public static void UnbindHandler(IGameStateHandler value)
         {
             if (!thisHandlers.Contains(value))
             {
@@ -100,6 +99,8 @@ namespace Core
 
             thisHandlers.Remove(value);
         }
+
+        private void OnActiveSceneChanged(UnityEngine.SceneManagement.Scene oldScene, UnityEngine.SceneManagement.Scene newScene) => activeScene = newScene.name;
 
         public void ResumeGame()
         {
@@ -110,6 +111,14 @@ namespace Core
 
             for (int i = thisHandlers.Count - 1; i >= 0; i--)
             {
+                if (thisHandlers[i] == null)
+                {
+#if UNITY_EDITOR
+                    Debug.LogError("Resume game failed. One or more game state handler is missing!?");
+#endif
+                    continue;
+                }
+
                 if (!thisHandlers[i].HandleCanResumeGame())
                 {
                     return;
@@ -127,6 +136,14 @@ namespace Core
 
             for (int i = thisHandlers.Count - 1; i >= 0; i--)
             {
+                if (thisHandlers[i] == null)
+                {
+#if UNITY_EDITOR
+                    Debug.LogError("Pause game failed. One or more game state handler is missing!?");
+#endif
+                    continue;
+                }
+
                 if (!thisHandlers[i].HandleCanPauseGame())
                 {
                     return;

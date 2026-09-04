@@ -17,6 +17,7 @@ namespace Core.UI
         [SerializeField] private UICursorData[] cursors;
 
         private readonly Dictionary<string, UICursorData> table = new();
+        private static readonly List<IUICursorStateHandler> handlers = new();
         private Canvas canvas;
         private bool hasFocus;
 
@@ -34,8 +35,28 @@ namespace Core.UI
         }
         private void OnApplicationFocus(bool focus) => hasFocus = focus;
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void OnRuntimeInitialize() => handlers.Clear();
         private static bool IsValid(Vector2 value) => float.IsFinite(value.x) && float.IsFinite(value.y);
+        public static void BindHandler(IUICursorStateHandler value)
+        {
+            if (handlers.Contains(value))
+            {
+                return;
+            }
 
+            handlers.Add(value);
+        }
+        public static void UnbindHandler(IUICursorStateHandler value)
+        {
+            if (!handlers.Contains(value))
+            {
+                return;
+            }
+
+            handlers.Remove(value);
+        }
+         
         private bool TryGetCursor(string id, out UICursorData cursor)
         {
             if (id == null)
@@ -51,7 +72,6 @@ namespace Core.UI
             Debug.LogWarning($"[{id}] is not defined");
             return false;
         }
-
         public void MoveCursor(Vector2 screenPosition)
         {
             if (!hasFocus)
@@ -87,15 +107,45 @@ namespace Core.UI
         }
         public void ShowCursor()
         {
-            canvas.Show();
+            for (int i = handlers.Count - 1; i >= 0; i--)
+            {
+                if (handlers[i] == null)
+                {
+#if UNITY_EDITOR
+                    Debug.LogError("Show cursor failed. One or more game state handler is missing!?");
+#endif
+                    continue;
+                }
 
+                if (!handlers[i].HandleCanShowCursor())
+                {
+                    return;
+                }
+            }
+
+            canvas.Show();
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Confined;
         }
         public void HideCursor()
         {
-            canvas.Hide();
+            for (int i = handlers.Count - 1; i >= 0; i--)
+            {
+                if (handlers[i] == null)
+                {
+#if UNITY_EDITOR
+                    Debug.LogError("Hide cursor failed. One or more game state handler is missing!?");
+#endif
+                    continue;
+                }
 
+                if (!handlers[i].HandleCanHideCursor())
+                {
+                    return;
+                }
+            }
+
+            canvas.Hide();
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
         }

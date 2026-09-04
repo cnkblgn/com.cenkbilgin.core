@@ -4,8 +4,6 @@ using UnityEngine;
 
 namespace Core.UI
 {
-    using static CoreUtility;
-
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Canvas))]
     internal sealed class UINotificationController : MonoBehaviour
@@ -16,7 +14,7 @@ namespace Core.UI
         [SerializeField, Required] private RectTransform notificationContainer = null;
 
         [Header("_")]
-        [SerializeField, Min(0)] private float yPadding = 16;
+        [SerializeField, Min(0)] private float yPadding = 8;
 
         private Canvas thisCanvas = null;
         private List<UINotification> activeEntities = new(1);
@@ -36,6 +34,7 @@ namespace Core.UI
             for (int i = 0; i < maxSize; i++)
             {
                 UINotification obj = Instantiate(notificationTemplate, notificationContainer);
+
                 obj.Initialize();
 
                 activeEntities.Add(obj);

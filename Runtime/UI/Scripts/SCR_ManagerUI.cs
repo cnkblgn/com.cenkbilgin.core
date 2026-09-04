@@ -18,7 +18,7 @@ namespace Core.UI
         [SerializeField, Required] private UITooltipController tooltipController = null;
         [SerializeField, Required] private UIWaypointController waypointController = null;
         [SerializeField, Required] private UINotificationController notificationController = null;
-        [SerializeField, Required] private UIConfirmationController confirmationController = null;
+        [SerializeField, Required] private UIPromptController promptController = null;
         [SerializeField, Required] private UITransitionController transitionController = null;
         [SerializeField, Required] private UISubtitleController subtitleController = null;
         [SerializeField, Required] private UIViewportController viewportController = null;
@@ -36,7 +36,7 @@ namespace Core.UI
             if (tooltipController == null) throw new NullReferenceException();
             if (waypointController == null) throw new NullReferenceException();
             if (notificationController == null) throw new NullReferenceException();
-            if (confirmationController == null) throw new NullReferenceException();
+            if (promptController == null) throw new NullReferenceException();
             if (transitionController == null) throw new NullReferenceException();
             if (viewportController == null) throw new NullReferenceException();
 
@@ -91,8 +91,8 @@ namespace Core.UI
         public void ShowTooltip(string value, Vector2 screenPosition) => tooltipController.Show(value, screenPosition);
         public void HideTooltip() => tooltipController.Hide();
 
-        public void ShowConfirmation(in UIConfirmationContext ctx) => confirmationController.Show(in ctx);
-        public void HideConfirmation() => confirmationController.Hide();
+        public void ShowPrompt<TContext>(string description, in TContext ctx) where TContext : struct => promptController.Show(description, in ctx);
+        public void HidePrompt() => promptController.Hide();
 
         public void ShowSubtitle(string text) => subtitleController.Show(text);
         public void HideSubtitle() => subtitleController.Hide();
