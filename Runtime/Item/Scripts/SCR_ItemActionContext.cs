@@ -11,8 +11,8 @@ namespace Core.Item
         public ItemActionContext(InventoryEntity inventory, ItemID itemBaseID, Guid itemInstanceID)
         {
             Inventory = inventory != null ? inventory : throw new ArgumentNullException(nameof(inventory), "Item action ctx failed! target inventory missing!?");
-            ItemBaseID = itemBaseID;
-            ItemInstanceID = itemInstanceID;
+            ItemBaseID = !itemBaseID.IsValid ? throw new ArgumentNullException(nameof(inventory), "Item action ctx failed! target item base id is not valid!?") : itemBaseID;
+            ItemInstanceID = itemInstanceID == Guid.Empty ? throw new ArgumentNullException(nameof(inventory), "Item action ctx failed! target item instance id is not valid!?") : itemInstanceID;
         }
     }
 }
