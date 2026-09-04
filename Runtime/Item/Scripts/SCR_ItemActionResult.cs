@@ -5,6 +5,7 @@ namespace Core.Item
         Completed,
         Failed,
         RequiresAmount,
-        RequiresTarget
+        RequiresTarget,
+        RequiresSlot
     }
 }

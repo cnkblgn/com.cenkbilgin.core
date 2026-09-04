@@ -7,6 +7,8 @@ namespace Core.Item
     {
         public abstract string GetName();
 
+        public abstract bool CanApply();
+
         public abstract ItemActionResult Apply(in ItemActionContext context);
     }
 }
