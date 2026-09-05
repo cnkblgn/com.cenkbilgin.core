@@ -4,6 +4,7 @@ namespace Core.Item
     {
         DEFAULT,
         INITIALIZED,
+        SORTED,
         ITEM_ADDED,
         ITEM_REMOVED,
         ITEM_DROPPED,

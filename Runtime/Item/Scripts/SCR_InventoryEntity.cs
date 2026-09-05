@@ -85,7 +85,7 @@ namespace Core.Item
         public IReadOnlyCollection<Guid> GetItems() => thisInventory.GetItems();
         public int GetItems(ItemID baseID) => thisInventory.GetItems(baseID);
 
-        public bool TryGetValidPositionForItem(ItemData item, out Vector2Int position, out InventoryResult result) => this.thisInventory.TryGetValidPositionForItem(item, out position, out result);
+        public bool TryGetValidPositionForItem(ItemData item, out Vector2Int position, out InventoryResult result) => this.thisInventory.TryGetValidPosition(item, out position, out result);
         public bool TryGetClampedPosition(Vector2Int scale, ref Vector2Int position, out InventoryResult result) => thisInventory.TryGetClampedPosition(scale, ref position, out result);
         public bool TryGetAnyPosition(Vector2Int scale, out Vector2Int position, out InventoryResult result) => thisInventory.TryGetAnyPosition(scale, out position, out result);
         public bool TryGetItemByTag(ItemTag tag, out ItemData registered, out InventoryResult result) => thisInventory.TryGetItemByTag(tag, out registered, out result);
@@ -98,6 +98,30 @@ namespace Core.Item
         public bool TryGetItemByPosition(Vector2Int position, out ItemData registered) => thisInventory.TryGetItemByPosition(position, out registered);
         public bool TryGetItemByArea(Vector2Int scale, Vector2Int position, out ItemData overlapped, out InventoryResult ctx) => thisInventory.TryGetItemByArea(scale, position, out overlapped, out ctx);
 
+        public bool IsPositionValid(ItemData item, Vector2Int position, out InventoryResult result) => thisInventory.IsPositionValid(item, position, out result);
+        public bool CanPlaceItem(ItemID id, Vector2Int position, bool isRotated, out InventoryResult result) => thisInventory.CanPlaceItem(id, position, isRotated, out result);
+
+        public bool TrySortItems(IInventorySorter sorter, out InventoryResult result) => thisInventory.TrySortItems(sorter, out result);
+        public bool TrySortItemsByArea(bool descending, out InventoryResult result) => thisInventory.TrySortItems(descending ? InventorySorter.SortByAreaDescending : InventorySorter.SortByArea, out result);
+        public bool TrySortItemsByTag(out InventoryResult result) => thisInventory.TrySortItems(InventorySorter.SortByTag, out result);
+        public bool TrySortItemsByTag(IReadOnlyList<ItemTag> priority, out InventoryResult result) => thisInventory.TrySortItems(new InventorySortByTag(priority), out result);
+        public bool TryMergeStacks(Func<ItemData, ItemData, bool> canStackPredicate, out InventoryResult result)
+        {
+            bool state = thisInventory.TryMergeStacks(canStackPredicate, out List<ItemData> changed, out List<ItemData> removed, out result);
+
+            foreach (ItemData item in changed)
+            {
+                SetState(InventoryState.ITEM_CHANGED, InventoryResult.SUCCESS, item);
+            }
+
+            foreach (ItemData item in removed)
+            {
+                SetState(InventoryState.ITEM_REMOVED, InventoryResult.SUCCESS, item);
+            }
+
+            return state;
+        }
+        public bool TryMergeStacks(out InventoryResult result) => TryMergeStacks(null, out result);
         /// <summary> Tries to get item stack. returns 0 if failed </summary>
         public bool TryGetItemStack(Guid instanceID, out int stack, out InventoryResult result) => thisInventory.TryGetItemStack(instanceID, out stack, out result);
         /// <summary> Tries to set item stack. </summary>
@@ -114,6 +138,60 @@ namespace Core.Item
             SetState(InventoryState.ITEM_CHANGED, result = InventoryResult.SUCCESS, registered);
 
             return registered.GetStack() > 0 || TryRemoveItem(instanceID, out _, out result);
+        }
+        /// <summary> Tries to transfer item. Set position null if you want automatic positioning. </summary>
+        public bool TryTransferItem(Guid instanceID, Vector2Int? position, InventoryEntity inventory, out ItemData transfered, out InventoryResult result)
+        {
+            transfered = null;
+
+            if (inventory == null)
+            {
+                result = InventoryResult.NULL;
+                throw new ArgumentNullException($"Inventory transfer item failed target inventory is null! {nameof(inventory)}");
+            }
+
+            if (!TryGetItemByInstanceID(instanceID, out ItemData registered))
+            {
+                Debug.LogError($"Inventory transfer item failed! [{instanceID}] not found!");
+                result = InventoryResult.NOT_REGISTERED;
+                return false;
+            }
+
+            if (inventory.TryAddItem(registered, position, out transfered, out result))
+            {
+                if (TryRemoveItem(instanceID, out _, out result))
+                {
+                    SetState(InventoryState.ITEM_TRANSFERED, result, transfered);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        /// <summary> Tries to transfer all items with automatic positioning. </summary>
+        public bool TryTransferItems(InventoryEntity inventory, out InventoryResult result)
+        {
+            if (inventory == null)
+            {
+                result = InventoryResult.NULL;
+                throw new ArgumentNullException($"Inventory transfer items failed target inventory is null! {nameof(inventory)}");
+            }
+
+            bool addedAny = false;
+
+            foreach (Guid id in GetItems().ToList())
+            {
+                if (TryGetItemByInstanceID(id, out ItemData registered) && inventory.TryAddItem(registered, null, out _, out _))
+                {
+                    if (TryRemoveItem(id, out _, out _))
+                    {
+                        addedAny = true;
+                    }
+                }
+            }
+
+            result = InventoryResult.SUCCESS;
+            return addedAny;
         }
         /// <summary> Tries to add item. Set position null if you want automatic positioning. </summary>
         public bool TryAddItem(ItemData item, Vector2Int? position, out ItemData registered, out InventoryResult result)
@@ -186,63 +264,6 @@ namespace Core.Item
         /// <summary> Tries to clear existing item from tile. </summary>
         public bool TryClearItem(Guid instanceID, out ItemData registered, out InventoryResult result) => thisInventory.TryClearItem(instanceID, out registered, out result);
         /// <summary> Tries to assign existing item to tile. </summary>
-        public bool TryPlaceItem(Guid instanceID, Vector2Int position, bool rotate, out ItemData registered, out InventoryResult ctx) => thisInventory.TryPlaceItem(instanceID, position, rotate, out registered, out ctx);
-        /// <summary> Tries to transfer item. Set position null if you want automatic positioning. </summary>
-        public bool TryTransferItem(Guid instanceID, Vector2Int? position, InventoryEntity inventory, out ItemData transfered, out InventoryResult result)
-        {
-            transfered = null;
-
-            if (inventory == null)
-            {
-                result = InventoryResult.NULL;
-                throw new ArgumentNullException($"Inventory transfer item failed target inventory is null! {nameof(inventory)}");
-            }
-
-            if (!TryGetItemByInstanceID(instanceID, out ItemData registered))
-            {
-                Debug.LogError($"Inventory transfer item failed! [{instanceID}] not found!");
-                result = InventoryResult.NOT_REGISTERED;
-                return false;
-            }
-
-            if (inventory.TryAddItem(registered, position, out transfered, out result))
-            {
-                if (TryRemoveItem(instanceID, out _, out result))
-                { 
-                    SetState(InventoryState.ITEM_TRANSFERED, result, transfered);
-                    return true;
-                }              
-            }
-
-            return false;
-        }
-        /// <summary> Tries to transfer all items with automatic positioning. </summary>
-        public bool TryTransferItems(InventoryEntity inventory, out InventoryResult result)
-        {
-            if (inventory == null)
-            {
-                result = InventoryResult.NULL;
-                throw new ArgumentNullException($"Inventory transfer items failed target inventory is null! {nameof(inventory)}");
-            }
-
-            bool addedAny = false;
-
-            foreach (Guid id in GetItems().ToList())
-            {
-                if (TryGetItemByInstanceID(id, out ItemData registered) && inventory.TryAddItem(registered, null, out _, out _))
-                {
-                    if (TryRemoveItem(id, out _, out _))
-                    {
-                        addedAny = true;
-                    }
-                }
-            }
-
-            result = InventoryResult.SUCCESS;
-            return addedAny;
-        }
-        public bool CanPlaceItem(ItemID id, Vector2Int position, bool isRotated, out InventoryResult result) => thisInventory.CanPlaceItem(id, position, isRotated, out result);
-
-        public bool IsPositionValidForItem(ItemData item, Vector2Int position, out InventoryResult result) => this.thisInventory.IsPositionValidForItem(item, position, out result);
+        public bool TryPlaceItem(Guid instanceID, Vector2Int position, bool rotate, out ItemData registered, out InventoryResult ctx) => thisInventory.TryPlaceItem(instanceID, position, rotate, out registered, out ctx);       
     }
 }
