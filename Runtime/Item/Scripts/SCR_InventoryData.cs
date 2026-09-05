@@ -442,7 +442,7 @@ namespace Core.Item
                     {
                         ItemData source = group[j];
 
-                        if (TryMergeItem(target, this, source, canStackPredicate, out result))
+                        if (TryMergeItem(target, source, this, canStackPredicate, out result))
                         {
                             totalMoved++;
                         }
@@ -459,10 +459,10 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return true;
         }
-        public bool TryMergeItem(Guid targetInstanceID, Guid sourceInstanceID, out InventoryResult result) => TryMergeItem(targetInstanceID, this, sourceInstanceID, null, out result);
-        public bool TryMergeItem(Guid targetInstanceID, Guid sourceInstanceID, Func<ItemData, ItemData, bool> canStackPredicate, out InventoryResult result) => TryMergeItem(targetInstanceID, this, sourceInstanceID, canStackPredicate, out result);
-        public bool TryMergeItem(Guid targetInstanceID, InventoryData sourceInventory, Guid sourceInstanceID, out InventoryResult result) => TryMergeItem(targetInstanceID, sourceInventory, sourceInstanceID, null, out result);
-        public bool TryMergeItem(Guid targetInstanceID, InventoryData sourceInventory, Guid sourceInstanceID, Func<ItemData, ItemData, bool> canStackPredicate, out InventoryResult result)
+        public bool TryMergeItem(Guid targetInstanceID, Guid sourceInstanceID, out InventoryResult result) => TryMergeItem(targetInstanceID, sourceInstanceID, this, null, out result);
+        public bool TryMergeItem(Guid targetInstanceID, Guid sourceInstanceID, Func<ItemData, ItemData, bool> canStackPredicate, out InventoryResult result) => TryMergeItem(targetInstanceID, sourceInstanceID, this, canStackPredicate, out result);
+        public bool TryMergeItem(Guid targetInstanceID, Guid sourceInstanceID, InventoryData sourceInventory, out InventoryResult result) => TryMergeItem(targetInstanceID, sourceInstanceID, sourceInventory, null, out result);
+        public bool TryMergeItem(Guid targetInstanceID, Guid sourceInstanceID, InventoryData sourceInventory,Func<ItemData, ItemData, bool> canStackPredicate, out InventoryResult result)
         {
             if (sourceInventory == null)
             {
@@ -481,9 +481,9 @@ namespace Core.Item
                 return false;
             }
 
-            return TryMergeItem(targetItem, sourceInventory, sourceItem, canStackPredicate, out result);
+            return TryMergeItem(targetItem, sourceItem, sourceInventory, canStackPredicate, out result);
         }
-        private bool TryMergeItem(ItemData targetItem, InventoryData sourceInventory, ItemData sourceItem, Func<ItemData, ItemData, bool> canStackPredicate, out InventoryResult result)
+        private bool TryMergeItem(ItemData targetItem, ItemData sourceItem, InventoryData sourceInventory, Func<ItemData, ItemData, bool> canStackPredicate, out InventoryResult result)
         {
             if (sourceInventory == null)
             {
@@ -720,7 +720,7 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return addedAny;
         }
-        public bool TrySwapItems(Guid instanceID, InventoryData targetInventory, Guid targetInstanceID, out InventoryResult result)
+        public bool TrySwapItems(Guid instanceID, Guid targetInstanceID, InventoryData targetInventory, out InventoryResult result)
         {
             if (targetInventory == null)
             {
