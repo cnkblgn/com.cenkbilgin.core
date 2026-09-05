@@ -422,9 +422,7 @@ namespace Core.Item
                     continue;
                 }
 
-                int maxStack = group[0].BaseID.GetDefinition().Stack;
-
-                if (maxStack <= 1)
+                if (!group[0].IsStackable())
                 {
                     continue;
                 }
