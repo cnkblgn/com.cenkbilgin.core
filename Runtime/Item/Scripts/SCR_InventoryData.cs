@@ -35,7 +35,7 @@ namespace Core.Item
             CurrentWeight = 0;
             itemGrid = new ItemData[GridWidth * GridHeight];
             itemTable = new();
-            ItemMask = mask; 
+            ItemMask = mask;
 
             if (items == null)
             {
@@ -91,18 +91,26 @@ namespace Core.Item
                 throw new ArgumentNullException(nameof(item));
             }
 
+            bool originalRotation = item.IsRotated;
+
             if (!TryGetAnyPosition(item.GetScale(), out position, out _))
             {
                 item.IsRotated = !item.IsRotated;
 
                 if (!TryGetAnyPosition(item.GetScale(), out position, out result))
                 {
-                    item.IsRotated = !item.IsRotated;
+                    item.IsRotated = originalRotation;
                     return false;
                 }
             }
 
-            return IsPositionValid(item, position, out result);
+            if (!IsPositionValid(item, position, out result))
+            {
+                item.IsRotated = originalRotation;
+                return false;
+            }
+
+            return true;
         }
         public bool TryGetClampedPosition(Vector2Int scale, ref Vector2Int position, out InventoryResult result)
         {
@@ -292,6 +300,11 @@ namespace Core.Item
                 return false;
             }
 
+            if (result == InventoryResult.OUT_OF_BOUNDS)
+            {
+                return false;
+            }
+
             if (!IsWeightEnough(item.GetWeight()))
             {
                 result = InventoryResult.WEIGHT_LIMIT_EXCEEDED;
@@ -460,7 +473,7 @@ namespace Core.Item
         public bool TryMergeItem(Guid targetInstanceID, Guid sourceInstanceID, out InventoryResult result) => TryMergeItem(targetInstanceID, sourceInstanceID, this, null, out result);
         public bool TryMergeItem(Guid targetInstanceID, Guid sourceInstanceID, Func<ItemData, ItemData, bool> canStackPredicate, out InventoryResult result) => TryMergeItem(targetInstanceID, sourceInstanceID, this, canStackPredicate, out result);
         public bool TryMergeItem(Guid targetInstanceID, Guid sourceInstanceID, InventoryData sourceInventory, out InventoryResult result) => TryMergeItem(targetInstanceID, sourceInstanceID, sourceInventory, null, out result);
-        public bool TryMergeItem(Guid targetInstanceID, Guid sourceInstanceID, InventoryData sourceInventory,Func<ItemData, ItemData, bool> canStackPredicate, out InventoryResult result)
+        public bool TryMergeItem(Guid targetInstanceID, Guid sourceInstanceID, InventoryData sourceInventory, Func<ItemData, ItemData, bool> canStackPredicate, out InventoryResult result)
         {
             if (sourceInventory == null)
             {
@@ -539,6 +552,24 @@ namespace Core.Item
             {
                 result = InventoryResult.NO_VALID_SPACE;
                 return false;
+            }
+
+            if (sourceInventory != this)
+            {
+                int sourceStack = sourceItem.GetStack();
+                float unitWeight = sourceStack > 0 ? sourceItem.GetWeight() / sourceStack : 0f;
+
+                if (unitWeight > 0f)
+                {
+                    int maxByWeight = Mathf.FloorToInt((MaximumWeight - CurrentWeight) / unitWeight);
+                    amount = Mathf.Min(amount, Mathf.Max(0, maxByWeight));
+                }
+
+                if (amount <= 0)
+                {
+                    result = InventoryResult.WEIGHT_LIMIT_EXCEEDED;
+                    return false;
+                }
             }
 
             TrySetItemStack(targetItem, targetItem.GetStack() + amount, out _);
@@ -690,6 +721,13 @@ namespace Core.Item
                     Notify(InventoryState.ITEM_TRANSFERED, result, transfered);
                     return true;
                 }
+
+                if (!inventory.TryRemoveItem(transfered.InstanceID, out _, out _))
+                {
+                    Debug.LogError($"CRITICAL: Transfer rollback failed! Item [{transfered.InstanceID}] may now exist in two inventories.");
+                }
+
+                transfered = null;
             }
 
             return false;
@@ -891,19 +929,22 @@ namespace Core.Item
                 return false;
             }
 
+            Vector2Int oldPosition = registered.Position;
+            Vector2Int oldScale = registered.GetScale();
             bool oldRotation = registered.IsRotated;
+
+            SetTileItem(null, oldPosition, oldScale);
+
             registered.IsRotated = isRotated;
             Vector2Int newScale = registered.GetScale();
 
-            if (TryGetItemByArea(newScale, position, out _, out result))
-            {
-                registered.IsRotated = oldRotation;
-                return false;
-            }
+            bool overlaps = TryGetItemByArea(newScale, position, out _, out result);
 
-            if (result == InventoryResult.OUT_OF_BOUNDS)
+            if (overlaps || result == InventoryResult.OUT_OF_BOUNDS)
             {
+                // Geri al: rotasyonu ve eski grid alanýný eski haline getir.
                 registered.IsRotated = oldRotation;
+                SetTileItem(registered, oldPosition, oldScale);
                 return false;
             }
 
