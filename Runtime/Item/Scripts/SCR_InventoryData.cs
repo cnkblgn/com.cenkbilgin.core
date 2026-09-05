@@ -401,7 +401,7 @@ namespace Core.Item
 
             Dictionary<ItemID, List<ItemData>> groups = new();
 
-            foreach (Guid id in items)
+            foreach (Guid id in items.ToArray())
             {
                 if (TryGetItemByInstanceID(id, out ItemData registered))
                 {
@@ -706,7 +706,7 @@ namespace Core.Item
 
             bool addedAny = false;
 
-            foreach (Guid id in GetItems())
+            foreach (Guid id in GetItems().ToArray())
             {
                 if (TryGetItemByInstanceID(id, out ItemData registered) && inventory.TryAddItem(registered, null, out _, out _))
                 {
