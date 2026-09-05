@@ -11,6 +11,7 @@ namespace Core.Item
         [Info("Toggle 'overrideData' only if you want to keep overrides.")]
         [SerializeField] private ItemID id;
         [SerializeField] private bool overrideData;
+        [SerializeField, Min(0)] private int overrideStack;
 
         private ItemData thisData;
         private IItemHandler thisHandler;
@@ -19,6 +20,11 @@ namespace Core.Item
         {
             thisHandler = GetComponent<IItemHandler>();
             thisData = id.CreateData();
+
+            if (overrideStack != 0)
+            {
+                thisData.SetStack(overrideStack);
+            }
 
             if (!overrideData)
             {
