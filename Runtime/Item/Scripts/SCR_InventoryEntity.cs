@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using Core.Localization;
 
@@ -104,27 +103,179 @@ namespace Core.Item
         public bool TrySortItems(IInventorySorter sorter, out InventoryResult result) => thisInventory.TrySortItems(sorter, out result);
         public bool TrySortItemsByArea(bool descending, out InventoryResult result) => thisInventory.TrySortItems(descending ? InventorySorter.SortByAreaDescending : InventorySorter.SortByArea, out result);
         public bool TrySortItemsByTag(out InventoryResult result) => thisInventory.TrySortItems(InventorySorter.SortByTag, out result);
-        public bool TrySortItemsByTag(IReadOnlyList<ItemTag> priority, out InventoryResult result) => thisInventory.TrySortItems(new InventorySortByTag(priority), out result);
-        public bool TryMergeStacks(Func<ItemData, ItemData, bool> canStackPredicate, out InventoryResult result)
+        public bool TrySortItemsByTag(IReadOnlyList<ItemTag> tags, out InventoryResult result) => thisInventory.TrySortItems(new InventorySortByTag(tags), out result);
+
+        public bool TryMergeItems(out InventoryResult result) => TryMergeItems(null, out result);
+        public bool TryMergeItems(Func<ItemData, ItemData, bool> canStackPredicate, out InventoryResult result)
         {
-            bool state = thisInventory.TryMergeStacks(canStackPredicate, out List<ItemData> changed, out List<ItemData> removed, out result);
+            int totalMoved = 0;
+            result = InventoryResult.SUCCESS;
 
-            foreach (ItemData item in changed)
+            IReadOnlyCollection<Guid> items = GetItems();
+
+            if (items.Count < 2)
             {
-                SetState(InventoryState.ITEM_CHANGED, InventoryResult.SUCCESS, item);
+                result = InventoryResult.NOT_REGISTERED;
+                return false;
             }
 
-            foreach (ItemData item in removed)
+            Dictionary<ItemID, List<ItemData>> groups = new();
+
+            foreach (Guid id in items)
             {
-                SetState(InventoryState.ITEM_REMOVED, InventoryResult.SUCCESS, item);
+                if (TryGetItemByInstanceID(id, out ItemData registered))
+                {
+                    if (!groups.TryGetValue(registered.BaseID, out List<ItemData> list))
+                    {
+                        list = new();
+                        groups[registered.BaseID] = list;
+                    }
+
+                    list.Add(registered);
+                }
             }
 
-            return state;
+            HashSet<Guid> touchedTargets = new();
+            List<Guid> toRemove = new();
+
+            foreach (List<ItemData> group in groups.Values)
+            {
+                if (group.Count < 2)
+                {
+                    continue;
+                }
+
+                int maxStack = group[0].BaseID.GetDefinition().Stack;
+
+                if (maxStack <= 1)
+                {
+                    continue;
+                }
+
+                for (int i = 0; i < group.Count; i++)
+                {
+                    ItemData target = group[i];
+
+                    if (target.GetStack() <= 0)
+                    {
+                        continue;
+                    }
+
+                    for (int j = i + 1; j < group.Count; j++)
+                    {
+                        ItemData source = group[j];
+
+                        if (source.GetStack() <= 0)
+                        {
+                            continue;
+                        }
+
+                        if (canStackPredicate != null && !canStackPredicate(target, source))
+                        {
+                            continue;
+                        }
+
+                        int space = maxStack - target.GetStack();
+
+                        if (space <= 0)
+                        {
+                            break;
+                        }
+
+                        int amount = Mathf.Min(space, source.GetStack());
+
+                        if (amount <= 0)
+                        {
+                            continue;
+                        }
+
+                        TrySetItemStack(target.InstanceID, target.GetStack() + amount, out _);
+                        TrySetItemStack(source.InstanceID, source.GetStack() - amount, out _);
+
+                        totalMoved += amount;
+                        touchedTargets.Add(target.InstanceID);
+
+                        if (source.GetStack() <= 0)
+                        {
+                            toRemove.Add(source.InstanceID);
+                        }
+                    }
+                }
+            }
+
+            if (totalMoved <= 0)
+            {
+                result = InventoryResult.NO_VALID_SPACE;
+                return false;
+            }
+
+            result = InventoryResult.SUCCESS;
+            return true;
         }
-        public bool TryMergeStacks(out InventoryResult result) => TryMergeStacks(null, out result);
-        /// <summary> Tries to get item stack. returns 0 if failed </summary>
+        public bool TryMergeItem(Guid targetInstanceID, Guid sourceInstanceID, out InventoryResult result) => TryMergeItem(targetInstanceID, this, sourceInstanceID, null, out result);
+        public bool TryMergeItem(Guid targetInstanceID, Guid sourceInstanceID, Func<ItemData, ItemData, bool> canStackPredicate, out InventoryResult result) => TryMergeItem(targetInstanceID, this, sourceInstanceID, canStackPredicate, out result);
+        public bool TryMergeItem(Guid targetInstanceID, InventoryEntity sourceInventory, Guid sourceInstanceID, out InventoryResult result) => TryMergeItem(targetInstanceID, sourceInventory, sourceInstanceID, null, out result);
+        public bool TryMergeItem(Guid targetInstanceID, InventoryEntity sourceInventory, Guid sourceInstanceID, Func<ItemData, ItemData, bool> canStackPredicate, out InventoryResult result)
+        {
+            if (sourceInventory == null)
+            {
+                throw new ArgumentNullException(nameof(sourceInventory), "Merge failed source inventory missing!?");
+            }
+
+            if (targetInstanceID == sourceInstanceID)
+            {
+                Debug.LogError("Trying to merge with duplicate item");
+                result = InventoryResult.DUPLICATE;
+                return false;
+            }
+
+            if (!TryGetItemByInstanceID(targetInstanceID, out ItemData target))
+            {
+                result = InventoryResult.NOT_REGISTERED;
+                return false;
+            }
+
+            if (!sourceInventory.TryGetItemByInstanceID(sourceInstanceID, out ItemData source))
+            {
+                result = InventoryResult.NOT_REGISTERED;
+                return false;
+            }
+
+            if (canStackPredicate != null && !canStackPredicate(target, source))
+            {
+                result = InventoryResult.NOT_SUPPORTED;
+                return false;
+            }
+            else if (target.BaseID != source.BaseID)
+            {
+                result = InventoryResult.NOT_SUPPORTED;
+                return false;
+            }
+
+            int maxStack = target.BaseID.GetDefinition().Stack;
+            int space = maxStack - target.GetStack();
+
+            if (space <= 0)
+            {
+                result = InventoryResult.STACK_FULL;
+                return false;
+            }
+
+            int amount = Mathf.Min(space, source.GetStack());
+
+            if (amount <= 0)
+            {
+                result = InventoryResult.NO_VALID_SPACE;
+                return false;
+            }
+
+            TrySetItemStack(targetInstanceID, target.GetStack() + amount, out result);
+            sourceInventory.TrySetItemStack(sourceInstanceID, source.GetStack() - amount, out _); 
+
+            result = InventoryResult.SUCCESS;
+            return true;
+        }
         public bool TryGetItemStack(Guid instanceID, out int stack, out InventoryResult result) => thisInventory.TryGetItemStack(instanceID, out stack, out result);
-        /// <summary> Tries to set item stack. </summary>
         public bool TrySetItemStack(Guid instanceID, int stack, out InventoryResult result)
         {
             if (!TryGetItemByInstanceID(instanceID, out ItemData registered))
@@ -139,7 +290,63 @@ namespace Core.Item
 
             return registered.GetStack() > 0 || TryRemoveItem(instanceID, out _, out result);
         }
-        /// <summary> Tries to transfer item. Set position null if you want automatic positioning. </summary>
+        public bool TrySwapItems(Guid instanceID, InventoryEntity otherInventory, Guid otherInstanceID, out InventoryResult result)
+        {
+            if (otherInventory == null)
+            {
+                throw new ArgumentNullException(nameof(otherInventory));
+            }
+
+            if (!TryGetItemByInstanceID(instanceID, out ItemData itemA))
+            {
+                result = InventoryResult.NOT_REGISTERED;
+                return false;
+            }
+
+            if (!otherInventory.TryGetItemByInstanceID(otherInstanceID, out ItemData itemB))
+            {
+                result = InventoryResult.NOT_REGISTERED;
+                return false;
+            }
+
+            Vector2Int positionA = itemA.Position;
+            Vector2Int positionB = itemB.Position;
+
+            if (!itemB.Tags.HasAny(whitelistTag) || !itemA.Tags.HasAny(otherInventory.whitelistTag))
+            {
+                result = InventoryResult.NOT_SUPPORTED;
+                return false;
+            }
+
+            if (!TryRemoveItem(instanceID, out ItemData removedA, out result))
+            {
+                return false;
+            }
+
+            if (!otherInventory.TryRemoveItem(otherInstanceID, out ItemData removedB, out result))
+            {
+                TryAddItem(removedA, positionA, out _, out _);
+                return false;
+            }
+
+            if (!TryAddItem(removedB, positionA, out ItemData placedB, out result))
+            {
+                otherInventory.TryAddItem(removedB, positionB, out _, out _); 
+                TryAddItem(removedA, positionA, out _, out _);                
+                return false;
+            }
+
+            if (!otherInventory.TryAddItem(removedA, positionB, out ItemData placedA, out result))
+            {
+                TryRemoveItem(placedB.InstanceID, out _, out _);
+                TryAddItem(removedA, positionA, out _, out _);
+                otherInventory.TryAddItem(removedB, positionB, out _, out _);
+                return false;
+            }
+
+            result = InventoryResult.SUCCESS;
+            return true;
+        }
         public bool TryTransferItem(Guid instanceID, Vector2Int? position, InventoryEntity inventory, out ItemData transfered, out InventoryResult result)
         {
             transfered = null;
@@ -168,7 +375,6 @@ namespace Core.Item
 
             return false;
         }
-        /// <summary> Tries to transfer all items with automatic positioning. </summary>
         public bool TryTransferItems(InventoryEntity inventory, out InventoryResult result)
         {
             if (inventory == null)
@@ -179,7 +385,7 @@ namespace Core.Item
 
             bool addedAny = false;
 
-            foreach (Guid id in GetItems().ToList())
+            foreach (Guid id in GetItems())
             {
                 if (TryGetItemByInstanceID(id, out ItemData registered) && inventory.TryAddItem(registered, null, out _, out _))
                 {
@@ -193,7 +399,6 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return addedAny;
         }
-        /// <summary> Tries to add item. Set position null if you want automatic positioning. </summary>
         public bool TryAddItem(ItemData item, Vector2Int? position, out ItemData registered, out InventoryResult result)
         {
             registered = null;
@@ -217,7 +422,6 @@ namespace Core.Item
             SetState(InventoryState.ITEM_ADDED, result, registered);
             return true;
         }
-        /// <summary> Tries to drop item. </summary>
         public bool TryDropItem(Guid instanceID, out ItemData registered, out InventoryResult result)
         {
             if (!TryRemoveItem(instanceID, out registered, out result))
@@ -249,7 +453,6 @@ namespace Core.Item
 
             return true;
         }
-        /// <summary> Tries to completely remove existing item from inventory. </summary>
         public bool TryRemoveItem(Guid instanceID, out ItemData registered, out InventoryResult result)
         {
             if (!thisInventory.TryRemoveItem(instanceID, out registered, out result))
@@ -261,9 +464,7 @@ namespace Core.Item
 
             return true;
         }
-        /// <summary> Tries to clear existing item from tile. </summary>
         public bool TryClearItem(Guid instanceID, out ItemData registered, out InventoryResult result) => thisInventory.TryClearItem(instanceID, out registered, out result);
-        /// <summary> Tries to assign existing item to tile. </summary>
         public bool TryPlaceItem(Guid instanceID, Vector2Int position, bool rotate, out ItemData registered, out InventoryResult ctx) => thisInventory.TryPlaceItem(instanceID, position, rotate, out registered, out ctx);       
     }
 }
