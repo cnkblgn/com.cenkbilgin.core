@@ -26,6 +26,7 @@ namespace Core.Item
         private const string WIDTH = "i_width";
         private const string HEIGHT = "i_height";
         private const string WEIGHT = "i_weight";
+        private const string MASK = "i_mask";
         private const string ITEMS = "i_items";
 
         public static void ExportTo(this InventoryEntity obj, Dictionary<string, DataNode> data)
@@ -68,6 +69,7 @@ namespace Core.Item
             data.SetInt(WIDTH, obj.GridWidth);
             data.SetInt(HEIGHT, obj.GridHeight);
             data.SetInt(WEIGHT, obj.MaximumWeight);
+            data.SetMask(MASK, obj.ItemMask);
             data.SetData(ITEMS, itemTable);
         }
         public static InventoryData CreateInventoryFrom(Dictionary<string, DataNode> data)
@@ -77,9 +79,10 @@ namespace Core.Item
             int width = data.GetInt(WIDTH);
             int height = data.GetInt(HEIGHT);
             int weight = data.GetInt(WEIGHT);
+            ulong mask = data.GetMask(MASK);
             Dictionary<string, DataNode> itemTable = data.GetData(ITEMS);
 
-            InventoryData inventory = new(width, height, weight);
+            InventoryData inventory = new(width, height, weight, mask);
 
             for (int i = 0; i < itemTable.Count; i++)
             {

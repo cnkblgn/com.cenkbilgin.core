@@ -1,6 +1,6 @@
 namespace Core.Item
 {
-    public interface IInventoryUser
+    internal interface IInventoryUser
     {
         public void HandleStateChanged(InventoryContext ctx);
     }

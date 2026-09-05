@@ -10,6 +10,6 @@ namespace Core
         VECTOR2     = 5,
         VECTOR3     = 6,
         GUID        = 7,
-        DATA        = 8
+        DATA        = 8,
     }
 }

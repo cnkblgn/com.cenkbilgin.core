@@ -9,7 +9,7 @@ namespace Core.Item
     using static InventoryData;
 
     [DisallowMultipleComponent]
-    public sealed class InventoryEntity : MonoBehaviour
+    public sealed class InventoryEntity : MonoBehaviour, IInventoryUser
     {
         public event Action<InventoryContext> OnStateChanged = null;
 
@@ -31,50 +31,35 @@ namespace Core.Item
         [SerializeField, Required] private Transform dropOrigin = null;
         [SerializeField] private float dropForce = 5;
 
-        private InventoryData thisInventory = new(MIN_WIDTH, MIN_HEIGHT, MIN_WEIGHT);
+        private InventoryData thisInventory = null;
         private IInventoryHandler thisHandler = null;
-        private ulong whitelistTag;
 
         private void Awake()
         {
             thisHandler = GetComponent<IInventoryHandler>();
-
-            thisInventory = new(width, height, weight);
+            thisInventory = new(width, height, weight, whitelistedItems);
 
             foreach (ItemID item in startingItems)
             {
                 thisInventory.TryAddItem(item.CreateData(), null, out ItemData _, out InventoryResult _);
             }
-
-            whitelistTag = whitelistedItems.CreateMask();
         }
-        private void Start() => Initialize();        
+        private void Start() => Initialize();
 
-        private void Initialize() => SetState(InventoryState.INITIALIZED);
-
-        private void SetState(InventoryState state, InventoryResult result = InventoryResult.SUCCESS, ItemData item = null)
+        public void HandleStateChanged(InventoryContext ctx)
         {
-            InventoryContext ctx = new(state, result, this, item);
-
             OnStateChanged?.Invoke(ctx);
             thisHandler?.HandleStateChanged(in ctx);
         }
 
-        public void ImportFrom(InventoryData inventory)
+        private void Initialize()
         {
-            thisInventory = new(inventory);
-
-            Initialize();
+            thisInventory.User = this;
+            HandleStateChanged(new(InventoryState.INITIALIZED, InventoryResult.SUCCESS, null));
         }
+        public void Clear() => thisInventory.Clear();
+        public void ImportFrom(InventoryData inventory) { thisInventory = new(inventory); Initialize(); }
         public void ExportTo(out InventoryData inventory) => inventory = new(thisInventory);
-
-        /// <summary> Clears inventory. Removes all items and calls Initialize. </summary>
-        public void Clear()
-        {
-            thisInventory.Clear();
-
-            Initialize();
-        } 
 
         public int GetCurrentCapacity() => thisInventory.CurrentCapacity;
         public int GetMaximumCapacity() => thisInventory.MaximumCapacity;
@@ -83,7 +68,6 @@ namespace Core.Item
         public Vector2Int GetDimensions() => new(thisInventory.GridWidth, thisInventory.GridHeight);
         public IReadOnlyCollection<Guid> GetItems() => thisInventory.GetItems();
         public int GetItems(ItemID baseID) => thisInventory.GetItems(baseID);
-
         public bool TryGetValidPositionForItem(ItemData item, out Vector2Int position, out InventoryResult result) => this.thisInventory.TryGetValidPosition(item, out position, out result);
         public bool TryGetClampedPosition(Vector2Int scale, ref Vector2Int position, out InventoryResult result) => thisInventory.TryGetClampedPosition(scale, ref position, out result);
         public bool TryGetAnyPosition(Vector2Int scale, out Vector2Int position, out InventoryResult result) => thisInventory.TryGetAnyPosition(scale, out position, out result);
@@ -219,252 +203,44 @@ namespace Core.Item
         {
             if (sourceInventory == null)
             {
-                throw new ArgumentNullException(nameof(sourceInventory), "Merge failed source inventory missing!?");
+                throw new ArgumentNullException(nameof(sourceInventory), "Try merge teim failed! source inventory is missing!?");
             }
 
-            if (targetInstanceID == sourceInstanceID)
-            {
-                Debug.LogError("Trying to merge with duplicate item");
-                result = InventoryResult.DUPLICATE;
-                return false;
-            }
-
-            if (!TryGetItemByInstanceID(targetInstanceID, out ItemData target))
-            {
-                result = InventoryResult.NOT_REGISTERED;
-                return false;
-            }
-
-            if (!sourceInventory.TryGetItemByInstanceID(sourceInstanceID, out ItemData source))
-            {
-                result = InventoryResult.NOT_REGISTERED;
-                return false;
-            }
-
-            if (canStackPredicate != null && !canStackPredicate(target, source))
-            {
-                result = InventoryResult.NOT_SUPPORTED;
-                return false;
-            }
-            else if (target.BaseID != source.BaseID)
-            {
-                result = InventoryResult.NOT_SUPPORTED;
-                return false;
-            }
-
-            int maxStack = target.BaseID.GetDefinition().Stack;
-            int space = maxStack - target.GetStack();
-
-            if (space <= 0)
-            {
-                result = InventoryResult.STACK_FULL;
-                return false;
-            }
-
-            int amount = Mathf.Min(space, source.GetStack());
-
-            if (amount <= 0)
-            {
-                result = InventoryResult.NO_VALID_SPACE;
-                return false;
-            }
-
-            TrySetItemStack(targetInstanceID, target.GetStack() + amount, out result);
-            sourceInventory.TrySetItemStack(sourceInstanceID, source.GetStack() - amount, out _); 
-
-            result = InventoryResult.SUCCESS;
-            return true;
+            return thisInventory.TryMergeItem(targetInstanceID, sourceInventory.thisInventory, sourceInstanceID, canStackPredicate, out result);
         }
         public bool TryGetItemStack(Guid instanceID, out int stack, out InventoryResult result) => thisInventory.TryGetItemStack(instanceID, out stack, out result);
-        public bool TrySetItemStack(Guid instanceID, int stack, out InventoryResult result)
+        public bool TrySetItemStack(Guid instanceID, int stack, out InventoryResult result) => thisInventory.TrySetItemStack(instanceID, stack, out result);
+        public bool TrySwapItems(Guid instanceID, InventoryEntity targetInventory, Guid otherInstanceID, out InventoryResult result)
         {
-            if (!TryGetItemByInstanceID(instanceID, out ItemData registered))
+            if (targetInventory == null)
             {
-                result = InventoryResult.NOT_REGISTERED;
-                return false;
+                throw new ArgumentNullException(nameof(targetInventory), "Try swap items failed! inventory is missing!?");
             }
 
-            thisInventory.TrySetItemStack(registered, stack, out _);
-
-            SetState(InventoryState.ITEM_CHANGED, result = InventoryResult.SUCCESS, registered);
-
-            return registered.GetStack() > 0 || TryRemoveItem(instanceID, out _, out result);
-        }
-        public bool TrySwapItems(Guid instanceID, InventoryEntity otherInventory, Guid otherInstanceID, out InventoryResult result)
-        {
-            if (otherInventory == null)
-            {
-                throw new ArgumentNullException(nameof(otherInventory));
-            }
-
-            if (!TryGetItemByInstanceID(instanceID, out ItemData itemA))
-            {
-                result = InventoryResult.NOT_REGISTERED;
-                return false;
-            }
-
-            if (!otherInventory.TryGetItemByInstanceID(otherInstanceID, out ItemData itemB))
-            {
-                result = InventoryResult.NOT_REGISTERED;
-                return false;
-            }
-
-            Vector2Int positionA = itemA.Position;
-            Vector2Int positionB = itemB.Position;
-
-            if (!itemB.Tags.HasAny(whitelistTag) || !itemA.Tags.HasAny(otherInventory.whitelistTag))
-            {
-                result = InventoryResult.NOT_SUPPORTED;
-                return false;
-            }
-
-            if (!TryRemoveItem(instanceID, out ItemData removedA, out result))
-            {
-                return false;
-            }
-
-            if (!otherInventory.TryRemoveItem(otherInstanceID, out ItemData removedB, out result))
-            {
-                TryAddItem(removedA, positionA, out _, out _);
-                return false;
-            }
-
-            if (!TryAddItem(removedB, positionA, out ItemData placedB, out result))
-            {
-                otherInventory.TryAddItem(removedB, positionB, out _, out _); 
-                TryAddItem(removedA, positionA, out _, out _);                
-                return false;
-            }
-
-            if (!otherInventory.TryAddItem(removedA, positionB, out ItemData placedA, out result))
-            {
-                TryRemoveItem(placedB.InstanceID, out _, out _);
-                TryAddItem(removedA, positionA, out _, out _);
-                otherInventory.TryAddItem(removedB, positionB, out _, out _);
-                return false;
-            }
-
-            result = InventoryResult.SUCCESS;
-            return true;
+            return thisInventory.TrySwapItems(instanceID, targetInventory.thisInventory, otherInstanceID, out result);
         }
         public bool TryTransferItem(Guid instanceID, Vector2Int? position, InventoryEntity inventory, out ItemData transfered, out InventoryResult result)
         {
-            transfered = null;
-
             if (inventory == null)
             {
-                result = InventoryResult.NULL;
-                throw new ArgumentNullException($"Inventory transfer item failed target inventory is null! {nameof(inventory)}");
+                throw new ArgumentNullException(nameof(inventory), "Try transfer items failed! inventory is missing!?");
             }
 
-            if (!TryGetItemByInstanceID(instanceID, out ItemData registered))
-            {
-                Debug.LogError($"Inventory transfer item failed! [{instanceID}] not found!");
-                result = InventoryResult.NOT_REGISTERED;
-                return false;
-            }
-
-            if (inventory.TryAddItem(registered, position, out transfered, out result))
-            {
-                if (TryRemoveItem(instanceID, out _, out result))
-                {
-                    SetState(InventoryState.ITEM_TRANSFERED, result, transfered);
-                    return true;
-                }
-            }
-
-            return false;
+            return thisInventory.TryTransferItem(instanceID, position, inventory.thisInventory, out transfered, out result);
         }
         public bool TryTransferItems(InventoryEntity inventory, out InventoryResult result)
         {
             if (inventory == null)
             {
-                result = InventoryResult.NULL;
-                throw new ArgumentNullException($"Inventory transfer items failed target inventory is null! {nameof(inventory)}");
+                throw new ArgumentNullException(nameof(inventory), "Try transfer items failed! inventory is missing!?");
             }
 
-            bool addedAny = false;
-
-            foreach (Guid id in GetItems())
-            {
-                if (TryGetItemByInstanceID(id, out ItemData registered) && inventory.TryAddItem(registered, null, out _, out _))
-                {
-                    if (TryRemoveItem(id, out _, out _))
-                    {
-                        addedAny = true;
-                    }
-                }
-            }
-
-            result = InventoryResult.SUCCESS;
-            return addedAny;
+            return thisInventory.TryTransferItems(inventory.thisInventory, out result);
         }
-        public bool TryAddItem(ItemData item, Vector2Int? position, out ItemData registered, out InventoryResult result)
-        {
-            registered = null;
-
-            if (item == null)
-            {
-                throw new ArgumentNullException($"item adding failed incoming item is null! {nameof(item)}");
-            }
-
-            if (!item.Tags.HasAny(whitelistTag))
-            {
-                result = InventoryResult.NOT_SUPPORTED;
-                return false;
-            }
-
-            if (!thisInventory.TryAddItem(item, position, out registered, out result))
-            {
-                return false;
-            }
-
-            SetState(InventoryState.ITEM_ADDED, result, registered);
-            return true;
-        }
-        public bool TryDropItem(Guid instanceID, out ItemData registered, out InventoryResult result)
-        {
-            if (!TryRemoveItem(instanceID, out registered, out result))
-            {
-                return false;
-            }
-
-            ItemEntity entity = ItemDatabase.CreateEntity(registered, dropOrigin.position, Quaternion.identity);
-
-            if (entity == null)
-            {
-                return false;
-            }
-
-            SetState(InventoryState.ITEM_DROPPED, result, registered);
-
-            if (entity.TryGetComponent(out Rigidbody body))
-            {
-                if (body.isKinematic)
-                {
-                    body.isKinematic = false;
-                }
-
-                body.useGravity = true;
-
-                body.AddForce((dropForce * dropOrigin.forward) + (UnityEngine.Random.onUnitSphere * 0.25f), ForceMode.Impulse);
-                body.AddTorque((dropForce * dropOrigin.forward) + (UnityEngine.Random.onUnitSphere * 0.25f), ForceMode.Impulse);
-            }
-
-            return true;
-        }
-        public bool TryRemoveItem(Guid instanceID, out ItemData registered, out InventoryResult result)
-        {
-            if (!thisInventory.TryRemoveItem(instanceID, out registered, out result))
-            {
-                return false;
-            }
-
-            SetState(InventoryState.ITEM_REMOVED, result, registered);
-
-            return true;
-        }
+        public bool TryAddItem(ItemData item, Vector2Int? position, out ItemData registered, out InventoryResult result) => thisInventory.TryAddItem(item, position, out registered, out result);
+        public bool TryDropItem(Guid instanceID, out ItemData registered, out InventoryResult result) => thisInventory.TryDropItem(instanceID, dropOrigin.position, dropForce * dropOrigin.forward, out registered, out result);
+        public bool TryRemoveItem(Guid instanceID, out ItemData registered, out InventoryResult result) => thisInventory.TryRemoveItem(instanceID, out registered, out result);
         public bool TryClearItem(Guid instanceID, out ItemData registered, out InventoryResult result) => thisInventory.TryClearItem(instanceID, out registered, out result);
-        public bool TryPlaceItem(Guid instanceID, Vector2Int position, bool rotate, out ItemData registered, out InventoryResult ctx) => thisInventory.TryPlaceItem(instanceID, position, rotate, out registered, out ctx);       
+        public bool TryPlaceItem(Guid instanceID, Vector2Int position, bool rotate, out ItemData registered, out InventoryResult ctx) => thisInventory.TryPlaceItem(instanceID, position, rotate, out registered, out ctx);
     }
 }

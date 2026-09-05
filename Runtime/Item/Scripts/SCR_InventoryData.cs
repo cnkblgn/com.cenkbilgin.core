@@ -14,6 +14,7 @@ namespace Core.Item
         public const int MIN_WEIGHT = 0;
         public const int MAX_WEIGHT = 1000;
 
+        internal IInventoryUser User { get; set; }
         public float CurrentWeight { get; private set; }
         public int CurrentCapacity => itemTable.Count;
         public int MaximumCapacity => itemGrid.Length;
@@ -21,11 +22,12 @@ namespace Core.Item
         public readonly int GridWidth;
         public readonly int GridHeight;
         public readonly int MaximumWeight;
+        public readonly ulong ItemMask;
 
         private ItemData[] itemGrid;
         private readonly Dictionary<Guid, ItemData> itemTable;
 
-        public InventoryData(List<ItemData> items, int width, int height, int maxWeight)
+        public InventoryData(List<ItemData> items, int width, int height, int maxWeight, ulong mask)
         {
             GridWidth = Mathf.Clamp(width, MIN_WIDTH, MAX_WIDTH);
             GridHeight = Mathf.Clamp(height, MIN_HEIGHT, MAX_HEIGHT);
@@ -33,6 +35,7 @@ namespace Core.Item
             CurrentWeight = 0;
             itemGrid = new ItemData[GridWidth * GridHeight];
             itemTable = new();
+            ItemMask = mask; 
 
             if (items == null)
             {
@@ -49,16 +52,22 @@ namespace Core.Item
                 }
             }
         }
-        public InventoryData(InventoryData data) : this(data?.itemTable.Values.ToList() ?? throw new ArgumentNullException(nameof(data)), data.GridWidth, data.GridHeight, data.MaximumWeight) { }
-        public InventoryData(int width, int height, int maxWeight) : this(new(), width, height, maxWeight) { }
+        public InventoryData(List<ItemData> items, int width, int height, int maxWeight, ItemTag[] masks) : this(items, width, height, maxWeight, (masks != null ? masks.ToArray() : ItemDatabase.GetTags().ToArray()).CreateMask()) { }
+        public InventoryData(InventoryData data) : this(data?.itemTable.Values.ToList() ?? throw new ArgumentNullException(nameof(data)), data.GridWidth, data.GridHeight, data.MaximumWeight, data.ItemMask) { }
+        public InventoryData(int width, int height, int maxWeight, ItemTag[] masks) : this(new(), width, height, maxWeight, masks) { }
+        public InventoryData(int width, int height, int maxWeight, ulong mask) : this(new(), width, height, maxWeight, mask) { }
+
+        private void Notify(InventoryState state, InventoryResult result, ItemData item = null) => User?.HandleStateChanged(new(state, result, item));
 
         public void Clear()
         {
             itemTable.Clear();
             itemGrid = new ItemData[GridWidth * GridHeight];
-            CurrentWeight = 0;
-        }
 
+            CurrentWeight = 0;
+
+            Notify(InventoryState.INITIALIZED, InventoryResult.SUCCESS);
+        }
         public IReadOnlyCollection<Guid> GetItems() => itemTable.Keys;
         public int GetItems(ItemID baseID)
         {
@@ -275,27 +284,9 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return true;
         }
-        internal bool TryGetItemStack(ItemData itemData, out int stack, out InventoryResult result)
-        {
-            stack = 0;
-
-            if (itemData == null)
-            {
-                result = InventoryResult.NULL;
-                Debug.LogError("Try get item stack failed! item data is null!?");
-                return false;
-            }
-
-            return TryGetItemStack(itemData.InstanceID, out stack, out result);
-        }
 
         public bool IsPositionValid(ItemData item, Vector2Int position, out InventoryResult result)
         {
-            if (item == null)
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
-
             if (TryGetItemByArea(item.GetScale(), position, out _, out result))
             {
                 return false;
@@ -394,6 +385,170 @@ namespace Core.Item
             return true;
         }
 
+        public bool TryMergeItems(out InventoryResult result) => TryMergeItems(null, out result);
+        public bool TryMergeItems(Func<ItemData, ItemData, bool> canStackPredicate, out InventoryResult result)
+        {
+            int totalMoved = 0;
+            result = InventoryResult.SUCCESS;
+
+            IReadOnlyCollection<Guid> items = GetItems();
+
+            if (items.Count < 2)
+            {
+                result = InventoryResult.NOT_REGISTERED;
+                return false;
+            }
+
+            Dictionary<ItemID, List<ItemData>> groups = new();
+
+            foreach (Guid id in items)
+            {
+                if (TryGetItemByInstanceID(id, out ItemData registered))
+                {
+                    if (!groups.TryGetValue(registered.BaseID, out List<ItemData> list))
+                    {
+                        list = new();
+                        groups[registered.BaseID] = list;
+                    }
+
+                    list.Add(registered);
+                }
+            }
+
+            foreach (List<ItemData> group in groups.Values)
+            {
+                if (group.Count < 2)
+                {
+                    continue;
+                }
+
+                int maxStack = group[0].BaseID.GetDefinition().Stack;
+
+                if (maxStack <= 1)
+                {
+                    continue;
+                }
+
+                for (int i = 0; i < group.Count; i++)
+                {
+                    ItemData target = group[i];
+
+                    if (target.GetStack() <= 0)
+                    {
+                        continue;
+                    }
+
+                    for (int j = i + 1; j < group.Count; j++)
+                    {
+                        ItemData source = group[j];
+
+                        if (TryMergeItem(target, this, source, canStackPredicate, out result))
+                        {
+                            totalMoved++;
+                        }
+                    }
+                }
+            }
+
+            if (totalMoved <= 0)
+            {
+                result = InventoryResult.NO_VALID_SPACE;
+                return false;
+            }
+
+            result = InventoryResult.SUCCESS;
+            return true;
+        }
+        public bool TryMergeItem(Guid targetInstanceID, Guid sourceInstanceID, out InventoryResult result) => TryMergeItem(targetInstanceID, this, sourceInstanceID, null, out result);
+        public bool TryMergeItem(Guid targetInstanceID, Guid sourceInstanceID, Func<ItemData, ItemData, bool> canStackPredicate, out InventoryResult result) => TryMergeItem(targetInstanceID, this, sourceInstanceID, canStackPredicate, out result);
+        public bool TryMergeItem(Guid targetInstanceID, InventoryData sourceInventory, Guid sourceInstanceID, out InventoryResult result) => TryMergeItem(targetInstanceID, sourceInventory, sourceInstanceID, null, out result);
+        public bool TryMergeItem(Guid targetInstanceID, InventoryData sourceInventory, Guid sourceInstanceID, Func<ItemData, ItemData, bool> canStackPredicate, out InventoryResult result)
+        {
+            if (sourceInventory == null)
+            {
+                throw new ArgumentNullException(nameof(sourceInventory), "Merge failed source inventory missing!?");
+            }
+
+            if (!TryGetItemByInstanceID(targetInstanceID, out ItemData targetItem))
+            {
+                result = InventoryResult.NOT_REGISTERED;
+                return false;
+            }
+
+            if (!sourceInventory.TryGetItemByInstanceID(sourceInstanceID, out ItemData sourceItem))
+            {
+                result = InventoryResult.NOT_REGISTERED;
+                return false;
+            }
+
+            return TryMergeItem(targetItem, sourceInventory, sourceItem, canStackPredicate, out result);
+        }
+        private bool TryMergeItem(ItemData targetItem, InventoryData sourceInventory, ItemData sourceItem, Func<ItemData, ItemData, bool> canStackPredicate, out InventoryResult result)
+        {
+            if (sourceInventory == null)
+            {
+                throw new ArgumentNullException(nameof(sourceInventory), "Merge failed source inventory missing!?");
+            }
+
+            if (sourceItem == null)
+            {
+                throw new ArgumentNullException(nameof(sourceInventory), "Merge failed source item missing!?");
+            }
+
+            if (targetItem == null)
+            {
+                throw new ArgumentNullException(nameof(sourceInventory), "Merge failed target item missing!?");
+            }
+
+            if (targetItem.InstanceID == sourceItem.InstanceID)
+            {
+                Debug.LogError("Trying to merge with duplicate item");
+                result = InventoryResult.DUPLICATE;
+                return false;
+            }
+
+            int maxStack = sourceItem.BaseID.GetDefinition().Stack;
+
+            if (maxStack <= 1)
+            {
+                result = InventoryResult.STACK_FULL;
+                return false;
+            }
+
+            if (targetItem.BaseID != sourceItem.BaseID)
+            {
+                result = InventoryResult.NOT_SUPPORTED;
+                return false;
+            }
+
+            if (canStackPredicate != null && !canStackPredicate(targetItem, sourceItem))
+            {
+                result = InventoryResult.NOT_SUPPORTED;
+                return false;
+            }
+
+            int space = maxStack - targetItem.GetStack();
+
+            if (space <= 0)
+            {
+                result = InventoryResult.STACK_FULL;
+                return false;
+            }
+
+            int amount = Mathf.Min(space, sourceItem.GetStack());
+
+            if (amount <= 0)
+            {
+                result = InventoryResult.NO_VALID_SPACE;
+                return false;
+            }
+
+            TrySetItemStack(targetItem, targetItem.GetStack() + amount, out _);
+            sourceInventory.TrySetItemStack(sourceItem, sourceItem.GetStack() - amount, out _);
+
+            result = InventoryResult.SUCCESS;
+            return true;
+        }
         private void RegisterItem(ItemData item, Vector2Int position, out ItemData registered)
         {
             registered = new(item, position);
@@ -485,30 +640,157 @@ namespace Core.Item
 
             return TrySetItemStack(registered, stack, out result);
         }
-        internal bool TrySetItemStack(ItemData itemData, int stack, out InventoryResult result)
+        internal bool TrySetItemStack(ItemData item, int stack, out InventoryResult result)
         {
-            if (itemData == null)
+            if (item == null)
             {
                 result = InventoryResult.NULL;
                 Debug.LogError("Try set item stack failed! item data is null!?");
                 return false;
             }
 
-            float previousWeight = itemData.GetWeight();
+            float previousWeight = item.GetWeight();
 
-            itemData.SetStack(stack);
+            item.SetStack(stack);
 
-            float currentWeight = itemData.GetWeight();
+            float currentWeight = item.GetWeight();
 
             CurrentWeight = Mathf.Max(0f, CurrentWeight + (currentWeight - previousWeight));
 
             result = InventoryResult.SUCCESS;
 
+            Notify(InventoryState.ITEM_CHANGED, result, item);
+
+            if (item.GetStack() <= 0)
+            {
+                TryRemoveItem(item.InstanceID, out _, out result);
+            }
+
+            return true;
+        }
+        public bool TryTransferItem(Guid instanceID, Vector2Int? position, InventoryData inventory, out ItemData transfered, out InventoryResult result)
+        {
+            transfered = null;
+
+            if (inventory == null)
+            {
+                result = InventoryResult.NULL;
+                throw new ArgumentNullException($"Inventory transfer item failed target inventory is null! {nameof(inventory)}");
+            }
+
+            if (!TryGetItemByInstanceID(instanceID, out ItemData registered))
+            {
+                Debug.LogError($"Inventory transfer item failed! [{instanceID}] not found!");
+                result = InventoryResult.NOT_REGISTERED;
+                return false;
+            }
+
+            if (inventory.TryAddItem(registered, position, out transfered, out result))
+            {
+                if (TryRemoveItem(instanceID, out _, out result))
+                {
+                    Notify(InventoryState.ITEM_TRANSFERED, result, transfered);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        public bool TryTransferItems(InventoryData inventory, out InventoryResult result)
+        {
+            if (inventory == null)
+            {
+                result = InventoryResult.NULL;
+                throw new ArgumentNullException($"Inventory transfer items failed target inventory is null! {nameof(inventory)}");
+            }
+
+            bool addedAny = false;
+
+            foreach (Guid id in GetItems())
+            {
+                if (TryGetItemByInstanceID(id, out ItemData registered) && inventory.TryAddItem(registered, null, out _, out _))
+                {
+                    if (TryRemoveItem(id, out _, out _))
+                    {
+                        addedAny = true;
+                    }
+                }
+            }
+
+            result = InventoryResult.SUCCESS;
+            return addedAny;
+        }
+        public bool TrySwapItems(Guid instanceID, InventoryData targetInventory, Guid targetInstanceID, out InventoryResult result)
+        {
+            if (targetInventory == null)
+            {
+                throw new ArgumentNullException(nameof(targetInventory), "Try swap items failed! target inventory is missing!?");
+            }
+
+            if (!TryGetItemByInstanceID(instanceID, out ItemData itemA))
+            {
+                result = InventoryResult.NOT_REGISTERED;
+                return false;
+            }
+
+            if (!targetInventory.TryGetItemByInstanceID(targetInstanceID, out ItemData itemB))
+            {
+                result = InventoryResult.NOT_REGISTERED;
+                return false;
+            }
+
+            Vector2Int positionA = itemA.Position;
+            Vector2Int positionB = itemB.Position;
+
+            if (!itemB.Tags.HasAny(ItemMask) || !itemA.Tags.HasAny(targetInventory.ItemMask))
+            {
+                result = InventoryResult.NOT_SUPPORTED;
+                return false;
+            }
+
+            if (!TryRemoveItem(instanceID, out ItemData removedA, out result))
+            {
+                return false;
+            }
+
+            if (!targetInventory.TryRemoveItem(targetInstanceID, out ItemData removedB, out result))
+            {
+                TryAddItem(removedA, positionA, out _, out _);
+                return false;
+            }
+
+            if (!TryAddItem(removedB, positionA, out ItemData placedB, out result))
+            {
+                targetInventory.TryAddItem(removedB, positionB, out _, out _);
+                TryAddItem(removedA, positionA, out _, out _);
+                return false;
+            }
+
+            if (!targetInventory.TryAddItem(removedA, positionB, out ItemData placedA, out result))
+            {
+                TryRemoveItem(placedB.InstanceID, out _, out _);
+                TryAddItem(removedA, positionA, out _, out _);
+                targetInventory.TryAddItem(removedB, positionB, out _, out _);
+                return false;
+            }
+
+            result = InventoryResult.SUCCESS;
             return true;
         }
         public bool TryAddItem(ItemData item, Vector2Int? position, out ItemData registered, out InventoryResult result)
         {
             registered = null;
+
+            if (item == null)
+            {
+                throw new ArgumentNullException(nameof(item), "Add item failed item missing!?");
+            }
+
+            if (!item.Tags.HasAny(ItemMask))
+            {
+                result = InventoryResult.NOT_SUPPORTED;
+                return false;
+            }
 
             Vector2Int bestPosition;
 
@@ -530,7 +812,41 @@ namespace Core.Item
             }
 
             result = InventoryResult.SUCCESS;
+
             RegisterItem(item, bestPosition, out registered);
+
+            Notify(InventoryState.ITEM_ADDED, result, registered);
+            return true;
+        }
+        public bool TryDropItem(Guid instanceID, Vector3 position, Vector3 force, out ItemData registered, out InventoryResult result)
+        {
+            if (!TryRemoveItem(instanceID, out registered, out result))
+            {
+                return false;
+            }
+
+            ItemEntity entity = ItemDatabase.CreateEntity(registered, position, Quaternion.identity);
+
+            if (entity == null)
+            {
+                return false;
+            }
+
+            Notify(InventoryState.ITEM_DROPPED, result, registered);
+
+            if (entity.TryGetComponent(out Rigidbody body))
+            {
+                if (body.isKinematic)
+                {
+                    body.isKinematic = false;
+                }
+
+                body.useGravity = true;
+
+                body.AddForce(force + (UnityEngine.Random.onUnitSphere * 0.25f), ForceMode.Impulse);
+                body.AddTorque(force + (UnityEngine.Random.onUnitSphere * 0.25f), ForceMode.Impulse);
+            }
+
             return true;
         }
         public bool TryRemoveItem(Guid instanceID, out ItemData registered, out InventoryResult result)
@@ -539,6 +855,8 @@ namespace Core.Item
             {
                 CurrentWeight = Mathf.Max(0, CurrentWeight - registered.GetWeight());
                 itemTable.Remove(registered.InstanceID);
+
+                Notify(InventoryState.ITEM_REMOVED, result, registered);
                 return true;
             }
 
