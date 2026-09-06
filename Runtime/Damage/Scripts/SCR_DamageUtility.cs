@@ -89,7 +89,7 @@ namespace Core.Damage
                     continue;
                 }
 
-                Vector3 direction = entity.Origin.position - point;
+                Vector3 direction = entity.Position - point;
                 float factor = Mathf.Clamp01(direction.sqrMagnitude / radiusSqr);
                 float totalDamage = Mathf.Lerp(maxDamage, minDamage, factor);
                 float totalForce = Mathf.Lerp(maxForce, minForce, factor);
@@ -150,7 +150,7 @@ namespace Core.Damage
                     continue;
                 }
 
-                Vector3 direction = entity.Origin.position - point;
+                Vector3 direction = entity.Position - point;
                 float factor = Mathf.Clamp01(direction.sqrMagnitude / radiusSqr);
                 float totalDamage = Mathf.Lerp(maxDamage, minDamage, factor);
                 float totalForce = Mathf.Lerp(maxForce, minForce, factor);

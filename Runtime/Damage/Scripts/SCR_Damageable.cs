@@ -8,8 +8,9 @@ namespace Core.Damage
     {
         public event Action<DamageContext> OnHit = null;
 
-        public Transform Origin => origin;
         public Resource Health => health;
+        public Vector3 Position => origin.position;
+        public Quaternion Rotation => origin.rotation;
 
         [Header("_")]
         [SerializeField] private Resource health = new(100, 100);

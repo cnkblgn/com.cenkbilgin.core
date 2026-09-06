@@ -6,7 +6,9 @@ namespace Core.Graphics
     [DisallowMultipleComponent]
     public sealed class DecalEmitter : MonoBehaviour
     {
-        public Transform ThisTransform => thisTransform;
+        public Vector3 Position => thisTransform.position;
+        public Vector3 Direction => thisTransform.forward;
+        public Quaternion Rotation => thisTransform.rotation;
         public int Projectors => projectors.Length;
 
         private Transform thisTransform = null;

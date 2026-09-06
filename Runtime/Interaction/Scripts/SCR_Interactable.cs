@@ -15,14 +15,11 @@ namespace Core.Interaction
         public event Action<InteractionContext> OnStateChanged = null;
 
         public string Description => description;
-        public Collider ThisCollider => thisCollider;
-        public Transform ThisTransform => thisTransform;
 
         [Header("_")]
         [SerializeField] private LocalizedID descriptionID = default;
         [SerializeField] private string descriptionStyles = "info_white";
 
-        private Transform thisTransform;
         private Collider thisCollider;
         private IInteractableHandler[] thisHandlers;
         private string description = STRING_EMPTY;
@@ -31,7 +28,6 @@ namespace Core.Interaction
         private void Awake()
         {
             thisCollider = GetComponent<Collider>();
-            thisTransform = transform;
             thisHandlers = GetComponents<IInteractableHandler>();
 
             if (descriptionID.IsValid)
