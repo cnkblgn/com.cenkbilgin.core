@@ -55,7 +55,8 @@ namespace Core.Item
         public static bool operator ==(ItemData left, ItemData right) =>  left is null ? right is null : left.Equals(right);
         public static bool operator !=(ItemData left, ItemData right) => !(left == right);
 
-        public Vector2Int GetScale()
+        public Vector2Int GetScale() => GetScale(isRotated);
+        public Vector2Int GetScale(bool isRotated)
         {
             ItemDefinition definition = BaseID.GetDefinition();
             int width = definition.Width;

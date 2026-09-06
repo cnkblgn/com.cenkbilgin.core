@@ -320,6 +320,32 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return true;
         }
+        public bool IsPlacementValid(ItemID id, Vector2Int position, bool isRotated, out InventoryResult result)
+        {
+            if (!id.IsValid)
+            {
+                result = InventoryResult.NULL;
+                return false;
+            }
+
+            ItemDefinition definition = id.GetDefinition();
+
+            Vector2Int baseScale = new(definition.Width, definition.Height);
+            Vector2Int newScale = isRotated ? new(baseScale.y, baseScale.x) : baseScale;
+
+            if (TryGetItemByArea(newScale, position, out _, out result))
+            {
+                return false;
+            }
+
+            if (result == InventoryResult.OUT_OF_BOUNDS)
+            {
+                return false;
+            }
+
+            result = InventoryResult.SUCCESS;
+            return true;
+        }
         private bool IsWeightEnough(float weight) => weight + CurrentWeight <= MaximumWeight;
         private bool IsTileOverlapping(int tilePositionX, int tilePositionY, int tileWidth, int tileHeight, out ItemData overlapped) => IsTileOverlapping(itemGrid, tilePositionX, tilePositionY, tileWidth, tileHeight, out overlapped);
         private bool IsTileOverlapping(ItemData[] grid, int tilePositionX, int tilePositionY, int tileWidth, int tileHeight, out ItemData overlapped)
@@ -369,32 +395,6 @@ namespace Core.Item
                 return false;
             }
 
-            return true;
-        }
-        public bool CanPlaceItem(ItemID id, Vector2Int position, bool isRotated, out InventoryResult result)
-        {
-            if (!id.IsValid)
-            {
-                result = InventoryResult.NULL;
-                return false;
-            }
-
-            ItemDefinition definition = id.GetDefinition();
-
-            Vector2Int baseScale = new(definition.Width, definition.Height);
-            Vector2Int newScale = isRotated ? new(baseScale.y, baseScale.x) : baseScale;
-
-            if (TryGetItemByArea(newScale, position, out _, out result))
-            {
-                return false;
-            }
-
-            if (result == InventoryResult.OUT_OF_BOUNDS)
-            {
-                return false;
-            }
-
-            result = InventoryResult.SUCCESS;
             return true;
         }
 
@@ -686,15 +686,12 @@ namespace Core.Item
 
             CurrentWeight = Mathf.Max(0f, CurrentWeight + (currentWeight - previousWeight));
 
-            result = InventoryResult.SUCCESS;
-
-            Notify(InventoryState.ITEM_CHANGED, result, item);
-
             if (item.GetStack() <= 0)
             {
-                TryRemoveItem(item.InstanceID, out _, out result);
+                return TryRemoveItem(item.InstanceID, out _, out result);
             }
 
+            Notify(InventoryState.ITEM_CHANGED, result = InventoryResult.SUCCESS, item);
             return true;
         }
         public bool TryTransferItem(Guid instanceID, Vector2Int? position, InventoryData inventory, out ItemData transfered, out InventoryResult result)
@@ -737,23 +734,36 @@ namespace Core.Item
             if (inventory == null)
             {
                 result = InventoryResult.NULL;
-                throw new ArgumentNullException($"Inventory transfer items failed target inventory is null! {nameof(inventory)}");
+                throw new ArgumentNullException(nameof(inventory), "Inventory transfer items failed target inventory is null!");
             }
 
             bool addedAny = false;
 
             foreach (Guid id in GetItems().ToArray())
             {
-                if (TryGetItemByInstanceID(id, out ItemData registered) && inventory.TryAddItem(registered, null, out _, out _))
+                if (!TryGetItemByInstanceID(id, out ItemData registered))
                 {
-                    if (TryRemoveItem(id, out _, out _))
-                    {
-                        addedAny = true;
-                    }
+                    continue;
+                }
+
+                if (!inventory.TryAddItem(registered, null, out ItemData transferred, out _))
+                {
+                    continue;
+                }
+
+                if (TryRemoveItem(id, out _, out _))
+                {
+                    addedAny = true;
+                    continue;
+                }
+
+                if (!inventory.TryRemoveItem(transferred.InstanceID, out _, out _))
+                {
+                    Debug.LogError($"CRITICAL: Transfer rollback failed! Item [{transferred.InstanceID}] may now exist in two inventories.");
                 }
             }
 
-            result = InventoryResult.SUCCESS;
+            result = addedAny ? InventoryResult.SUCCESS : InventoryResult.NOT_REGISTERED;
             return addedAny;
         }
         public bool TrySwapItems(Guid instanceID, Guid targetInstanceID, InventoryData targetInventory, out InventoryResult result)

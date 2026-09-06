@@ -82,7 +82,7 @@ namespace Core.Item
         public bool TryGetItemByArea(Vector2Int scale, Vector2Int position, out ItemData overlapped, out InventoryResult ctx) => thisInventory.TryGetItemByArea(scale, position, out overlapped, out ctx);
 
         public bool IsPositionValid(ItemData item, Vector2Int position, out InventoryResult result) => thisInventory.IsPositionValid(item, position, out result);
-        public bool CanPlaceItem(ItemID id, Vector2Int position, bool isRotated, out InventoryResult result) => thisInventory.CanPlaceItem(id, position, isRotated, out result);
+        public bool CanPlaceItem(ItemID id, Vector2Int position, bool isRotated, out InventoryResult result) => thisInventory.IsPlacementValid(id, position, isRotated, out result);
 
         public bool TrySortItems(IInventorySorter sorter, out InventoryResult result) => thisInventory.TrySortItems(sorter, out result);
         public bool TrySortItemsByArea(bool descending, out InventoryResult result) => thisInventory.TrySortItems(descending ? InventorySorter.SortByAreaDescending : InventorySorter.SortByArea, out result);
