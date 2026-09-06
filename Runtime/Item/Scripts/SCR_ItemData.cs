@@ -6,25 +6,23 @@ namespace Core.Item
 {
     public sealed class ItemData : IEquatable<ItemData>
     {
+        public readonly Dictionary<string, DataNode> Data;
         public readonly ItemID BaseID;
         public readonly Guid InstanceID;
         public readonly ulong Tags;
 
-        public Vector2Int Position;
-        public bool IsRotated;
-
+        private Vector2Int position;
         private int stack;
-
-        public readonly Dictionary<string, DataNode> Data;
+        private bool isRotated;
 
         public ItemData(ItemID id, Guid instanceID, Dictionary<string, DataNode> data, Vector2Int position, int stack, bool isRotated)
         {
             this.BaseID = id;
             this.InstanceID = instanceID;
             this.Data = data == null ? new() : new(data);
-            this.Position = position;
+            this.position = position;
             this.stack = stack;
-            this.IsRotated = isRotated;
+            this.isRotated = isRotated;
             this.Tags = BaseID.GetDefinition().Tags;
         }
         public ItemData(ItemID id) : this(id, Guid.NewGuid(), null, Vector2Int.zero, 1, false)
@@ -35,8 +33,8 @@ namespace Core.Item
 
             stack = definition.Stack;
         }
-        public ItemData(ItemData data) : this(data == null ? throw new ArgumentNullException(nameof(data)) : data.BaseID, data.InstanceID, data.Data, data.Position, data.stack, data.IsRotated) { }
-        public ItemData(ItemData data, Vector2Int position) : this(data) { Position = position; }
+        public ItemData(ItemData data) : this(data == null ? throw new ArgumentNullException(nameof(data)) : data.BaseID, data.InstanceID, data.Data, data.position, data.stack, data.isRotated) { }
+        public ItemData(ItemData data, Vector2Int position) : this(data) { this.position = position; }
 
         public bool Equals(ItemData other)
         {
@@ -63,8 +61,14 @@ namespace Core.Item
             int width = definition.Width;
             int height = definition.Height;
 
-            return IsRotated ? new(height, width) : new(width, height);
+            return isRotated ? new(height, width) : new(width, height);
         }
+
+        public Vector2Int GetPosition() => position;
+        internal void SetPosition(Vector2Int value) => position = value;
+
+        public bool IsRotated() => isRotated;
+        internal void SetRotation(bool value) => isRotated = value;
 
         public float GetWeight() => GetWeight(stack);
         public float GetWeight(int stack) => BaseID.GetDefinition().Weight * stack;

@@ -46,9 +46,9 @@ namespace Core.Item
             {
                 ItemData item = new(items[i]);
 
-                if (!TryAddItem(item, item.Position, out ItemData _, out InventoryResult ctx))
+                if (!TryAddItem(item, item.GetPosition(), out ItemData _, out InventoryResult ctx))
                 {
-                    Debug.LogWarning($"Failed to add item {item.BaseID} at {item.Position} — {ctx}. Skipping.");
+                    Debug.LogWarning($"Failed to add item {item.BaseID} at {item.GetPosition()} — {ctx}. Skipping.");
                 }
             }
         }
@@ -91,22 +91,22 @@ namespace Core.Item
                 throw new ArgumentNullException(nameof(item));
             }
 
-            bool originalRotation = item.IsRotated;
+            bool originalRotation = item.IsRotated();
 
             if (!TryGetAnyPosition(item.GetScale(), out position, out _))
             {
-                item.IsRotated = !item.IsRotated;
+                item.SetRotation(!item.IsRotated());
 
                 if (!TryGetAnyPosition(item.GetScale(), out position, out result))
                 {
-                    item.IsRotated = originalRotation;
+                    item.SetRotation(originalRotation);
                     return false;
                 }
             }
 
             if (!IsPositionValid(item, position, out result))
             {
-                item.IsRotated = originalRotation;
+                item.SetRotation(originalRotation);
                 return false;
             }
 
@@ -582,7 +582,7 @@ namespace Core.Item
         {
             registered = new(item, position);
 
-            SetTileItem(registered, registered.Position, registered.GetScale());
+            SetTileItem(registered, registered.GetPosition(), registered.GetScale());
 
             itemTable[registered.InstanceID] = registered;
             CurrentWeight += registered.GetWeight();
@@ -631,7 +631,7 @@ namespace Core.Item
                 ItemDefinition definition = item.BaseID.GetDefinition();
                 Vector2Int baseScale = new(definition.Width, definition.Height);
 
-                bool rotated = item.IsRotated;
+                bool rotated = item.IsRotated();
                 Vector2Int scale = rotated ? new(baseScale.y, baseScale.x) : baseScale;
 
                 if (!TryGetAnyPosition(tempGrid, scale, out Vector2Int position, out result))
@@ -651,8 +651,8 @@ namespace Core.Item
 
             foreach ((ItemData item, Vector2Int position, bool rotated) in placements)
             {
-                item.IsRotated = rotated;
-                item.Position = position;
+                item.SetRotation(rotated);
+                item.SetPosition(position);
             }
 
             itemGrid = tempGrid;
@@ -775,8 +775,8 @@ namespace Core.Item
                 return false;
             }
 
-            Vector2Int positionA = itemA.Position;
-            Vector2Int positionB = itemB.Position;
+            Vector2Int positionA = itemA.GetPosition();
+            Vector2Int positionB = itemB.GetPosition();
 
             if (!itemB.Tags.HasAny(ItemMask) || !itemA.Tags.HasAny(targetInventory.ItemMask))
             {
@@ -907,7 +907,7 @@ namespace Core.Item
                 return false;
             }
 
-            Vector2Int position = registered.Position;
+            Vector2Int position = registered.GetPosition();
             Vector2Int scale = registered.GetScale();
 
             if (!IsTileInsideBoundary(position.x, position.y, scale.x, scale.y))
@@ -929,26 +929,25 @@ namespace Core.Item
                 return false;
             }
 
-            Vector2Int oldPosition = registered.Position;
+            Vector2Int oldPosition = registered.GetPosition();
             Vector2Int oldScale = registered.GetScale();
-            bool oldRotation = registered.IsRotated;
+            bool oldRotation = registered.IsRotated();
 
             SetTileItem(null, oldPosition, oldScale);
 
-            registered.IsRotated = isRotated;
+            registered.SetRotation(isRotated);
             Vector2Int newScale = registered.GetScale();
 
             bool overlaps = TryGetItemByArea(newScale, position, out _, out result);
 
             if (overlaps || result == InventoryResult.OUT_OF_BOUNDS)
             {
-                // Geri al: rotasyonu ve eski grid alanýný eski haline getir.
-                registered.IsRotated = oldRotation;
+                registered.SetRotation(oldRotation);
                 SetTileItem(registered, oldPosition, oldScale);
                 return false;
             }
 
-            registered.Position = position;
+            registered.SetPosition(position);
             SetTileItem(registered, position, newScale);
             result = InventoryResult.SUCCESS;
             return true;
