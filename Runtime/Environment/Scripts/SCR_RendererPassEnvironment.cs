@@ -76,7 +76,7 @@ namespace Core.Environment
 
             TextureHandle destination = renderGraph.CreateTexture(description);
 
-            using var builder = renderGraph.AddRasterRenderPass<PassData>(PASS_NAME, out var passData);
+            using var builder = renderGraph.AddRasterRenderPass(PASS_NAME, out PassData passData);
             passData.Source = source;
             passData.Material = fogMaterial;
 

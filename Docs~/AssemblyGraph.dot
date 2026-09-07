@@ -76,6 +76,12 @@ digraph Assemblies
   "ASM_PersistenceEditor" -> "ASM_Core";
   "ASM_PersistenceEditor" -> "ASM_CoreEditor";
   "ASM_PersistenceEditor" -> "ASM_Persistence";
+  "ASM_PostProcessing" -> "ASM_Core";
+  "ASM_PostProcessing" -> "ASM_CoreEditor";
+  "ASM_PostProcessing" -> "ASM_Graphics";
+  "ASM_PostProcessing" -> "Unknown_df380645f10b7bc4b97d4f5eb6303d95";
+  "ASM_PostProcessing" -> "Unknown_15fc0a57446b3144c949da3e2b9737a9";
+  "ASM_PostProcessing" -> "Unknown_86bc95e6fdb13ff43aa04316542905ae";
   "ASM_Prefab" -> "ASM_Core";
   "ASM_Prefab" -> "ASM_CoreEditor";
   "ASM_PrefabEditor" -> "ASM_Core";
