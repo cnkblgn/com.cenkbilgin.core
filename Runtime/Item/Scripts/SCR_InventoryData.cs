@@ -885,7 +885,7 @@ namespace Core.Item
                 return false;
             }
 
-            if (!targetInventory.TryPlaceItem(removedA, positionB, isRotated, out _, out result))
+            if (!targetInventory.TryAddItem(removedA, positionB, isRotated, out _, out result))
             {
                 TryRemoveItem(placedB.InstanceID, out _, out _);
                 TryAddItem(removedA, positionA, out _, out _);
@@ -938,7 +938,7 @@ namespace Core.Item
             Notify(InventoryState.ITEM_ADDED, result = InventoryResult.SUCCESS, registered);
             return true;
         }
-        private bool TryPlaceItem(ItemData item, Vector2Int position, bool isRotated, out ItemData registered, out InventoryResult result)
+        private bool TryAddItem(ItemData item, Vector2Int position, bool isRotated, out ItemData registered, out InventoryResult result)
         {
             registered = null;
 
@@ -957,7 +957,7 @@ namespace Core.Item
 
             RegisterItem(item, position, out registered);
 
-            result = InventoryResult.SUCCESS;
+            Notify(InventoryState.ITEM_ADDED, result = InventoryResult.SUCCESS, registered);
             return true;
         }
         public bool TryDropItem(Guid instanceID, Vector3 position, Vector3 force, out ItemData registered, out InventoryResult result)
