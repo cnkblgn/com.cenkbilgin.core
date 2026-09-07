@@ -75,10 +75,10 @@ namespace Core.Item
         public bool TryGetItemByTag(ulong tags, out ItemData registered, out InventoryResult result) => thisInventory.TryGetItemByTag(tags, out registered, out result);
         public bool TryGetItemsByTag(ItemTag[] tags, out List<ItemData> registered, out InventoryResult result) => thisInventory.TryGetItemsByTag(tags, out registered, out result);
         public bool TryGetItemsByTag(ulong tags, out List<ItemData> registered, out InventoryResult result) => thisInventory.TryGetItemsByTag(tags, out registered, out result);
-        public bool TryGetItemByBaseID(ItemID baseID, out ItemData registered) => thisInventory.TryGetItemByBaseID(baseID, out registered);
-        public bool TryGetItemsByBaseID(ItemID baseID, List<ItemData> registered) => thisInventory.TryGetItemsByBaseID(baseID, registered);
-        public bool TryGetItemByInstanceID(Guid instanceID, out ItemData registered) => thisInventory.TryGetItemByInstanceID(instanceID, out registered);
-        public bool TryGetItemByPosition(Vector2Int position, out ItemData registered) => thisInventory.TryGetItemByPosition(position, out registered);
+        public bool TryGetItemByBaseID(ItemID baseID, out ItemData registered, out InventoryResult result) => thisInventory.TryGetItemByBaseID(baseID, out registered, out result);
+        public bool TryGetItemsByBaseID(ItemID baseID, List<ItemData> registered, out InventoryResult result) => thisInventory.TryGetItemsByBaseID(baseID, registered, out result);
+        public bool TryGetItemByInstanceID(Guid instanceID, out ItemData registered, out InventoryResult result) => thisInventory.TryGetItemByInstanceID(instanceID, out registered, out result);
+        public bool TryGetItemByPosition(Vector2Int position, out ItemData registered, out InventoryResult result) => thisInventory.TryGetItemByPosition(position, out registered, out result);
         public bool TryGetItemByArea(Vector2Int scale, Vector2Int position, out ItemData overlapped, out InventoryResult ctx) => thisInventory.TryGetItemByArea(scale, position, out overlapped, out ctx);
         public bool IsPositionValid(ItemData item, Vector2Int position, out InventoryResult result) => thisInventory.IsPositionValid(item, position, out result);
         public bool IsPlacementValid(ItemID id, Vector2Int position, bool isRotated, out InventoryResult result) => thisInventory.IsPlacementValid(id, position, isRotated, out result);
@@ -135,6 +135,6 @@ namespace Core.Item
         public bool TryDropItem(Guid instanceID, out ItemData registered, out InventoryResult result) => thisInventory.TryDropItem(instanceID, dropOrigin.position, dropForce * dropOrigin.forward, out registered, out result); 
         public bool TryRemoveItem(Guid instanceID, out ItemData registered, out InventoryResult result) => thisInventory.TryRemoveItem(instanceID, out registered, out result);
         public bool TryClearItem(Guid instanceID, out ItemData registered, out InventoryResult result) => thisInventory.TryClearItem(instanceID, out registered, out result);
-        public bool TryPlaceItem(Guid instanceID, Vector2Int position, bool rotate, out ItemData registered, out InventoryResult ctx) => thisInventory.TryPlaceItem(instanceID, position, rotate, out registered, out ctx);
+        public bool TryMoveItem(Guid instanceID, Vector2Int position, bool isRotated, out ItemData registered, out InventoryResult ctx) => thisInventory.TryMoveItem(instanceID, position, isRotated, out registered, out ctx);
     }
 }

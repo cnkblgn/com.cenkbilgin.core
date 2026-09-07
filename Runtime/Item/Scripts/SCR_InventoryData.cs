@@ -114,6 +114,12 @@ namespace Core.Item
         }
         public bool TryGetClampedPosition(Vector2Int scale, ref Vector2Int position, out InventoryResult result)
         {
+            if (scale.x <= 0 || scale.y <= 0)
+            {
+                result = InventoryResult.OUT_OF_BOUNDS;
+                return false;
+            }
+
             if (scale.x > GridWidth || scale.y > GridHeight)
             {
                 result = InventoryResult.NO_VALID_SPACE;
@@ -158,7 +164,7 @@ namespace Core.Item
             {
                 for (int x = 0; x <= maxX; x++)
                 {
-                    if (!IsTileOverlapping(grid, x, y, scale.x, scale.y, out _))
+                    if (!IsTileOverlapping(grid, x, y, scale.x, scale.y, Guid.Empty, out _, out _))
                     {
                         position = new(x, y);
                         result = InventoryResult.SUCCESS;
@@ -205,97 +211,109 @@ namespace Core.Item
             result = found ? InventoryResult.SUCCESS : InventoryResult.NOT_REGISTERED;
             return found;
         }
-        public bool TryGetItemByBaseID(ItemID baseID, out ItemData registered)
+        public bool TryGetItemByBaseID(ItemID baseID, out ItemData registered, out InventoryResult result)
         {
             foreach (ItemData item in itemTable.Values)
             {
                 if (item.BaseID == baseID)
                 {
+                    result = InventoryResult.SUCCESS;
                     registered = item;
                     return true;
                 }
             }
 
+            result = InventoryResult.NOT_REGISTERED;
             registered = null;
             return false;
         }
-        public bool TryGetItemsByBaseID(ItemID baseID, List<ItemData> registered)
+        public bool TryGetItemsByBaseID(ItemID baseID, List<ItemData> registered, out InventoryResult result)
         {
             if (registered == null)
             {
-                throw new ArgumentNullException($"registered list cannot be null! {nameof(registered)}");
+                throw new ArgumentNullException(nameof(registered), $"registered list cannot be null!");
             }
 
-            bool found = false;
+            result = InventoryResult.NOT_REGISTERED;
 
             foreach (ItemData item in itemTable.Values)
             {
                 if (item.BaseID == baseID)
                 {
+                    result = InventoryResult.SUCCESS;
                     registered.Add(item);
-                    found = true;
                 }
             }
-
-            return found;
+   
+            return result == InventoryResult.SUCCESS;
         }
-        public bool TryGetItemByInstanceID(Guid instanceID, out ItemData registered)
+        public bool TryGetItemByInstanceID(Guid instanceID, out ItemData registered, out InventoryResult result)
         {
             if (!itemTable.TryGetValue(instanceID, out registered))
             {
+                result = InventoryResult.NOT_REGISTERED;
                 return false;
             }
 
+            result = InventoryResult.SUCCESS;
             return true;
         }
-        public bool TryGetItemByPosition(Vector2Int position, out ItemData registered)
+        public bool TryGetItemByPosition(Vector2Int position, out ItemData registered, out InventoryResult result)
         {
-            if (!IsTileInsideBoundary(position.x, position.y))
+            if (!IsTileInsideBoundary(position.x, position.y, out result))
             {
                 registered = null;
                 return false;
             }
 
             registered = itemGrid[(position.y * GridWidth) + (position.x)];
-            return registered != null;
+
+            bool foundItem = registered != null;
+
+            result = foundItem ? InventoryResult.SUCCESS : InventoryResult.NOT_REGISTERED;
+
+            return foundItem;
         }
-        public bool TryGetItemByArea(Vector2Int scale, Vector2Int position, out ItemData overlapped, out InventoryResult result)
+        public bool TryGetItemByArea(Vector2Int scale, Vector2Int position, out ItemData overlapped, out InventoryResult result) => TryGetItemByArea(scale, position, Guid.Empty, out overlapped, out result);
+        private bool TryGetItemByArea(Vector2Int scale, Vector2Int position, Guid ignoredID, out ItemData overlapped, out InventoryResult result)
         {
             overlapped = null;
 
-            if (!IsTileInsideBoundary(position.x, position.y, scale.x, scale.y))
+            if (!IsTileInsideBoundary(position.x, position.y, scale.x, scale.y, out result))
             {
-                result = InventoryResult.OUT_OF_BOUNDS;
                 return false;
             }
 
-            if (!IsTileOverlapping(position.x, position.y, scale.x, scale.y, out overlapped))
+            if (!IsTileOverlapping(position.x, position.y, scale.x, scale.y, ignoredID, out overlapped, out result))
             {
-                result = InventoryResult.NO_VALID_SPACE;
                 return false;
             }
 
-            result = InventoryResult.SUCCESS;
             return true;
         }
         public bool TryGetItemStack(Guid instanceID, out int stack, out InventoryResult result)
         {
             stack = 0;
 
-            if (!TryGetItemByInstanceID(instanceID, out ItemData registered))
+            if (!TryGetItemByInstanceID(instanceID, out ItemData registered, out result))
             {
-                result = InventoryResult.NOT_REGISTERED;
                 return false;
             }
 
             stack = registered.GetStack();
-            result = InventoryResult.SUCCESS;
             return true;
         }
 
-        public bool IsPositionValid(ItemData item, Vector2Int position, out InventoryResult result)
+        public bool IsPositionValid(ItemData item, Vector2Int position, out InventoryResult result) => IsPositionValid(item, position, Guid.Empty, out result);
+        private bool IsPositionValid(ItemData item, Vector2Int position, Guid ignoredID, out InventoryResult result)
         {
-            if (TryGetItemByArea(item.GetScale(), position, out _, out result))
+            if (item == null)
+            {
+                result = InventoryResult.NULL;
+                throw new ArgumentNullException("Placement validation failed! item is null!?");
+            }
+
+            if (TryGetItemByArea(item.GetScale(), position, ignoredID, out _, out result))
             {
                 return false;
             }
@@ -305,13 +323,20 @@ namespace Core.Item
                 return false;
             }
 
-            if (!IsWeightEnough(item.GetWeight()))
+            float currentWeight = CurrentWeight;
+
+            if (ignoredID != Guid.Empty && TryGetItemByInstanceID(ignoredID, out ItemData ignoredItem, out _))
+            {
+                currentWeight -= ignoredItem.GetWeight();
+            }
+
+            if (currentWeight + item.GetWeight() > MaximumWeight)
             {
                 result = InventoryResult.WEIGHT_LIMIT_EXCEEDED;
                 return false;
             }
 
-            if (TryGetItemByInstanceID(item.InstanceID, out _))
+            if (ignoredID == Guid.Empty && TryGetItemByInstanceID(item.InstanceID, out _, out _))
             {
                 result = InventoryResult.DUPLICATE;
                 return false;
@@ -325,7 +350,7 @@ namespace Core.Item
             if (!id.IsValid)
             {
                 result = InventoryResult.NULL;
-                return false;
+                throw new ArgumentNullException("Placement validation failed! id is not valid!?");
             }
 
             ItemDefinition definition = id.GetDefinition();
@@ -350,18 +375,16 @@ namespace Core.Item
         {
             if (targetInventory == null)
             {
-                throw new ArgumentNullException(nameof(targetInventory), "Try swap items failed! target inventory is missing!?");
+                throw new ArgumentNullException(nameof(targetInventory), "Item Swap validation failed! target inventory is missing!?");
             }
 
-            if (!TryGetItemByInstanceID(instanceID, out ItemData itemA))
+            if (!TryGetItemByInstanceID(instanceID, out ItemData itemA, out result))
             {
-                result = InventoryResult.NOT_REGISTERED;
                 return false;
             }
 
-            if (!targetInventory.TryGetItemByInstanceID(targetInstanceID, out ItemData itemB))
+            if (!targetInventory.TryGetItemByInstanceID(targetInstanceID, out ItemData itemB, out result))
             {
-                result = InventoryResult.NOT_REGISTERED;
                 return false;
             }
 
@@ -374,12 +397,12 @@ namespace Core.Item
                 return false;
             }
 
-            if (!IsPositionValid(itemB, positionB, out result))
+            if (!IsPositionValid(itemB, positionA, instanceID, out result))
             {
                 return false;
             }
 
-            if (!targetInventory.IsPositionValid(itemA, positionA, out result))
+            if (!targetInventory.IsPositionValid(itemA, positionB, targetInstanceID, out result))
             {
                 return false;
             }
@@ -387,29 +410,39 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return true;
         }
-        private bool IsWeightEnough(float weight) => weight + CurrentWeight <= MaximumWeight;
-        private bool IsTileOverlapping(int tilePositionX, int tilePositionY, int tileWidth, int tileHeight, out ItemData overlapped) => IsTileOverlapping(itemGrid, tilePositionX, tilePositionY, tileWidth, tileHeight, out overlapped);
-        private bool IsTileOverlapping(ItemData[] grid, int tilePositionX, int tilePositionY, int tileWidth, int tileHeight, out ItemData overlapped)
+        private bool IsTileOverlapping(int tilePositionX, int tilePositionY, int tileWidth, int tileHeight, Guid ignoredID, out ItemData overlapped, out InventoryResult result) => IsTileOverlapping(itemGrid, tilePositionX, tilePositionY, tileWidth, tileHeight, ignoredID, out overlapped, out result);
+        private bool IsTileOverlapping(ItemData[] grid, int tilePositionX, int tilePositionY, int tileWidth, int tileHeight, Guid ignoredID, out ItemData overlapped, out InventoryResult result)
         {
+            overlapped = null;
+
             for (int y = 0; y < tileHeight; y++)
             {
                 for (int x = 0; x < tileWidth; x++)
                 {
-                    overlapped = grid[((tilePositionY + y) * GridWidth) + (tilePositionX + x)];
+                    ItemData registered = grid[((tilePositionY + y) * GridWidth) + (tilePositionX + x)];
 
-                    if (overlapped != null)
+                    if (registered == null)
                     {
-                        return true;
+                        continue;
                     }
+
+                    if (ignoredID != Guid.Empty && registered.InstanceID == ignoredID)
+                    {
+                        continue;
+                    }
+
+                    overlapped = registered;
+                    result = InventoryResult.OVERLAPPING;
+                    return true;
                 }
             }
 
-            overlapped = null;
+            result = InventoryResult.EMPTY;
             return false;
         }
-        private bool IsTileInsideBoundary(int tilePositionX, int tilePositionY, int tileWidth, int tileHeight)
+        private bool IsTileInsideBoundary(int tilePositionX, int tilePositionY, int tileWidth, int tileHeight, out InventoryResult result)
         {
-            if (!IsTileInsideBoundary(tilePositionX, tilePositionY))
+            if (!IsTileInsideBoundary(tilePositionX, tilePositionY, out result))
             {
                 return false;
             }
@@ -417,15 +450,17 @@ namespace Core.Item
             tilePositionX += tileWidth - 1;
             tilePositionY += tileHeight - 1;
 
-            if (!IsTileInsideBoundary(tilePositionX, tilePositionY))
+            if (!IsTileInsideBoundary(tilePositionX, tilePositionY, out result))
             {
                 return false;
             }
 
             return true;
         }
-        private bool IsTileInsideBoundary(int tilePositionX, int tilePositionY)
+        private bool IsTileInsideBoundary(int tilePositionX, int tilePositionY, out InventoryResult result)
         {
+            result = InventoryResult.OUT_OF_BOUNDS;
+
             if (tilePositionX < 0 || tilePositionY < 0)
             {
                 return false;
@@ -436,6 +471,7 @@ namespace Core.Item
                 return false;
             }
 
+            result = InventoryResult.SUCCESS;
             return true;
         }
 
@@ -457,7 +493,7 @@ namespace Core.Item
 
             foreach (Guid id in items.ToArray())
             {
-                if (TryGetItemByInstanceID(id, out ItemData registered))
+                if (TryGetItemByInstanceID(id, out ItemData registered, out _))
                 {
                     if (!groups.TryGetValue(registered.BaseID, out List<ItemData> list))
                     {
@@ -494,7 +530,7 @@ namespace Core.Item
                     {
                         ItemData source = group[j];
 
-                        if (TryMergeItem(target, source, this, canStackPredicate, out result))
+                        if (TryMergeItem(target, source, this, canStackPredicate, out _))
                         {
                             totalMoved++;
                         }
@@ -504,7 +540,7 @@ namespace Core.Item
 
             if (totalMoved <= 0)
             {
-                result = InventoryResult.NO_VALID_SPACE;
+                result = InventoryResult.FAILED;
                 return false;
             }
 
@@ -521,15 +557,13 @@ namespace Core.Item
                 throw new ArgumentNullException(nameof(sourceInventory), "Merge failed source inventory missing!?");
             }
 
-            if (!TryGetItemByInstanceID(targetInstanceID, out ItemData targetItem))
+            if (!TryGetItemByInstanceID(targetInstanceID, out ItemData targetItem, out result))
             {
-                result = InventoryResult.NOT_REGISTERED;
                 return false;
             }
 
-            if (!sourceInventory.TryGetItemByInstanceID(sourceInstanceID, out ItemData sourceItem))
+            if (!sourceInventory.TryGetItemByInstanceID(sourceInstanceID, out ItemData sourceItem, out result))
             {
-                result = InventoryResult.NOT_REGISTERED;
                 return false;
             }
 
@@ -544,12 +578,12 @@ namespace Core.Item
 
             if (sourceItem == null)
             {
-                throw new ArgumentNullException(nameof(sourceInventory), "Item merge failed source item missing!?");
+                throw new ArgumentNullException(nameof(sourceItem), "Item merge failed source item missing!?");
             }
 
             if (targetItem == null)
             {
-                throw new ArgumentNullException(nameof(sourceInventory), "Item merge failed target item missing!?");
+                throw new ArgumentNullException(nameof(targetItem), "Item merge failed target item missing!?");
             }
 
             if (targetItem.InstanceID == sourceItem.InstanceID)
@@ -631,7 +665,7 @@ namespace Core.Item
         private void SetTileItem(ItemData item, Vector2Int position, Vector2Int scale) => SetTileItem(itemGrid, item, position, scale);
         private void SetTileItem(ItemData[] grid, ItemData item, Vector2Int position, Vector2Int scale)
         {
-            if (!IsTileInsideBoundary(position.x, position.y, scale.x, scale.y))
+            if (!IsTileInsideBoundary(position.x, position.y, scale.x, scale.y, out _))
             {
                 throw new IndexOutOfRangeException($"Item tile placement out of bounds! pos = {position} scale = {scale}");
             }
@@ -702,15 +736,14 @@ namespace Core.Item
         }
         public bool TrySetItemStack(Guid instanceID, int stack, out InventoryResult result)
         {
-            if (!TryGetItemByInstanceID(instanceID, out ItemData registered))
+            if (!TryGetItemByInstanceID(instanceID, out ItemData registered, out result))
             {
-                result = InventoryResult.NOT_REGISTERED;
                 return false;
             }
 
             return TrySetItemStack(registered, stack, out result);
         }
-        internal bool TrySetItemStack(ItemData item, int stack, out InventoryResult result)
+        private bool TrySetItemStack(ItemData item, int stack, out InventoryResult result)
         {
             if (item == null)
             {
@@ -735,41 +768,6 @@ namespace Core.Item
             Notify(InventoryState.ITEM_CHANGED, result = InventoryResult.SUCCESS, item);
             return true;
         }
-        public bool TryTransferItem(Guid instanceID, Vector2Int? position, InventoryData inventory, out ItemData transfered, out InventoryResult result)
-        {
-            transfered = null;
-
-            if (inventory == null)
-            {
-                result = InventoryResult.NULL;
-                throw new ArgumentNullException($"Inventory transfer item failed target inventory is null! {nameof(inventory)}");
-            }
-
-            if (!TryGetItemByInstanceID(instanceID, out ItemData registered))
-            {
-                Debug.LogError($"Inventory transfer item failed! [{instanceID}] not found!");
-                result = InventoryResult.NOT_REGISTERED;
-                return false;
-            }
-
-            if (inventory.TryAddItem(registered, position, out transfered, out result))
-            {
-                if (TryRemoveItem(instanceID, out _, out result))
-                {
-                    Notify(InventoryState.ITEM_TRANSFERED, result, transfered);
-                    return true;
-                }
-
-                if (!inventory.TryRemoveItem(transfered.InstanceID, out _, out _))
-                {
-                    Debug.LogError($"CRITICAL: Transfer rollback failed! Item [{transfered.InstanceID}] may now exist in two inventories.");
-                }
-
-                transfered = null;
-            }
-
-            return false;
-        }
         public bool TryTransferItems(InventoryData inventory, out InventoryResult result)
         {
             if (inventory == null)
@@ -782,7 +780,7 @@ namespace Core.Item
 
             foreach (Guid id in GetItems().ToArray())
             {
-                if (!TryGetItemByInstanceID(id, out ItemData registered))
+                if (!TryGetItemByInstanceID(id, out ItemData registered, out result))
                 {
                     continue;
                 }
@@ -807,34 +805,52 @@ namespace Core.Item
             result = addedAny ? InventoryResult.SUCCESS : InventoryResult.NOT_REGISTERED;
             return addedAny;
         }
-        
+        public bool TryTransferItem(Guid instanceID, Vector2Int? position, InventoryData inventory, out ItemData transfered, out InventoryResult result)
+        {
+            transfered = null;
+
+            if (inventory == null)
+            {
+                result = InventoryResult.NULL;
+                throw new ArgumentNullException($"Inventory transfer item failed target inventory is null! {nameof(inventory)}");
+            }
+
+            if (!TryGetItemByInstanceID(instanceID, out ItemData registered, out result))
+            {
+                Debug.LogError($"Inventory transfer item failed! [{instanceID}] not found!");
+                return false;
+            }
+
+            if (inventory.TryAddItem(registered, position, out transfered, out result))
+            {
+                if (TryRemoveItem(instanceID, out _, out result))
+                {
+                    Notify(InventoryState.ITEM_TRANSFERED, result, transfered);
+                    return true;
+                }
+
+                if (!inventory.TryRemoveItem(transfered.InstanceID, out _, out _))
+                {
+                    Debug.LogError($"CRITICAL: Transfer rollback failed! Item [{transfered.InstanceID}] may now exist in two inventories.");
+                }
+
+                transfered = null;
+            }
+
+            return false;
+        }
         public bool TrySwapItems(Guid instanceID, Guid targetInstanceID, InventoryData targetInventory, out InventoryResult result)
         {
-            if (targetInventory == null)
+            if (!IsSwapValid(instanceID, targetInstanceID, targetInventory, out result))
             {
-                throw new ArgumentNullException(nameof(targetInventory), "Try swap items failed! target inventory is missing!?");
-            }
-
-            if (!TryGetItemByInstanceID(instanceID, out ItemData itemA))
-            {
-                result = InventoryResult.NOT_REGISTERED;
                 return false;
             }
 
-            if (!targetInventory.TryGetItemByInstanceID(targetInstanceID, out ItemData itemB))
-            {
-                result = InventoryResult.NOT_REGISTERED;
-                return false;
-            }
+            TryGetItemByInstanceID(instanceID, out ItemData itemA, out _);
+            targetInventory.TryGetItemByInstanceID(targetInstanceID, out ItemData itemB, out _);
 
             Vector2Int positionA = itemA.GetPosition();
             Vector2Int positionB = itemB.GetPosition();
-
-            if (!itemB.Tags.HasAny(ItemMask) || !itemA.Tags.HasAny(targetInventory.ItemMask))
-            {
-                result = InventoryResult.NOT_SUPPORTED;
-                return false;
-            }
 
             if (!TryRemoveItem(instanceID, out ItemData removedA, out result))
             {
@@ -917,6 +933,7 @@ namespace Core.Item
 
             if (entity == null)
             {
+                result = InventoryResult.NULL; 
                 return false;
             }
 
@@ -952,19 +969,17 @@ namespace Core.Item
         }
         public bool TryClearItem(Guid instanceID, out ItemData registered, out InventoryResult result)
         {
-            if (!TryGetItemByInstanceID(instanceID, out registered))
+            if (!TryGetItemByInstanceID(instanceID, out registered, out result))
             {
                 Debug.LogError($"Inventory clear item failed! [{instanceID}] not found!");
-                result = InventoryResult.NOT_REGISTERED;
                 return false;
             }
 
             Vector2Int position = registered.GetPosition();
             Vector2Int scale = registered.GetScale();
 
-            if (!IsTileInsideBoundary(position.x, position.y, scale.x, scale.y))
+            if (!IsTileInsideBoundary(position.x, position.y, scale.x, scale.y, out result))
             {
-                result = InventoryResult.OUT_OF_BOUNDS;
                 return false;
             }
 
@@ -972,12 +987,11 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return true;
         }
-        public bool TryPlaceItem(Guid instanceID, Vector2Int position, bool isRotated, out ItemData registered, out InventoryResult result)
+        public bool TryMoveItem(Guid instanceID, Vector2Int position, bool isRotated, out ItemData registered, out InventoryResult result)
         {
-            if (!TryGetItemByInstanceID(instanceID, out registered))
+            if (!TryGetItemByInstanceID(instanceID, out registered, out result))
             {
                 Debug.LogError($"Inventory place item failed! [{instanceID}] not found!");
-                result = InventoryResult.NOT_REGISTERED;
                 return false;
             }
 
@@ -990,9 +1004,7 @@ namespace Core.Item
             registered.SetRotation(isRotated);
             Vector2Int newScale = registered.GetScale();
 
-            bool overlaps = TryGetItemByArea(newScale, position, out _, out result);
-
-            if (overlaps || result == InventoryResult.OUT_OF_BOUNDS)
+            if (TryGetItemByArea(newScale, position, out _, out result) || result == InventoryResult.OUT_OF_BOUNDS)
             {
                 registered.SetRotation(oldRotation);
                 SetTileItem(registered, oldPosition, oldScale);

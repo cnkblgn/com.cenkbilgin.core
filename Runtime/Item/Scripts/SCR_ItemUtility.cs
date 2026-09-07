@@ -56,7 +56,7 @@ namespace Core.Item
             {
                 Dictionary<string, DataNode> slot = new();
 
-                if (obj.TryGetItemByInstanceID(id, out ItemData registered))
+                if (obj.TryGetItemByInstanceID(id, out ItemData registered, out _))
                 {
                     registered.ExportTo(slot);
                 }

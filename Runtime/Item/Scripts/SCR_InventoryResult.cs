@@ -5,6 +5,7 @@ namespace Core.Item
         NULL,
         DUPLICATE,
         OVERLAPPING,
+        EMPTY,
         NOT_REGISTERED,
         NOT_SUPPORTED,
         NO_VALID_SPACE,
@@ -13,5 +14,6 @@ namespace Core.Item
         WEIGHT_LIMIT_EXCEEDED,
         CAPACITY_LIMIT_EXCEEDED,
         SUCCESS,
+        FAILED,
     }
 }
