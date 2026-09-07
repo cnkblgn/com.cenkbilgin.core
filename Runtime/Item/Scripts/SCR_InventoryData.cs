@@ -346,6 +346,47 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return true;
         }
+        public bool IsSwapValid(Guid instanceID, Guid targetInstanceID, InventoryData targetInventory, out InventoryResult result)
+        {
+            if (targetInventory == null)
+            {
+                throw new ArgumentNullException(nameof(targetInventory), "Try swap items failed! target inventory is missing!?");
+            }
+
+            if (!TryGetItemByInstanceID(instanceID, out ItemData itemA))
+            {
+                result = InventoryResult.NOT_REGISTERED;
+                return false;
+            }
+
+            if (!targetInventory.TryGetItemByInstanceID(targetInstanceID, out ItemData itemB))
+            {
+                result = InventoryResult.NOT_REGISTERED;
+                return false;
+            }
+
+            Vector2Int positionA = itemA.GetPosition();
+            Vector2Int positionB = itemB.GetPosition();
+
+            if (!itemB.Tags.HasAny(ItemMask) || !itemA.Tags.HasAny(targetInventory.ItemMask))
+            {
+                result = InventoryResult.NOT_SUPPORTED;
+                return false;
+            }
+
+            if (!IsPositionValid(itemB, positionB, out result))
+            {
+                return false;
+            }
+
+            if (!targetInventory.IsPositionValid(itemA, positionA, out result))
+            {
+                return false;
+            }
+
+            result = InventoryResult.SUCCESS;
+            return true;
+        }
         private bool IsWeightEnough(float weight) => weight + CurrentWeight <= MaximumWeight;
         private bool IsTileOverlapping(int tilePositionX, int tilePositionY, int tileWidth, int tileHeight, out ItemData overlapped) => IsTileOverlapping(itemGrid, tilePositionX, tilePositionY, tileWidth, tileHeight, out overlapped);
         private bool IsTileOverlapping(ItemData[] grid, int tilePositionX, int tilePositionY, int tileWidth, int tileHeight, out ItemData overlapped)
@@ -498,17 +539,17 @@ namespace Core.Item
         {
             if (sourceInventory == null)
             {
-                throw new ArgumentNullException(nameof(sourceInventory), "Merge failed source inventory missing!?");
+                throw new ArgumentNullException(nameof(sourceInventory), "Item merge failed source inventory missing!?");
             }
 
             if (sourceItem == null)
             {
-                throw new ArgumentNullException(nameof(sourceInventory), "Merge failed source item missing!?");
+                throw new ArgumentNullException(nameof(sourceInventory), "Item merge failed source item missing!?");
             }
 
             if (targetItem == null)
             {
-                throw new ArgumentNullException(nameof(sourceInventory), "Merge failed target item missing!?");
+                throw new ArgumentNullException(nameof(sourceInventory), "Item merge failed target item missing!?");
             }
 
             if (targetItem.InstanceID == sourceItem.InstanceID)
@@ -766,6 +807,7 @@ namespace Core.Item
             result = addedAny ? InventoryResult.SUCCESS : InventoryResult.NOT_REGISTERED;
             return addedAny;
         }
+        
         public bool TrySwapItems(Guid instanceID, Guid targetInstanceID, InventoryData targetInventory, out InventoryResult result)
         {
             if (targetInventory == null)
