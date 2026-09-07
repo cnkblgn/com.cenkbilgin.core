@@ -371,12 +371,15 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return true;
         }
-        public bool IsSwapValid(Guid instanceID, Guid targetInstanceID, InventoryData targetInventory, out InventoryResult result)
+        public bool IsSwapValid(Guid instanceID, Guid targetInstanceID, InventoryData targetInventory, out Vector2Int position, out Vector2Int targetPosition, out InventoryResult result)
         {
             if (targetInventory == null)
             {
                 throw new ArgumentNullException(nameof(targetInventory), "Item Swap validation failed! target inventory is missing!?");
             }
+
+            position = Vector2Int.one * -1;
+            targetPosition = Vector2Int.one * -1;
 
             if (!TryGetItemByInstanceID(instanceID, out ItemData itemA, out result))
             {
@@ -388,8 +391,8 @@ namespace Core.Item
                 return false;
             }
 
-            Vector2Int positionA = itemA.GetPosition();
-            Vector2Int positionB = itemB.GetPosition();
+            position = itemA.GetPosition();
+            targetPosition = itemB.GetPosition();
 
             if (!itemB.Tags.HasAny(ItemMask) || !itemA.Tags.HasAny(targetInventory.ItemMask))
             {
@@ -397,12 +400,22 @@ namespace Core.Item
                 return false;
             }
 
-            if (!IsPositionValid(itemB, positionA, instanceID, out result))
+            if (!TryGetClampedPosition(itemB.GetScale(), ref position, out result))
             {
                 return false;
             }
 
-            if (!targetInventory.IsPositionValid(itemA, positionB, targetInstanceID, out result))
+            if (!targetInventory.TryGetClampedPosition(itemA.GetScale(), ref targetPosition, out result))
+            {
+                return false;
+            }
+
+            if (!IsPositionValid(itemB, position, instanceID, out result))
+            {
+                return false;
+            }
+
+            if (!targetInventory.IsPositionValid(itemA, targetPosition, targetInstanceID, out result))
             {
                 return false;
             }
@@ -841,16 +854,13 @@ namespace Core.Item
         }
         public bool TrySwapItems(Guid instanceID, Guid targetInstanceID, InventoryData targetInventory, out InventoryResult result)
         {
-            if (!IsSwapValid(instanceID, targetInstanceID, targetInventory, out result))
+            if (!IsSwapValid(instanceID, targetInstanceID, targetInventory, out Vector2Int positionA, out Vector2Int positionB, out result))
             {
                 return false;
             }
 
-            TryGetItemByInstanceID(instanceID, out ItemData itemA, out _);
-            targetInventory.TryGetItemByInstanceID(targetInstanceID, out ItemData itemB, out _);
-
-            Vector2Int positionA = itemA.GetPosition();
-            Vector2Int positionB = itemB.GetPosition();
+            TryGetItemByInstanceID(instanceID, out ItemData _, out _);
+            targetInventory.TryGetItemByInstanceID(targetInstanceID, out ItemData _, out _);
 
             if (!TryRemoveItem(instanceID, out ItemData removedA, out result))
             {

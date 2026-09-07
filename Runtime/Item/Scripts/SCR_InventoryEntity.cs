@@ -82,8 +82,7 @@ namespace Core.Item
         public bool TryGetItemByArea(Vector2Int scale, Vector2Int position, out ItemData overlapped, out InventoryResult ctx) => thisInventory.TryGetItemByArea(scale, position, out overlapped, out ctx);
         public bool IsPositionValid(ItemData item, Vector2Int position, out InventoryResult result) => thisInventory.IsPositionValid(item, position, out result);
         public bool IsPlacementValid(ItemID id, Vector2Int position, bool isRotated, out InventoryResult result) => thisInventory.IsPlacementValid(id, position, isRotated, out result);
-        public bool IsSwapValid(Guid instanceID, Guid targetInstanceID, InventoryEntity targetInventory, out InventoryResult result) => thisInventory.IsSwapValid(instanceID, targetInstanceID, targetInventory.thisInventory, out result);
-
+        public bool IsSwapValid(Guid instanceID, Guid targetInstanceID, InventoryEntity targetInventory, out Vector2Int position, out Vector2Int targetPosition, out InventoryResult result) => thisInventory.IsSwapValid(instanceID, targetInstanceID, targetInventory.thisInventory, out position, out targetPosition, out result);
         public bool TrySortItems(IInventorySorter sorter, out InventoryResult result) => thisInventory.TrySortItems(sorter, out result);
         public bool TrySortItemsByArea(bool descending, out InventoryResult result) => thisInventory.TrySortItems(descending ? InventorySorter.SortByAreaDescending : InventorySorter.SortByArea, out result);
         public bool TrySortItemsByTag(out InventoryResult result) => thisInventory.TrySortItems(InventorySorter.SortByTag, out result);
