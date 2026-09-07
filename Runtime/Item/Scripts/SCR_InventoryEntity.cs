@@ -64,7 +64,7 @@ namespace Core.Item
         public int GetCurrentCapacity() => thisInventory.CurrentCapacity;
         public int GetMaximumCapacity() => thisInventory.MaximumCapacity;
         public float GetCurrentWeight() => thisInventory.CurrentWeight;
-        public int GetMaxWeight() => thisInventory.MaximumWeight;
+        public int GetMaximumWeight() => thisInventory.MaximumWeight;
         public Vector2Int GetDimensions() => new(thisInventory.GridWidth, thisInventory.GridHeight);
         public IReadOnlyCollection<Guid> GetItems() => thisInventory.GetItems();
         public int GetItems(ItemID baseID) => thisInventory.GetItems(baseID);
@@ -79,7 +79,8 @@ namespace Core.Item
         public bool TryGetItemsByBaseID(ItemID baseID, List<ItemData> registered, out InventoryResult result) => thisInventory.TryGetItemsByBaseID(baseID, registered, out result);
         public bool TryGetItemByInstanceID(Guid instanceID, out ItemData registered, out InventoryResult result) => thisInventory.TryGetItemByInstanceID(instanceID, out registered, out result);
         public bool TryGetItemByPosition(Vector2Int position, out ItemData registered, out InventoryResult result) => thisInventory.TryGetItemByPosition(position, out registered, out result);
-        public bool TryGetItemByArea(Vector2Int scale, Vector2Int position, out ItemData overlapped, out InventoryResult ctx) => thisInventory.TryGetItemByArea(scale, position, out overlapped, out ctx);
+        [Obsolete]
+        public bool TryGetItemByArea(Vector2Int position, Vector2Int scale, out ItemData overlapped, out InventoryResult ctx) => thisInventory.TryGetItemByArea(position, scale, out overlapped, out ctx);
 
         public bool CanAddItem(ItemData item, Vector2Int position, bool isRotated, out InventoryResult result) => thisInventory.CanAddItem(item, position, isRotated, out result);
         public bool IsPlacementValid(Vector2Int position, Vector2Int scale, out InventoryResult result) => thisInventory.IsPlacementValid(position, scale, out result);

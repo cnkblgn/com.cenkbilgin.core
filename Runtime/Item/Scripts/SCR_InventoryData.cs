@@ -260,7 +260,7 @@ namespace Core.Item
 
             return foundItem;
         }
-        public bool TryGetItemByArea(Vector2Int scale, Vector2Int position, out ItemData overlapped, out InventoryResult result)
+        public bool TryGetItemByArea(Vector2Int position, Vector2Int scale, out ItemData overlapped, out InventoryResult result)
         {
             overlapped = null;
 
@@ -319,7 +319,7 @@ namespace Core.Item
         }
         public bool IsPlacementValid(Vector2Int position, Vector2Int scale, out InventoryResult result)
         {
-            if (TryGetItemByArea(scale, position, out _, out result))
+            if (TryGetItemByArea(position, scale, out _, out result))
             {
                 return false;
             }
