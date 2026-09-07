@@ -41,7 +41,7 @@ namespace Core.Item
 
             foreach (ItemID item in startingItems)
             {
-                thisInventory.TryAddItem(item.CreateData(), null, out ItemData _, out InventoryResult _);
+                thisInventory.TryAddItem(item.CreateData(), null, null, out ItemData _, out InventoryResult _);
             }
         }
         private void Start() => Initialize();
@@ -68,7 +68,7 @@ namespace Core.Item
         public Vector2Int GetDimensions() => new(thisInventory.GridWidth, thisInventory.GridHeight);
         public IReadOnlyCollection<Guid> GetItems() => thisInventory.GetItems();
         public int GetItems(ItemID baseID) => thisInventory.GetItems(baseID);
-        public bool TryGetValidPositionForItem(ItemData item, out Vector2Int position, out bool isRotated, out InventoryResult result) => this.thisInventory.TryGetValidPosition(item, out position, out isRotated, out result);
+        public bool TryGetBestPosition(ItemData item, out Vector2Int position, out bool isRotated, out InventoryResult result) => this.thisInventory.TryGetBestPosition(item, out position, out isRotated, out result);
         public bool TryGetClampedPosition(Vector2Int scale, ref Vector2Int position, out InventoryResult result) => thisInventory.TryGetClampedPosition(scale, ref position, out result);
         public bool TryGetAnyPosition(Vector2Int scale, out Vector2Int position, out InventoryResult result) => thisInventory.TryGetAnyPosition(scale, out position, out result);
         public bool TryGetItemByTag(ItemTag tag, out ItemData registered, out InventoryResult result) => thisInventory.TryGetItemByTag(tag, out registered, out result);
@@ -80,9 +80,10 @@ namespace Core.Item
         public bool TryGetItemByInstanceID(Guid instanceID, out ItemData registered, out InventoryResult result) => thisInventory.TryGetItemByInstanceID(instanceID, out registered, out result);
         public bool TryGetItemByPosition(Vector2Int position, out ItemData registered, out InventoryResult result) => thisInventory.TryGetItemByPosition(position, out registered, out result);
         public bool TryGetItemByArea(Vector2Int scale, Vector2Int position, out ItemData overlapped, out InventoryResult ctx) => thisInventory.TryGetItemByArea(scale, position, out overlapped, out ctx);
-        public bool IsPositionValid(ItemData item, Vector2Int position, out InventoryResult result) => thisInventory.IsPositionValid(item, position, out result);
-        public bool IsPlacementValid(ItemID id, Vector2Int position, bool isRotated, out InventoryResult result) => thisInventory.IsPlacementValid(id, position, isRotated, out result);
-        public bool IsSwapValid(Guid instanceID, Guid targetInstanceID, InventoryEntity targetInventory, bool isRotated, out Vector2Int position, out Vector2Int targetPosition, out InventoryResult result) => thisInventory.IsSwapValid(instanceID, targetInstanceID, targetInventory.thisInventory, isRotated, out position, out targetPosition, out result);
+
+        public bool CanAddItem(ItemData item, Vector2Int position, bool isRotated, out InventoryResult result) => thisInventory.CanAddItem(item, position, isRotated, out result);
+        public bool IsPlacementValid(Vector2Int position, Vector2Int scale, out InventoryResult result) => thisInventory.IsPlacementValid(position, scale, out result);
+
         public bool TrySortItems(IInventorySorter sorter, out InventoryResult result) => thisInventory.TrySortItems(sorter, out result);
         public bool TrySortItemsByArea(bool descending, out InventoryResult result) => thisInventory.TrySortItems(descending ? InventorySorter.SortByAreaDescending : InventorySorter.SortByArea, out result);
         public bool TrySortItemsByTag(out InventoryResult result) => thisInventory.TrySortItems(InventorySorter.SortByTag, out result);
@@ -103,23 +104,14 @@ namespace Core.Item
         }
         public bool TryGetItemStack(Guid instanceID, out int stack, out InventoryResult result) => thisInventory.TryGetItemStack(instanceID, out stack, out result);
         public bool TrySetItemStack(Guid instanceID, int stack, out InventoryResult result) => thisInventory.TrySetItemStack(instanceID, stack, out result);
-        public bool TrySwapItems(Guid instanceID, Guid targetInstanceID, InventoryEntity targetInventory, bool isRotated, out InventoryResult result)
-        {
-            if (targetInventory == null)
-            {
-                throw new ArgumentNullException(nameof(targetInventory), "Try swap items failed! inventory is missing!?");
-            }
-
-            return thisInventory.TrySwapItems(instanceID, targetInstanceID, targetInventory.thisInventory, isRotated, out result);
-        }
-        public bool TryTransferItem(Guid instanceID, Vector2Int? position, InventoryEntity inventory, out ItemData transfered, out InventoryResult result)
+        public bool TryTransferItem(Guid instanceID, Vector2Int? position, bool? isRotated, InventoryEntity inventory, out ItemData transfered, out InventoryResult result)
         {
             if (inventory == null)
             {
                 throw new ArgumentNullException(nameof(inventory), "Try transfer items failed! inventory is missing!?");
             }
 
-            return thisInventory.TryTransferItem(instanceID, position, inventory.thisInventory, out transfered, out result);
+            return thisInventory.TryTransferItem(instanceID, position, isRotated, inventory.thisInventory, out transfered, out result);
         }
         public bool TryTransferItems(InventoryEntity inventory, out InventoryResult result)
         {
@@ -130,7 +122,7 @@ namespace Core.Item
 
             return thisInventory.TryTransferItems(inventory.thisInventory, out result);
         }
-        public bool TryAddItem(ItemData item, Vector2Int? position, out ItemData registered, out InventoryResult result) => thisInventory.TryAddItem(item, position, out registered, out result);
+        public bool TryAddItem(ItemData item, Vector2Int? position, bool? isRotated, out ItemData registered, out InventoryResult result) => thisInventory.TryAddItem(item, position, isRotated, out registered, out result);
         public bool TryDropItem(Guid instanceID, out ItemData registered, out InventoryResult result) => thisInventory.TryDropItem(instanceID, dropOrigin.position, dropForce * dropOrigin.forward, out registered, out result); 
         public bool TryRemoveItem(Guid instanceID, out ItemData registered, out InventoryResult result) => thisInventory.TryRemoveItem(instanceID, out registered, out result);
         public bool TryClearItem(Guid instanceID, out ItemData registered, out InventoryResult result) => thisInventory.TryClearItem(instanceID, out registered, out result);

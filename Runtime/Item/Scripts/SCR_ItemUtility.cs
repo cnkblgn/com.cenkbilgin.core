@@ -90,7 +90,7 @@ namespace Core.Item
 
                 ItemData item = CreateItemFrom(slot);
 
-                inventory.TryAddItem(item, item.GetPosition(), out ItemData _, out InventoryResult _);
+                inventory.TryAddItem(item, item.GetPosition(), item.GetRotation(), out ItemData _, out InventoryResult _);
             }
 
             return inventory;
@@ -125,7 +125,7 @@ namespace Core.Item
             data.SetString(BASE_ID, obj.BaseID.Key);
             data.SetGuid(INSTANCE_ID, obj.InstanceID);
             data.SetVector2(POS, new(position.x, position.y));
-            data.SetBool(ROT, obj.IsRotated());
+            data.SetBool(ROT, obj.GetRotation());
             data.SetInt(STACK, obj.GetStack());
             data.SetData(DATA, obj.Data);
         }

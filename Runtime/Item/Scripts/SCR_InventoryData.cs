@@ -46,7 +46,7 @@ namespace Core.Item
             {
                 ItemData item = new(items[i]);
 
-                if (!TryAddItem(item, item.GetPosition(), out ItemData _, out InventoryResult ctx))
+                if (!TryAddItem(item, item.GetPosition(), item.GetRotation(), out ItemData _, out InventoryResult ctx))
                 {
                     Debug.LogWarning($"Failed to add item {item.BaseID} at {item.GetPosition()} — {ctx}. Skipping.");
                 }
@@ -84,32 +84,26 @@ namespace Core.Item
             return count;
         }
 
-        public bool TryGetValidPosition(ItemData item, out Vector2Int position, out bool isRotated, out InventoryResult result)
+        public bool TryGetBestPosition(ItemData item, out Vector2Int bestPosition, out bool bestRotation, out InventoryResult result)
         {
             if (item == null)
             {
-                throw new ArgumentNullException(nameof(item));
+                throw new ArgumentNullException(nameof(item), "Try get valid position failed! item is null!?");
             }
 
-            isRotated = item.IsRotated();
+            bestRotation = item.GetRotation();
+            Vector2Int scale = item.GetScale(bestRotation);
 
-            Vector2Int scale = item.GetScale(isRotated);
-
-            if (TryGetAnyPosition(scale, out position, out _))
+            if (TryGetAnyPosition(scale, out bestPosition, out _))
             {
                 result = InventoryResult.SUCCESS;
                 return true;
             }
 
-            isRotated = !isRotated;
-            scale = ItemData.GetScale(item.BaseID, isRotated);
+            bestRotation = !bestRotation;
+            scale = item.GetScale(bestRotation);
 
-            if (!TryGetAnyPosition(scale, out position, out result))
-            {
-                return false;
-            }
-
-            return true;
+            return TryGetAnyPosition(scale, out bestPosition, out result);
         }
         public bool TryGetClampedPosition(Vector2Int scale, ref Vector2Int position, out InventoryResult result)
         {
@@ -157,7 +151,7 @@ namespace Core.Item
             {
                 for (int x = 0; x <= maxX; x++)
                 {
-                    if (!IsTileOverlapping(grid, x, y, scale.x, scale.y, Guid.Empty, out _, out _))
+                    if (!IsTileOverlapping(grid, x, y, scale.x, scale.y, out _, out _))
                     {
                         position = new(x, y);
                         result = InventoryResult.SUCCESS;
@@ -190,19 +184,18 @@ namespace Core.Item
         public bool TryGetItemsByTag(ulong tags, out List<ItemData> items, out InventoryResult result)
         {
             items = new();
-            bool found = false;
+            result = InventoryResult.NOT_REGISTERED;
 
             foreach (ItemData item in itemTable.Values)
             {
                 if (item.Tags.HasAny(tags))
                 {
                     items.Add(item);
-                    found = true;
+                    result = InventoryResult.SUCCESS;
                 }
             }
 
-            result = found ? InventoryResult.SUCCESS : InventoryResult.NOT_REGISTERED;
-            return found;
+            return result == InventoryResult.SUCCESS;
         }
         public bool TryGetItemByBaseID(ItemID baseID, out ItemData registered, out InventoryResult result)
         {
@@ -224,7 +217,7 @@ namespace Core.Item
         {
             if (registered == null)
             {
-                throw new ArgumentNullException(nameof(registered), $"registered list cannot be null!");
+                throw new ArgumentNullException(nameof(registered), $"Get items by base id failed! Registered list cannot be null!");
             }
 
             result = InventoryResult.NOT_REGISTERED;
@@ -267,8 +260,7 @@ namespace Core.Item
 
             return foundItem;
         }
-        public bool TryGetItemByArea(Vector2Int scale, Vector2Int position, out ItemData overlapped, out InventoryResult result) => TryGetItemByArea(scale, position, Guid.Empty, out overlapped, out result);
-        private bool TryGetItemByArea(Vector2Int scale, Vector2Int position, Guid ignoredID, out ItemData overlapped, out InventoryResult result)
+        public bool TryGetItemByArea(Vector2Int scale, Vector2Int position, out ItemData overlapped, out InventoryResult result)
         {
             overlapped = null;
 
@@ -277,7 +269,7 @@ namespace Core.Item
                 return false;
             }
 
-            if (!IsTileOverlapping(position.x, position.y, scale.x, scale.y, ignoredID, out overlapped, out result))
+            if (!IsTileOverlapping(position.x, position.y, scale.x, scale.y, out overlapped, out result))
             {
                 return false;
             }
@@ -297,73 +289,37 @@ namespace Core.Item
             return true;
         }
 
-        public bool IsPositionValid(ItemData item, Vector2Int position, bool isRotated, out InventoryResult result)
-        {
-            if (item == null)
-            {
-                throw new ArgumentNullException(nameof(item), "Placement validation failed! item is null!?");
-            }
-
-            return IsPositionValid(item, position, item.GetScale(isRotated), Guid.Empty, out result);
-        }
-        public bool IsPositionValid(ItemData item, Vector2Int position, out InventoryResult result)
-        {
-            if (item == null)
-            {
-                throw new ArgumentNullException(nameof(item), "Placement validation failed! item is null!?");
-            }
-
-            return IsPositionValid(item, position, item.GetScale(), Guid.Empty, out result);
-        }
-        private bool IsPositionValid(ItemData item, Vector2Int position, Vector2Int scale, Guid ignoredID, out InventoryResult result)
+        public bool CanAddItem(ItemData item, Vector2Int position, bool isRotated, out InventoryResult result)
         {
             if (item == null)
             {
                 result = InventoryResult.NULL;
-                throw new ArgumentNullException("Placement validation failed! item is null!?");
+                throw new ArgumentNullException(nameof(item), "Placement validation failed! item is null!?");
             }
 
-            if (TryGetItemByArea(scale, position, ignoredID, out _, out result))
-            {
-                return false;
-            }
-
-            if (result == InventoryResult.OUT_OF_BOUNDS)
-            {
-                return false;
-            }
-
-            float currentWeight = CurrentWeight;
-
-            if (ignoredID != Guid.Empty && TryGetItemByInstanceID(ignoredID, out ItemData ignoredItem, out _))
-            {
-                currentWeight -= ignoredItem.GetWeight();
-            }
-
-            if (currentWeight + item.GetWeight() > MaximumWeight)
-            {
-                result = InventoryResult.WEIGHT_LIMIT_EXCEEDED;
-                return false;
-            }
-
-            if (ignoredID == Guid.Empty && TryGetItemByInstanceID(item.InstanceID, out _, out _))
+            if (TryGetItemByInstanceID(item.InstanceID, out ItemData _, out _))
             {
                 result = InventoryResult.DUPLICATE;
                 return false;
             }
 
+            if (!IsPlacementValid(position, item.GetScale(isRotated), out result))
+            {
+                return false;
+            }
+
+            if (CurrentWeight + item.GetWeight() > MaximumWeight)
+            {
+                result = InventoryResult.WEIGHT_LIMIT_EXCEEDED;
+                return false;
+            }
+
             result = InventoryResult.SUCCESS;
             return true;
         }
-        public bool IsPlacementValid(ItemID id, Vector2Int position, bool isRotated, out InventoryResult result)
+        public bool IsPlacementValid(Vector2Int position, Vector2Int scale, out InventoryResult result)
         {
-            if (!id.IsValid)
-            {
-                result = InventoryResult.NULL;
-                throw new ArgumentNullException("Placement validation failed! id is not valid!?");
-            }
-
-            if (TryGetItemByArea(ItemData.GetScale(id, isRotated), position, out _, out result))
+            if (TryGetItemByArea(scale, position, out _, out result))
             {
                 return false;
             }
@@ -376,63 +332,8 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return true;
         }
-        public bool IsSwapValid(Guid instanceID, Guid targetInstanceID, InventoryData targetInventory, bool isRotated, out Vector2Int position, out Vector2Int targetPosition, out InventoryResult result)
-        {
-            if (targetInventory == null)
-            {
-                throw new ArgumentNullException(nameof(targetInventory), "Item Swap validation failed! target inventory is missing!?");
-            }
-
-            position = Vector2Int.one * -1;
-            targetPosition = Vector2Int.one * -1;
-
-            if (!TryGetItemByInstanceID(instanceID, out ItemData itemA, out result))
-            {
-                return false;
-            }
-
-            if (!targetInventory.TryGetItemByInstanceID(targetInstanceID, out ItemData itemB, out result))
-            {
-                return false;
-            }
-
-            position = itemA.GetPosition();
-            targetPosition = itemB.GetPosition();
-
-            if (!itemB.Tags.HasAny(ItemMask) || !itemA.Tags.HasAny(targetInventory.ItemMask))
-            {
-                result = InventoryResult.NOT_SUPPORTED;
-                return false;
-            }
-
-            Vector2Int scaleA = itemA.GetScale(isRotated);
-            Vector2Int scaleB = itemB.GetScale();
-
-            if (!TryGetClampedPosition(scaleB, ref position, out result))
-            {
-                return false;
-            }
-
-            if (!targetInventory.TryGetClampedPosition(scaleA, ref targetPosition, out result))
-            {
-                return false;
-            }
-
-            if (!IsPositionValid(itemB, position, scaleB, instanceID, out result))
-            {
-                return false;
-            }
-
-            if (!targetInventory.IsPositionValid(itemA, targetPosition, scaleA, targetInstanceID, out result))
-            {
-                return false;
-            }
-
-            result = InventoryResult.SUCCESS;
-            return true;
-        }
-        private bool IsTileOverlapping(int tilePositionX, int tilePositionY, int tileWidth, int tileHeight, Guid ignoredID, out ItemData overlapped, out InventoryResult result) => IsTileOverlapping(itemGrid, tilePositionX, tilePositionY, tileWidth, tileHeight, ignoredID, out overlapped, out result);
-        private bool IsTileOverlapping(ItemData[] grid, int tilePositionX, int tilePositionY, int tileWidth, int tileHeight, Guid ignoredID, out ItemData overlapped, out InventoryResult result)
+        private bool IsTileOverlapping(int tilePositionX, int tilePositionY, int tileWidth, int tileHeight, out ItemData overlapped, out InventoryResult result) => IsTileOverlapping(itemGrid, tilePositionX, tilePositionY, tileWidth, tileHeight, out overlapped, out result);
+        private bool IsTileOverlapping(ItemData[] grid, int tilePositionX, int tilePositionY, int tileWidth, int tileHeight, out ItemData overlapped, out InventoryResult result)
         {
             overlapped = null;
 
@@ -443,11 +344,6 @@ namespace Core.Item
                     ItemData registered = grid[((tilePositionY + y) * GridWidth) + (tilePositionX + x)];
 
                     if (registered == null)
-                    {
-                        continue;
-                    }
-
-                    if (ignoredID != Guid.Empty && registered.InstanceID == ignoredID)
                     {
                         continue;
                     }
@@ -542,7 +438,7 @@ namespace Core.Item
                 {
                     ItemData target = group[i];
 
-                    if (target.GetStack() <= 0)
+                    if (target == null || !itemTable.ContainsKey(target.InstanceID) || target.GetStack() <= 0)
                     {
                         continue;
                     }
@@ -550,6 +446,11 @@ namespace Core.Item
                     for (int j = i + 1; j < group.Count; j++)
                     {
                         ItemData source = group[j];
+
+                        if (source == null || !itemTable.ContainsKey(source.InstanceID))
+                        {
+                            continue;
+                        }
 
                         if (TryMergeItem(target, source, this, canStackPredicate, out _))
                         {
@@ -674,15 +575,7 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return true;
         }
-        private void RegisterItem(ItemData item, Vector2Int position, out ItemData registered)
-        {
-            registered = new(item, position);
 
-            SetTileItem(registered, registered.GetPosition(), registered.GetScale());
-
-            itemTable[registered.InstanceID] = registered;
-            CurrentWeight += registered.GetWeight();
-        }
         private void SetTileItem(ItemData item, Vector2Int position, Vector2Int scale) => SetTileItem(itemGrid, item, position, scale);
         private void SetTileItem(ItemData[] grid, ItemData item, Vector2Int position, Vector2Int scale)
         {
@@ -727,13 +620,13 @@ namespace Core.Item
                 ItemDefinition definition = item.BaseID.GetDefinition();
                 Vector2Int baseScale = new(definition.Width, definition.Height);
 
-                bool rotated = item.IsRotated();
-                Vector2Int scale = rotated ? new(baseScale.y, baseScale.x) : baseScale;
+                bool isRotated = item.GetRotation();
+                Vector2Int scale = isRotated ? new(baseScale.y, baseScale.x) : baseScale;
 
                 if (!TryGetAnyPosition(tempGrid, scale, out Vector2Int position, out result))
                 {
-                    rotated = !rotated;
-                    scale = rotated ? new(baseScale.y, baseScale.x) : baseScale;
+                    isRotated = !isRotated;
+                    scale = isRotated ? new(baseScale.y, baseScale.x) : baseScale;
 
                     if (!TryGetAnyPosition(tempGrid, scale, out position, out result))
                     {
@@ -742,7 +635,7 @@ namespace Core.Item
                 }
 
                 SetTileItem(tempGrid, item, position, scale);
-                placements.Add((item, position, rotated));
+                placements.Add((item, position, isRotated));
             }
 
             foreach ((ItemData item, Vector2Int position, bool rotated) in placements)
@@ -768,9 +661,7 @@ namespace Core.Item
         {
             if (item == null)
             {
-                result = InventoryResult.NULL;
-                Debug.LogError("Try set item stack failed! item data is null!?");
-                return false;
+                throw new ArgumentNullException(nameof(item), "Set item stack failed item missing!?");
             }
 
             float previousWeight = item.GetWeight();
@@ -791,13 +682,20 @@ namespace Core.Item
         }
         public bool TryTransferItems(InventoryData inventory, out InventoryResult result)
         {
+            result = InventoryResult.NULL;
+
             if (inventory == null)
             {
-                result = InventoryResult.NULL;
                 throw new ArgumentNullException(nameof(inventory), "Inventory transfer items failed target inventory is null!");
             }
 
-            bool addedAny = false;
+            if (inventory == this)
+            {
+                Debug.LogError("Transfer items failed! target inventory same as current inventory!?");
+                return false;
+            }
+
+            bool transfered = false;
 
             foreach (Guid id in GetItems().ToArray())
             {
@@ -806,14 +704,14 @@ namespace Core.Item
                     continue;
                 }
 
-                if (!inventory.TryAddItem(registered, null, out ItemData transferred, out _))
+                if (!inventory.TryAddItem(registered, null, null, out ItemData transferred, out _))
                 {
                     continue;
                 }
 
                 if (TryRemoveItem(id, out _, out _))
                 {
-                    addedAny = true;
+                    transfered = true;
                     continue;
                 }
 
@@ -823,10 +721,10 @@ namespace Core.Item
                 }
             }
 
-            result = addedAny ? InventoryResult.SUCCESS : InventoryResult.NOT_REGISTERED;
-            return addedAny;
+            result = transfered ? InventoryResult.SUCCESS : InventoryResult.NOT_REGISTERED;
+            return transfered;
         }
-        public bool TryTransferItem(Guid instanceID, Vector2Int? position, InventoryData inventory, out ItemData transfered, out InventoryResult result)
+        public bool TryTransferItem(Guid instanceID, Vector2Int? position, bool? isRotated, InventoryData inventory, out ItemData transfered, out InventoryResult result)
         {
             transfered = null;
 
@@ -842,7 +740,7 @@ namespace Core.Item
                 return false;
             }
 
-            if (inventory.TryAddItem(registered, position, out transfered, out result))
+            if (inventory.TryAddItem(registered, position, isRotated, out transfered, out result))
             {
                 if (TryRemoveItem(instanceID, out _, out result))
                 {
@@ -860,43 +758,7 @@ namespace Core.Item
 
             return false;
         }
-        public bool TrySwapItems(Guid instanceID, Guid targetInstanceID, InventoryData targetInventory, bool isRotated, out InventoryResult result)
-        {
-            if (!IsSwapValid(instanceID, targetInstanceID, targetInventory, isRotated, out Vector2Int positionA, out Vector2Int positionB, out result))
-            {
-                return false;
-            }
-
-            if (!TryRemoveItem(instanceID, out ItemData removedA, out result))
-            {
-                return false;
-            }
-
-            if (!targetInventory.TryRemoveItem(targetInstanceID, out ItemData removedB, out result))
-            {
-                TryAddItem(removedA, positionA, out _, out _);
-                return false;
-            }
-
-            if (!TryAddItem(removedB, positionA, out ItemData placedB, out result))
-            {
-                targetInventory.TryAddItem(removedB, positionB, out _, out _);
-                TryAddItem(removedA, positionA, out _, out _);
-                return false;
-            }
-
-            if (!targetInventory.TryAddItem(removedA, positionB, isRotated, out _, out result))
-            {
-                TryRemoveItem(placedB.InstanceID, out _, out _);
-                TryAddItem(removedA, positionA, out _, out _);
-                targetInventory.TryAddItem(removedB, positionB, out _, out _);
-                return false;
-            }
-
-            result = InventoryResult.SUCCESS;
-            return true;
-        }
-        public bool TryAddItem(ItemData item, Vector2Int? position, out ItemData registered, out InventoryResult result)
+        public bool TryAddItem(ItemData item, Vector2Int? position, bool? isRotated, out ItemData registered, out InventoryResult result)
         {
             registered = null;
 
@@ -912,50 +774,33 @@ namespace Core.Item
             }
 
             Vector2Int bestPosition;
-            bool rotation = item.IsRotated();
+            bool bestRotation = isRotated ?? item.GetRotation();
 
             if (position.HasValue)
             {
                 bestPosition = position.Value;
-
-                if (!IsPositionValid(item, bestPosition, rotation, out result))
-                {
-                    return false;
-                }
             }
             else
             {
-                if (!TryGetValidPosition(item, out bestPosition, out rotation, out result))
+                if (!TryGetBestPosition(item, out bestPosition, out bestRotation, out result))
                 {
                     return false;
                 }
             }
 
-            item.SetRotation(rotation);
-
-            RegisterItem(item, bestPosition, out registered);
-
-            Notify(InventoryState.ITEM_ADDED, result = InventoryResult.SUCCESS, registered);
-            return true;
-        }
-        private bool TryAddItem(ItemData item, Vector2Int position, bool isRotated, out ItemData registered, out InventoryResult result)
-        {
-            registered = null;
-
-            if (!item.Tags.HasAny(ItemMask))
-            {
-                result = InventoryResult.NOT_SUPPORTED;
-                return false;
-            }
-
-            if (!IsPositionValid(item, position, isRotated, out result))
+            if (!CanAddItem(item, bestPosition, bestRotation, out result))
             {
                 return false;
             }
 
-            item.SetRotation(isRotated);
+            registered = new(item);
+            registered.SetPosition(bestPosition);
+            registered.SetRotation(bestRotation);
 
-            RegisterItem(item, position, out registered);
+            SetTileItem(registered, registered.GetPosition(), registered.GetScale());
+
+            itemTable[registered.InstanceID] = registered;
+            CurrentWeight += registered.GetWeight();
 
             Notify(InventoryState.ITEM_ADDED, result = InventoryResult.SUCCESS, registered);
             return true;
@@ -1016,11 +861,6 @@ namespace Core.Item
             Vector2Int position = registered.GetPosition();
             Vector2Int scale = registered.GetScale();
 
-            if (!IsTileInsideBoundary(position.x, position.y, scale.x, scale.y, out result))
-            {
-                return false;
-            }
-
             SetTileItem(null, position, scale);
             result = InventoryResult.SUCCESS;
             return true;
@@ -1040,7 +880,7 @@ namespace Core.Item
 
             Vector2Int newScale = registered.GetScale(isRotated);
 
-            if (!IsPositionValid(registered, position, newScale, instanceID, out result))
+            if (!IsPlacementValid(position, newScale, out result))
             {
                 SetTileItem(registered, oldPosition, oldScale);
                 return false;
