@@ -55,7 +55,7 @@ namespace Core.UI
 
             thisCanvas.Show();
 
-            root.anchoredPosition = ctx.Position + (Vector2.right * root.rect.width / 2);
+            root.anchoredPosition = ctx.Position + (Vector2.right * root.rect.width);
 
             Populate(in ctx);
 
