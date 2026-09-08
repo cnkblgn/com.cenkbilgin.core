@@ -290,19 +290,35 @@ namespace Core.Item
         }
         private static void GetSwapPositions(Vector2Int positionA, Vector2Int scaleA, Vector2Int positionB, Vector2Int scaleB, out Vector2Int targetPositionA, out Vector2Int targetPositionB)
         {
-            targetPositionB = positionA;
             Vector2Int direction = positionB - positionA;
 
             if (direction == Vector2Int.zero)
             {
                 targetPositionA = positionB;
+                targetPositionB = positionA;
                 return;
             }
 
-            int directionX = direction.x == 0 ? 0 : direction.x > 0 ? 1 : -1;
-            int directionY = direction.y == 0 ? 0 : direction.y > 0 ? 1 : -1;
+            int directionX = direction.x == 0 ? 0 : (direction.x > 0 ? 1 : -1);
+            int directionY = direction.y == 0 ? 0 : (direction.y > 0 ? 1 : -1);
 
-            targetPositionA = positionB - new Vector2Int((scaleA.x - scaleB.x) * directionX, (scaleA.y - scaleB.y) * directionY);
+            // direction negatifse B, A'dan önce (blok baþlangýcý B'dir)
+            bool bIsStart = directionX < 0 || directionY < 0;
+
+            if (bIsStart)
+            {
+                // A, B'nin eski (baþlangýç) pozisyonuna geçer
+                targetPositionA = positionB;
+                // B, A'nýn kapladýðý alan kadar öteye kayar
+                targetPositionB = positionB + new Vector2Int(scaleA.x * -directionX, scaleA.y * -directionY);
+            }
+            else
+            {
+                // A blok baþlangýcýnda, B oraya geçer
+                targetPositionB = positionA;
+                // A, B'nin kapladýðý alan kadar öteye kayar
+                targetPositionA = positionA + new Vector2Int(scaleB.x * directionX, scaleB.y * directionY);
+            }
         }
 
         public bool CanAddItem(ItemData item, Vector2Int position, bool isRotated, out InventoryResult result)
@@ -977,8 +993,6 @@ namespace Core.Item
 
         public bool TrySwapItem(Guid instanceIDA, Guid instanceIDB, InventoryData inventoryB, bool rotationA, out InventoryResult result)
         {
-            Debug.LogWarning("CENK BURAYA BAK!");
-
             if (inventoryB == null)
             {
                 throw new ArgumentNullException(nameof(inventoryB), "Swap item failed target inventory is null!?");
@@ -1031,6 +1045,13 @@ namespace Core.Item
             Debug.Log("APos: " + positionA + " << AScale: " + scaleA);
             Debug.Log("BPos: " + positionB + " << BScale: " + scaleB);
             Debug.Log("ATargetPos: " + targetPositionA + " << BTargetPos: " + targetPositionB);
+
+            // APos: (1, 2) << AScale: (3, 1)
+            // BPos: (0, 2) << BScale: (1, 1)
+
+            // Olan bu: ATargetPos: (2, 2) << BTargetPos: (1, 2)
+
+            // Olmasý gereken: ATargetPos: (0, 2) << BTargetPos: (3, 2)
 
             // 2. [B][-][-][-]
             if (!TryRemoveItem(instanceIDA, out ItemData removedA, out result))
