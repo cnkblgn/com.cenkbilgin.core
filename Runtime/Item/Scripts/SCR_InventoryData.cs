@@ -69,7 +69,7 @@ namespace Core.Item
             Notify(InventoryState.INITIALIZED, InventoryResult.SUCCESS);
         }
         public IReadOnlyCollection<Guid> GetItems() => itemTable.Keys;
-        public int GetItems(ItemID baseID)
+        public int GetItemCount(ItemID baseID)
         {
             int count = 0;
 
@@ -83,7 +83,85 @@ namespace Core.Item
 
             return count;
         }
+        public ItemData[,] GetSnapshot()
+        {
+            ItemData[,] snapshot = new ItemData[GridWidth, GridHeight];
 
+            for (int y = 0; y < GridHeight; y++)
+            {
+                for (int x = 0; x < GridWidth; x++)
+                {
+                    snapshot[x, y] = itemGrid[(y * GridWidth) + x];
+                }
+            }
+
+            return snapshot;
+        }
+
+        public bool TryGetNearestPosition(Vector2Int desiredPosition, Vector2Int scale, Guid ignoreID, out Vector2Int position, out InventoryResult result)
+        {
+            position = Vector2Int.zero;
+
+            if (scale.x <= 0 || scale.y <= 0)
+            {
+                result = InventoryResult.OUT_OF_BOUNDS;
+                return false;
+            }
+
+            int maxX = GridWidth - scale.x;
+            int maxY = GridHeight - scale.y;
+
+            if (maxX < 0 || maxY < 0)
+            {
+                result = InventoryResult.OUT_OF_BOUNDS;
+                return false;
+            }
+
+            Vector2Int clamped = new(Mathf.Clamp(desiredPosition.x, 0, maxX), Mathf.Clamp(desiredPosition.y, 0, maxY));
+
+            if (!TryGetItemByArea(clamped, scale, ignoreID, out _, out _))
+            {
+                position = clamped;
+                result = InventoryResult.SUCCESS;
+                return true;
+            }
+
+            Vector2Int bestPosition = Vector2Int.zero;
+            float bestDistance = float.MaxValue;
+            bool found = false;
+
+            for (int y = 0; y <= maxY; y++)
+            {
+                for (int x = 0; x <= maxX; x++)
+                {
+                    Vector2Int candidate = new(x, y);
+
+                    if (TryGetItemByArea(candidate, scale, ignoreID, out _, out _))
+                    {
+                        continue;
+                    }
+
+                    float distance = Vector2Int.Distance(candidate, clamped);
+
+                    if (distance < bestDistance)
+                    {
+                        bestDistance = distance;
+                        bestPosition = candidate;
+                        found = true;
+                    }
+                }
+            }
+
+            if (!found)
+            {
+                result = InventoryResult.NO_VALID_SPACE;
+                return false;
+            }
+
+            position = bestPosition;
+            result = InventoryResult.SUCCESS;
+            return true;
+        }
         public bool TryGetBestPosition(ItemData item, out Vector2Int bestPosition, out bool bestRotation, out InventoryResult result)
         {
             if (item == null)
@@ -276,6 +354,47 @@ namespace Core.Item
 
             return true;
         }
+        public bool TryGetItemsByAdjacent(Guid instanceID, out List<ItemData> items)
+        {
+            items = new();
+
+            if (!TryGetItemByInstanceID(instanceID, out ItemData item, out _))
+            {
+                return false;
+            }
+
+            HashSet<Guid> visited = new() { instanceID };
+            Vector2Int position = item.GetPosition();
+            Vector2Int scale = item.GetScale();
+
+            void ScanEdge(List<ItemData> list, int startX, int startY, int width, int height)
+            {
+                for (int y = startY; y < startY + height; y++)
+                {
+                    for (int x = startX; x < startX + width; x++)
+                    {
+                        if (!IsTileInsideBoundary(x, y, out _))
+                        {
+                            continue;
+                        }
+
+                        ItemData found = itemGrid[(y * GridWidth) + x];
+
+                        if (found != null && visited.Add(found.InstanceID))
+                        {
+                            list.Add(found);
+                        }
+                    }
+                }
+            }
+
+            ScanEdge(items, position.x - 1, position.y, 1, scale.y);              // sol kenar
+            ScanEdge(items, position.x + scale.x, position.y, 1, scale.y);        // sað kenar
+            ScanEdge(items, position.x, position.y - 1, scale.x, 1);              // üst kenar
+            ScanEdge(items, position.x, position.y + scale.y, scale.x, 1);        // alt kenar
+
+            return items.Count != 0;
+        }
         public bool TryGetItemStack(Guid instanceID, out int stack, out InventoryResult result)
         {
             stack = 0;
@@ -287,38 +406,6 @@ namespace Core.Item
 
             stack = registered.GetStack();
             return true;
-        }
-        private static void GetSwapPositions(Vector2Int positionA, Vector2Int scaleA, Vector2Int positionB, Vector2Int scaleB, out Vector2Int targetPositionA, out Vector2Int targetPositionB)
-        {
-            Vector2Int direction = positionB - positionA;
-
-            if (direction == Vector2Int.zero)
-            {
-                targetPositionA = positionB;
-                targetPositionB = positionA;
-                return;
-            }
-
-            int directionX = direction.x == 0 ? 0 : (direction.x > 0 ? 1 : -1);
-            int directionY = direction.y == 0 ? 0 : (direction.y > 0 ? 1 : -1);
-
-            // direction negatifse B, A'dan önce (blok baþlangýcý B'dir)
-            bool bIsStart = directionX < 0 || directionY < 0;
-
-            if (bIsStart)
-            {
-                // A, B'nin eski (baþlangýç) pozisyonuna geçer
-                targetPositionA = positionB;
-                // B, A'nýn kapladýðý alan kadar öteye kayar
-                targetPositionB = positionB + new Vector2Int(scaleA.x * -directionX, scaleA.y * -directionY);
-            }
-            else
-            {
-                // A blok baþlangýcýnda, B oraya geçer
-                targetPositionB = positionA;
-                // A, B'nin kapladýðý alan kadar öteye kayar
-                targetPositionA = positionA + new Vector2Int(scaleB.x * directionX, scaleB.y * directionY);
-            }
         }
 
         public bool CanAddItem(ItemData item, Vector2Int position, bool isRotated, out InventoryResult result)
@@ -349,13 +436,16 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return true;
         }
-        public bool CanSwapItem(Guid instanceIDA, Guid instanceIDB, InventoryData inventoryB, bool rotationA, out InventoryResult result)
+        public bool CanSwapItem(Guid instanceIDA, Guid instanceIDB, InventoryData inventoryB, bool rotationA, out Vector2Int targetPositionA, out Vector2Int targetPositionB, out InventoryResult result)
         {
             // Weight kontrolü yapmýyor burasý. burda kontrol lazým yav
             if (inventoryB == null)
             {
                 throw new ArgumentNullException(nameof(inventoryB), "Can swap item failed target inventory is null!?");
             }
+
+            targetPositionA = Vector2Int.one * -1;
+            targetPositionB = Vector2Int.one * -1;
 
             if (!TryGetItemByInstanceID(instanceIDA, out ItemData itemA, out result))
             {
@@ -375,16 +465,60 @@ namespace Core.Item
                 return false;
             }
 
+            static void getSwapPositions(Vector2Int positionA, Vector2Int scaleA, Vector2Int positionB, Vector2Int scaleB, out Vector2Int targetPositionA, out Vector2Int targetPositionB)
+            {
+                Vector2Int direction = positionB - positionA;
+
+                if (direction == Vector2Int.zero)
+                {
+                    targetPositionA = positionB;
+                    targetPositionB = positionA;
+                    return;
+                }
+
+                int directionX = direction.x == 0 ? 0 : (direction.x > 0 ? 1 : -1);
+                int directionY = direction.y == 0 ? 0 : (direction.y > 0 ? 1 : -1);
+
+                bool bIsStart = directionX < 0 || directionY < 0;
+
+                if (bIsStart)
+                {
+                    targetPositionA = positionB;
+                    targetPositionB = positionB + new Vector2Int(scaleA.x * -directionX, scaleA.y * -directionY);
+                }
+                else
+                {
+                    targetPositionB = positionA;
+                    targetPositionA = positionA + new Vector2Int(scaleB.x * directionX, scaleB.y * directionY);
+                }
+            }
+            static bool areAdjacent(Vector2Int positionA, Vector2Int scaleA, Vector2Int positionB, Vector2Int scaleB, out Vector2Int direction)
+            {
+                direction = Vector2Int.zero;
+
+                if (positionA.y == positionB.y && scaleA.y == scaleB.y)
+                {
+                    if (positionA.x + scaleA.x == positionB.x) { direction = new Vector2Int(1, 0); return true; }
+                    if (positionB.x + scaleB.x == positionA.x) { direction = new Vector2Int(-1, 0); return true; }
+                }
+
+                if (positionA.x == positionB.x && scaleA.x == scaleB.x)
+                {
+                    if (positionA.y + scaleA.y == positionB.y) { direction = new Vector2Int(0, 1); return true; }
+                    if (positionB.y + scaleB.y == positionA.y) { direction = new Vector2Int(0, -1); return true; }
+                }
+
+                return false;
+            }
+
             Vector2Int scaleA = itemA.GetScale(rotationA);
             Vector2Int scaleB = itemB.GetScale();
             Vector2Int positionA = itemA.GetPosition();
             Vector2Int positionB = itemB.GetPosition();
-            Vector2Int targetPositionA; 
-            Vector2Int targetPositionB;
 
-            if (sameInventory)
+            if (sameInventory && areAdjacent(positionA, scaleA, positionB, scaleB, out _))
             {
-                GetSwapPositions(positionA, scaleA, positionB, scaleB, out targetPositionA, out targetPositionB);
+                getSwapPositions(positionA, scaleA, positionB, scaleB, out targetPositionA, out targetPositionB);
             }
             else 
             { 
@@ -405,7 +539,6 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return true;
         }
-
         public bool IsPlacementValid(Vector2Int position, Vector2Int scale, Guid ignoreID, out InventoryResult result)
         {
             if (TryGetItemByArea(position, scale, ignoreID, out _, out result))
@@ -486,6 +619,22 @@ namespace Core.Item
             return true;
         }
 
+        private void SetTileItem(ItemData item, Vector2Int position, Vector2Int scale) => SetTileItem(itemGrid, item, position, scale);
+        private void SetTileItem(ItemData[] grid, ItemData item, Vector2Int position, Vector2Int scale)
+        {
+            if (!IsTileInsideBoundary(position.x, position.y, scale.x, scale.y, out _))
+            {
+                throw new IndexOutOfRangeException($"Item tile placement out of bounds! pos = {position} scale = {scale}");
+            }
+
+            for (int y = 0; y < scale.y; y++)
+            {
+                for (int x = 0; x < scale.x; x++)
+                {
+                    grid[((position.y + y) * GridWidth) + (position.x + x)] = item;
+                }
+            }
+        }
         public bool TryMergeItems(out InventoryResult result) => TryMergeItems(null, out result);
         public bool TryMergeItems(Func<ItemData, ItemData, bool> canStackPredicate, out InventoryResult result)
         {
@@ -669,22 +818,49 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return true;
         }
-
-        private void SetTileItem(ItemData item, Vector2Int position, Vector2Int scale) => SetTileItem(itemGrid, item, position, scale);
-        private void SetTileItem(ItemData[] grid, ItemData item, Vector2Int position, Vector2Int scale)
+        public bool TryCompactItems(out InventoryResult result)
         {
-            if (!IsTileInsideBoundary(position.x, position.y, scale.x, scale.y, out _))
+            if (itemTable.Count == 0)
             {
-                throw new IndexOutOfRangeException($"Item tile placement out of bounds! pos = {position} scale = {scale}");
+                result = InventoryResult.SUCCESS;
+                return true;
             }
 
-            for (int y = 0; y < scale.y; y++)
+            List<ItemData> ordered = itemTable.Values.OrderBy(i => i.GetPosition().y).ThenBy(i => i.GetPosition().x).ToList();
+
+            ItemData[] tempGrid = new ItemData[itemGrid.Length];
+            List<(ItemData item, Vector2Int position)> placements = new(ordered.Count);
+
+            foreach (ItemData item in ordered)
             {
-                for (int x = 0; x < scale.x; x++)
+                Vector2Int scale = item.GetScale();
+
+                if (!TryGetAnyPosition(tempGrid, scale, out Vector2Int position, out result))
                 {
-                    grid[((position.y + y) * GridWidth) + (position.x + x)] = item;
+                    Vector2Int rotatedScale = item.GetScale(!item.GetRotation());
+
+                    if (!TryGetAnyPosition(tempGrid, rotatedScale, out position, out result))
+                    {
+                        return false;
+                    }
+
+                    item.SetRotation(!item.GetRotation());
+                    scale = rotatedScale;
                 }
+
+                SetTileItem(tempGrid, item, position, scale);
+                placements.Add((item, position));
             }
+
+            foreach ((ItemData item, Vector2Int position) in placements)
+            {
+                item.SetPosition(position);
+                Notify(InventoryState.ITEM_CHANGED, InventoryResult.SUCCESS, item);
+            }
+
+            itemGrid = tempGrid;
+            result = InventoryResult.SUCCESS;
+            return true;
         }
         public bool TrySortItems(IInventorySorter sorter, out InventoryResult result)
         {
@@ -967,15 +1143,12 @@ namespace Core.Item
                 return false;
             }
 
-            Debug.Log("Try Move: " + registered.BaseID);
-
             Vector2Int oldPosition = registered.GetPosition();
             Vector2Int oldScale = registered.GetScale();
             Vector2Int newScale = registered.GetScale(isRotated);
 
             if (!IsPlacementValid(position, newScale, instanceID, out result))
             {
-                Debug.Log("Try Move Failed: " + registered.BaseID + " << result: " + result);
                 return false;
             }
 
@@ -985,17 +1158,19 @@ namespace Core.Item
             registered.SetRotation(isRotated);
             SetTileItem(registered, position, newScale);
 
-            Debug.Log("Try Move Success: " + registered.BaseID + " << result: " + result);
-
             result = InventoryResult.SUCCESS;
             return true;
         }
-
         public bool TrySwapItem(Guid instanceIDA, Guid instanceIDB, InventoryData inventoryB, bool rotationA, out InventoryResult result)
         {
             if (inventoryB == null)
             {
                 throw new ArgumentNullException(nameof(inventoryB), "Swap item failed target inventory is null!?");
+            }
+
+            if (!CanSwapItem(instanceIDA, instanceIDB, inventoryB, rotationA, out Vector2Int targetPositionA, out Vector2Int targetPositionB, out result))
+            {
+                return false;
             }
 
             if (!TryGetItemByInstanceID(instanceIDA, out ItemData itemA, out result))
@@ -1008,50 +1183,10 @@ namespace Core.Item
                 return false;
             }
 
-            bool sameInventory = inventoryB == this;
-
-            if (sameInventory && itemA.InstanceID == itemB.InstanceID)
-            {
-                Debug.Log("Try Swap Item Failed: " + result);
-                result = InventoryResult.DUPLICATE;
-                return false;
-            }
-
-            bool originalRotationA = itemA.GetRotation();
-            bool originalRotationB = itemB.GetRotation();
-            Vector2Int positionA = itemA.GetPosition();
-            Vector2Int positionB = itemB.GetPosition();
-            Vector2Int scaleA = itemA.GetScale(rotationA);
-            Vector2Int scaleB = itemB.GetScale(originalRotationB);
-            Vector2Int targetPositionA; 
-            Vector2Int targetPositionB;
-
-            if (sameInventory)
-            {
-                GetSwapPositions(positionA, scaleA, positionB, scaleB, out targetPositionA, out targetPositionB);
-            }
-            else
-            {
-                targetPositionA = positionB;
-                targetPositionB = positionA;
-            }
-
-            // Hatalý malesef
-            // [B][A][A][A]
-            // [A][B][A][A] olmaya çalýþtýðýndan overlap veriyor
-            // [A][A][A][B] olcak þekilde kaydýrmak lazým?
-
-            // 1. [B][A][A][A]
-            Debug.Log("APos: " + positionA + " << AScale: " + scaleA);
-            Debug.Log("BPos: " + positionB + " << BScale: " + scaleB);
-            Debug.Log("ATargetPos: " + targetPositionA + " << BTargetPos: " + targetPositionB);
-
-            // APos: (1, 2) << AScale: (3, 1)
-            // BPos: (0, 2) << BScale: (1, 1)
-
-            // Olan bu: ATargetPos: (2, 2) << BTargetPos: (1, 2)
-
-            // Olmasý gereken: ATargetPos: (0, 2) << BTargetPos: (3, 2)
+            bool defaultRotationA = itemA.GetRotation();
+            bool defaultRotationB = itemB.GetRotation();
+            Vector2Int defaultPositionA = itemA.GetPosition();
+            Vector2Int defaultPositionB = itemB.GetPosition();
 
             // 2. [B][-][-][-]
             if (!TryRemoveItem(instanceIDA, out ItemData removedA, out result))
@@ -1062,7 +1197,7 @@ namespace Core.Item
             // 3. [-][-][-][-]
             if (!inventoryB.TryRemoveItem(instanceIDB, out ItemData removedB, out result))
             {
-                if (!TryAddItem(removedA, positionA, originalRotationA, out _, out InventoryResult rollbackA))   
+                if (!TryAddItem(removedA, defaultPositionA, defaultRotationA, out _, out InventoryResult rollbackA))
                 {
                     Debug.LogError($"CRITICAL: Swap rollback failed! Item [{removedA.InstanceID}] could not be restored — {rollbackA}.");
                     return false;
@@ -1072,12 +1207,12 @@ namespace Core.Item
             // 4. [A][A][A][-]
             if (!inventoryB.TryAddItem(removedA, targetPositionA, rotationA, out ItemData placedA, out result))
             {
-                if (!TryAddItem(removedA, positionA, originalRotationA, out _, out InventoryResult rollbackA))
+                if (!TryAddItem(removedA, defaultPositionA, defaultRotationA, out _, out InventoryResult rollbackA))
                 {
                     Debug.LogError($"CRITICAL: Swap rollback failed! Item [{removedA.InstanceID}] could not be restored — {rollbackA}.");
                 }
 
-                if (!inventoryB.TryAddItem(removedB, positionB, originalRotationB, out _, out InventoryResult rollbackB))
+                if (!inventoryB.TryAddItem(removedB, defaultPositionB, defaultRotationB, out _, out InventoryResult rollbackB))
                 {
                     Debug.LogError($"CRITICAL: Swap rollback failed! Item [{removedB.InstanceID}] could not be restored — {rollbackB}.");
                 }
@@ -1086,19 +1221,19 @@ namespace Core.Item
             }
 
             // 4. [A][A][A][B]
-            if (!TryAddItem(removedB, targetPositionB, originalRotationB, out _, out result))
+            if (!TryAddItem(removedB, targetPositionB, defaultRotationB, out _, out result))
             {
                 if (!inventoryB.TryRemoveItem(placedA.InstanceID, out _, out InventoryResult undoA))
                 {
                     Debug.LogError($"CRITICAL: Swap rollback failed! Item [{placedA.InstanceID}] could not be pulled back — {undoA}.");
                 }
 
-                if (!TryAddItem(removedA, positionA, originalRotationA, out _, out InventoryResult rollbackA))
+                if (!TryAddItem(removedA, defaultPositionA, defaultRotationA, out _, out InventoryResult rollbackA))
                 {
                     Debug.LogError($"CRITICAL: Swap rollback failed! Item [{removedA.InstanceID}] could not be restored — {rollbackA}.");
                 }
 
-                if (!inventoryB.TryAddItem(removedB, positionB, originalRotationB, out _, out InventoryResult rollbackB))
+                if (!inventoryB.TryAddItem(removedB, defaultPositionB, defaultRotationB, out _, out InventoryResult rollbackB))
                 {
                     Debug.LogError($"CRITICAL: Swap rollback failed! Item [{removedB.InstanceID}] could not be restored — {rollbackB}.");
                 }

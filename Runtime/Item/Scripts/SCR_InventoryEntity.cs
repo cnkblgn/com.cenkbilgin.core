@@ -67,8 +67,12 @@ namespace Core.Item
         public int GetMaximumWeight() => thisInventory.MaximumWeight;
         public Vector2Int GetDimensions() => new(thisInventory.GridWidth, thisInventory.GridHeight);
         public IReadOnlyCollection<Guid> GetItems() => thisInventory.GetItems();
-        public int GetItems(ItemID baseID) => thisInventory.GetItems(baseID);
-        public bool TryGetBestPosition(ItemData item, out Vector2Int position, out bool isRotated, out InventoryResult result) => this.thisInventory.TryGetBestPosition(item, out position, out isRotated, out result);
+        public int GetItemCount(ItemID baseID) => thisInventory.GetItemCount(baseID);
+        public ItemData[,] GetSnapshot() => thisInventory.GetSnapshot();
+
+        public bool TryGetNearestPosition(Vector2Int desiredPosition, Vector2Int scale, out Vector2Int position, out InventoryResult result) => TryGetNearestPosition(desiredPosition, scale, Guid.Empty, out position, out result);
+        public bool TryGetNearestPosition(Vector2Int desiredPosition, Vector2Int scale, Guid ignoreID, out Vector2Int position, out InventoryResult result) => thisInventory.TryGetNearestPosition(desiredPosition, scale, ignoreID, out position, out result);
+        public bool TryGetBestPosition(ItemData item, out Vector2Int position, out bool isRotated, out InventoryResult result) => thisInventory.TryGetBestPosition(item, out position, out isRotated, out result);
         public bool TryGetClampedPosition(Vector2Int scale, ref Vector2Int position, out InventoryResult result) => thisInventory.TryGetClampedPosition(scale, ref position, out result);
         public bool TryGetAnyPosition(Vector2Int scale, out Vector2Int position, out InventoryResult result) => thisInventory.TryGetAnyPosition(scale, out position, out result);
         public bool TryGetItemByTag(ItemTag tag, out ItemData registered, out InventoryResult result) => thisInventory.TryGetItemByTag(tag, out registered, out result);
@@ -81,13 +85,15 @@ namespace Core.Item
         public bool TryGetItemByPosition(Vector2Int position, out ItemData registered, out InventoryResult result) => thisInventory.TryGetItemByPosition(position, out registered, out result);
         public bool TryGetItemByArea(Vector2Int position, Vector2Int scale, out ItemData overlapped, out InventoryResult ctx) => TryGetItemByArea(position, scale, Guid.Empty, out overlapped, out ctx);
         public bool TryGetItemByArea(Vector2Int position, Vector2Int scale, Guid ignoreID, out ItemData overlapped, out InventoryResult ctx) => thisInventory.TryGetItemByArea(position, scale, ignoreID, out overlapped, out ctx);
+        public bool TryGetItemsByAdjacent(Guid instanceID, out List<ItemData> items) => thisInventory.TryGetItemsByAdjacent(instanceID, out items);
 
         public bool CanAddItem(ItemData item, Vector2Int position, bool isRotated, out InventoryResult result) => thisInventory.CanAddItem(item, position, isRotated, out result);
-        public bool CanSwapItem(Guid instanceIDA, Guid instanceIDB, InventoryEntity inventoryB, bool rotationA, out InventoryResult result) => thisInventory.CanSwapItem(instanceIDA, instanceIDB, inventoryB.thisInventory, rotationA, out result);
-        public bool CanSwapItem(Guid instanceIDA, Guid instanceIDB, bool rotationA, out InventoryResult result) => CanSwapItem(instanceIDA, instanceIDB, this, rotationA, out result);
+        public bool CanSwapItem(Guid instanceIDA, Guid instanceIDB, InventoryEntity inventoryB, bool rotationA, out Vector2Int targetPositionA, out Vector2Int targetPositionB, out InventoryResult result) => thisInventory.CanSwapItem(instanceIDA, instanceIDB, inventoryB.thisInventory, rotationA, out targetPositionA, out targetPositionB, out result);
+        public bool CanSwapItem(Guid instanceIDA, Guid instanceIDB, bool rotationA, out Vector2Int targetPositionA, out Vector2Int targetPositionB, out InventoryResult result) => CanSwapItem(instanceIDA, instanceIDB, this, rotationA, out targetPositionA, out targetPositionB, out result);
         public bool IsPlacementValid(Vector2Int position, Vector2Int scale, out InventoryResult result) => IsPlacementValid(position, scale, Guid.Empty, out result);
         public bool IsPlacementValid(Vector2Int position, Vector2Int scale, Guid ignoreID, out InventoryResult result) => thisInventory.IsPlacementValid(position, scale, ignoreID, out result);
 
+        public bool TryCompactItems(out InventoryResult result) => thisInventory.TryCompactItems(out result);
         public bool TrySortItems(IInventorySorter sorter, out InventoryResult result) => thisInventory.TrySortItems(sorter, out result);
         public bool TrySortItemsByArea(bool descending, out InventoryResult result) => thisInventory.TrySortItems(descending ? InventorySorter.SortByAreaDescending : InventorySorter.SortByArea, out result);
         public bool TrySortItemsByTag(out InventoryResult result) => thisInventory.TrySortItems(InventorySorter.SortByTag, out result);
