@@ -93,11 +93,11 @@ namespace Core.UI
         public void ShowTooltip(string value, Vector2 screenPosition) => tooltipController.Show(value, screenPosition);
         public void HideTooltip() => tooltipController.Hide();
 
-        public void ShowPrompt<TContext>(string description, in TContext ctx) where TContext : struct => promptController.Show(description, in ctx);
-        public void HidePrompt() => promptController.Hide();
+        public UIPromptHandle ShowPrompt<TContext>(string description, in TContext ctx) where TContext : struct => promptController.Show(description, in ctx);
+        public void HidePrompt(UIPromptHandle handle) => promptController.Hide(handle);
 
-        public void ShowContextMenu(in UIContextMenuContext ctx) => contextMenuController.Show(in ctx);
-        public void HideContextMenu() => contextMenuController.Hide();
+        public UIContextMenuHandle ShowContextMenu(in UIContextMenuContext ctx) => contextMenuController.Show(in ctx);
+        public void HideContextMenu(UIContextMenuHandle handle) => contextMenuController.Hide(handle);
 
         public void ShowSubtitle(string text) => subtitleController.Show(text);
         public void HideSubtitle() => subtitleController.Hide();

@@ -110,6 +110,8 @@ namespace Core.UI
         }
         public void ShowCursor()
         {
+            bool canShow = true;
+
             for (int i = handlers.Count - 1; i >= 0; i--)
             {
                 if (handlers[i] == null)
@@ -127,8 +129,13 @@ namespace Core.UI
                         Debug.Log("Show Cursor Failed!");
                     }
 
-                    return;
+                    canShow = false;                    
                 }
+            }
+
+            if (!canShow)
+            {
+                return;
             }
 
             canvas.Show();
@@ -142,6 +149,8 @@ namespace Core.UI
         }
         public void HideCursor()
         {
+            bool canHide = true;
+
             for (int i = handlers.Count - 1; i >= 0; i--)
             {
                 if (handlers[i] == null)
@@ -159,8 +168,13 @@ namespace Core.UI
                         Debug.Log("Hide Cursor Failed!");
                     }
 
-                    return;
+                    canHide = false;
                 }
+            }
+
+            if (!canHide)
+            {
+                return;
             }
 
             canvas.Hide();

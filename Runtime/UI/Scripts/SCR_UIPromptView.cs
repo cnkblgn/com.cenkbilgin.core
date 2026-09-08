@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System;
 
 namespace Core.UI
 {
@@ -8,22 +9,21 @@ namespace Core.UI
     [RequireComponent(typeof(CanvasGroup))]
     internal sealed class UIPromptView : MonoBehaviour
     {
-        public bool IsActive => isActive;
+        public bool IsActive => thisHandle != default;
 
         [Header("_")]
         [SerializeField] private TextMeshProUGUI descriptionText = null;
         [SerializeField, Required] private Button acceptButton = null;
         [SerializeField, Required] private Button cancelButton = null;
 
-        private CanvasGroup thisCanvas;
-        private IUIPromptHandler thisHandler;
-        private bool isActive = false;
+        private CanvasGroup thisCanvas = null;
+        private IUIPromptHandler thisHandler = null;
+        private UIPromptHandle thisHandle = default;
 
         private void Awake()
         {
             thisCanvas = GetComponent<CanvasGroup>();
             thisHandler = GetComponent<IUIPromptHandler>();
-
             thisCanvas.Hide();
         }
         private void OnEnable()
@@ -40,49 +40,57 @@ namespace Core.UI
         private void OnAcceptButtonClicked()
         {
             thisHandler?.Accept();
-            TryHide();
+
+            Hide();
         }
         private void OnCancelButtonClicked()
         {
-            TryHide();
+            Hide();
         }
 
-        public bool TryShow<TContext>(string description, in TContext context) where TContext : struct
+        public UIPromptHandle Show<TContext>(string description, in TContext context) where TContext : struct
         {
-            if (isActive)
+            if (IsActive)
             {
-                return false;
+                return default;
             }
 
             if (thisHandler is not IUIPromptHandler<TContext> handler)
             {
-                return false;
+                return default;
             }
-
-            isActive = true;
-            thisCanvas.Show();
-            handler.Show(context);
 
             if (descriptionText != null)
             {
                 descriptionText.text = description;
             }
 
-            return true;
+            thisCanvas.Show();
+            handler.Show(context);
+
+            return thisHandle = new(Guid.NewGuid());
         }
-        public bool TryHide()
+        public bool TryHide(UIPromptHandle handle)
         {
-            if (!isActive)
+            if (thisHandle != handle)
             {
                 return false;
             }
 
-            isActive = false;
+            Hide();
+            return true;
+        }
+        public void Hide()
+        {
+            if (!IsActive)
+            {
+                return;
+            }
+
+            thisHandle = default;
             thisCanvas.Hide();
             thisHandler?.Cancel();
             thisHandler?.Hide();
-
-            return true;
         }
     }
 }

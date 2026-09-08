@@ -109,6 +109,8 @@ namespace Core
                 return;
             }
 
+            bool canResume = true;
+
             for (int i = thisHandlers.Count - 1; i >= 0; i--)
             {
                 if (thisHandlers[i] == null)
@@ -121,8 +123,13 @@ namespace Core
 
                 if (!thisHandlers[i].HandleCanResumeGame())
                 {
-                    return;
+                    canResume = false;
                 }
+            }
+
+            if (!canResume)
+            {
+                return;
             }
 
             SetGameState(GameState.RESUME);
@@ -133,6 +140,8 @@ namespace Core
             {
                 return;
             }
+
+            bool canPause = true;
 
             for (int i = thisHandlers.Count - 1; i >= 0; i--)
             {
@@ -146,8 +155,13 @@ namespace Core
 
                 if (!thisHandlers[i].HandleCanPauseGame())
                 {
-                    return;
+                    canPause = false;
                 }
+            }
+
+            if (!canPause)
+            {
+                return;
             }
 
             SetGameState(GameState.PAUSE);

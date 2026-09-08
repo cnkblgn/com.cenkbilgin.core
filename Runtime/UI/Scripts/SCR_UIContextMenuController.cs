@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,8 +18,8 @@ namespace Core.UI
         [SerializeField, Required] private UIContextItemView viewTemplate;
 
         private Canvas thisCanvas;
+        private UIContextMenuHandle thisHandle;
         private readonly List<UIContextItemView> thisItems = new();
-        private bool isOpened = false;
 
         private void Awake()
         {
@@ -46,11 +47,11 @@ namespace Core.UI
 
         public void OnSelected() => Hide();
 
-        public void Show(in UIContextMenuContext ctx)
+        public UIContextMenuHandle Show(in UIContextMenuContext ctx)
         {
-            if (isOpened)
+            if (thisHandle != default)
             {
-                return;
+                return default;
             }
 
             thisCanvas.Show();
@@ -59,20 +60,27 @@ namespace Core.UI
 
             Populate(in ctx);
 
-            isOpened = true;
+            return thisHandle = new(Guid.NewGuid());
         }
-        public void Hide()
+        public void Hide(UIContextMenuHandle handle)
         {
-            if (!isOpened)
+            if (thisHandle != handle)
             {
                 return;
             }
 
+            Hide();
+        }
+        private void Hide()
+        {
+            if (thisHandle == default)
+            {
+                return;
+            }
+
+            thisHandle = default;
             thisCanvas.Hide();
-
             Clear();
-
-            isOpened = false;
         }
 
         private void Populate(in UIContextMenuContext ctx)
@@ -100,35 +108,26 @@ namespace Core.UI
         }
 
         public bool HandleCanShowCursor() => true;
-        public bool HandleCanHideCursor()
-        {
-            if (isOpened)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
+        public bool HandleCanHideCursor() => thisHandle == default;
         public bool HandleCanResumeGame()
         {
-            if (isOpened)
+            if (thisHandle == default)
             {
-                Hide();
-                return false;
+                return true;
             }
 
-            return true;
+            Hide();
+            return false;
         }
         public bool HandleCanPauseGame()
         {
-            if (isOpened)
+            if (thisHandle == default)
             {
-                Hide();
-                return false;
+                return true;
             }
 
-            return true;
+            Hide();
+            return false;
         }
     }
 }
