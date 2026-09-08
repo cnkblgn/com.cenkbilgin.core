@@ -67,6 +67,7 @@ namespace Core.Item
         public int GetMaximumWeight() => thisInventory.MaximumWeight;
         public Vector2Int GetDimensions() => new(thisInventory.GridWidth, thisInventory.GridHeight);
         public IReadOnlyCollection<Guid> GetItems() => thisInventory.GetItems();
+        public int GetItemCount() => GetItems().Count;
         public int GetItemCount(ItemID baseID) => thisInventory.GetItemCount(baseID);
         public ItemData[,] GetSnapshot() => thisInventory.GetSnapshot();
 

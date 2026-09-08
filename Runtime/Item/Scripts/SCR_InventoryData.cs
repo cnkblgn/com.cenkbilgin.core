@@ -817,7 +817,7 @@ namespace Core.Item
 
             result = InventoryResult.SUCCESS;
             return true;
-        }
+        }        
         public bool TryCompactItems(out InventoryResult result)
         {
             if (itemTable.Count == 0)
@@ -828,39 +828,7 @@ namespace Core.Item
 
             List<ItemData> ordered = itemTable.Values.OrderBy(i => i.GetPosition().y).ThenBy(i => i.GetPosition().x).ToList();
 
-            ItemData[] tempGrid = new ItemData[itemGrid.Length];
-            List<(ItemData item, Vector2Int position)> placements = new(ordered.Count);
-
-            foreach (ItemData item in ordered)
-            {
-                Vector2Int scale = item.GetScale();
-
-                if (!TryGetAnyPosition(tempGrid, scale, out Vector2Int position, out result))
-                {
-                    Vector2Int rotatedScale = item.GetScale(!item.GetRotation());
-
-                    if (!TryGetAnyPosition(tempGrid, rotatedScale, out position, out result))
-                    {
-                        return false;
-                    }
-
-                    item.SetRotation(!item.GetRotation());
-                    scale = rotatedScale;
-                }
-
-                SetTileItem(tempGrid, item, position, scale);
-                placements.Add((item, position));
-            }
-
-            foreach ((ItemData item, Vector2Int position) in placements)
-            {
-                item.SetPosition(position);
-                Notify(InventoryState.ITEM_CHANGED, InventoryResult.SUCCESS, item);
-            }
-
-            itemGrid = tempGrid;
-            result = InventoryResult.SUCCESS;
-            return true;
+            return TryArrangeItems(ordered, out result);
         }
         public bool TrySortItems(IInventorySorter sorter, out InventoryResult result)
         {
@@ -880,23 +848,32 @@ namespace Core.Item
             }
 
             List<ItemData> sorted = itemTable.Values.ToList();
+
             sorted.Sort(comparer);
 
+            return TryArrangeItems(sorted, out result);
+        }
+        private bool TryArrangeItems(IReadOnlyList<ItemData> items, out InventoryResult result)
+        {
             ItemData[] tempGrid = new ItemData[itemGrid.Length];
-            List<(ItemData item, Vector2Int position, bool rotated)> placements = new(sorted.Count);
 
-            foreach (ItemData item in sorted)
+            List<(ItemData item, Vector2Int position, bool rotated)> placements = new(items.Count);
+
+            foreach (ItemData item in items)
             {
                 ItemDefinition definition = item.BaseID.GetDefinition();
+
                 Vector2Int baseScale = new(definition.Width, definition.Height);
 
-                bool isRotated = item.GetRotation();
-                Vector2Int scale = isRotated ? new(baseScale.y, baseScale.x) : baseScale;
+                bool rotated = item.GetRotation();
+
+                Vector2Int scale = rotated ? new(baseScale.y, baseScale.x) : baseScale;
 
                 if (!TryGetAnyPosition(tempGrid, scale, out Vector2Int position, out result))
                 {
-                    isRotated = !isRotated;
-                    scale = isRotated ? new(baseScale.y, baseScale.x) : baseScale;
+                    rotated = !rotated;
+
+                    scale = rotated ? new(baseScale.y, baseScale.x) : baseScale;
 
                     if (!TryGetAnyPosition(tempGrid, scale, out position, out result))
                     {
@@ -905,17 +882,18 @@ namespace Core.Item
                 }
 
                 SetTileItem(tempGrid, item, position, scale);
-                placements.Add((item, position, isRotated));
+                placements.Add((item, position, rotated));
             }
 
             foreach ((ItemData item, Vector2Int position, bool rotated) in placements)
             {
                 item.SetRotation(rotated);
                 item.SetPosition(position);
+                Notify( InventoryState.ITEM_CHANGED, InventoryResult.SUCCESS, item);
             }
 
             itemGrid = tempGrid;
-            result = InventoryResult.SUCCESS;
+            Notify(InventoryState.SORTED, result = InventoryResult.SUCCESS, null);
             return true;
         }
         public bool TrySetItemStack(Guid instanceID, int stack, out InventoryResult result)
