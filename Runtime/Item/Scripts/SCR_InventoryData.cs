@@ -876,16 +876,19 @@ namespace Core.Item
             Vector2Int oldPosition = registered.GetPosition();
             Vector2Int oldScale = registered.GetScale();
 
+            Debug.Log("Clearing Position: " + oldPosition +  " << Clearing Scale: " + oldScale);
             SetTileItem(null, oldPosition, oldScale);
 
             Vector2Int newScale = registered.GetScale(isRotated);
 
             if (!IsPlacementValid(position, newScale, out result))
             {
+                Debug.Log("Placement not valid for: Position: " + position + " << Scale: " + newScale);
                 SetTileItem(registered, oldPosition, oldScale);
                 return false;
             }
 
+            Debug.Log("Setting Position: " + position + " << Setting Scale: " + newScale);
             registered.SetPosition(position);
             registered.SetRotation(isRotated);
             SetTileItem(registered, position, newScale);
