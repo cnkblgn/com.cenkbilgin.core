@@ -127,5 +127,7 @@ namespace Core.Item
         public bool TryRemoveItem(Guid instanceID, out ItemData registered, out InventoryResult result) => thisInventory.TryRemoveItem(instanceID, out registered, out result);
         public bool TryClearItem(Guid instanceID, out ItemData registered, out InventoryResult result) => thisInventory.TryClearItem(instanceID, out registered, out result);
         public bool TryMoveItem(Guid instanceID, Vector2Int position, bool isRotated, out ItemData registered, out InventoryResult ctx) => thisInventory.TryMoveItem(instanceID, position, isRotated, out registered, out ctx);
+        public bool TrySwapItem(Guid instanceIDA, Guid instanceIDB, bool rotationA, out InventoryResult result) => thisInventory.TrySwapItem(instanceIDA, instanceIDB, rotationA, out result);
+        public bool TrySwapItem(Guid instanceIDA, Guid instanceIDB, InventoryData inventoryB, bool rotationA, out InventoryResult result) => thisInventory.TrySwapItem(instanceIDA, instanceIDB, inventoryB, rotationA, out result);
     }
 }

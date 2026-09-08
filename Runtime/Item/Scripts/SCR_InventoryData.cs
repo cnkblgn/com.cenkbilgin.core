@@ -895,5 +895,90 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return true;
         }
+        public bool TrySwapItem(Guid instanceIDA, Guid instanceIDB, bool rotationA, out InventoryResult result) => TrySwapItem(instanceIDA, instanceIDB, this, rotationA, out result);
+        public bool TrySwapItem(Guid instanceIDA, Guid instanceIDB, InventoryData inventoryB, bool rotationA, out InventoryResult result)
+        {
+            if (inventoryB == null)
+            {
+                throw new ArgumentNullException(nameof(inventoryB), "Swap item failed target inventory is null!");
+            }
+
+            if (!TryGetItemByInstanceID(instanceIDA, out ItemData itemA, out result))
+            {
+                Debug.LogError($"Inventory swap item failed! [{instanceIDA}] not found!");
+                return false;
+            }
+
+            if (!inventoryB.TryGetItemByInstanceID(instanceIDB, out ItemData itemB, out result))
+            {
+                Debug.LogError($"Inventory swap item failed! [{instanceIDB}] not found!");
+                return false;
+            }
+
+            bool sameInventory = inventoryB == this;
+
+            if (sameInventory && itemA.InstanceID == itemB.InstanceID)
+            {
+                result = InventoryResult.DUPLICATE;
+                return false;
+            }
+
+            Vector2Int positionA = itemA.GetPosition();
+            Vector2Int positionB = itemB.GetPosition();
+            bool rotationB = itemB.GetRotation();
+
+            if (!TryRemoveItem(instanceIDA, out ItemData removedA, out result))
+            {
+                return false;
+            }
+
+            if (!inventoryB.TryRemoveItem(instanceIDB, out ItemData removedB, out result))
+            {
+                if (!TryAddItem(removedA, positionA, rotationA, out _, out InventoryResult rollbackA))
+                {
+                    Debug.LogError($"CRITICAL: Swap rollback failed! Item [{removedA.InstanceID}] could not be restored — {rollbackA}.");
+                }
+
+                return false;
+            }
+
+            if (!inventoryB.TryAddItem(removedA, positionB, rotationA, out ItemData placedA, out result))
+            {
+                if (!TryAddItem(removedA, positionA, rotationA, out _, out InventoryResult rollbackA))
+                {
+                    Debug.LogError($"CRITICAL: Swap rollback failed! Item [{removedA.InstanceID}] could not be restored — {rollbackA}.");
+                }
+
+                if (!inventoryB.TryAddItem(removedB, positionB, rotationB, out _, out InventoryResult rollbackB))
+                {
+                    Debug.LogError($"CRITICAL: Swap rollback failed! Item [{removedB.InstanceID}] could not be restored — {rollbackB}.");
+                }
+
+                return false;
+            }
+
+            if (!TryAddItem(removedB, positionA, rotationB, out ItemData _, out result))
+            {
+                if (!inventoryB.TryRemoveItem(placedA.InstanceID, out _, out InventoryResult undoA))
+                {
+                    Debug.LogError($"CRITICAL: Swap rollback failed! Item [{placedA.InstanceID}] could not be pulled back — {undoA}.");
+                }
+
+                if (!TryAddItem(removedA, positionA, rotationA, out _, out InventoryResult rollbackA))
+                {
+                    Debug.LogError($"CRITICAL: Swap rollback failed! Item [{removedA.InstanceID}] could not be restored — {rollbackA}.");
+                }
+
+                if (!inventoryB.TryAddItem(removedB, positionB, rotationB, out _, out InventoryResult rollbackB))
+                {
+                    Debug.LogError($"CRITICAL: Swap rollback failed! Item [{removedB.InstanceID}] could not be restored — {rollbackB}.");
+                }
+
+                return false;
+            }
+
+            result = InventoryResult.SUCCESS;
+            return true;
+        }
     }
 }
