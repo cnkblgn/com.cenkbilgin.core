@@ -977,10 +977,6 @@ namespace Core.Item
 
         public bool TrySwapItem(Guid instanceIDA, Guid instanceIDB, InventoryData inventoryB, bool rotationA, out InventoryResult result)
         {
-            // Hatalý malesef
-            // [A][B][B][B]
-            // [B][A][B][B] olmaya çalýþtýðýndan overlap veriyor
-            // [B][B][B][A] olcak þekilde kaydýrmak lazým?
             Debug.LogWarning("CENK BURAYA BAK!");
 
             if (inventoryB == null)
@@ -1031,10 +1027,18 @@ namespace Core.Item
             // [A][B][A][A] olmaya çalýþtýðýndan overlap veriyor
             // [A][A][A][B] olcak þekilde kaydýrmak lazým?
 
+            // 1. [B][A][A][A]
+            Debug.Log("APos: " + positionA + " << AScale: " + scaleA);
+            Debug.Log("BPos: " + positionB + " << BScale: " + scaleB);
+            Debug.Log("ATargetPos: " + targetPositionA + " << BTargetPos: " + targetPositionB);
+
+            // 2. [B][-][-][-]
             if (!TryRemoveItem(instanceIDA, out ItemData removedA, out result))
             {
                 return false;
             }
+
+            // 3. [-][-][-][-]
             if (!inventoryB.TryRemoveItem(instanceIDB, out ItemData removedB, out result))
             {
                 if (!TryAddItem(removedA, positionA, originalRotationA, out _, out InventoryResult rollbackA))   
@@ -1043,6 +1047,8 @@ namespace Core.Item
                     return false;
                 }
             }
+
+            // 4. [A][A][A][-]
             if (!inventoryB.TryAddItem(removedA, targetPositionA, rotationA, out ItemData placedA, out result))
             {
                 if (!TryAddItem(removedA, positionA, originalRotationA, out _, out InventoryResult rollbackA))
@@ -1057,6 +1063,8 @@ namespace Core.Item
 
                 return false;
             }
+
+            // 4. [A][A][A][B]
             if (!TryAddItem(removedB, targetPositionB, originalRotationB, out _, out result))
             {
                 if (!inventoryB.TryRemoveItem(placedA.InstanceID, out _, out InventoryResult undoA))
