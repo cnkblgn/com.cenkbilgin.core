@@ -4,10 +4,10 @@ using UnityEngine.Rendering;
 namespace Core.PostProcessing
 {
     [Serializable]
-    [VolumeComponentMenu("Post-processing/Clarity")]
-    public sealed class Clarity : VolumeComponent
+    [VolumeComponentMenu("Post-processing/Clarify")]
+    public sealed class Clarify : VolumeComponent
     {
         public BoolParameter Enabled = new(false, true);
-        public ClampedFloatParameter Intensity = new(2, 0f, 10f);
+        public ClampedFloatParameter Strength = new(2, 0f, 10f, true);
     }
 }

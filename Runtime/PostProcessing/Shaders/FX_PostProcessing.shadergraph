@@ -1236,7 +1236,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "342103ccd14142ab942bc50441a7293d",
     "m_Id": 0,
-    "m_DisplayName": "SharpenOffset",
+    "m_DisplayName": "_SharpenOffset",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -1286,7 +1286,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "3484cd8de62d4ef887867940af660732",
     "m_Id": 0,
-    "m_DisplayName": "VibranceIntensity",
+    "m_DisplayName": "_VibranceStrength",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -1617,10 +1617,10 @@
             "m_Id": "3d83f13f09d54f319c6a3ef7b1935d3f"
         },
         {
-            "m_Id": "a11cee91e6344920b00c48ab0a90fca4"
+            "m_Id": "c4cf503d89bc4ed08381b980eb870569"
         },
         {
-            "m_Id": "c4cf503d89bc4ed08381b980eb870569"
+            "m_Id": "a11cee91e6344920b00c48ab0a90fca4"
         },
         {
             "m_Id": "4348dd80abe94a7797b0862b84a37cb4"
@@ -1683,7 +1683,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "4de0f5ee39ca4151b553a9988543afc4",
     "m_Id": 0,
-    "m_DisplayName": "DitherStrength",
+    "m_DisplayName": "_DitherStrength",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -1863,7 +1863,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "5cd0a1a971e14dae9403d93ca9bb8d7c",
     "m_Id": 0,
-    "m_DisplayName": "DitherSize",
+    "m_DisplayName": "_DitherSize",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -2001,10 +2001,10 @@
     "promotedFromAssetID": "",
     "promotedFromCategoryName": "",
     "promotedOrdering": -1,
-    "m_Name": "_VibranceIntensity",
+    "m_Name": "_VibranceStrength",
     "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "_VibranceIntensity",
-    "m_DefaultReferenceName": "_VibranceIntensity",
+    "m_RefNameGeneratedByDisplayName": "_VibranceStrength",
+    "m_DefaultReferenceName": "_VibranceStrength",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": false,
     "m_UseCustomSlotLabel": false,
@@ -2157,7 +2157,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "73d736362db34f58b0043620a2e77512",
     "m_Id": 0,
-    "m_DisplayName": "SharpenClamp",
+    "m_DisplayName": "_SharpenClamp",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -2180,10 +2180,10 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": -2540.0,
-            "y": -659.0,
+            "x": -2544.0,
+            "y": -678.0,
             "width": 134.0,
-            "height": 34.0
+            "height": 33.99993896484375
         }
     },
     "m_Slots": [
@@ -2392,7 +2392,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "83088ff2ef3541928f9538ae42c62b67",
     "m_Id": 0,
-    "m_DisplayName": "QuantizeSteps",
+    "m_DisplayName": "_QuantizeSteps",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -2413,10 +2413,10 @@
     "promotedFromAssetID": "",
     "promotedFromCategoryName": "",
     "promotedOrdering": -1,
-    "m_Name": "_ClarifyIntensity",
+    "m_Name": "_ClarifyStrength",
     "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "_ClarifyIntensity",
-    "m_DefaultReferenceName": "_ClarifyIntensity",
+    "m_RefNameGeneratedByDisplayName": "_ClarifyStrength",
+    "m_DefaultReferenceName": "_ClarifyStrength",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": false,
     "m_UseCustomSlotLabel": false,
@@ -2687,7 +2687,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector3MaterialSlot",
     "m_ObjectId": "93f7a110beb449edabf546b0c3a2b593",
     "m_Id": 0,
-    "m_DisplayName": "VibranceBalance",
+    "m_DisplayName": "_VibranceBalance",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -2909,7 +2909,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "a4fdf3bd5e9a489391e91d4909c2ccb8",
     "m_Id": 0,
-    "m_DisplayName": "ClarifyIntensity",
+    "m_DisplayName": "_ClarifyStrength",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -3349,7 +3349,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "c88cfb2c87b048979ed0d1a2f7d3ddb1",
     "m_Id": 0,
-    "m_DisplayName": "SharpenStrength",
+    "m_DisplayName": "_SharpenStrength",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",

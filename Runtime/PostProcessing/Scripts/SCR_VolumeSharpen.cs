@@ -8,8 +8,8 @@ namespace Core.PostProcessing
     public sealed class Sharpen : VolumeComponent
     {
         public BoolParameter Enabled = new(false, true);
-        public ClampedFloatParameter Strength = new(1f, 0f, 10f);
-        public ClampedFloatParameter Offset = new(0.5f, 0.1f, 4f);
-        public ClampedFloatParameter Clamp = new(0.03f, 0f, 2f);
+        public ClampedFloatParameter Strength = new(1f, 0f, 10f, true);
+        public ClampedFloatParameter Offset = new(0.5f, 0.1f, 4f, true);
+        public ClampedFloatParameter Clamp = new(0.03f, 0f, 2f, true);
     }
 }

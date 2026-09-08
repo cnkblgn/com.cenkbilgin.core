@@ -10,8 +10,8 @@ namespace Core.PostProcessing
         private const string PASS_NAME = "PostProcessingPass";
         private const string TEXTURE_NAME = "CameraColor" + "_" + PASS_NAME;
 
-        private static readonly int ClarifyIntensityID = Shader.PropertyToID("_ClarifyIntensity");
-        private static readonly int VibranceIntensityID = Shader.PropertyToID("_VibranceIntensity");
+        private static readonly int ClarifyStrengthID = Shader.PropertyToID("_ClarifyStrength");
+        private static readonly int VibranceStrengthID = Shader.PropertyToID("_VibranceStrength");
         private static readonly int VibranceBalanceID = Shader.PropertyToID("_VibranceBalance");
         private static readonly int SharpenStrengthID = Shader.PropertyToID("_SharpenStrength");
         private static readonly int SharpenOffsetID = Shader.PropertyToID("_SharpenOffset");
@@ -37,11 +37,11 @@ namespace Core.PostProcessing
             public TextureHandle Source; 
             public Material Material;
 
-            public bool ClarityEnabled;
-            public float ClarityIntensity;
+            public bool ClarifyEnabled;
+            public float ClarifyStrength;
 
             public bool VibranceEnabled;
-            public float VibranceIntensity;
+            public float VibranceStrength;
             public Vector3 VibranceBalance;
 
             public bool SharpenEnabled;
@@ -71,11 +71,11 @@ namespace Core.PostProcessing
 
         private static void ExecutePass(PassData data, RasterGraphContext context)
         {
-            data.Material.SetKeyword(ClarifyKeyword, data.ClarityEnabled);
-            data.Material.SetFloat(ClarifyIntensityID, data.ClarityIntensity);
+            data.Material.SetKeyword(ClarifyKeyword, data.ClarifyEnabled);
+            data.Material.SetFloat(ClarifyStrengthID, data.ClarifyStrength);
 
             data.Material.SetKeyword(VibranceKeyword, data.VibranceEnabled);
-            data.Material.SetFloat(VibranceIntensityID, data.VibranceIntensity);
+            data.Material.SetFloat(VibranceStrengthID, data.VibranceStrength);
             data.Material.SetVector(VibranceBalanceID, data.VibranceBalance);
 
             data.Material.SetKeyword(SharpenKeyword, data.SharpenEnabled);
@@ -103,7 +103,7 @@ namespace Core.PostProcessing
             }
 
             VolumeStack stack = VolumeManager.instance.stack;
-            Clarity clarity = stack.GetComponent<Clarity>();
+            Clarify clarify = stack.GetComponent<Clarify>();
             Vibrance vibrance = stack.GetComponent<Vibrance>();
             Sharpen sharpen = stack.GetComponent<Sharpen>();
             Quantize quantize = stack.GetComponent<Quantize>();
@@ -121,11 +121,11 @@ namespace Core.PostProcessing
                 passData.Source = source;
                 passData.Material = material;
 
-                passData.ClarityEnabled = clarity.active && clarity.Enabled.value && clarity.Intensity.value != 0;
-                passData.ClarityIntensity = clarity.Intensity.value;
+                passData.ClarifyEnabled = clarify.active && clarify.Enabled.value && clarify.Strength.value != 0;
+                passData.ClarifyStrength = clarify.Strength.value;
 
-                passData.VibranceEnabled = vibrance.active && vibrance.Enabled.value && vibrance.Intensity.value != 0;
-                passData.VibranceIntensity = vibrance.Intensity.value;
+                passData.VibranceEnabled = vibrance.active && vibrance.Enabled.value && vibrance.Strength.value != 0;
+                passData.VibranceStrength = vibrance.Strength.value;
                 passData.VibranceBalance = vibrance.Balance.value;
 
                 passData.SharpenEnabled = sharpen.active && sharpen.Enabled.value && sharpen.Strength.value != 0;

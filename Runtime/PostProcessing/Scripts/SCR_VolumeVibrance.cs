@@ -9,7 +9,7 @@ namespace Core.PostProcessing
     public sealed class Vibrance : VolumeComponent
     {
         public BoolParameter Enabled = new(false, true);
-        public ClampedFloatParameter Intensity = new(1, 0f, 10f);
+        public ClampedFloatParameter Strength = new(1, 0f, 10f, true);
         public Vector3Parameter Balance = new(Vector3.one, true);
     }
 }

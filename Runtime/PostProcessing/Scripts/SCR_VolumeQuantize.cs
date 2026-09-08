@@ -8,6 +8,6 @@ namespace Core.PostProcessing
     public sealed class Quantize : VolumeComponent
     {
         public BoolParameter Enabled = new(false, true);
-        public ClampedIntParameter Steps = new(16, 2, 128);
+        public ClampedIntParameter Steps = new(16, 2, 128, true);
     }
 }
