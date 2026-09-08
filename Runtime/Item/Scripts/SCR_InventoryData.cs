@@ -288,6 +288,22 @@ namespace Core.Item
             stack = registered.GetStack();
             return true;
         }
+        private static void GetSwapPositions(Vector2Int positionA, Vector2Int scaleA, Vector2Int positionB, Vector2Int scaleB, out Vector2Int targetPositionA, out Vector2Int targetPositionB)
+        {
+            targetPositionB = positionA;
+            Vector2Int direction = positionB - positionA;
+
+            if (direction == Vector2Int.zero)
+            {
+                targetPositionA = positionB;
+                return;
+            }
+
+            int directionX = direction.x == 0 ? 0 : direction.x > 0 ? 1 : -1;
+            int directionY = direction.y == 0 ? 0 : direction.y > 0 ? 1 : -1;
+
+            targetPositionA = positionB - new Vector2Int((scaleA.x - scaleB.x) * directionX, (scaleA.y - scaleB.y) * directionY);
+        }
 
         public bool CanAddItem(ItemData item, Vector2Int position, bool isRotated, out InventoryResult result)
         {
@@ -320,8 +336,10 @@ namespace Core.Item
         public bool CanSwapItem(Guid instanceIDA, Guid instanceIDB, InventoryData inventoryB, bool rotationA, out InventoryResult result)
         {
             // Weight kontrolü yapmýyor burasý. burda kontrol lazým yav
-
-            if (inventoryB == null) throw new ArgumentNullException(nameof(inventoryB), "Can swap item failed target inventory is null!?");
+            if (inventoryB == null)
+            {
+                throw new ArgumentNullException(nameof(inventoryB), "Can swap item failed target inventory is null!?");
+            }
 
             if (!TryGetItemByInstanceID(instanceIDA, out ItemData itemA, out result))
             {
@@ -345,13 +363,25 @@ namespace Core.Item
             Vector2Int scaleB = itemB.GetScale();
             Vector2Int positionA = itemA.GetPosition();
             Vector2Int positionB = itemB.GetPosition();
+            Vector2Int targetPositionA; 
+            Vector2Int targetPositionB;
 
-            if (!inventoryB.IsPlacementValid(positionB, scaleA, instanceIDB, out result))
+            if (sameInventory)
+            {
+                GetSwapPositions(positionA, scaleA, positionB, scaleB, out targetPositionA, out targetPositionB);
+            }
+            else 
+            { 
+                targetPositionA = positionB; 
+                targetPositionB = positionA; 
+            }
+
+            if (!inventoryB.IsPlacementValid(targetPositionA, scaleA, instanceIDB, out result))
             {
                 return false;
             }
 
-            if (!IsPlacementValid(positionA, scaleB, instanceIDA, out result))
+            if (!IsPlacementValid(targetPositionB, scaleB, instanceIDA, out result))
             {
                 return false;
             }
@@ -944,9 +974,19 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return true;
         }
+
         public bool TrySwapItem(Guid instanceIDA, Guid instanceIDB, InventoryData inventoryB, bool rotationA, out InventoryResult result)
         {
-            if (inventoryB == null) throw new ArgumentNullException(nameof(inventoryB), "Swap item failed target inventory is null!?");
+            // Hatalý malesef
+            // [A][B][B][B]
+            // [B][A][B][B] olmaya çalýþtýðýndan overlap veriyor
+            // [B][B][B][A] olcak þekilde kaydýrmak lazým?
+            Debug.LogWarning("CENK BURAYA BAK!");
+
+            if (inventoryB == null)
+            {
+                throw new ArgumentNullException(nameof(inventoryB), "Swap item failed target inventory is null!?");
+            }
 
             if (!TryGetItemByInstanceID(instanceIDA, out ItemData itemA, out result))
             {
@@ -967,65 +1007,72 @@ namespace Core.Item
                 return false;
             }
 
-            Vector2Int positionA = itemA.GetPosition();
-            Vector2Int positionB = itemB.GetPosition();
             bool originalRotationA = itemA.GetRotation();
             bool originalRotationB = itemB.GetRotation();
+            Vector2Int positionA = itemA.GetPosition();
+            Vector2Int positionB = itemB.GetPosition();
+            Vector2Int scaleA = itemA.GetScale(rotationA);
+            Vector2Int scaleB = itemB.GetScale(originalRotationB);
+            Vector2Int targetPositionA; 
+            Vector2Int targetPositionB;
+
+            if (sameInventory)
+            {
+                GetSwapPositions(positionA, scaleA, positionB, scaleB, out targetPositionA, out targetPositionB);
+            }
+            else
+            {
+                targetPositionA = positionB;
+                targetPositionB = positionA;
+            }
+
+            // Hatalý malesef
+            // [B][A][A][A]
+            // [A][B][A][A] olmaya çalýþtýðýndan overlap veriyor
+            // [A][A][A][B] olcak þekilde kaydýrmak lazým?
 
             if (!TryRemoveItem(instanceIDA, out ItemData removedA, out result))
             {
-                Debug.Log("Try Swap Item Failed: Item 'A' cannot be removed!");
                 return false;
             }
-
             if (!inventoryB.TryRemoveItem(instanceIDB, out ItemData removedB, out result))
             {
-                Debug.Log("Try Swap Item Failed: Item 'B' cannot be removed!");
-
-                if (!TryAddItem(removedA, positionA, originalRotationA, out _, out InventoryResult rollbackA))
+                if (!TryAddItem(removedA, positionA, originalRotationA, out _, out InventoryResult rollbackA))   
                 {
-                    Debug.LogError( $"CRITICAL: Swap rollback failed! " + $"Item [{removedA.InstanceID}] could not be restored — {rollbackA}.");
+                    Debug.LogError($"CRITICAL: Swap rollback failed! Item [{removedA.InstanceID}] could not be restored — {rollbackA}.");
+                    return false;
                 }
-
-                return false;
             }
-
-            if (!inventoryB.TryAddItem(removedA, positionB, rotationA, out ItemData placedA, out result))
+            if (!inventoryB.TryAddItem(removedA, targetPositionA, rotationA, out ItemData placedA, out result))
             {
-                Debug.Log("Try Swap Item Failed: Item 'A' cannot be added! Pos: " + positionB + " << Scale: " + removedA.GetScale(rotationA));
-
                 if (!TryAddItem(removedA, positionA, originalRotationA, out _, out InventoryResult rollbackA))
                 {
-                    Debug.LogError( $"CRITICAL: Swap rollback failed! " + $"Item [{removedA.InstanceID}] could not be restored — {rollbackA}.");
+                    Debug.LogError($"CRITICAL: Swap rollback failed! Item [{removedA.InstanceID}] could not be restored — {rollbackA}.");
                 }
 
                 if (!inventoryB.TryAddItem(removedB, positionB, originalRotationB, out _, out InventoryResult rollbackB))
                 {
-                    Debug.LogError( $"CRITICAL: Swap rollback failed! " + $"Item [{removedB.InstanceID}] could not be restored — {rollbackB}.");
+                    Debug.LogError($"CRITICAL: Swap rollback failed! Item [{removedB.InstanceID}] could not be restored — {rollbackB}.");
                 }
 
                 return false;
             }
-
-            if (!TryAddItem(removedB, positionA, originalRotationB, out _, out result))
+            if (!TryAddItem(removedB, targetPositionB, originalRotationB, out _, out result))
             {
-                Debug.Log("Try Swap Item Failed: Item 'B' cannot be added! Pos: " + positionA + " << Scale: " + removedB.GetScale(originalRotationB));
-
                 if (!inventoryB.TryRemoveItem(placedA.InstanceID, out _, out InventoryResult undoA))
                 {
-                    Debug.LogError( $"CRITICAL: Swap rollback failed! " + $"Item [{placedA.InstanceID}] could not be pulled back — {undoA}.");
+                    Debug.LogError($"CRITICAL: Swap rollback failed! Item [{placedA.InstanceID}] could not be pulled back — {undoA}.");
                 }
 
                 if (!TryAddItem(removedA, positionA, originalRotationA, out _, out InventoryResult rollbackA))
                 {
-                    Debug.LogError( $"CRITICAL: Swap rollback failed! " + $"Item [{removedA.InstanceID}] could not be restored — {rollbackA}.");
+                    Debug.LogError($"CRITICAL: Swap rollback failed! Item [{removedA.InstanceID}] could not be restored — {rollbackA}.");
                 }
 
                 if (!inventoryB.TryAddItem(removedB, positionB, originalRotationB, out _, out InventoryResult rollbackB))
                 {
-                    Debug.LogError( $"CRITICAL: Swap rollback failed! " + $"Item [{removedB.InstanceID}] could not be restored — {rollbackB}.");
+                    Debug.LogError($"CRITICAL: Swap rollback failed! Item [{removedB.InstanceID}] could not be restored — {rollbackB}.");
                 }
-
                 return false;
             }
 

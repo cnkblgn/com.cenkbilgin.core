@@ -13,7 +13,7 @@ namespace Core.Addon
 #if UNITY_EDITOR
             return Path.Combine(Application.dataPath, PATH_EDITOR);
 #else
-            return Path.Combine(Application.dataPath, "..", BuildRoot);
+            return Path.Combine(Application.dataPath, "..", PATH_BUILD);
 #endif
         }
     }

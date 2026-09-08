@@ -1,8 +1,10 @@
+using System.Threading.Tasks;
+
 namespace Core.Addon
 {
     public interface IAddonLoader
     {
-        public void Load();
+        public Task LoadAsync();
         public void Build();
     }
 }

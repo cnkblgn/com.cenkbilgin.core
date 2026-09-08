@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Core.Addon
@@ -16,9 +17,9 @@ namespace Core.Addon
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void OnBeforeSceneLoad()
+        private static async void OnBeforeSceneLoad()
         {
-            LoadAll();
+            await LoadAllAsync();
             BuildAll();
         }
 
@@ -56,13 +57,13 @@ namespace Core.Addon
 
                     if (hasAttribute && !implementsInterface)
                     {
-                        Debug.LogError($"[ModLoader] is defined on '{type.FullName}', but the type does not implement IModLoader.");
+                        Debug.LogError($"[AddonLoader] is defined on '{type.FullName}', but the type does not implement IAddonLoader.");
                         continue;
                     }
 
                     if (!hasAttribute && implementsInterface)
                     {
-                        Debug.LogError($"'{type.FullName}' implements IModLoader but is missing the [ModLoader] attribute.");
+                        Debug.LogError($"'{type.FullName}' implements IAddonLoader but is missing the [AddonLoader] attribute.");
                         continue;
                     }
 
@@ -73,7 +74,7 @@ namespace Core.Addon
 
                     if (Activator.CreateInstance(type) is not IAddonLoader loader)
                     {
-                        Debug.LogError($"Failed to create mod loader '{type.FullName}'.");
+                        Debug.LogError($"Failed to create addon loader '{type.FullName}'.");
                         continue;
                     }
 
@@ -93,11 +94,11 @@ namespace Core.Addon
                 return string.Compare(a.Type.FullName, b.Type.FullName, StringComparison.Ordinal);
             });
         }
-        private static void LoadAll()
+        private static async Task LoadAllAsync()
         {
             for (int i = 0; i < entries.Count; i++)
             {
-                entries[i].Loader.Load();
+                await entries[i].Loader.LoadAsync();
             }
         }
         private static void BuildAll()
