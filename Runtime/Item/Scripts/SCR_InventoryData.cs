@@ -962,6 +962,7 @@ namespace Core.Item
 
             if (sameInventory && itemA.InstanceID == itemB.InstanceID)
             {
+                Debug.Log("Try Swap Item Failed: " + result);
                 result = InventoryResult.DUPLICATE;
                 return false;
             }
@@ -973,11 +974,14 @@ namespace Core.Item
 
             if (!TryRemoveItem(instanceIDA, out ItemData removedA, out result))
             {
+                Debug.Log("Try Swap Item Failed: Item 'A' cannot be removed!");
                 return false;
             }
 
             if (!inventoryB.TryRemoveItem(instanceIDB, out ItemData removedB, out result))
             {
+                Debug.Log("Try Swap Item Failed: Item 'B' cannot be removed!");
+
                 if (!TryAddItem(removedA, positionA, originalRotationA, out _, out InventoryResult rollbackA))
                 {
                     Debug.LogError( $"CRITICAL: Swap rollback failed! " + $"Item [{removedA.InstanceID}] could not be restored — {rollbackA}.");
@@ -988,7 +992,9 @@ namespace Core.Item
 
             if (!inventoryB.TryAddItem(removedA, positionB, rotationA, out ItemData placedA, out result))
             {
-                if (!TryAddItem( removedA, positionA, originalRotationA, out _, out InventoryResult rollbackA))
+                Debug.Log("Try Swap Item Failed: Item 'A' cannot be added! Pos: " + positionB + " << Scale: " + removedA.GetScale(rotationA));
+
+                if (!TryAddItem(removedA, positionA, originalRotationA, out _, out InventoryResult rollbackA))
                 {
                     Debug.LogError( $"CRITICAL: Swap rollback failed! " + $"Item [{removedA.InstanceID}] could not be restored — {rollbackA}.");
                 }
@@ -1003,6 +1009,8 @@ namespace Core.Item
 
             if (!TryAddItem(removedB, positionA, originalRotationB, out _, out result))
             {
+                Debug.Log("Try Swap Item Failed: Item 'B' cannot be added! Pos: " + positionA + " << Scale: " + removedB.GetScale(originalRotationB));
+
                 if (!inventoryB.TryRemoveItem(placedA.InstanceID, out _, out InventoryResult undoA))
                 {
                     Debug.LogError( $"CRITICAL: Swap rollback failed! " + $"Item [{placedA.InstanceID}] could not be pulled back — {undoA}.");
