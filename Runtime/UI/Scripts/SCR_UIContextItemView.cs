@@ -16,7 +16,7 @@ namespace Core.UI
         private IUIContextItemHandler thisHandler;
         private bool hasInitialized;
 
-        public void Initialize(in UIContextItemContext ctx, IUIContextItemHandler handler = null)
+        public void Initialize(in UIContextItemContext ctx, IUIContextItemHandler handler)
         {
             if (hasInitialized)
             {

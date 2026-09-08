@@ -79,7 +79,7 @@ namespace Core.UI
             {
                 UIContextItemView itemView = Instantiate(viewTemplate, viewContainer);
                 itemView.gameObject.SetActive(true);
-                itemView.Initialize(ctx.Items[i]);
+                itemView.Initialize(ctx.Items[i], this);
 
                 thisItems.Add(itemView);
             }
