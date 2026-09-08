@@ -151,7 +151,7 @@ namespace Core.Item
             {
                 for (int x = 0; x <= maxX; x++)
                 {
-                    if (!IsTileOverlapping(grid, x, y, scale.x, scale.y, out _, out _))
+                    if (!IsTileOverlapping(grid, x, y, scale.x, scale.y, Guid.Empty, out _, out _))
                     {
                         position = new(x, y);
                         result = InventoryResult.SUCCESS;
@@ -260,7 +260,7 @@ namespace Core.Item
 
             return foundItem;
         }
-        public bool TryGetItemByArea(Vector2Int position, Vector2Int scale, out ItemData overlapped, out InventoryResult result)
+        public bool TryGetItemByArea(Vector2Int position, Vector2Int scale, Guid ignoreID, out ItemData overlapped, out InventoryResult result)
         {
             overlapped = null;
 
@@ -269,7 +269,7 @@ namespace Core.Item
                 return false;
             }
 
-            if (!IsTileOverlapping(position.x, position.y, scale.x, scale.y, out overlapped, out result))
+            if (!IsTileOverlapping(position.x, position.y, scale.x, scale.y, ignoreID, out overlapped, out result))
             {
                 return false;
             }
@@ -303,7 +303,7 @@ namespace Core.Item
                 return false;
             }
 
-            if (!IsPlacementValid(position, item.GetScale(isRotated), out result))
+            if (!IsPlacementValid(position, item.GetScale(isRotated), Guid.Empty, out result))
             {
                 return false;
             }
@@ -317,9 +317,52 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return true;
         }
-        public bool IsPlacementValid(Vector2Int position, Vector2Int scale, out InventoryResult result)
+        public bool CanSwapItem(Guid instanceIDA, Guid instanceIDB, InventoryData inventoryB, bool rotationA, out InventoryResult result)
         {
-            if (TryGetItemByArea(position, scale, out _, out result))
+            // Weight kontrolü yapmýyor burasý. burda kontrol lazým yav
+
+            if (inventoryB == null) throw new ArgumentNullException(nameof(inventoryB), "Can swap item failed target inventory is null!?");
+
+            if (!TryGetItemByInstanceID(instanceIDA, out ItemData itemA, out result))
+            {
+                return false;
+            }
+
+            if (!inventoryB.TryGetItemByInstanceID(instanceIDB, out ItemData itemB, out result))
+            {
+                return false;
+            }
+
+            bool sameInventory = inventoryB == this;
+
+            if (sameInventory && itemA.InstanceID == itemB.InstanceID)
+            {
+                result = InventoryResult.DUPLICATE;
+                return false;
+            }
+
+            Vector2Int scaleA = itemA.GetScale(rotationA);
+            Vector2Int scaleB = itemB.GetScale();
+            Vector2Int positionA = itemA.GetPosition();
+            Vector2Int positionB = itemB.GetPosition();
+
+            if (!inventoryB.IsPlacementValid(positionB, scaleA, instanceIDB, out result))
+            {
+                return false;
+            }
+
+            if (!IsPlacementValid(positionA, scaleB, instanceIDA, out result))
+            {
+                return false;
+            }
+
+            result = InventoryResult.SUCCESS;
+            return true;
+        }
+
+        public bool IsPlacementValid(Vector2Int position, Vector2Int scale, Guid ignoreID, out InventoryResult result)
+        {
+            if (TryGetItemByArea(position, scale, ignoreID, out _, out result))
             {
                 return false;
             }
@@ -332,8 +375,8 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return true;
         }
-        private bool IsTileOverlapping(int tilePositionX, int tilePositionY, int tileWidth, int tileHeight, out ItemData overlapped, out InventoryResult result) => IsTileOverlapping(itemGrid, tilePositionX, tilePositionY, tileWidth, tileHeight, out overlapped, out result);
-        private bool IsTileOverlapping(ItemData[] grid, int tilePositionX, int tilePositionY, int tileWidth, int tileHeight, out ItemData overlapped, out InventoryResult result)
+        private bool IsTileOverlapping(int tilePositionX, int tilePositionY, int tileWidth, int tileHeight, Guid ignoreID,  out ItemData overlapped, out InventoryResult result) => IsTileOverlapping(itemGrid, tilePositionX, tilePositionY, tileWidth, tileHeight, ignoreID, out overlapped, out result);
+        private bool IsTileOverlapping(ItemData[] grid, int tilePositionX, int tilePositionY, int tileWidth, int tileHeight, Guid ignoreID, out ItemData overlapped, out InventoryResult result)
         {
             overlapped = null;
 
@@ -344,6 +387,11 @@ namespace Core.Item
                     ItemData registered = grid[((tilePositionY + y) * GridWidth) + (tilePositionX + x)];
 
                     if (registered == null)
+                    {
+                        continue;
+                    }
+
+                    if (ignoreID == registered.InstanceID)
                     {
                         continue;
                     }
@@ -875,40 +923,33 @@ namespace Core.Item
 
             Vector2Int oldPosition = registered.GetPosition();
             Vector2Int oldScale = registered.GetScale();
-
-            SetTileItem(null, oldPosition, oldScale);
-
             Vector2Int newScale = registered.GetScale(isRotated);
 
-            if (!IsPlacementValid(position, newScale, out result))
+            if (!IsPlacementValid(position, newScale, instanceID, out result))
             {
-                SetTileItem(registered, oldPosition, oldScale);
                 return false;
             }
+
+            SetTileItem(null, oldPosition, oldScale);
 
             registered.SetPosition(position);
             registered.SetRotation(isRotated);
             SetTileItem(registered, position, newScale);
+
             result = InventoryResult.SUCCESS;
             return true;
         }
-        public bool TrySwapItem(Guid instanceIDA, Guid instanceIDB, bool rotationA, out InventoryResult result) => TrySwapItem(instanceIDA, instanceIDB, this, rotationA, out result);
         public bool TrySwapItem(Guid instanceIDA, Guid instanceIDB, InventoryData inventoryB, bool rotationA, out InventoryResult result)
         {
-            if (inventoryB == null)
-            {
-                throw new ArgumentNullException(nameof(inventoryB), "Swap item failed target inventory is null!");
-            }
+            if (inventoryB == null) throw new ArgumentNullException(nameof(inventoryB), "Swap item failed target inventory is null!?");
 
             if (!TryGetItemByInstanceID(instanceIDA, out ItemData itemA, out result))
             {
-                Debug.LogError($"Inventory swap item failed! [{instanceIDA}] not found!");
                 return false;
             }
 
             if (!inventoryB.TryGetItemByInstanceID(instanceIDB, out ItemData itemB, out result))
             {
-                Debug.LogError($"Inventory swap item failed! [{instanceIDB}] not found!");
                 return false;
             }
 
@@ -922,7 +963,8 @@ namespace Core.Item
 
             Vector2Int positionA = itemA.GetPosition();
             Vector2Int positionB = itemB.GetPosition();
-            bool rotationB = itemB.GetRotation();
+            bool originalRotationA = itemA.GetRotation();
+            bool originalRotationB = itemB.GetRotation();
 
             if (!TryRemoveItem(instanceIDA, out ItemData removedA, out result))
             {
@@ -931,9 +973,9 @@ namespace Core.Item
 
             if (!inventoryB.TryRemoveItem(instanceIDB, out ItemData removedB, out result))
             {
-                if (!TryAddItem(removedA, positionA, rotationA, out _, out InventoryResult rollbackA))
+                if (!TryAddItem(removedA, positionA, originalRotationA, out _, out InventoryResult rollbackA))
                 {
-                    Debug.LogError($"CRITICAL: Swap rollback failed! Item [{removedA.InstanceID}] could not be restored — {rollbackA}.");
+                    Debug.LogError( $"CRITICAL: Swap rollback failed! " + $"Item [{removedA.InstanceID}] could not be restored — {rollbackA}.");
                 }
 
                 return false;
@@ -941,34 +983,34 @@ namespace Core.Item
 
             if (!inventoryB.TryAddItem(removedA, positionB, rotationA, out ItemData placedA, out result))
             {
-                if (!TryAddItem(removedA, positionA, rotationA, out _, out InventoryResult rollbackA))
+                if (!TryAddItem( removedA, positionA, originalRotationA, out _, out InventoryResult rollbackA))
                 {
-                    Debug.LogError($"CRITICAL: Swap rollback failed! Item [{removedA.InstanceID}] could not be restored — {rollbackA}.");
+                    Debug.LogError( $"CRITICAL: Swap rollback failed! " + $"Item [{removedA.InstanceID}] could not be restored — {rollbackA}.");
                 }
 
-                if (!inventoryB.TryAddItem(removedB, positionB, rotationB, out _, out InventoryResult rollbackB))
+                if (!inventoryB.TryAddItem(removedB, positionB, originalRotationB, out _, out InventoryResult rollbackB))
                 {
-                    Debug.LogError($"CRITICAL: Swap rollback failed! Item [{removedB.InstanceID}] could not be restored — {rollbackB}.");
+                    Debug.LogError( $"CRITICAL: Swap rollback failed! " + $"Item [{removedB.InstanceID}] could not be restored — {rollbackB}.");
                 }
 
                 return false;
             }
 
-            if (!TryAddItem(removedB, positionA, rotationB, out ItemData _, out result))
+            if (!TryAddItem(removedB, positionA, originalRotationB, out _, out result))
             {
                 if (!inventoryB.TryRemoveItem(placedA.InstanceID, out _, out InventoryResult undoA))
                 {
-                    Debug.LogError($"CRITICAL: Swap rollback failed! Item [{placedA.InstanceID}] could not be pulled back — {undoA}.");
+                    Debug.LogError( $"CRITICAL: Swap rollback failed! " + $"Item [{placedA.InstanceID}] could not be pulled back — {undoA}.");
                 }
 
-                if (!TryAddItem(removedA, positionA, rotationA, out _, out InventoryResult rollbackA))
+                if (!TryAddItem(removedA, positionA, originalRotationA, out _, out InventoryResult rollbackA))
                 {
-                    Debug.LogError($"CRITICAL: Swap rollback failed! Item [{removedA.InstanceID}] could not be restored — {rollbackA}.");
+                    Debug.LogError( $"CRITICAL: Swap rollback failed! " + $"Item [{removedA.InstanceID}] could not be restored — {rollbackA}.");
                 }
 
-                if (!inventoryB.TryAddItem(removedB, positionB, rotationB, out _, out InventoryResult rollbackB))
+                if (!inventoryB.TryAddItem(removedB, positionB, originalRotationB, out _, out InventoryResult rollbackB))
                 {
-                    Debug.LogError($"CRITICAL: Swap rollback failed! Item [{removedB.InstanceID}] could not be restored — {rollbackB}.");
+                    Debug.LogError( $"CRITICAL: Swap rollback failed! " + $"Item [{removedB.InstanceID}] could not be restored — {rollbackB}.");
                 }
 
                 return false;
