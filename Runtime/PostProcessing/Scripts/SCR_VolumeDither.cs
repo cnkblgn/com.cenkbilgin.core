@@ -5,7 +5,7 @@ namespace Core.PostProcessing
 {
     [Serializable]
     [VolumeComponentMenu("Post-processing/Dither")]
-    public sealed class VolumeDither : VolumeComponent
+    public sealed class Dither : VolumeComponent
     {
         public BoolParameter Enabled = new(false, true);
         public ClampedFloatParameter Strength = new(1, 0f, 2f);

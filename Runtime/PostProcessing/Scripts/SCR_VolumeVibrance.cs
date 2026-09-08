@@ -6,7 +6,7 @@ namespace Core.PostProcessing
 {
     [Serializable]
     [VolumeComponentMenu("Post-processing/Vibrance")]
-    public sealed class VolumeVibrance : VolumeComponent
+    public sealed class Vibrance : VolumeComponent
     {
         public BoolParameter Enabled = new(false, true);
         public ClampedFloatParameter Intensity = new(1, 0f, 10f);

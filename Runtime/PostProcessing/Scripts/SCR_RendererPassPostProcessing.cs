@@ -103,11 +103,11 @@ namespace Core.PostProcessing
             }
 
             VolumeStack stack = VolumeManager.instance.stack;
-            VolumeClarity clarity = stack.GetComponent<VolumeClarity>();
-            VolumeVibrance vibrance = stack.GetComponent<VolumeVibrance>();
-            VolumeSharpen sharpen = stack.GetComponent<VolumeSharpen>();
-            VolumeQuantize quantize = stack.GetComponent<VolumeQuantize>();
-            VolumeDither dither = stack.GetComponent<VolumeDither>();
+            Clarity clarity = stack.GetComponent<Clarity>();
+            Vibrance vibrance = stack.GetComponent<Vibrance>();
+            Sharpen sharpen = stack.GetComponent<Sharpen>();
+            Quantize quantize = stack.GetComponent<Quantize>();
+            Dither dither = stack.GetComponent<Dither>();
 
             TextureHandle source = resourceData.activeColorTexture;
             TextureDesc description = renderGraph.GetTextureDesc(source);

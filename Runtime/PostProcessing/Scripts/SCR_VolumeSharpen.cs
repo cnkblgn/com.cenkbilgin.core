@@ -5,7 +5,7 @@ namespace Core.PostProcessing
 {
     [Serializable]
     [VolumeComponentMenu("Post-processing/Sharpen")]
-    public sealed class VolumeSharpen : VolumeComponent
+    public sealed class Sharpen : VolumeComponent
     {
         public BoolParameter Enabled = new(false, true);
         public ClampedFloatParameter Strength = new(1f, 0f, 10f);
