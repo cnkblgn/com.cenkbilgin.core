@@ -921,12 +921,15 @@ namespace Core.Item
                 return false;
             }
 
+            Debug.Log("Try Move: " + registered.BaseID);
+
             Vector2Int oldPosition = registered.GetPosition();
             Vector2Int oldScale = registered.GetScale();
             Vector2Int newScale = registered.GetScale(isRotated);
 
             if (!IsPlacementValid(position, newScale, instanceID, out result))
             {
+                Debug.Log("Try Move Failed: " + registered.BaseID + " << result: " + result);
                 return false;
             }
 
@@ -935,6 +938,8 @@ namespace Core.Item
             registered.SetPosition(position);
             registered.SetRotation(isRotated);
             SetTileItem(registered, position, newScale);
+
+            Debug.Log("Try Move Success: " + registered.BaseID + " << result: " + result);
 
             result = InventoryResult.SUCCESS;
             return true;
