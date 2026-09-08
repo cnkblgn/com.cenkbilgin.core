@@ -18,7 +18,7 @@ namespace Core.UI
         [SerializeField, Required] private UIContextItemView viewTemplate;
 
         private Canvas thisCanvas;
-        private UIContextMenuHandle thisHandle;
+        private UIContextHandle thisHandle;
         private readonly List<UIContextItemView> thisItems = new();
 
         private void Awake()
@@ -47,7 +47,7 @@ namespace Core.UI
 
         public void OnSelected() => Hide();
 
-        public UIContextMenuHandle Show(in UIContextMenuContext ctx)
+        public UIContextHandle Show(in UIContextMenuContext ctx)
         {
             if (thisHandle != default)
             {
@@ -62,7 +62,7 @@ namespace Core.UI
 
             return thisHandle = new(Guid.NewGuid());
         }
-        public void Hide(UIContextMenuHandle handle)
+        public void Hide(UIContextHandle handle)
         {
             if (thisHandle != handle)
             {
