@@ -96,8 +96,8 @@ namespace Core.UI
         public UIPromptHandle ShowPrompt<TContext>(string description, in TContext ctx) where TContext : struct => promptController.Show(description, in ctx);
         public void HidePrompt(UIPromptHandle handle) => promptController.Hide(handle);
 
-        public UIContextHandle ShowContextMenu(in UIContextMenuContext ctx) => contextMenuController.Show(in ctx);
-        public void HideContextMenu(UIContextHandle handle) => contextMenuController.Hide(handle);
+        public UIContextMenuHandle ShowContextMenu(in UIContextMenuContext ctx) => contextMenuController.Show(in ctx);
+        public void HideContextMenu(UIContextMenuHandle handle) => contextMenuController.Hide(handle);
 
         public void ShowSubtitle(string text) => subtitleController.Show(text);
         public void HideSubtitle() => subtitleController.Hide();
