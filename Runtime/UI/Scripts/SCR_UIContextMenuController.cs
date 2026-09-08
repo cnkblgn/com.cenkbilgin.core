@@ -25,6 +25,8 @@ namespace Core.UI
             thisCanvas = GetComponent<Canvas>();
             thisCanvas.Hide();
 
+            root.AlignBottomLeft();
+
             viewTemplate.gameObject.SetActive(false);
         }
         private void OnEnable()
@@ -53,7 +55,7 @@ namespace Core.UI
 
             thisCanvas.Show();
 
-            root.anchoredPosition = ctx.Position;
+            root.anchoredPosition = ctx.Position + (Vector2.right * root.rect.width / 2);
 
             Populate(in ctx);
 
