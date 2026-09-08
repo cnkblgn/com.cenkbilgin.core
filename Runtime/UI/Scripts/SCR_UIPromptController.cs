@@ -16,7 +16,8 @@ namespace Core.UI
         private void Start()
         {
             thisCanvas = GetComponent<Canvas>();
-            thisCanvas.Show();
+            thisCanvas.Hide();
+
             Hide();
         }
         private void OnEnable()
@@ -38,6 +39,7 @@ namespace Core.UI
             {
                 if (views[i].TryShow(description, context))
                 {
+                    thisCanvas.Show();
                     ManagerUI.Instance.ShowCursor();
                     return;
                 }
@@ -49,6 +51,7 @@ namespace Core.UI
             {
                 if (views[i].TryHide())
                 {
+                    thisCanvas.Hide();
                     ManagerUI.Instance.HideCursor();
                     return;
                 }
