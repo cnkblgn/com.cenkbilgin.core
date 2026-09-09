@@ -71,39 +71,61 @@ namespace Core.Item
         public int GetItemCount(ItemID baseID) => thisInventory.GetItemCount(baseID);
         public ItemData[,] GetSnapshot() => thisInventory.GetSnapshot();
 
+        /// <summary> Finds the closest valid position to the desired position. </summary>
         public bool TryGetNearestPosition(Vector2Int desiredPosition, Vector2Int scale, out Vector2Int position, out InventoryResult result) => TryGetNearestPosition(desiredPosition, scale, Guid.Empty, out position, out result);
+        /// <summary> Finds the closest valid position to the desired position. Optional ignore id </summary>
         public bool TryGetNearestPosition(Vector2Int desiredPosition, Vector2Int scale, Guid ignoreID, out Vector2Int position, out InventoryResult result) => thisInventory.TryGetNearestPosition(desiredPosition, scale, ignoreID, out position, out result);
+        /// <summary> Finds a valid position and rotation for the given item. </summary>
         public bool TryGetBestPosition(ItemData item, out Vector2Int position, out bool isRotated, out InventoryResult result) => thisInventory.TryGetBestPosition(item, out position, out isRotated, out result);
+        /// <summary> Clamps a position so the given item scale stays inside the inventory bounds. </summary>
         public bool TryGetClampedPosition(Vector2Int scale, ref Vector2Int position, out InventoryResult result) => thisInventory.TryGetClampedPosition(scale, ref position, out result);
+        /// <summary> Finds the first valid position for the given item scale in the specified grid. </summary>
         public bool TryGetAnyPosition(Vector2Int scale, out Vector2Int position, out InventoryResult result) => thisInventory.TryGetAnyPosition(scale, out position, out result);
-        public bool TryGetItemByTag(ItemTag tag, out ItemData registered, out InventoryResult result) => thisInventory.TryGetItemByTag(tag, out registered, out result);
+        /// <summary> Finds the first item that matches any of the given tags. </summary>
+        public bool TryGetItemByTag(ItemTag tag, out ItemData registered, out InventoryResult result) => thisInventory.TryGetItemByTag(tag.Mask, out registered, out result);
+        /// <summary> Finds the first item that matches any of the given tags. </summary>
         public bool TryGetItemByTag(ulong tags, out ItemData registered, out InventoryResult result) => thisInventory.TryGetItemByTag(tags, out registered, out result);
-        public bool TryGetItemsByTag(ItemTag[] tags, out List<ItemData> registered, out InventoryResult result) => thisInventory.TryGetItemsByTag(tags, out registered, out result);
+        /// <summary> Finds all items that match any of the given tags. </summary>
+        public bool TryGetItemsByTag(ItemTag[] tags, out List<ItemData> registered, out InventoryResult result) => thisInventory.TryGetItemsByTag(tags.CreateMask(), out registered, out result);
+        /// <summary> Finds all items that match any of the given tags. </summary>
         public bool TryGetItemsByTag(ulong tags, out List<ItemData> registered, out InventoryResult result) => thisInventory.TryGetItemsByTag(tags, out registered, out result);
+        /// <summary> Finds the first item with the given base ID. </summary>
         public bool TryGetItemByBaseID(ItemID baseID, out ItemData registered, out InventoryResult result) => thisInventory.TryGetItemByBaseID(baseID, out registered, out result);
+        /// <summary> Adds all items with the given base ID to the provided list. </summary>
         public bool TryGetItemsByBaseID(ItemID baseID, List<ItemData> registered, out InventoryResult result) => thisInventory.TryGetItemsByBaseID(baseID, registered, out result);
+        /// <summary> Finds an item by its unique instance ID. </summary>
         public bool TryGetItemByInstanceID(Guid instanceID, out ItemData registered, out InventoryResult result) => thisInventory.TryGetItemByInstanceID(instanceID, out registered, out result);
+        /// <summary> Finds the item occupying the given grid position. </summary>
         public bool TryGetItemByPosition(Vector2Int position, out ItemData registered, out InventoryResult result) => thisInventory.TryGetItemByPosition(position, out registered, out result);
+        /// <summary> Checks an area for an overlapping item. </summary>
         public bool TryGetItemByArea(Vector2Int position, Vector2Int scale, out ItemData overlapped, out InventoryResult ctx) => TryGetItemByArea(position, scale, Guid.Empty, out overlapped, out ctx);
+        /// <summary> Checks an area for an overlapping item. Optional ignore id </summary>
         public bool TryGetItemByArea(Vector2Int position, Vector2Int scale, Guid ignoreID, out ItemData overlapped, out InventoryResult ctx) => thisInventory.TryGetItemByArea(position, scale, ignoreID, out overlapped, out ctx);
+        /// <summary> Finds all items directly adjacent to the given item. </summary>
         public bool TryGetItemsByAdjacent(Guid instanceID, out List<ItemData> items) => thisInventory.TryGetItemsByAdjacent(instanceID, out items);
 
+        /// <summary> Checks whether the given item can be added at the specified position and rotation. </summary>
         public bool CanAddItem(ItemData item, Vector2Int position, bool isRotated, out InventoryResult result) => thisInventory.CanAddItem(item, position, isRotated, out result);
+        /// <summary> Checks whether two items can be swapped and calculates their target positions. </summary>
         public bool CanSwapItem(Guid instanceIDA, Guid instanceIDB, InventoryEntity inventoryB, bool rotationA, out Vector2Int targetPositionA, out Vector2Int targetPositionB, out InventoryResult result) => thisInventory.CanSwapItem(instanceIDA, instanceIDB, inventoryB.thisInventory, rotationA, out targetPositionA, out targetPositionB, out result);
+        /// <summary> Checks whether two items can be swapped and calculates their target positions. </summary>
         public bool CanSwapItem(Guid instanceIDA, Guid instanceIDB, bool rotationA, out Vector2Int targetPositionA, out Vector2Int targetPositionB, out InventoryResult result) => CanSwapItem(instanceIDA, instanceIDB, this, rotationA, out targetPositionA, out targetPositionB, out result);
+        /// <summary> Checks whether an item can be placed at the given position and scale. </summary>
         public bool IsPlacementValid(Vector2Int position, Vector2Int scale, out InventoryResult result) => IsPlacementValid(position, scale, Guid.Empty, out result);
+        /// <summary> Checks whether an item can be placed at the given position and scale. Optional ignore id </summary>
         public bool IsPlacementValid(Vector2Int position, Vector2Int scale, Guid ignoreID, out InventoryResult result) => thisInventory.IsPlacementValid(position, scale, ignoreID, out result);
 
-        public bool TryCompactItems(out InventoryResult result) => thisInventory.TryCompactItems(out result);
-        public bool TrySortItems(IInventorySorter sorter, out InventoryResult result) => thisInventory.TrySortItems(sorter, out result);
-        public bool TrySortItemsByArea(bool descending, out InventoryResult result) => thisInventory.TrySortItems(descending ? InventorySorter.SortByAreaDescending : InventorySorter.SortByArea, out result);
-        public bool TrySortItemsByTag(out InventoryResult result) => thisInventory.TrySortItems(InventorySorter.SortByTag, out result);
-        public bool TrySortItemsByTag(IReadOnlyList<ItemTag> tags, out InventoryResult result) => thisInventory.TrySortItems(new InventorySortByTag(tags), out result);
+        /// <summary> Merges compatible items without any rule. </summary>
         public bool TryMergeItems(out InventoryResult result) => TryMergeItems(null, out result);
+        /// <summary> Merges compatible items using an optional stacking rule. </summary>
         public bool TryMergeItems(Func<ItemData, ItemData, bool> canStackPredicate, out InventoryResult result) => thisInventory.TryMergeItems(canStackPredicate, out result);
+        /// <summary> Merges an item without any rule. </summary>
         public bool TryMergeItem(Guid targetInstanceID, Guid sourceInstanceID, out InventoryResult result) => TryMergeItem(targetInstanceID, sourceInstanceID, this, null, out result);
+        /// <summary> Merges an item using an optional stacking rule. </summary>
         public bool TryMergeItem(Guid targetInstanceID, Guid sourceInstanceID, Func<ItemData, ItemData, bool> canStackPredicate, out InventoryResult result) => TryMergeItem(targetInstanceID, sourceInstanceID, this, canStackPredicate, out result);
+        /// <summary> Merges an item without any rule. </summary>
         public bool TryMergeItem(Guid targetInstanceID, Guid sourceInstanceID, InventoryEntity sourceInventory,  out InventoryResult result) => TryMergeItem(targetInstanceID, sourceInstanceID, sourceInventory, null, out result);
+        /// <summary> Merges an item using an optional stacking rule. </summary>
         public bool TryMergeItem(Guid targetInstanceID, Guid sourceInstanceID, InventoryEntity sourceInventory, Func<ItemData, ItemData, bool> canStackPredicate, out InventoryResult result)
         {
             if (sourceInventory == null)
@@ -113,17 +135,19 @@ namespace Core.Item
 
             return thisInventory.TryMergeItem(targetInstanceID, sourceInstanceID, sourceInventory.thisInventory, canStackPredicate, out result);
         }
+        /// <summary> Rearranges items to fill the inventory from the top left without changing their order. </summary>
+        public bool TryCompactItems(out InventoryResult result) => thisInventory.TryCompactItems(out result);
+        /// <summary> Sorts and rearranges items using the given inventory sorter. </summary>
+        public bool TrySortItems(IInventorySorter sorter, out InventoryResult result) => thisInventory.TrySortItems(sorter, out result);
+        /// <summary> Sorts and rearranges items using item area with order. </summary>
+        public bool TrySortItemsByArea(bool descending, out InventoryResult result) => thisInventory.TrySortItems(descending ? InventorySorter.SortByAreaDescending : InventorySorter.SortByArea, out result);
+        /// <summary> Sorts and rearranges items using the default tags. </summary>
+        public bool TrySortItemsByTag(out InventoryResult result) => thisInventory.TrySortItems(InventorySorter.SortByTag, out result);
+        /// <summary> Sorts and rearranges items using tag priority list. </summary>
+        public bool TrySortItemsByTag(IReadOnlyList<ItemTag> tags, out InventoryResult result) => thisInventory.TrySortItems(new InventorySortByTag(tags), out result);
         public bool TryGetItemStack(Guid instanceID, out int stack, out InventoryResult result) => thisInventory.TryGetItemStack(instanceID, out stack, out result);
         public bool TrySetItemStack(Guid instanceID, int stack, out InventoryResult result) => thisInventory.TrySetItemStack(instanceID, stack, out result);
-        public bool TryTransferItem(Guid instanceID, Vector2Int? position, bool? isRotated, InventoryEntity inventory, out ItemData transfered, out InventoryResult result)
-        {
-            if (inventory == null)
-            {
-                throw new ArgumentNullException(nameof(inventory), "Try transfer items failed! inventory is missing!?");
-            }
-
-            return thisInventory.TryTransferItem(instanceID, position, isRotated, inventory.thisInventory, out transfered, out result);
-        }
+        /// <summary> Transfers all items that can fit into the target inventory. </summary>
         public bool TryTransferItems(InventoryEntity inventory, out InventoryResult result)
         {
             if (inventory == null)
@@ -133,12 +157,29 @@ namespace Core.Item
 
             return thisInventory.TryTransferItems(inventory.thisInventory, out result);
         }
+        /// <summary> Transfers one item to the target inventory. </summary>
+        public bool TryTransferItem(Guid instanceID, Vector2Int? position, bool? isRotated, InventoryEntity inventory, out ItemData transfered, out InventoryResult result)
+        {
+            if (inventory == null)
+            {
+                throw new ArgumentNullException(nameof(inventory), "Try transfer items failed! inventory is missing!?");
+            }
+
+            return thisInventory.TryTransferItem(instanceID, position, isRotated, inventory.thisInventory, out transfered, out result);
+        }
+        /// <summary> Adds an item to the inventory at the requested or best available position. </summary>
         public bool TryAddItem(ItemData item, Vector2Int? position, bool? isRotated, out ItemData registered, out InventoryResult result) => thisInventory.TryAddItem(item, position, isRotated, out registered, out result);
-        public bool TryDropItem(Guid instanceID, out ItemData registered, out InventoryResult result) => thisInventory.TryDropItem(instanceID, dropOrigin.position, dropForce * dropOrigin.forward, out registered, out result); 
+        /// <summary> Removes an item and creates its world entity with the given drop force. </summary>
+        public bool TryDropItem(Guid instanceID, out ItemData registered, out InventoryResult result) => thisInventory.TryDropItem(instanceID, dropOrigin.position, dropForce * dropOrigin.forward, out registered, out result);
+        /// <summary> Removes an item from the inventory and updates its weight. </summary>
         public bool TryRemoveItem(Guid instanceID, out ItemData registered, out InventoryResult result) => thisInventory.TryRemoveItem(instanceID, out registered, out result);
+        /// <summary> Clears an item's occupied tiles without removing it from the item table. </summary>
         public bool TryClearItem(Guid instanceID, out ItemData registered, out InventoryResult result) => thisInventory.TryClearItem(instanceID, out registered, out result);
-        public bool TryMoveItem(Guid instanceID, Vector2Int position, bool isRotated, out ItemData registered, out InventoryResult ctx) => thisInventory.TryMoveItem(instanceID, position, isRotated, out registered, out ctx);
+        /// <summary> Moves an item to a new position and optionally clears its old tiles. </summary>
+        public bool TryMoveItem(Guid instanceID, Vector2Int position, bool isRotated, bool clearOldTile, out ItemData registered, out InventoryResult ctx) => thisInventory.TryMoveItem(instanceID, position, isRotated, clearOldTile, out registered, out ctx);
+        /// <summary> Swaps two items between the same or different inventories. </summary>
         public bool TrySwapItem(Guid instanceIDA, Guid instanceIDB, bool rotationA, out InventoryResult result) => TrySwapItem(instanceIDA, instanceIDB, this, rotationA, out result);
+        /// <summary> Swaps two items between the same or different inventories. </summary>
         public bool TrySwapItem(Guid instanceIDA, Guid instanceIDB, InventoryEntity inventoryB, bool rotationA, out InventoryResult result) => thisInventory.TrySwapItem(instanceIDA, instanceIDB, inventoryB.thisInventory, rotationA, out result);
     }
 }

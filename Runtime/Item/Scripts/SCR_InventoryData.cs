@@ -98,6 +98,7 @@ namespace Core.Item
             return snapshot;
         }
 
+        /// <summary> Finds the closest valid position to the desired position. Optional ignore id </summary>
         public bool TryGetNearestPosition(Vector2Int desiredPosition, Vector2Int scale, Guid ignoreID, out Vector2Int position, out InventoryResult result)
         {
             position = Vector2Int.zero;
@@ -162,6 +163,7 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return true;
         }
+        /// <summary> Finds a valid position and rotation for the given item. </summary>
         public bool TryGetBestPosition(ItemData item, out Vector2Int bestPosition, out bool bestRotation, out InventoryResult result)
         {
             if (item == null)
@@ -183,6 +185,7 @@ namespace Core.Item
 
             return TryGetAnyPosition(scale, out bestPosition, out result);
         }
+        /// <summary> Clamps a position so the given item scale stays inside the inventory bounds. </summary>
         public bool TryGetClampedPosition(Vector2Int scale, ref Vector2Int position, out InventoryResult result)
         {
             if (scale.x <= 0 || scale.y <= 0)
@@ -205,6 +208,7 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return true;
         }
+        /// <summary> Finds the first valid position for the given item scale in the specified grid. </summary>
         public bool TryGetAnyPosition(Vector2Int scale, out Vector2Int position, out InventoryResult result) => TryGetAnyPosition(itemGrid, scale, out position, out result);
         private bool TryGetAnyPosition(ItemData[] grid, Vector2Int scale, out Vector2Int position, out InventoryResult result)
         {
@@ -241,7 +245,7 @@ namespace Core.Item
             result = InventoryResult.NO_VALID_SPACE;
             return false;
         }
-        public bool TryGetItemByTag(ItemTag tag, out ItemData registered, out InventoryResult result) => TryGetItemByTag(tag.Mask, out registered, out result);
+        /// <summary> Finds the first item that matches any of the given tags. </summary>
         public bool TryGetItemByTag(ulong tags, out ItemData registered, out InventoryResult result)
         {
             foreach (ItemData item in itemTable.Values)
@@ -258,7 +262,7 @@ namespace Core.Item
             result = InventoryResult.NOT_REGISTERED;
             return false;
         }
-        public bool TryGetItemsByTag(ItemTag[] tags, out List<ItemData> items, out InventoryResult result) => TryGetItemsByTag(tags.CreateMask(), out items, out result);
+        /// <summary> Finds all items that match any of the given tags. </summary>
         public bool TryGetItemsByTag(ulong tags, out List<ItemData> items, out InventoryResult result)
         {
             items = new();
@@ -275,6 +279,7 @@ namespace Core.Item
 
             return result == InventoryResult.SUCCESS;
         }
+        /// <summary> Finds the first item with the given base ID. </summary>
         public bool TryGetItemByBaseID(ItemID baseID, out ItemData registered, out InventoryResult result)
         {
             foreach (ItemData item in itemTable.Values)
@@ -291,6 +296,7 @@ namespace Core.Item
             registered = null;
             return false;
         }
+        /// <summary> Adds all items with the given base ID to the provided list. </summary>
         public bool TryGetItemsByBaseID(ItemID baseID, List<ItemData> registered, out InventoryResult result)
         {
             if (registered == null)
@@ -311,6 +317,7 @@ namespace Core.Item
 
             return result == InventoryResult.SUCCESS;
         }
+        /// <summary> Finds an item by its unique instance ID. </summary>
         public bool TryGetItemByInstanceID(Guid instanceID, out ItemData registered, out InventoryResult result)
         {
             if (!itemTable.TryGetValue(instanceID, out registered))
@@ -322,6 +329,7 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return true;
         }
+        /// <summary> Finds the item occupying the given grid position. </summary>
         public bool TryGetItemByPosition(Vector2Int position, out ItemData registered, out InventoryResult result)
         {
             if (!IsTileInsideBoundary(position.x, position.y, out result))
@@ -338,6 +346,7 @@ namespace Core.Item
 
             return foundItem;
         }
+        /// <summary> Checks an area for an overlapping item. Optional ignore id </summary>
         public bool TryGetItemByArea(Vector2Int position, Vector2Int scale, Guid ignoreID, out ItemData overlapped, out InventoryResult result)
         {
             overlapped = null;
@@ -354,6 +363,7 @@ namespace Core.Item
 
             return true;
         }
+        /// <summary> Finds all items directly adjacent to the given item. </summary>
         public bool TryGetItemsByAdjacent(Guid instanceID, out List<ItemData> items)
         {
             items = new();
@@ -408,6 +418,7 @@ namespace Core.Item
             return true;
         }
 
+        /// <summary> Checks whether the given item can be added at the specified position and rotation. </summary>
         public bool CanAddItem(ItemData item, Vector2Int position, bool isRotated, out InventoryResult result)
         {
             if (item == null)
@@ -436,6 +447,7 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return true;
         }
+        /// <summary> Checks whether two items can be swapped and calculates their target positions. </summary>
         public bool CanSwapItem(Guid instanceIDA, Guid instanceIDB, InventoryData inventoryB, bool rotationA, out Vector2Int targetPositionA, out Vector2Int targetPositionB, out InventoryResult result)
         {
             // Weight kontrolü yapmýyor burasý. burda kontrol lazým yav
@@ -539,6 +551,7 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return true;
         }
+        /// <summary> Checks whether an item can be placed at the given position and scale. </summary>
         public bool IsPlacementValid(Vector2Int position, Vector2Int scale, Guid ignoreID, out InventoryResult result)
         {
             if (TryGetItemByArea(position, scale, ignoreID, out _, out result))
@@ -635,7 +648,7 @@ namespace Core.Item
                 }
             }
         }
-        public bool TryMergeItems(out InventoryResult result) => TryMergeItems(null, out result);
+        /// <summary> Merges compatible items using an optional stacking rule. </summary>
         public bool TryMergeItems(Func<ItemData, ItemData, bool> canStackPredicate, out InventoryResult result)
         {
             int totalMoved = 0;
@@ -712,9 +725,7 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return true;
         }
-        public bool TryMergeItem(Guid targetInstanceID, Guid sourceInstanceID, out InventoryResult result) => TryMergeItem(targetInstanceID, sourceInstanceID, this, null, out result);
-        public bool TryMergeItem(Guid targetInstanceID, Guid sourceInstanceID, Func<ItemData, ItemData, bool> canStackPredicate, out InventoryResult result) => TryMergeItem(targetInstanceID, sourceInstanceID, this, canStackPredicate, out result);
-        public bool TryMergeItem(Guid targetInstanceID, Guid sourceInstanceID, InventoryData sourceInventory, out InventoryResult result) => TryMergeItem(targetInstanceID, sourceInstanceID, sourceInventory, null, out result);
+        /// <summary> Merges an item using an optional stacking rule. </summary>
         public bool TryMergeItem(Guid targetInstanceID, Guid sourceInstanceID, InventoryData sourceInventory, Func<ItemData, ItemData, bool> canStackPredicate, out InventoryResult result)
         {
             if (sourceInventory == null)
@@ -817,7 +828,8 @@ namespace Core.Item
 
             result = InventoryResult.SUCCESS;
             return true;
-        }        
+        }
+        /// <summary> Rearranges items to fill the inventory from the top left without changing their order. </summary>
         public bool TryCompactItems(out InventoryResult result)
         {
             if (itemTable.Count == 0)
@@ -830,6 +842,7 @@ namespace Core.Item
 
             return TryArrangeItems(ordered, out result);
         }
+        /// <summary> Sorts and rearranges items using the given inventory sorter. </summary>
         public bool TrySortItems(IInventorySorter sorter, out InventoryResult result)
         {
             if (sorter == null)
@@ -928,6 +941,7 @@ namespace Core.Item
             Notify(InventoryState.ITEM_CHANGED, result = InventoryResult.SUCCESS, item);
             return true;
         }
+        /// <summary> Transfers all items that can fit into the target inventory. </summary>
         public bool TryTransferItems(InventoryData inventory, out InventoryResult result)
         {
             result = InventoryResult.NULL;
@@ -972,6 +986,7 @@ namespace Core.Item
             result = transfered ? InventoryResult.SUCCESS : InventoryResult.NOT_REGISTERED;
             return transfered;
         }
+        /// <summary> Transfers one item to the target inventory. </summary>
         public bool TryTransferItem(Guid instanceID, Vector2Int? position, bool? isRotated, InventoryData inventory, out ItemData transfered, out InventoryResult result)
         {
             transfered = null;
@@ -1006,6 +1021,7 @@ namespace Core.Item
 
             return false;
         }
+        /// <summary> Adds an item to the inventory at the requested or best available position. </summary>
         public bool TryAddItem(ItemData item, Vector2Int? position, bool? isRotated, out ItemData registered, out InventoryResult result)
         {
             registered = null;
@@ -1053,6 +1069,7 @@ namespace Core.Item
             Notify(InventoryState.ITEM_ADDED, result = InventoryResult.SUCCESS, registered);
             return true;
         }
+        /// <summary> Removes an item and creates its world entity with the given drop force. </summary>
         public bool TryDropItem(Guid instanceID, Vector3 position, Vector3 force, out ItemData registered, out InventoryResult result)
         {
             if (!TryRemoveItem(instanceID, out registered, out result))
@@ -1085,6 +1102,7 @@ namespace Core.Item
 
             return true;
         }
+        /// <summary> Removes an item from the inventory and updates its weight. </summary>
         public bool TryRemoveItem(Guid instanceID, out ItemData registered, out InventoryResult result)
         {
             if (TryClearItem(instanceID, out registered, out result))
@@ -1098,6 +1116,7 @@ namespace Core.Item
 
             return false;
         }
+        /// <summary> Clears an item's occupied tiles without removing it from the item table. </summary>
         public bool TryClearItem(Guid instanceID, out ItemData registered, out InventoryResult result)
         {
             if (!TryGetItemByInstanceID(instanceID, out registered, out result))
@@ -1113,7 +1132,8 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return true;
         }
-        public bool TryMoveItem(Guid instanceID, Vector2Int position, bool isRotated, out ItemData registered, out InventoryResult result)
+        /// <summary> Moves an item to a new position and optionally clears its old tiles. </summary>
+        public bool TryMoveItem(Guid instanceID, Vector2Int position, bool isRotated, bool clearOldTile, out ItemData registered, out InventoryResult result)
         {
             if (!TryGetItemByInstanceID(instanceID, out registered, out result))
             {
@@ -1130,15 +1150,18 @@ namespace Core.Item
                 return false;
             }
 
-            SetTileItem(null, oldPosition, oldScale);
+            if (clearOldTile)
+            {
+                SetTileItem(null, oldPosition, oldScale);
+            }
 
             registered.SetPosition(position);
             registered.SetRotation(isRotated);
             SetTileItem(registered, position, newScale);
-
-            result = InventoryResult.SUCCESS;
+            Notify(InventoryState.ITEM_CHANGED, result = InventoryResult.SUCCESS, registered);
             return true;
         }
+        /// <summary> Swaps two items between the same or different inventories. </summary>
         public bool TrySwapItem(Guid instanceIDA, Guid instanceIDB, InventoryData inventoryB, bool rotationA, out InventoryResult result)
         {
             if (inventoryB == null)
