@@ -68,7 +68,7 @@ namespace Core.UI
             thisCanvas.Show();
             handler.Show(context);
 
-            return thisHandle = new(Guid.NewGuid());
+            return thisHandle = new(Guid.NewGuid(), this);
         }
         public bool TryHide(UIPromptHandle handle)
         {

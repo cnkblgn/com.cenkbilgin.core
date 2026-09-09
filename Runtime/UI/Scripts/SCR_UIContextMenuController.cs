@@ -10,6 +10,8 @@ namespace Core.UI
     [RequireComponent(typeof(GraphicRaycaster))]
     internal sealed class UIContextMenuController : MonoBehaviour, IUIContextItemHandler, IUICursorStateHandler, IGameStateHandler
     {
+        public bool IsActive => thisHandle != default;
+
         [Header("_")]
         [SerializeField, Required] private RectTransform root;
 
@@ -60,7 +62,7 @@ namespace Core.UI
 
             Populate(in ctx);
 
-            return thisHandle = new(Guid.NewGuid());
+            return thisHandle = new(Guid.NewGuid(), this);
         }
         public void Hide(UIContextMenuHandle handle)
         {
