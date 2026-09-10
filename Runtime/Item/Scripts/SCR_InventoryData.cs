@@ -860,12 +860,12 @@ namespace Core.Item
 
             int remaining = current - value;
 
-            item.SetStack(remaining);
-
+            TrySetItemStack(item.InstanceID, remaining, out result);
+    
             copy = ItemData.Clone(item);
             copy.SetStack(value);
 
-            if (!TryAddItem(copy, null, null, out copy, out result))
+            if (!TryAddItem(copy, null, null, out _, out result))
             {
                 return ItemDatabase.GetOrphanInventory().TryAddItem(copy, null, null, out copy, out result);
             }
