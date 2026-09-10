@@ -7,7 +7,7 @@ namespace Core.UI
 {
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Canvas))]
-    internal sealed class UICursorController : MonoBehaviour
+    public sealed class UICursorController : MonoBehaviour
     {
         [Header("_")]
         [SerializeField] private bool debug;
@@ -75,7 +75,7 @@ namespace Core.UI
             Debug.LogWarning($"[{id}] is not defined");
             return false;
         }
-        public void MoveCursor(Vector2 screenPosition)
+        internal void MoveCursor(Vector2 screenPosition)
         {
             if (!hasFocus)
             {
@@ -101,14 +101,14 @@ namespace Core.UI
 
             cursorTransform.localPosition = position;
         }
-        public void SetCursor(string id)
+        internal void SetCursor(string id)
         {
             if (TryGetCursor(id, out UICursorData cursor))
             {
                 cursorImage.sprite = cursor.Icon;
             }
         }
-        public void ShowCursor()
+        internal void ShowCursor()
         {
             bool canShow = true;
 
@@ -147,7 +147,7 @@ namespace Core.UI
                 Debug.Log("Show Cursor Success!");
             }
         }
-        public void HideCursor()
+        internal void HideCursor()
         {
             bool canHide = true;
 
