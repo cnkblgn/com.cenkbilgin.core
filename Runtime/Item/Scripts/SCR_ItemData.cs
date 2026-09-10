@@ -35,6 +35,17 @@ namespace Core.Item
         }
         public ItemData(ItemData data) : this(data == null ? throw new ArgumentNullException(nameof(data)) : data.BaseID, data.InstanceID, data.Data, data.position, data.stack, data.isRotated) { }
 
+        /// <summary> Creates clone with unique ID </summary>
+        public static ItemData Clone(ItemData data)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data), "Item clone failed! data is null!?");
+            }
+
+            return new(data.BaseID, Guid.NewGuid(), data.Data, data.position, data.stack, data.isRotated);
+        }
+
         public bool Equals(ItemData other) => other is not null && InstanceID == other.InstanceID && BaseID == other.BaseID;
         public override bool Equals(object obj) => Equals(obj as ItemData);
         public override int GetHashCode() => HashCode.Combine(InstanceID, BaseID);

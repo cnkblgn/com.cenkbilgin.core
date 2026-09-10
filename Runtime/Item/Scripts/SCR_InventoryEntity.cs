@@ -135,6 +135,8 @@ namespace Core.Item
 
             return thisInventory.TryMergeItem(targetInstanceID, sourceInstanceID, sourceInventory.thisInventory, canStackPredicate, out result);
         }
+        /// <summary> Tries to split item with given target stack. Returns false if copy cannot be added inventory! </summary>
+        public bool TrySplitItem(Guid instanceID, int value, out ItemData copy, out InventoryResult result) => thisInventory.TrySplitItem(instanceID, value, out copy, out result);
         /// <summary> Rearranges items to fill the inventory from the top left without changing their order. </summary>
         public bool TryCompactItems(out InventoryResult result) => thisInventory.TryCompactItems(out result);
         /// <summary> Sorts and rearranges items using the given inventory sorter. </summary>

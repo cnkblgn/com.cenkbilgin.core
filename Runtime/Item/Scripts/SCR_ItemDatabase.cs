@@ -6,6 +6,7 @@ namespace Core.Item
 {
     public static class ItemDatabase
     {
+        private static InventoryData orphanInventory = new(1, 1, 1, 0);
         private static readonly Dictionary<string, int> idLookup = new();
         private static readonly Dictionary<string, int> tagLookup = new();
         private static ItemDefinition[] definitions = Array.Empty<ItemDefinition>();
@@ -52,6 +53,7 @@ namespace Core.Item
                 definitions[i] = new(entry);
             }
 
+            orphanInventory = new(10, 10, 100000, tags);
             Debug.Log($"Item database build successfull!");
         }
 
@@ -136,5 +138,10 @@ namespace Core.Item
 
         internal static Transform GetRoot() => root;
         public static void SetRoot(Transform transform) => root = transform;
+
+        public static void ClearOrphanInventory() => orphanInventory.Clear();
+        public static bool TryGetOrphanItemByInstanceID(Guid instanceID, out ItemData registered, out InventoryResult result) => orphanInventory.TryGetItemByInstanceID(instanceID, out registered, out result);
+        public static bool TryAddOrphanItem(ItemData item, Vector2Int? position, bool? isRotated, out ItemData registered, out InventoryResult result) => orphanInventory.TryAddItem(item, position, isRotated, out registered, out result);
+        public static bool TryRemoveOrphanItem(Guid instanceID, out ItemData registered, out InventoryResult result) => orphanInventory.TryRemoveItem(instanceID, out registered, out result);
     }
 }

@@ -532,10 +532,10 @@ namespace Core.Item
             {
                 getSwapPositions(positionA, scaleA, positionB, scaleB, out targetPositionA, out targetPositionB);
             }
-            else 
-            { 
-                targetPositionA = positionB; 
-                targetPositionB = positionA; 
+            else
+            {
+                targetPositionA = positionB;
+                targetPositionB = positionA;
             }
 
             if (!inventoryB.IsPlacementValid(targetPositionA, scaleA, instanceIDB, out result))
@@ -567,7 +567,7 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return true;
         }
-        private bool IsTileOverlapping(int tilePositionX, int tilePositionY, int tileWidth, int tileHeight, Guid ignoreID,  out ItemData overlapped, out InventoryResult result) => IsTileOverlapping(itemGrid, tilePositionX, tilePositionY, tileWidth, tileHeight, ignoreID, out overlapped, out result);
+        private bool IsTileOverlapping(int tilePositionX, int tilePositionY, int tileWidth, int tileHeight, Guid ignoreID, out ItemData overlapped, out InventoryResult result) => IsTileOverlapping(itemGrid, tilePositionX, tilePositionY, tileWidth, tileHeight, ignoreID, out overlapped, out result);
         private bool IsTileOverlapping(ItemData[] grid, int tilePositionX, int tilePositionY, int tileWidth, int tileHeight, Guid ignoreID, out ItemData overlapped, out InventoryResult result)
         {
             overlapped = null;
@@ -829,6 +829,49 @@ namespace Core.Item
             result = InventoryResult.SUCCESS;
             return true;
         }
+        /// <summary> Tries to split item with given target stack. Returns false if copy cannot be added inventory! </summary>
+        public bool TrySplitItem(Guid instanceID, int value, out ItemData copy, out InventoryResult result)
+        {
+            copy = null;
+
+            if (!TryGetItemByInstanceID(instanceID, out ItemData registered, out result))
+            {
+                return false;
+            }
+
+            return TrySplitItem(registered, value, out copy, out result);
+        }
+        private bool TrySplitItem(ItemData item, int value, out ItemData copy, out InventoryResult result)
+        {
+            if (item == null)
+            {
+                throw new ArgumentNullException(nameof(item), "Item split failed source item missing!?");
+            }
+
+            copy = null;
+            int current = item.GetStack();
+
+            if (value >= current)
+            {
+                Debug.LogError($"Item split failed! incoming target stack is out of bounds! current: {current} << incoming: {value}");
+                result = InventoryResult.NOT_SUPPORTED;
+                return false;
+            }
+
+            int remaining = current - value;
+
+            item.SetStack(remaining);
+
+            copy = ItemData.Clone(item);
+            copy.SetStack(value);
+
+            if (!TryAddItem(copy, null, null, out copy, out result))
+            {
+                return ItemDatabase.TryAddOrphanItem(copy, null, null, out copy, out result);
+            }
+
+            return true;
+        }
         /// <summary> Rearranges items to fill the inventory from the top left without changing their order. </summary>
         public bool TryCompactItems(out InventoryResult result)
         {
@@ -902,7 +945,7 @@ namespace Core.Item
             {
                 item.SetRotation(rotated);
                 item.SetPosition(position);
-                Notify( InventoryState.ITEM_CHANGED, InventoryResult.SUCCESS, item);
+                Notify(InventoryState.ITEM_CHANGED, InventoryResult.SUCCESS, item);
             }
 
             itemGrid = tempGrid;
