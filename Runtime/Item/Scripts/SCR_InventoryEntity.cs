@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Core.Localization;
+using System.Linq;
 
 namespace Core.Item
 {
@@ -19,8 +20,8 @@ namespace Core.Item
         [SerializeField] private new LocalizedID name;
 
         [Header("_")]
-        [SerializeField] private ItemID[] startingItems;
-        [SerializeField] private ItemTag[] whitelistedItems;
+        [SerializeField] private ItemID[] startingItems = new ItemID[] { };
+        [SerializeField] private ItemTag[] whitelistedItems = new ItemTag[] {};
 
         [Header("_")]
         [SerializeField, Range(MIN_WIDTH, MAX_WIDTH)] private int width = 5;
@@ -52,6 +53,20 @@ namespace Core.Item
             thisHandler?.HandleStateChanged(in ctx);
         }
 
+        public static InventoryEntity Create(int width, int height, int weight)
+        {
+            GameObject @object = new("_DO_NOT_DELETE_ORPHAN_INVENTORY_!", typeof(InventoryEntity));
+            InventoryEntity entity = @object.GetComponent<InventoryEntity>();
+
+            entity.startingItems = Array.Empty<ItemID>();
+            entity.whitelistedItems = ItemDatabase.GetTags().ToArray();
+            entity.width = width;
+            entity.height = height;
+            entity.weight = weight;
+            entity.thisInventory = new(width, height, weight, entity.whitelistedItems);
+
+            return entity;
+        }
         private void Initialize()
         {
             thisInventory.User = this;

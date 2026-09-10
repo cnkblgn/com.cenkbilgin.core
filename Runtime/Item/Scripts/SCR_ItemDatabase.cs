@@ -156,8 +156,7 @@ namespace Core.Item
                 return;
             }
 
-            GameObject orphanInventoryObject = new("_DO_NOT_DELETE_ORPHAN_INVENTORY_!", typeof(InventoryEntity));
-            orphanInventory = orphanInventoryObject.GetComponent<InventoryEntity>();
+            orphanInventory = InventoryEntity.Create(10, 10, 1000);
         }
     }
 }
