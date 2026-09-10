@@ -6,7 +6,7 @@ namespace Core.Item
 {
     public static class ItemDatabase
     {
-        private static InventoryData orphanInventory = new(1, 1, 1, 0);
+        private static InventoryEntity orphanInventory = null;
         private static readonly Dictionary<string, int> idLookup = new();
         private static readonly Dictionary<string, int> tagLookup = new();
         private static ItemDefinition[] definitions = Array.Empty<ItemDefinition>();
@@ -53,7 +53,6 @@ namespace Core.Item
                 definitions[i] = new(entry);
             }
 
-            orphanInventory = new(10, 10, 100000, tags);
             Debug.Log($"Item database build successfull!");
         }
 
@@ -97,6 +96,8 @@ namespace Core.Item
                 throw new ArgumentNullException($"Trying to create item entity with null data! {nameof(data)}");
             }
 
+            CreateOrphanInventory();
+
             GameObject spawned = data.BaseID.GetDefinition().EntityID.Spawn(position, rotation, parent == null ? root : parent);
 
             if (spawned == null)
@@ -139,9 +140,24 @@ namespace Core.Item
         internal static Transform GetRoot() => root;
         public static void SetRoot(Transform transform) => root = transform;
 
-        public static void ClearOrphanInventory() => orphanInventory.Clear();
-        public static bool TryGetOrphanItemByInstanceID(Guid instanceID, out ItemData registered, out InventoryResult result) => orphanInventory.TryGetItemByInstanceID(instanceID, out registered, out result);
-        public static bool TryAddOrphanItem(ItemData item, Vector2Int? position, bool? isRotated, out ItemData registered, out InventoryResult result) => orphanInventory.TryAddItem(item, position, isRotated, out registered, out result);
-        public static bool TryRemoveOrphanItem(Guid instanceID, out ItemData registered, out InventoryResult result) => orphanInventory.TryRemoveItem(instanceID, out registered, out result);
+        public static InventoryEntity GetOrphanInventory()
+        {
+            if (orphanInventory == null)
+            {
+                CreateOrphanInventory();
+            }
+
+            return orphanInventory;
+        }
+        private static void CreateOrphanInventory()
+        {
+            if (orphanInventory != null)
+            {
+                return;
+            }
+
+            GameObject orphanInventoryObject = new("_DO_NOT_DELETE_ORPHAN_INVENTORY_!", typeof(InventoryEntity));
+            orphanInventory = orphanInventoryObject.GetComponent<InventoryEntity>();
+        }
     }
 }

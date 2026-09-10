@@ -867,7 +867,7 @@ namespace Core.Item
 
             if (!TryAddItem(copy, null, null, out copy, out result))
             {
-                return ItemDatabase.TryAddOrphanItem(copy, null, null, out copy, out result);
+                return ItemDatabase.GetOrphanInventory().TryAddItem(copy, null, null, out copy, out result);
             }
 
             return true;
