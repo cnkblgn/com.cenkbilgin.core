@@ -59,7 +59,7 @@ namespace Core.UI
             thisCanvas.Show();
             ManagerUI.Instance.ShowCursor();
 
-            root.position = ctx.Position + (Vector2.right * root.rect.width);
+            root.position = ctx.Position;
 
             Populate(in ctx);
 
