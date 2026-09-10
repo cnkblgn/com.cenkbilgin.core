@@ -733,15 +733,21 @@ namespace Core.Item
                 throw new ArgumentNullException(nameof(sourceInventory), "Merge failed source inventory missing!?");
             }
 
+            Debug.Log("ABI BURDAYIM AMK -10");
+
             if (!TryGetItemByInstanceID(targetInstanceID, out ItemData targetItem, out result))
             {
                 return false;
             }
 
+            Debug.Log("ABI BURDAYIM AMK -9");
+
             if (!sourceInventory.TryGetItemByInstanceID(sourceInstanceID, out ItemData sourceItem, out result))
             {
                 return false;
             }
+
+            Debug.Log("ABI BURDAYIM AMK -8");
 
             return TryMergeItem(targetItem, sourceItem, sourceInventory, canStackPredicate, out result);
         }
