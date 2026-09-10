@@ -733,21 +733,15 @@ namespace Core.Item
                 throw new ArgumentNullException(nameof(sourceInventory), "Merge failed source inventory missing!?");
             }
 
-            Debug.Log("ABI BURDAYIM AMK -10");
-
             if (!TryGetItemByInstanceID(targetInstanceID, out ItemData targetItem, out result))
             {
                 return false;
             }
 
-            Debug.Log("ABI BURDAYIM AMK -9");
-
             if (!sourceInventory.TryGetItemByInstanceID(sourceInstanceID, out ItemData sourceItem, out result))
             {
                 return false;
             }
-
-            Debug.Log("ABI BURDAYIM AMK -8");
 
             return TryMergeItem(targetItem, sourceItem, sourceInventory, canStackPredicate, out result);
         }
@@ -768,8 +762,6 @@ namespace Core.Item
                 throw new ArgumentNullException(nameof(targetItem), "Item merge failed target item missing!?");
             }
 
-            Debug.Log("ABI BURDAYIM 1");
-
             if (targetItem.InstanceID == sourceItem.InstanceID)
             {
                 Debug.LogError("Trying to merge with duplicate item");
@@ -777,11 +769,7 @@ namespace Core.Item
                 return false;
             }
 
-            Debug.Log("ABI BURDAYIM 2");
-
             int maxStack = sourceItem.BaseID.GetDefinition().Stack;
-
-            Debug.Log("ABI BURDAYIM 3");
 
             if (maxStack <= 1)
             {
@@ -789,23 +777,17 @@ namespace Core.Item
                 return false;
             }
 
-            Debug.Log("ABI BURDAYIM 4");
-
             if (targetItem.BaseID != sourceItem.BaseID)
             {
                 result = InventoryResult.NOT_SUPPORTED;
                 return false;
             }
 
-            Debug.Log("ABI BURDAYIM 5");
-
             if (canStackPredicate != null && !canStackPredicate(targetItem, sourceItem))
             {
                 result = InventoryResult.NOT_SUPPORTED;
                 return false;
             }
-
-            Debug.Log("ABI BURDAYIM 6");
 
             int space = maxStack - targetItem.GetStack();
 
@@ -815,8 +797,6 @@ namespace Core.Item
                 return false;
             }
 
-            Debug.Log("ABI BURDAYIM 7");
-
             int amount = Mathf.Min(space, sourceItem.GetStack());
 
             if (amount <= 0)
@@ -824,8 +804,6 @@ namespace Core.Item
                 result = InventoryResult.NO_VALID_SPACE;
                 return false;
             }
-
-            Debug.Log("ABI BURDAYIM 8");
 
             if (sourceInventory != this)
             {
@@ -838,16 +816,12 @@ namespace Core.Item
                     amount = Mathf.Min(amount, Mathf.Max(0, maxByWeight));
                 }
 
-                Debug.Log("ABI BURDAYIM 9");
-
                 if (amount <= 0)
                 {
                     result = InventoryResult.WEIGHT_LIMIT_EXCEEDED;
                     return false;
                 }
             }
-
-            Debug.Log("ABI BURDAYIM 10"); 
 
             TrySetItemStack(targetItem, targetItem.GetStack() + amount, out _);
             sourceInventory.TrySetItemStack(sourceItem, sourceItem.GetStack() - amount, out _);

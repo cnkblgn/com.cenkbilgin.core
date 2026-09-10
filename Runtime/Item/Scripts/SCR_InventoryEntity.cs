@@ -145,7 +145,7 @@ namespace Core.Item
         {
             if (sourceInventory == null)
             {
-                throw new ArgumentNullException(nameof(sourceInventory), "Try merge teim failed! source inventory is missing!?");
+                throw new ArgumentNullException(nameof(sourceInventory), "Try merge item failed! source inventory is missing!?");
             }
 
             return thisInventory.TryMergeItem(targetInstanceID, sourceInstanceID, sourceInventory.thisInventory, canStackPredicate, out result);
