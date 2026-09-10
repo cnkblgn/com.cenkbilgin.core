@@ -86,6 +86,8 @@ namespace Core.Item
         public int GetItemCount(ItemID baseID) => thisInventory.GetItemCount(baseID);
         public ItemData[,] GetSnapshot() => thisInventory.GetSnapshot();
 
+        public void SetDropOrigin(Transform transform) => dropOrigin = transform;
+
         /// <summary> Finds the closest valid position to the desired position. </summary>
         public bool TryGetNearestPosition(Vector2Int desiredPosition, Vector2Int scale, out Vector2Int position, out InventoryResult result) => TryGetNearestPosition(desiredPosition, scale, Guid.Empty, out position, out result);
         /// <summary> Finds the closest valid position to the desired position. Optional ignore id </summary>
@@ -187,7 +189,20 @@ namespace Core.Item
         /// <summary> Adds an item to the inventory at the requested or best available position. </summary>
         public bool TryAddItem(ItemData item, Vector2Int? position, bool? isRotated, out ItemData registered, out InventoryResult result) => thisInventory.TryAddItem(item, position, isRotated, out registered, out result);
         /// <summary> Removes an item and creates its world entity with the given drop force. </summary>
-        public bool TryDropItem(Guid instanceID, out ItemData registered, out InventoryResult result) => thisInventory.TryDropItem(instanceID, dropOrigin.position, dropForce * dropOrigin.forward, out registered, out result);
+        public bool TryDropItem(Guid instanceID, out ItemData registered, out InventoryResult result)
+        {
+#if UNITY_EDITOR
+            if (dropOrigin == null)
+            {
+                registered = null;
+                result = InventoryResult.NULL;
+                Debug.LogWarning("Item drop failed! Drop origin is missing!?");
+                return false;
+            }
+#endif
+
+            return thisInventory.TryDropItem(instanceID, dropOrigin.position, dropForce * dropOrigin.forward, out registered, out result);
+        }
         /// <summary> Removes an item from the inventory and updates its weight. </summary>
         public bool TryRemoveItem(Guid instanceID, out ItemData registered, out InventoryResult result) => thisInventory.TryRemoveItem(instanceID, out registered, out result);
         /// <summary> Clears an item's occupied tiles without removing it from the item table. </summary>
