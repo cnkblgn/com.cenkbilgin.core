@@ -57,6 +57,7 @@ namespace Core.UI
             }
 
             thisCanvas.Show();
+            ManagerUI.Instance.ShowCursor();
 
             root.anchoredPosition = ctx.Position + (Vector2.right * root.rect.width);
 
@@ -82,6 +83,7 @@ namespace Core.UI
 
             thisHandle = default;
             thisCanvas.Hide();
+            ManagerUI.Instance.HideCursor();
             Clear();
         }
 
@@ -110,10 +112,10 @@ namespace Core.UI
         }
 
         public bool HandleCanShowCursor() => true;
-        public bool HandleCanHideCursor() => thisHandle == default;
+        public bool HandleCanHideCursor() => !IsActive;
         public bool HandleCanResumeGame()
         {
-            if (thisHandle == default)
+            if (!IsActive)
             {
                 return true;
             }
@@ -123,7 +125,7 @@ namespace Core.UI
         }
         public bool HandleCanPauseGame()
         {
-            if (thisHandle == default)
+            if (!IsActive)
             {
                 return true;
             }
