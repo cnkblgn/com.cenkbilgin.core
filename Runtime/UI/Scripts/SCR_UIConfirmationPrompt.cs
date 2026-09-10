@@ -10,14 +10,14 @@ namespace Core.UI
         private Action onAcceptEvent = null;
         private Action onCancelEvent = null;
 
-        public void Show(in UIConfirmationPromptContext ctx)
+        public void HandleShow(in UIConfirmationPromptContext ctx)
         {
             onAcceptEvent = ctx.OnAccept;
             onCancelEvent = ctx.OnCancel;
         }
-        public void Accept() => onAcceptEvent?.Invoke();
-        public void Cancel() => onCancelEvent?.Invoke();
-        public void Hide()
+        public void HandleAccept() => onAcceptEvent?.Invoke();
+        public void HandleCancel() => onCancelEvent?.Invoke();
+        public void HandleHide()
         {
             onAcceptEvent = null;
             onCancelEvent = null;

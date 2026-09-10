@@ -2,13 +2,13 @@ namespace Core.UI
 {
     public interface IUIPromptHandler
     {
-        public void Hide();
-        public void Accept();
-        public void Cancel();
+        public void HandleHide();
+        public void HandleAccept();
+        public void HandleCancel();
     }
 
     public interface IUIPromptHandler<TContext> : IUIPromptHandler where TContext : struct
     {
-        public void Show(in TContext context);
+        public void HandleShow(in TContext context);
     }
 }

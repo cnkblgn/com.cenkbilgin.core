@@ -18,6 +18,7 @@ namespace Core.UI
 
         private CanvasGroup thisCanvas = null;
         private IUIPromptHandler thisHandler = null;
+        private IUIPromptUser thisUser = null;
         private UIPromptHandle thisHandle = default;
 
         private void Awake()
@@ -39,7 +40,7 @@ namespace Core.UI
 
         private void OnAcceptButtonClicked()
         {
-            thisHandler?.Accept();
+            thisHandler?.HandleAccept();
 
             Hide();
         }
@@ -48,7 +49,7 @@ namespace Core.UI
             Hide();
         }
 
-        public UIPromptHandle Show<TContext>(string description, in TContext context) where TContext : struct
+        public UIPromptHandle Show<TContext>(string description, in TContext context, IUIPromptUser user) where TContext : struct
         {
             if (IsActive)
             {
@@ -66,9 +67,10 @@ namespace Core.UI
             }
 
             thisCanvas.Show();
-            handler.Show(context);
-
-            return thisHandle = new(Guid.NewGuid(), this);
+            thisUser = user;
+            thisHandle = new(Guid.NewGuid(), this);
+            handler.HandleShow(context);
+            return thisHandle;
         }
         public bool TryHide(UIPromptHandle handle)
         {
@@ -89,8 +91,10 @@ namespace Core.UI
 
             thisHandle = default;
             thisCanvas.Hide();
-            thisHandler?.Cancel();
-            thisHandler?.Hide();
+            thisHandler?.HandleCancel();
+            thisHandler?.HandleHide();
+            thisUser?.HandlePromptHide();
+            thisUser = null;
         }
     }
 }

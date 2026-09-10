@@ -22,7 +22,7 @@ namespace Core.UI
 
         private void OnValueChanged(float value) => valueText.text = context.IsInt ? $"{value:0}" : $"{value:0.00}";
 
-        public void Show(in UISliderPromptContext ctx)
+        public void HandleShow(in UISliderPromptContext ctx)
         {
             context = ctx;
             onAcceptEvent = context.OnAccept;
@@ -33,9 +33,9 @@ namespace Core.UI
             valueSlider.maxValue = context.Max;
             valueSlider.value = valueSlider.value;
         }
-        public void Accept() => onAcceptEvent?.Invoke(valueSlider.value);
-        public void Cancel() => onCancelEvent?.Invoke();
-        public void Hide()
+        public void HandleAccept() => onAcceptEvent?.Invoke(valueSlider.value);
+        public void HandleCancel() => onCancelEvent?.Invoke();
+        public void HandleHide()
         {
             onAcceptEvent = null;
             onCancelEvent = null;

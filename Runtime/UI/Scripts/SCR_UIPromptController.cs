@@ -6,7 +6,7 @@ namespace Core.UI
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Canvas))]
     [RequireComponent(typeof(GraphicRaycaster))]
-    internal sealed class UIPromptController : MonoBehaviour, IUICursorStateHandler, IGameStateHandler
+    internal sealed class UIPromptController : MonoBehaviour, IUICursorStateHandler, IGameStateHandler, IUIPromptUser
     {
         [Header("_")]
         [SerializeField, Required] private UIPromptView[] views = null;
@@ -17,8 +17,7 @@ namespace Core.UI
         private void Start()
         {
             thisCanvas = GetComponent<Canvas>();
-
-            Hide();
+            thisCanvas.Hide();
         }
         private void OnEnable()
         {
@@ -56,7 +55,7 @@ namespace Core.UI
 
             for (int i = 0; i < views.Length; i++)
             {
-                UIPromptHandle handle = views[i].Show(description, context);
+                UIPromptHandle handle = views[i].Show(description, context, this);
 
                 if (handle == default)
                 {
@@ -78,25 +77,20 @@ namespace Core.UI
                 return;
             }
 
-            if (!activeView.TryHide(handle))
+            activeView.TryHide(handle);
+        }
+
+        public void HandlePromptHide()
+        {
+            if (activeView == null)
             {
                 return;
             }
 
-            Hide();
-        }
-        private void Hide()
-        {
-            if (activeView != null)
-            {
-                activeView.Hide();
-                activeView = null;
-            }
-
+            activeView = null;
             thisCanvas.Hide();
             ManagerUI.Instance.HideCursor();
         }
-
         public bool HandleCanResumeGame()
         {
             if (!HasActivePrompt())
@@ -104,7 +98,7 @@ namespace Core.UI
                 return true;
             }
 
-            Hide();
+            activeView.Hide();
             return false;
         }
         public bool HandleCanPauseGame()
@@ -114,7 +108,7 @@ namespace Core.UI
                 return true;
             }
 
-            Hide();
+            activeView.Hide();
             return false;
         }
         public bool HandleCanShowCursor() => true;
