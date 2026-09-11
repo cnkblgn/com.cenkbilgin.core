@@ -6,6 +6,7 @@ namespace Core.Item
     public abstract class ItemAction
     {
         public abstract string GetName();
+        public abstract bool IsValid();
         public abstract ItemActionResult Apply(in ItemActionContext context);
     }
 }
