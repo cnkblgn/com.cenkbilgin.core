@@ -13,7 +13,7 @@ namespace Core.UI
         [SerializeField] private bool overrideWrapping = true;
 
         [Header("_")]
-        [Info("Canvas Bounds pivot must be (0, 0)")]
+        [Info("'Canvas Bounds' pivot must be (0,0)")]
         [SerializeField] private RectTransform canvasBounds = null;
         [SerializeField, Required] private RectTransform textContainer = null;
         [SerializeField, Required] private TextMeshProUGUI textElement = null;
@@ -21,11 +21,28 @@ namespace Core.UI
 
         private void Awake()
         {
+            textContainer.AlignBottomLeft();
+
             if (overrideWrapping)
             {
                 textElement.textWrappingMode = TextWrappingModes.NoWrap;
             }
         }
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            if (canvasBounds == null)
+            {
+                return;
+            }
+
+            if (canvasBounds != null && canvasBounds.pivot != Vector2.zero)
+            {
+                Debug.LogWarning($"UI Text box target canvas bound pivot is invalid: [{canvasBounds.pivot}] Pivot must be (0,0)");
+            }
+        }
+#endif
 
         public void Set(string value)
         {

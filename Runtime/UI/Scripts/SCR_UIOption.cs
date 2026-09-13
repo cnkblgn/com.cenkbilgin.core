@@ -6,9 +6,9 @@ namespace Core.UI
     [DisallowMultipleComponent]
     public abstract class UIOptionBase : MonoBehaviour
     {
-        public abstract void Load();
         public abstract void Apply();
-        public abstract void Revert();
+        public abstract void Load(bool notify);
+        public abstract void Revert(bool notify);
     }
 
     public abstract class UIOption<T> : UIOptionBase
@@ -39,14 +39,14 @@ namespace Core.UI
             appliedValue = currentValue;
             onApply?.Invoke(appliedValue);
         }
-        public override void Load()
+        public override void Load(bool notify = false)
         {
-            Set(appliedValue, false);
+            Set(appliedValue, notify);
         }
-        public override void Revert()
+        public override void Revert(bool notify = false)
         {
             appliedValue = defaultValue;
-            Load();
+            Load(notify);
         }
 
         protected virtual T Validate(T value) => value;
