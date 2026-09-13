@@ -39,7 +39,7 @@ namespace Core.UI
 
             if (canvasBounds != null && canvasBounds.pivot != Vector2.zero)
             {
-                Debug.LogWarning($"UI Text box target canvas bound pivot is invalid: [{canvasBounds.pivot}] Pivot must be (0,0)");
+                Debug.LogWarning($"UI Text box target canvas bound pivot is invalid: [{canvasBounds.pivot}] Pivot must be (0,0)", gameObject);
             }
         }
 #endif

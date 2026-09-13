@@ -7,8 +7,8 @@ namespace Core.UI
     public abstract class UIOptionBase : MonoBehaviour
     {
         public abstract void Apply();
-        public abstract void Load(bool notify);
-        public abstract void Revert(bool notify);
+        public abstract void Load(bool notify = false);
+        public abstract void Revert(bool notify = false);
     }
 
     public abstract class UIOption<T> : UIOptionBase
@@ -39,11 +39,11 @@ namespace Core.UI
             appliedValue = currentValue;
             onApply?.Invoke(appliedValue);
         }
-        public override void Load(bool notify = false)
+        public override void Load(bool notify)
         {
             Set(appliedValue, notify);
         }
-        public override void Revert(bool notify = false)
+        public override void Revert(bool notify)
         {
             appliedValue = defaultValue;
             Load(notify);
