@@ -3,8 +3,6 @@ using UnityEngine.EventSystems;
 
 namespace Core.UI
 {
-    using static CoreUtility;
-
     public sealed class UIPointerEventScale : UIPointerEvent
     {
         [Header("_")]
@@ -44,6 +42,11 @@ namespace Core.UI
         }
         protected override void OnPointerClickInternal(PointerEventData eventData)
         {
+            if (eventData.button != PointerEventData.InputButton.Left)
+            {
+                return;
+            }
+
             base.OnPointerClickInternal(eventData);
 
             Scale(onClickScalePower, onClickScaleDelay, onClickScaleDuration, onClickScaleEasingType);

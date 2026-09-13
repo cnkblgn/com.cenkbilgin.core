@@ -28,6 +28,11 @@ namespace Core.UI
         }
         protected override void OnPointerClickInternal(PointerEventData eventData)
         {
+            if (eventData.button != PointerEventData.InputButton.Left)
+            {
+                return;
+            }
+
             base.OnPointerClickInternal(eventData);
 
             ExecuteEvents.ExecuteHierarchy(targetObject != null ? targetObject : transform.parent.gameObject, eventData, ExecuteEvents.pointerClickHandler);

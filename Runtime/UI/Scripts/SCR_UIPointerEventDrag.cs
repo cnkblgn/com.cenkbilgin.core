@@ -52,44 +52,6 @@ namespace Core.UI
             }
         }
 
-        [Obsolete]
-        private void ClampToCanvasOld()
-        {
-            thisTransform.GetWorldCorners(thisCorners);
-            canvasTransform.GetWorldCorners(canvasCorners);
-
-            Vector3 offset = Vector3.zero;
-
-            // LEFT
-            if (thisCorners[0].x < canvasCorners[0].x)
-            {
-                offset.x = canvasCorners[0].x - thisCorners[0].x;
-            }
-
-            // RIGHT
-            if (thisCorners[2].x > canvasCorners[2].x)
-            {
-                offset.x = canvasCorners[2].x - thisCorners[2].x;
-            }
-
-            // BOTTOM
-            if (thisCorners[0].y < canvasCorners[0].y)
-            {
-                offset.y = canvasCorners[0].y - thisCorners[0].y;
-            }
-
-            // TOP
-            if (thisCorners[1].y > canvasCorners[1].y)
-            {
-                offset.y = canvasCorners[1].y - thisCorners[1].y;
-            }
-
-            if (offset != Vector3.zero)
-            {
-                // apply offset in world space
-                thisTransform.position += offset;
-            }
-        }
         private void ClampToCanvas()
         {
             Vector2 half = windowSize * 0.5f;
