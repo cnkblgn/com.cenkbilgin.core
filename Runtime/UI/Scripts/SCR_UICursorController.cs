@@ -5,9 +5,11 @@ using UnityEngine.UI;
 
 namespace Core.UI
 {
+    using static UICursorSystem;
+
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Canvas))]
-    public sealed class UICursorController : MonoBehaviour
+    internal sealed class UICursorController : MonoBehaviour
     {
         [Header("_")]
         [SerializeField] private bool debug;
@@ -20,7 +22,6 @@ namespace Core.UI
         [SerializeField] private UICursorData[] cursors;
 
         private readonly Dictionary<string, UICursorData> table = new();
-        private static readonly List<IUICursorStateHandler> handlers = new();
         private Canvas canvas;
         private bool hasFocus;
 
@@ -38,28 +39,8 @@ namespace Core.UI
         }
         private void OnApplicationFocus(bool focus) => hasFocus = focus;
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void OnRuntimeInitialize() => handlers.Clear();
         private static bool IsValid(Vector2 value) => float.IsFinite(value.x) && float.IsFinite(value.y);
-        public static void BindHandler(IUICursorStateHandler value)
-        {
-            if (handlers.Contains(value))
-            {
-                return;
-            }
 
-            handlers.Add(value);
-        }
-        public static void UnbindHandler(IUICursorStateHandler value)
-        {
-            if (!handlers.Contains(value))
-            {
-                return;
-            }
-
-            handlers.Remove(value);
-        }
-         
         private bool TryGetCursor(string id, out UICursorData cursor)
         {
             if (id == null)
@@ -112,9 +93,9 @@ namespace Core.UI
         {
             bool canShow = true;
 
-            for (int i = handlers.Count - 1; i >= 0; i--)
+            for (int i = Handlers.Count - 1; i >= 0; i--)
             {
-                if (handlers[i] == null)
+                if (Handlers[i] == null)
                 {
 #if UNITY_EDITOR
                     Debug.LogError("Show cursor failed. One or more game state handler is missing!?");
@@ -122,7 +103,7 @@ namespace Core.UI
                     continue;
                 }
 
-                if (!handlers[i].HandleCanShowCursor())
+                if (!Handlers[i].HandleCanShowCursor())
                 {
                     if (debug)
                     {
@@ -151,9 +132,9 @@ namespace Core.UI
         {
             bool canHide = true;
 
-            for (int i = handlers.Count - 1; i >= 0; i--)
+            for (int i = Handlers.Count - 1; i >= 0; i--)
             {
-                if (handlers[i] == null)
+                if (Handlers[i] == null)
                 {
 #if UNITY_EDITOR
                     Debug.LogError("Hide cursor failed. One or more game state handler is missing!?");
@@ -161,7 +142,7 @@ namespace Core.UI
                     continue;
                 }
 
-                if (!handlers[i].HandleCanHideCursor())
+                if (!Handlers[i].HandleCanHideCursor())
                 {
                     if (debug)
                     {

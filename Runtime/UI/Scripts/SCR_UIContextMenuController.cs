@@ -36,13 +36,13 @@ namespace Core.UI
         {
             ManagerGame.BindHandler(this);
 
-            UICursorController.BindHandler(this);
+            UICursorSystem.BindHandler(this);
         } 
         private void OnDisable()
         {
             ManagerGame.UnbindHandler(this);
 
-            UICursorController.UnbindHandler(this);
+            UICursorSystem.UnbindHandler(this);
 
             Hide();
         }
