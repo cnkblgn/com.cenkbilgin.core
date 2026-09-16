@@ -1,19 +1,29 @@
-using UnityEngine;
+using System.Text;
+using System.Text.RegularExpressions;
 using UnityEditor;
+using UnityEngine;
 
 namespace Core.Editor
 {
-    using static CoreUtility;
-
     internal sealed class EditorWindowObjectRenamer : EditorWindow
     {
+        private enum CaseMode { None, PascalCase, camelCase, UPPERCASE, lowercase, snake_case }
+
         private string prefix = "";
         private string suffix = "";
         private string removeBefore = "";
         private string removeAfter = "";
         private string removeWord = "";
+        private string findWord = "";
+        private string replaceWith = "";
         private string previewName = "";
+        private string numberSeparator = "_";
+        private int startIndex = 1;
+        private int paddingDigits = 2;
+        private bool removeNumbers = false;
         private bool sequenceNumbering = false;
+
+        private CaseMode caseMode = CaseMode.None;
 
         [MenuItem("Tools/Object Renamer")]
         public static void ShowWindow() => GetWindow<EditorWindowObjectRenamer>("Object Renamer");
@@ -27,7 +37,31 @@ namespace Core.Editor
             removeBefore = EditorGUILayout.TextField("Remove Before", removeBefore);
             removeAfter = EditorGUILayout.TextField("Remove After", removeAfter);
             removeWord = EditorGUILayout.TextField("Remove Word", removeWord);
+            removeNumbers = EditorGUILayout.Toggle("Remove Numbers", removeNumbers);
+
+            EditorGUILayout.Space();
+            GUILayout.Label("Find & Replace", EditorStyles.boldLabel);
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Find", GUILayout.Width(35));
+            findWord = EditorGUILayout.TextField(findWord);
+            EditorGUILayout.LabelField("Replace", GUILayout.Width(50));
+            replaceWith = EditorGUILayout.TextField(replaceWith);
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.Space();
+            caseMode = (CaseMode)EditorGUILayout.EnumPopup("Case", caseMode);
+
+            EditorGUILayout.Space();
             sequenceNumbering = EditorGUILayout.Toggle("Sequence Numbering", sequenceNumbering);
+
+            if (sequenceNumbering)
+            {
+                EditorGUI.indentLevel++;
+                startIndex = EditorGUILayout.IntField("Start Index", startIndex);
+                paddingDigits = Mathf.Max(1, EditorGUILayout.IntField("Padding Digits", paddingDigits));
+                numberSeparator = EditorGUILayout.TextField("Separator", numberSeparator);
+                EditorGUI.indentLevel--;
+            }
 
             UpdatePreview();
 
@@ -38,7 +72,6 @@ namespace Core.Editor
                 Rename();
             }
         }
-
         private void UpdatePreview()
         {
             if (Selection.objects.Length == 0)
@@ -47,12 +80,19 @@ namespace Core.Editor
                 return;
             }
 
-            previewName = ComputeName(Selection.objects[0].name);
+            string name = ApplyName(Selection.objects[0].name);
+
+            if (sequenceNumbering)
+            {
+                name = $"{name}{numberSeparator}{startIndex.ToString($"D{paddingDigits}")}";
+            }
+
+            previewName = name;
         }
 
         private void Rename()
         {
-            var selectedObjects = Selection.objects;
+            Object[] selectedObjects = Selection.objects;
 
             if (selectedObjects.Length == 0)
             {
@@ -63,13 +103,13 @@ namespace Core.Editor
             for (int i = 0; i < selectedObjects.Length; i++)
             {
                 Object obj = selectedObjects[i];
-
-                string name = ComputeName(obj.name);
+                string name = ApplyName(obj.name);
                 string path = AssetDatabase.GetAssetPath(obj);
 
                 if (sequenceNumbering)
                 {
-                    name = $"{name}_{i + 1:00}";
+                    int number = startIndex + i;
+                    name = $"{name}{numberSeparator}{number.ToString($"D{paddingDigits}")}";
                 }
 
                 if (!string.IsNullOrEmpty(path))
@@ -78,6 +118,7 @@ namespace Core.Editor
                 }
                 else
                 {
+                    Undo.RecordObject(obj, "Rename Object");
                     obj.name = name;
                 }
             }
@@ -85,7 +126,7 @@ namespace Core.Editor
             AssetDatabase.SaveAssets();
             Debug.LogWarning("Selected objects renamed!");
         }
-        private string ComputeName(string original)
+        private string ApplyName(string original)
         {
             string name = original;
 
@@ -114,6 +155,17 @@ namespace Core.Editor
                 name = name.Replace(removeWord, "");
             }
 
+            if (!string.IsNullOrEmpty(findWord))
+            {
+                name = name.Replace(findWord, replaceWith ?? "");
+            }
+
+            if (removeNumbers)
+            {
+                name = Regex.Replace(name, @"[\s_\-]*\(?\d+\)?$", "");
+            }
+
+            name = ApplyCase(name, caseMode);
             name = name.Replace(" ", "");
 
             if (!string.IsNullOrEmpty(prefix))
@@ -127,6 +179,59 @@ namespace Core.Editor
             }
 
             return string.IsNullOrEmpty(name) ? original : name;
+        }
+        private string ApplyCase(string input, CaseMode mode)
+        {
+            if (mode == CaseMode.None || string.IsNullOrEmpty(input))
+            {
+                return input;
+            }
+
+            string[] words = input.Split(new[] { ' ', '_', '-' }, System.StringSplitOptions.RemoveEmptyEntries);
+
+            if (words.Length == 0)
+            {
+                return input;
+            }
+
+            switch (mode)
+            {
+                case CaseMode.UPPERCASE: return string.Join("", words).ToUpperInvariant();
+                case CaseMode.lowercase: return string.Join("", words).ToLowerInvariant();
+                case CaseMode.snake_case: return string.Join("_", System.Array.ConvertAll(words, w => w.ToLowerInvariant()));
+                case CaseMode.PascalCase:
+                {
+                    StringBuilder sb = new();
+
+                    foreach (var w in words)
+                    {
+                        sb.Append(char.ToUpperInvariant(w[0])).Append(w[1..].ToLowerInvariant());
+                    }
+
+                    return sb.ToString();
+                }
+                case CaseMode.camelCase:
+                {
+                    StringBuilder sb = new();
+
+                    for (int i = 0; i < words.Length; i++)
+                    {
+                        var w = words[i];
+
+                        if (i == 0)
+                        {
+                            sb.Append(w.ToLowerInvariant());
+                        }
+                        else
+                        {
+                            sb.Append(char.ToUpperInvariant(w[0])).Append(w[1..].ToLowerInvariant());
+                        }
+                    }
+                    return sb.ToString();
+                }
+                default:
+                    return input;
+            }
         }
     }
 }
