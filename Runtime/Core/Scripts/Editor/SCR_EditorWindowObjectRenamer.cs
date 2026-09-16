@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using UnityEditor;
@@ -7,7 +8,15 @@ namespace Core.Editor
 {
     internal sealed class EditorWindowObjectRenamer : EditorWindow
     {
-        private enum CaseMode { None, PascalCase, camelCase, UPPERCASE, lowercase, snake_case }
+        private enum CaseMode 
+        {
+            None, 
+            PascalCase,
+            camelCase, 
+            UPPERCASE, 
+            lowercase, 
+            snake_case 
+        }
 
         private string prefix = "";
         private string suffix = "";
@@ -22,6 +31,9 @@ namespace Core.Editor
         private int paddingDigits = 2;
         private bool removeNumbers = false;
         private bool sequenceNumbering = false;
+
+
+        private static readonly Regex WordSplitRegex = new(@"[A-Z]+(?=[A-Z][a-z])|[A-Z]?[a-z]+|[A-Z]+|[0-9]+", RegexOptions.Compiled);
 
         private CaseMode caseMode = CaseMode.None;
 
@@ -160,12 +172,7 @@ namespace Core.Editor
                 name = name.Replace(findWord, replaceWith ?? "");
             }
 
-            if (removeNumbers)
-            {
-                name = Regex.Replace(name, @"[\s_\-]*\(?\d+\)?$", "");
-            }
-
-            name = ApplyCase(name, caseMode);
+            name = ApplyCase(name, caseMode, removeNumbers);
             name = name.Replace(" ", "");
 
             if (!string.IsNullOrEmpty(prefix))
@@ -180,14 +187,26 @@ namespace Core.Editor
 
             return string.IsNullOrEmpty(name) ? original : name;
         }
-        private string ApplyCase(string input, CaseMode mode)
+        private static string[] SplitWords(string input, bool removeNumbers)
         {
-            if (mode == CaseMode.None || string.IsNullOrEmpty(input))
+            var matches = WordSplitRegex.Matches(input);
+            var words = new System.Collections.Generic.List<string>();
+
+            foreach (Match m in matches)
             {
-                return input;
+                if (removeNumbers && m.Value.All(char.IsDigit))
+                {
+                    continue;
+                }
+
+                words.Add(m.Value);
             }
 
-            string[] words = input.Split(new[] { ' ', '_', '-' }, System.StringSplitOptions.RemoveEmptyEntries);
+            return words.ToArray();
+        }
+        private static string ApplyCase(string input, CaseMode mode, bool removeNumbers)
+        {
+            string[] words = SplitWords(input, removeNumbers);
 
             if (words.Length == 0)
             {
@@ -196,29 +215,38 @@ namespace Core.Editor
 
             switch (mode)
             {
+                case CaseMode.None: return string.Join("", words);
                 case CaseMode.UPPERCASE: return string.Join("", words).ToUpperInvariant();
                 case CaseMode.lowercase: return string.Join("", words).ToLowerInvariant();
-                case CaseMode.snake_case: return string.Join("_", System.Array.ConvertAll(words, w => w.ToLowerInvariant()));
+                case CaseMode.snake_case: return string.Join("_", words.Select(w => w.ToLowerInvariant()));
                 case CaseMode.PascalCase:
                 {
                     StringBuilder sb = new();
 
                     foreach (var w in words)
                     {
-                        sb.Append(char.ToUpperInvariant(w[0])).Append(w[1..].ToLowerInvariant());
+                        if (char.IsDigit(w[0]))
+                        {
+                            sb.Append(w);
+                        }
+                        else
+                        {
+                            sb.Append(char.ToUpperInvariant(w[0])).Append(w[1..].ToLowerInvariant());
+                        }
                     }
-
                     return sb.ToString();
                 }
                 case CaseMode.camelCase:
                 {
                     StringBuilder sb = new();
-
                     for (int i = 0; i < words.Length; i++)
                     {
                         var w = words[i];
-
-                        if (i == 0)
+                        if (char.IsDigit(w[0]))
+                        {
+                            sb.Append(w);
+                        }
+                        else if (i == 0)
                         {
                             sb.Append(w.ToLowerInvariant());
                         }
@@ -229,8 +257,7 @@ namespace Core.Editor
                     }
                     return sb.ToString();
                 }
-                default:
-                    return input;
+                default: return input;
             }
         }
     }
