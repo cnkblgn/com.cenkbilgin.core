@@ -171,9 +171,14 @@ namespace Core.Editor
                 string w = words[i];
                 bool isNumber = char.IsDigit(w[0]);
 
-                if (i > 0 && isNumber && separateNumbers)
+                if (i > 0)
                 {
-                    sb.Append('_');
+                    bool prevIsNumber = char.IsDigit(words[i - 1][^1]);
+
+                    if (separateNumbers && (isNumber != prevIsNumber))
+                    {
+                        sb.Append('_');
+                    }
                 }
 
                 sb.Append(transform(w));
@@ -181,7 +186,6 @@ namespace Core.Editor
 
             return sb.ToString();
         }
-
         private string ApplyName(string original)
         {
             string name = original;
@@ -263,9 +267,14 @@ namespace Core.Editor
                             string w = words[i];
                             bool isNumber = char.IsDigit(w[0]);
 
-                            if (i > 0 && isNumber && separateNumbers)
+                            if (i > 0)
                             {
-                                sb.Append('_');
+                                bool prevIsNumber = char.IsDigit(words[i - 1][^1]);
+
+                                if (separateNumbers && (isNumber != prevIsNumber))
+                                {
+                                    sb.Append('_');
+                                }
                             }
 
                             sb.Append(isNumber ? w : char.ToUpperInvariant(w[0]) + w[1..].ToLowerInvariant());
@@ -283,9 +292,14 @@ namespace Core.Editor
                             string w = words[i];
                             bool isNumber = char.IsDigit(w[0]);
 
-                            if (i > 0 && isNumber && separateNumbers)
+                            if (i > 0)
                             {
-                                sb.Append('_');
+                                bool prevIsNumber = char.IsDigit(words[i - 1][^1]);
+
+                                if (separateNumbers && (isNumber != prevIsNumber))
+                                {
+                                    sb.Append('_');
+                                }
                             }
 
                             if (isNumber)
