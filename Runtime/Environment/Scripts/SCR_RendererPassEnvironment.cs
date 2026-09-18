@@ -1,4 +1,3 @@
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.RenderGraphModule;
@@ -39,9 +38,14 @@ namespace Core.Environment
 #if UNITY_EDITOR
             UniversalCameraData cameraData = frameData.Get<UniversalCameraData>();
 
+            if (cameraData.cameraType == CameraType.Preview)
+            {
+                return;
+            }
+
             if (cameraData.cameraType == CameraType.SceneView)
             {
-                SceneView sceneView = SceneView.lastActiveSceneView;
+                UnityEditor.SceneView sceneView = UnityEditor.SceneView.lastActiveSceneView;
 
                 if (sceneView == null)
                 {
@@ -54,6 +58,11 @@ namespace Core.Environment
                 {
                     return;
                 }
+            }
+
+            if (UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage() != null)
+            {
+                return;
             }
 #endif
 
