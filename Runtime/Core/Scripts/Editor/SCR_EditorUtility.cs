@@ -178,56 +178,77 @@ namespace Core.Editor
         private static void SnapTransform()
         {
             GameObject[] selected = Selection.gameObjects;
+
             if (selected.Length == 0)
             {
                 Debug.LogWarning("Snap transform failed! No selected game object.");
                 return;
             }
 
+            const float STEP_HEIGHT = 0.25f;
+            const float RAY_HEIGHT = 0.5f;
+            const float MAX_SEARCH_HEIGHT = 8f;
+            const float MAX_SNAP_HEIGHT = 8f;
+
             Undo.SetCurrentGroupName("Snap Transforms");
             int undoGroup = Undo.GetCurrentGroup();
+
             int snappedCount = 0;
 
             foreach (GameObject go in selected)
             {
-                Vector3 origin = go.transform.position + Vector3.up * 1024;
-                RaycastHit[] hits = Physics.RaycastAll(origin, Vector3.down, 4096);
+                Transform transform = go.transform;
+                Vector3 position = transform.position;
 
-                RaycastHit? closestHit = null;
-                float closestDistance = float.MaxValue;
+                RaycastHit? bestHit = null;
+                float bestVerticalDistance = float.MaxValue;
 
-                foreach (RaycastHit hit in hits)
+                for (float height = 0f; height <= MAX_SEARCH_HEIGHT; height += STEP_HEIGHT)
                 {
-                    if (hit.collider.transform.IsChildOf(go.transform))
-                    {
-                        continue;
-                    }
+                    Vector3 rayOrigin = position + Vector3.up * height;
 
-                    if (hit.distance < closestDistance)
+                    RaycastHit[] hits = Physics.RaycastAll(rayOrigin, Vector3.down, RAY_HEIGHT, ~0, QueryTriggerInteraction.Ignore);
+
+                    foreach (RaycastHit hit in hits)
                     {
-                        closestDistance = hit.distance;
-                        closestHit = hit;
+                        Transform hitTransform = hit.collider.transform;
+
+                        if (hitTransform == transform || hitTransform.IsChildOf(transform))
+                        {
+                            continue;
+                        }
+
+                        float hitHeight = Mathf.Abs(hit.point.y - position.y);
+
+                        if (hitHeight > MAX_SNAP_HEIGHT)
+                        {
+                            continue;
+                        }
+
+                        if (hitHeight < bestVerticalDistance)
+                        {
+                            bestVerticalDistance = hitHeight;
+                            bestHit = hit;
+                        }
                     }
                 }
 
-                if (!closestHit.HasValue)
+                if (!bestHit.HasValue)
                 {
-                    Debug.LogWarning($"Snap transform failed! '{go.name}' has no viable collider to snap!", go);
+                    Debug.LogWarning($"Snap transform failed! '{go.name}' has no viable collider to snap!", go );
+
                     continue;
                 }
 
-                RaycastHit groundHit = closestHit.Value;
+                RaycastHit groundHit = bestHit.Value;
+                Undo.RecordObject(transform, "Snap Transform");
 
-                Undo.RecordObject(go.transform, "Snap Transform");
-
-                go.transform.SnapToGround(groundHit.point, groundHit.normal);
-
+                transform.SnapToGround(groundHit.point, groundHit.normal);
                 snappedCount++;
             }
 
             Undo.CollapseUndoOperations(undoGroup);
-
-            Debug.Log($"Snap transform successfull! Total snapped: {snappedCount}/{selected.Length}");
+            Debug.Log($"Snap transform successful! Total snapped: {snappedCount}/{selected.Length}");
         }
 
         [MenuItem("Tools/Snap Transform %#t", true, 5)]

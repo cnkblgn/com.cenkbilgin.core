@@ -1,7 +1,7 @@
 {
   "name": "com.cenkbilgin.core",
   "displayName": "Core Systems",
-  "version": "6.6.9",
+  "version": "6.7.0",
   "unity": "6000.3",
   "description": "Core template for future unity projects.",
   "author":
@@ -10,6 +10,10 @@
     "url": "https://github.com/cenkbilgin"
   },
   "license": "Proprietary",
+  "dependencies": 
+  {
+    "com.unity.formats.fbx": "5.1.6"
+  },
   "samples":
   [
     {

@@ -11,12 +11,6 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [
-        {
-            "name": "com.unity.nuget.newtonsoft-json",
-            "expression": "3.2.1",
-            "define": "UNITY_NEWTONSOFT_JSON_ACTIVE"
-        }
-    ],
+    "versionDefines": [],
     "noEngineReferences": false
 }
