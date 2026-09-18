@@ -13,7 +13,7 @@ namespace Core.Graphics.Editor
         [MenuItem("Tools/Create Texture2D Array", true, 15)]
         private static bool ValidateCreateTextureArray() => Selection.objects.OfType<Texture2D>().Count() >= 2;
         [MenuItem("Tools/Create Texture2D Array", false, 15)]
-        private static void CreateArray()
+        private static void CreateTextureArray()
         {
             Texture2D[] textures = Selection.objects.OfType<Texture2D>().OrderBy(t => t.name).ToArray();
 
@@ -69,9 +69,9 @@ namespace Core.Graphics.Editor
         }
 
         [MenuItem("Tools/Create Texture2D Atlas", true, 16)]
-        private static bool ValidateCreateAtlas() => Selection.objects.OfType<Texture2D>().Count() >= 2;
+        private static bool ValidateCreateTextureAtlas() => Selection.objects.OfType<Texture2D>().Count() >= 2;
         [MenuItem("Tools/Create Texture2D Atlas", false, 16)]
-        private static void CreateAtlas()
+        private static void CreateTextureAtlas()
         {
             Texture2D[] textures = Selection.objects.OfType<Texture2D>().OrderBy(t => t.name).ToArray();
             Texture2D first = textures[0];
@@ -175,7 +175,6 @@ namespace Core.Graphics.Editor
 
         [MenuItem("Tools/Bake Mesh to FBX", true, 17)]
         private static bool ValidateBakeMeshToFBX() => Selection.activeObject is Mesh;
-
         [MenuItem("Tools/Bake Mesh to FBX", false, 17)]
         private static void BakeMeshToFBX()
         {
@@ -204,7 +203,6 @@ namespace Core.Graphics.Editor
 
         [MenuItem("Tools/Bake Object to FBX", true, 18)]
         private static bool ValidateBakeObjectToFBX() => Selection.activeGameObject != null;
-
         [MenuItem("Tools/Bake Object to FBX", false, 18)]
         private static void BakeObjectToFBX()
         {
@@ -324,8 +322,7 @@ namespace Core.Graphics.Editor
 
         [MenuItem("Tools/Bake Tree to FBX", true, 19)]
         private static bool ValidateBakeTreeToFBX() => Selection.activeGameObject != null;
-
-        [MenuItem("Tools/Tree Creator/Bake Selected Tree", false, 19)]
+        [MenuItem("Tools/Bake Tree to FBX", false, 19)]
         private static void BakeTreeToFBX()
         {
             GameObject source = Selection.activeGameObject;
