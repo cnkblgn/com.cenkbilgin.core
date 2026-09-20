@@ -77,6 +77,10 @@ namespace Core
         public void SetIsVisited(bool value) => isVisited = value;
 
 #if UNITY_EDITOR
+        private void OnValidate()
+        {
+            if (TryGetComponent(out Collider collider)) collider.isTrigger = true;
+        }
         private void EnsureCollider()
         {
             if (thisCollider == null)
