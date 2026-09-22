@@ -1,12 +1,9 @@
 using System;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 
 namespace Core.Surface
 {
-    using static CoreUtility;
-
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Terrain))]
     public class SurfaceTerrainBaker : MonoBehaviour
@@ -31,6 +28,7 @@ namespace Core.Surface
         [SerializeField] private Resolution resolution = Resolution._512;
         [SerializeField] private Mapping[] mappings;
 
+#if UNITY_EDITOR
         [ContextMenu("Build")]
         public void Bake()
         {
@@ -91,10 +89,11 @@ namespace Core.Surface
             if (Editor.EditorUtility.TryCreateAsset<SurfaceMap>($"Assets/SCO_SurfaceMap_{name}.asset", out SurfaceMap map))
             {
                 map.Initialize(terrain.transform.position, data.size, resolution, resolution, tags);
-                EditorUtility.SetDirty(map);
-                AssetDatabase.SaveAssets();
+                UnityEditor.EditorUtility.SetDirty(map);
+                UnityEditor.AssetDatabase.SaveAssets();
                 Debug.Log("Surface map baked.");
             }
         }
+#endif
     }
 }

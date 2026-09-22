@@ -16,9 +16,12 @@ namespace Core.Localization
 
         private readonly List<string> extraEntries = new();
 
-        public override void OnAfterAssembliesLoaded() => Reload();
-        public override void OnAfterScriptLoad() => Reload();
-        public override void Reload() => LocalizationDatabase.Build(file.text, interpolators);
+        public override void OnAfterAssembliesLoaded() => BuildDatabase();
+        public override void OnAfterScriptLoad() => BuildDatabase();
+
+#if UNITY_EDITOR
+        public override void Reload() => BuildDatabase();
+#endif
 
         public void BuildDatabase()
         {

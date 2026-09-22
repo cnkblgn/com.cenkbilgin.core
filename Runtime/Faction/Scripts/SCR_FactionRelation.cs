@@ -17,8 +17,9 @@ namespace Core.Faction
         {
             ID = id;
             Relation = relation;
-
+#if UNITY_EDITOR
             Name = ID.Key;
+#endif
         }
 
 #if UNITY_EDITOR
