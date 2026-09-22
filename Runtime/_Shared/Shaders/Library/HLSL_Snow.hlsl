@@ -3,7 +3,18 @@
 
 #include "../../../_Shared/Shaders/Library/HLSL_Helper.hlsl"
  
-void Get_float(float3 _worldPosition, float3 _worldNormal, float _heightMask, float _heightContrast, float3 _snowColor, Texture2D _snowMap, SamplerState _snowSamp, float2 _snowOffset, float _snowScale, float _snowMinAngle, float _snowMaxAngle, float _snowOpacity, float3 _baseColor, out float3 color, out float mask)
+void GetMask_float(float3 _worldNormal, float _heightMask, float _heightContrast, float _snowMinAngle, float _snowMaxAngle, float _snowOpacity, out float mask)
+{
+    float upMask = smoothstep(_snowMinAngle, _snowMaxAngle, dot(normalize(_worldNormal), float3(0, 1, 0)) );
+    float heightMask = pow(saturate(_heightMask), _heightContrast);
+    mask = upMask * heightMask * _snowOpacity;
+}
+void GetMask_half(half3 _worldNormal, half _heightMask, half _heightContrast, half _snowMinAngle, half _snowMaxAngle, half _snowOpacity, out half mask)
+{
+    GetMask_float(_worldNormal, _heightMask, _heightContrast, _snowMinAngle, _snowMaxAngle, _snowOpacity, mask);
+}
+
+void GetColor_float(float3 _worldPosition, float3 _worldNormal, float _heightMask, float _heightContrast, float3 _snowColor, Texture2D _snowMap, SamplerState _snowSamp, float2 _snowOffset, float _snowScale, float _snowMinAngle, float _snowMaxAngle, float _snowOpacity, float3 _baseColor, out float3 color, out float mask)
 {    
     float2 uv01 = _worldPosition.xz * _snowScale + _snowOffset;
     float2 uv02 = uv01 + Hash22(floor(_worldPosition.xz * 0.133));
@@ -11,18 +22,15 @@ void Get_float(float3 _worldPosition, float3 _worldNormal, float _heightMask, fl
     float3 color01 = _snowMap.Sample(_snowSamp, uv01).rgb;
     float3 color02 = _snowMap.Sample(_snowSamp, uv02).rgb;
 
-    float upMask = smoothstep(_snowMinAngle, _snowMaxAngle, dot(normalize(_worldNormal), float3(0, 1, 0)));
-    float heightMask = pow(saturate(_heightMask), _heightContrast);   
-    mask = upMask * heightMask * _snowOpacity;
+    GetMask_float(_worldNormal, _heightMask, _heightContrast, _snowMinAngle, _snowMaxAngle, _snowOpacity, mask);
 
     float3 snowColor = color01 * color02 * _snowColor;
     
     color = lerp(_baseColor, snowColor, mask);
 }
-
-void Get_half(half3 _worldPosition, half3 _worldNormal, half _heightMask, half _heightContrast, half3 _snowColor, Texture2D _snowMap, SamplerState _snowSamp, half2 _snowOffset, half _snowScale, half _snowMinAngle, half _snowMaxAngle, half _snowOpacity, half3 _baseColor, out half3 color, out half mask)
+void GetColor_half(half3 _worldPosition, half3 _worldNormal, half _heightMask, half _heightContrast, half3 _snowColor, Texture2D _snowMap, SamplerState _snowSamp, half2 _snowOffset, half _snowScale, half _snowMinAngle, half _snowMaxAngle, half _snowOpacity, half3 _baseColor, out half3 color, out half mask)
 {
-    Get_float(_worldPosition, _worldNormal, _heightMask, _heightContrast, _snowColor, _snowMap, _snowSamp, _snowOffset, _snowScale, _snowMinAngle, _snowMaxAngle, _snowOpacity, _baseColor, color, mask);
+    GetColor_float(_worldPosition, _worldNormal, _heightMask, _heightContrast, _snowColor, _snowMap, _snowSamp, _snowOffset, _snowScale, _snowMinAngle, _snowMaxAngle, _snowOpacity, _baseColor, color, mask);
 }
 
 #endif

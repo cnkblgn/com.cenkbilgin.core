@@ -2282,7 +2282,7 @@
     "m_Group": {
         "m_Id": ""
     },
-    "m_Name": "Get (Custom Function)",
+    "m_Name": "GetColor (Custom Function)",
     "m_DrawState": {
         "m_Expanded": true,
         "m_Position": {
@@ -2352,7 +2352,7 @@
         "m_SerializableColors": []
     },
     "m_SourceType": 0,
-    "m_FunctionName": "Get",
+    "m_FunctionName": "GetColor",
     "m_FunctionSource": "56b75a3379b4f0a429aaee17cc0de6f1",
     "m_FunctionSourceUsePragmas": true,
     "m_FunctionBody": "Enter function body here..."
