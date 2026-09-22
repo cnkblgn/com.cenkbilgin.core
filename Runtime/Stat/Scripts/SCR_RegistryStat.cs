@@ -21,6 +21,15 @@ namespace Core.Stat
         public void BuildDatabase() => StatDatabase.Build(CoreUtility.MergeEntries(entries, extraEntries, static entry => entry.ID.Key));
         public void AppendEntries(IReadOnlyList<StatEntry> entries) => CoreUtility.AppendEntries(entries, extraEntries, static entry => entry.ID.Key, static entry => entry.ID.IsValid);
 
+
+        public override void Reload()
+        {
+            BuildDatabase();
+
+            GenerateIDs();
+        }
+
+
 #if UNITY_EDITOR
         protected override void OnValidate()
         {
@@ -31,14 +40,6 @@ namespace Core.Stat
                 entries[i].OnValidate();
             }
         }
-
-        public override void Reload()
-        {
-            BuildDatabase();
-
-            GenerateIDs();
-        }
-
         private void GenerateIDs()
         {
             Editor.SourceGenerator generator = new();

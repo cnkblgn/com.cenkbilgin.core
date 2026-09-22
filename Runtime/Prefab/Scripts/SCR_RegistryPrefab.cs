@@ -22,13 +22,14 @@ namespace Core.Prefab
         public void BuildDatabase() => PrefabDatabase.Build(CoreUtility.MergeEntries(entries.ToArray(), extraEntries, static entry => entry != null ? entry.name : CoreUtility.STRING_NULL));
         public void AppendEntries(IReadOnlyList<GameObject> prefabs) => CoreUtility.AppendEntries(prefabs, extraEntries, static entry => entry.name, static entry => entry != null);
 
-#if UNITY_EDITOR
         public override void Reload()
         {
             BuildDatabase();
             GenerateIDs();
         }
 
+
+#if UNITY_EDITOR
         private void GenerateIDs()
         {
             Editor.SourceGenerator generator = new();

@@ -24,6 +24,14 @@ namespace Core.Quest
         public void BuildDatabase() => QuestDatabase.Build(CoreUtility.MergeEntries(entries, extraEntries, static entry => entry.ID.Key));
         public void AppendEntries(IReadOnlyList<QuestEntry> entries) => CoreUtility.AppendEntries(entries, extraEntries, static entry => entry.ID.Key, static entry => entry.ID.IsValid);
 
+        public override void Reload()
+        {
+            BuildDatabase();
+            GenerateIDs();
+            GenerateGraph();
+        }
+
+
 #if UNITY_EDITOR
         protected override void OnValidate()
         {
@@ -35,13 +43,6 @@ namespace Core.Quest
             }
 
             Editor.ReferenceUtility.FixReferences(this);
-        }
-
-        public override void Reload()
-        {
-            BuildDatabase();
-            GenerateIDs();
-            GenerateGraph();
         }
 
         private void GenerateIDs()

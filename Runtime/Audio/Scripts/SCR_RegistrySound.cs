@@ -22,13 +22,14 @@ namespace Core.Audio
         public void BuildDatabase() => SoundDatabase.Build(CoreUtility.MergeEntries(entries, extraEntries, static entry => entry != null ? entry.name : CoreUtility.STRING_NULL));
         public void AppendEntries(IReadOnlyList<AudioClip> clips) => CoreUtility.AppendEntries(clips, extraEntries, static entry => entry.name, static entry => entry != null);
 
-#if UNITY_EDITOR
         public override void Reload()
         {
             BuildDatabase();
             GenerateIDs();
         }
 
+
+#if UNITY_EDITOR
         private void GenerateIDs()
         {
             Editor.SourceGenerator generator = new();

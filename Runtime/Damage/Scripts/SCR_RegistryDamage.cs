@@ -22,13 +22,14 @@ namespace Core.Damage
         public void BuildDatabase() => DamageDatabase.Build(CoreUtility.MergeEntries(tags, extraTags));
         public void AppendTags(IReadOnlyList<string> tags) => CoreUtility.AppendUnique(tags, extraTags, StringComparer.Ordinal);
 
-#if UNITY_EDITOR
         public override void Reload()
         {
             BuildDatabase();
             GenerateTags();
         }
 
+
+#if UNITY_EDITOR
         private void GenerateTags()
         {
             Editor.SourceGenerator generator = new();

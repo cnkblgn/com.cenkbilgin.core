@@ -28,6 +28,14 @@ namespace Core.Item
         public void AppendEntries(IReadOnlyList<ItemEntry> entries) => CoreUtility.AppendEntries(entries, extraEntries, static entry => entry.ID.Key, static entry => entry.ID.IsValid);
         public void AppendTags(IReadOnlyList<string> tags) => CoreUtility.AppendUnique(tags, extraTags, StringComparer.Ordinal);
 
+        public override void Reload()
+        {
+            BuildDatabase();
+            GenerateTags();
+            GenerateIDs();
+        }
+
+
 #if UNITY_EDITOR
         protected override void OnValidate()
         {
@@ -39,13 +47,6 @@ namespace Core.Item
             }
 
             Editor.ReferenceUtility.FixReferences(this);
-        }
-
-        public override void Reload()
-        {
-            BuildDatabase();
-            GenerateTags();
-            GenerateIDs();
         }
 
         private void GenerateTags()
