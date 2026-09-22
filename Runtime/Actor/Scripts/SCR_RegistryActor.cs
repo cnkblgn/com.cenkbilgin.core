@@ -26,15 +26,13 @@ namespace Core.Actors
         public void AppendIDs(IReadOnlyList<string> ids) => CoreUtility.AppendUnique(ids, extraIDs, StringComparer.Ordinal);
         public void AppendTags(IReadOnlyList<string> tags) => CoreUtility.AppendUnique(tags, extraTags, StringComparer.Ordinal);
 
+#if UNITY_EDITOR
         public override void Reload()
         {
             BuildDatabase();
             GenerateTags();
             GenerateIDs();
         }
-
-
-#if UNITY_EDITOR
         private void GenerateTags()
         {
             Editor.SourceGenerator generator = new();

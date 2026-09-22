@@ -21,14 +21,12 @@ namespace Core.Graphics
         public void BuildDatabase() => MaterialDatabase.Build(CoreUtility.MergeEntries(entries, extraEntries, static entry => entry != null ? entry.name : CoreUtility.STRING_NULL));
         public void AppendEntries(IReadOnlyList<Material> materials) => CoreUtility.AppendEntries(materials, extraEntries, static entry => entry.name, static entry => entry != null);
 
+#if UNITY_EDITOR
         public override void Reload()
         {
             BuildDatabase();
             GenerateIDs();
         }
-
-
-#if UNITY_EDITOR
         private void GenerateIDs()
         {
             Editor.SourceGenerator generator = new();

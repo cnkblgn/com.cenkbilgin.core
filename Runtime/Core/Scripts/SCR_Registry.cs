@@ -9,15 +9,15 @@ namespace Core
         [Info("Registry load order.\n" + "Path: " + RegistryLoader.PATH)]
         [SerializeField, ReadOnly] private int priority;
 
+        public abstract void OnAfterScriptLoad();
+        public abstract void OnAfterAssembliesLoaded();
+
 #if UNITY_EDITOR
         protected virtual void OnValidate()
         {
             priority = Priority;
         }
-#endif
-
         public abstract void Reload();
-        public abstract void OnAfterScriptLoad();
-        public abstract void OnAfterAssembliesLoaded();
+#endif
     }
 }

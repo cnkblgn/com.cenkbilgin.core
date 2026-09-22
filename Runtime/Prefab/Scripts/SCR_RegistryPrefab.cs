@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 
 namespace Core.Prefab
@@ -22,14 +21,13 @@ namespace Core.Prefab
         public void BuildDatabase() => PrefabDatabase.Build(CoreUtility.MergeEntries(entries.ToArray(), extraEntries, static entry => entry != null ? entry.name : CoreUtility.STRING_NULL));
         public void AppendEntries(IReadOnlyList<GameObject> prefabs) => CoreUtility.AppendEntries(prefabs, extraEntries, static entry => entry.name, static entry => entry != null);
 
+
+#if UNITY_EDITOR
         public override void Reload()
         {
             BuildDatabase();
             GenerateIDs();
         }
-
-
-#if UNITY_EDITOR
         private void GenerateIDs()
         {
             Editor.SourceGenerator generator = new();
@@ -53,20 +51,19 @@ namespace Core.Prefab
 
             Editor.EditorUtility.GenerateTextFile(idPath, generator.ToString());
         }
-
         public void Register(GameObject obj)
         {
             entries.Add(obj);
 
             UnityEditor.EditorUtility.SetDirty(this);
-            AssetDatabase.SaveAssets();
+            UnityEditor.AssetDatabase.SaveAssets();
         }
         public void Unregister(GameObject obj)
         {
             entries.Remove(obj);
 
             UnityEditor.EditorUtility.SetDirty(this);
-            AssetDatabase.SaveAssets();
+            UnityEditor.AssetDatabase.SaveAssets();
         }
 #endif
     }
