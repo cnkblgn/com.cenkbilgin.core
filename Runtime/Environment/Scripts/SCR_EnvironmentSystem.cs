@@ -26,6 +26,9 @@ namespace Core.Environment
         private static bool hasInitialized;
         private float timer;
 
+        internal static bool isFogEnabled = true;
+        internal static bool isCloudEnabled = true;
+        internal static bool isCelestialEnabled = true;
         internal static readonly int _FOG_COLOR_ID = Shader.PropertyToID("_FOG_COLOR");
         internal static readonly int _FOG_DENSITY_ID = Shader.PropertyToID("_FOG_DENSITY");
         internal static readonly int _FOG_DISTANCE_START_ID = Shader.PropertyToID("_FOG_DISTANCE_START");
@@ -76,6 +79,9 @@ namespace Core.Environment
             cachedSunLight = null;
             cachedMoonLight = null;
             hasInitialized = false;
+            isFogEnabled = true;
+            isCloudEnabled = true;
+            isCelestialEnabled = true;
         }
 
         private void Update()
@@ -134,6 +140,15 @@ namespace Core.Environment
 
             return IsValid();
         }
+
+        public static void ShowFog() => isFogEnabled = true;
+        public static void HideFog() => isFogEnabled = false;
+
+        public static void ShowClouds() => isCloudEnabled = true;
+        public static void HideClouds() => isCloudEnabled = false;
+
+        public static void ShowCelestial() => isCelestialEnabled = true;
+        public static void HideCelestial() => isCelestialEnabled = false;
 
         private void Refresh()
         {
@@ -195,7 +210,7 @@ namespace Core.Environment
             }
 
             Shader.SetGlobalColor(_FOG_COLOR_ID, fog.Color);
-            Shader.SetGlobalFloat(_FOG_DENSITY_ID, fog.Density);
+            Shader.SetGlobalFloat(_FOG_DENSITY_ID, isFogEnabled ? fog.Density : 0);
             Shader.SetGlobalFloat(_FOG_DISTANCE_START_ID, fog.DistanceStart);
             Shader.SetGlobalFloat(_FOG_DISTANCE_FALLOFF_ID, fog.DistanceFalloff);
             Shader.SetGlobalFloat(_FOG_HEIGHT_START_ID, fog.HeightStart);
@@ -233,17 +248,17 @@ namespace Core.Environment
             Shader.SetGlobalFloat(_HORIZON_SOFTNESS_ID, sky.HorizonSmoothness);
             Shader.SetGlobalColor(_SUN_COLOR_ID, sun.Color * sun.Power);
             Shader.SetGlobalVector(_SUN_DIRECTION_ID, -sunDirection);
-            Shader.SetGlobalFloat(_SUN_SIZE_ID, sun.Size);
+            Shader.SetGlobalFloat(_SUN_SIZE_ID, isCelestialEnabled ? sun.Size : 0);
             Shader.SetGlobalFloat(_SUN_GLOW_ID, sun.Glow);
             Shader.SetGlobalColor(_MOON_COLOR_ID, moon.Color * moon.Power);
             Shader.SetGlobalVector(_MOON_DIRECTION_ID, -moonDirection);
-            Shader.SetGlobalFloat(_MOON_SIZE_ID, moon.Size);
+            Shader.SetGlobalFloat(_MOON_SIZE_ID, isCelestialEnabled ? moon.Size : 0);
             Shader.SetGlobalFloat(_MOON_GLOW_ID, moon.Glow);
 
             Shader.SetGlobalFloat(_CLOUD_BLEND_ID, settings.Blend);
             Shader.SetGlobalColor(_CLOUD_TINT_ID, cloud.Tint);
             Shader.SetGlobalFloat(_CLOUD_COVERAGE_ID, cloud.Coverage);
-            Shader.SetGlobalFloat(_CLOUD_OPACITY_ID, cloud.Opacity);
+            Shader.SetGlobalFloat(_CLOUD_OPACITY_ID, isCloudEnabled ? cloud.Opacity : 0);
             Shader.SetGlobalFloat(_CLOUD_FADE_ID, cloud.Fade);
             Shader.SetGlobalFloat(_CLOUD_HEIGHT_ID, cloud.Height);
             Shader.SetGlobalFloat(_CLOUD_CURVE_ID, cloud.Curve);
