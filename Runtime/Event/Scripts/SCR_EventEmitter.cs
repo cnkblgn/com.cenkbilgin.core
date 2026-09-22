@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace Core
+namespace Core.Event
 {
     [DisallowMultipleComponent]
     public sealed class EventEmitter : MonoBehaviour
