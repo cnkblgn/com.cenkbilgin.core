@@ -21,31 +21,25 @@ namespace Core.Environment
             Shader fogShader = Shader.Find(FOG_SHADER_PATH);
             Shader skyShader = Shader.Find(SKY_SHADER_PATH);
 
-            if (fogShader != null)
+            if (fogShader == null)
             {
-                fogMaterial = CoreUtils.CreateEngineMaterial(fogShader);
-                hasInitialized = true;
-            }
-            else
-            {
-                Debug.LogError($"Fog shader [{FOG_SHADER_PATH}] not found?");
+                Debug.LogError($"Fog shader [{FOG_SHADER_PATH}] not found.");
                 hasInitialized = false;
                 return;
             }
 
-            if (skyShader != null)
+            if (skyShader == null)
             {
-                skyMaterial = CoreUtils.CreateEngineMaterial(skyShader);
-                hasInitialized = true;
-            }
-            else
-            {
-                Debug.LogError($"Sky shader [{SKY_SHADER_PATH}] not found?");
+                Debug.LogError($"Sky shader [{SKY_SHADER_PATH}] not found.");
                 hasInitialized = false;
                 return;
             }
 
-            pass = new();
+            fogMaterial = CoreUtils.CreateEngineMaterial(fogShader);
+            skyMaterial = CoreUtils.CreateEngineMaterial(skyShader);
+
+            pass = new RendererPassEnvironment();
+            hasInitialized = true;
         }
         protected override void Dispose(bool disposing)
         {

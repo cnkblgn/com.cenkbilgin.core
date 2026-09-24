@@ -25,7 +25,7 @@ namespace Core.PostProcessing
             }
             else
             {
-                Debug.LogError($"Fog shader [{SHADER_PATH}] not found?");
+                Debug.LogError($"Post processing shader [{SHADER_PATH}] not found?");
                 hasInitialized = false;
                 return;
             }

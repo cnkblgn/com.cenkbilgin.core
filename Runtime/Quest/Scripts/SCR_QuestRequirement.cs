@@ -1,40 +1,38 @@
-using Core.Actors;
 using System;
+using Core.Actors;
+using Core.Event;
 
 namespace Core.Quest
 {
     [Serializable]
     public struct QuestRequirement
     {
-        public QuestEvent Event;
-        public ActorID ID;
+        public EventID Event;
+        public ActorID Actor;
         public ActorTag[] Tags;
         public byte Amount;
 
-        public QuestRequirement(QuestEvent @event, ActorID id, ActorTag[] tags, byte amount)
+        public QuestRequirement(EventID @event, ActorID actor, ActorTag[] tags, byte amount)
         {
             Event = @event;
             Tags = tags;
-            ID = id;
+            Actor = actor;
             Amount = amount;
         }
-        public QuestRequirement(QuestEvent @event, ActorID id, ActorTag[] tags) : this(@event, id, tags, 1) { }
-        public QuestRequirement(QuestEvent @event, ActorID id, byte amount) : this(@event, id, null, amount) { }
-        public QuestRequirement(QuestEvent @event, ActorID id) : this(@event, id, null, 1) { }
+        public QuestRequirement(EventID @event, ActorID actor, ActorTag[] tags) : this(@event, actor, tags, 1) { }
+        public QuestRequirement(EventID @event, ActorID actor, byte amount) : this(@event, actor, null, amount) { }
+        public QuestRequirement(EventID @event, ActorID actor) : this(@event, actor, null, 1) { }
 
-        public readonly bool IsMatch(QuestEvent @event, ActorID id, ulong tags)
+        public readonly bool IsMatch(EventContext context)
         {
-            if (Event != @event)
+            if (Actor.IsValid && Actor.Index != context.Actor)
             {
                 return false;
             }
 
-            if (tags != 0 && !tags.HasAll(Tags.CreateMask()))
-            {
-                return false;
-            }
+            ulong requiredTags = Tags.CreateMask();
 
-            if (ID.IsValid && ID != id)
+            if (!context.Tags.HasAll(requiredTags))
             {
                 return false;
             }

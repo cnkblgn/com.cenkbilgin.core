@@ -1,5 +1,5 @@
 using System;
-using Core.Actors;
+using Core.Event;
 
 namespace Core.Quest
 {
@@ -10,14 +10,17 @@ namespace Core.Quest
         public readonly int[] Progress;
         public bool IsCompleted;
 
+        [NonSerialized] private bool isStarted;
+        [NonSerialized] private Action<EventContext> callback;
+
         public QuestInstance(QuestDefinition definition)
         {
-            Definition = definition ?? throw new ArgumentNullException(nameof(definition));
+            Definition = definition ?? throw new ArgumentNullException(nameof(definition), "Quest instace ctor failed! definition is null!?");
             Progress = new int[definition.Requirements.Length];
         }
         internal QuestInstance(QuestID id, int[] progress, bool isCompleted)
         {
-            Definition = !id.IsValid ? throw new ArgumentNullException(nameof(id)) : id.GetDefinition();
+            Definition = !id.IsValid ? throw new ArgumentNullException(nameof(id), "Quest instace ctor failed! id is not valid!?") : id.GetDefinition();
             Progress = (int[])progress.Clone();
             IsCompleted = isCompleted;
         }
@@ -47,29 +50,87 @@ namespace Core.Quest
 
             return true;
         }
-        public bool Notify(QuestEvent @event, ActorID id, ulong tags, int amount)
+        internal void Start()
         {
-            bool hasChanged = false;
-
-            for (int i = 0; i < Definition.Requirements.Length; i++)
+            if (IsCompleted || isStarted)
             {
-                QuestRequirement requirement = Definition.Requirements[i];
+                return;
+            }
 
-                if (!requirement.IsMatch(@event, id, tags))
+            isStarted = true;
+            callback = OnEvent;
+
+            QuestRequirement[] requirements = Definition.Requirements;
+
+            for (int i = 0; i < requirements.Length; i++)
+            {
+                EventID id = requirements[i].Event;
+
+                if (!id.IsValid)
+                {
+                    continue;
+                }
+
+                EventDatabase.Subscribe(id, callback);
+            }
+        }
+        internal void Complete()
+        {
+            if (callback == null)
+            {
+                return;
+            }
+
+            QuestRequirement[] requirements = Definition.Requirements;
+
+            for (int i = 0; i < requirements.Length; i++)
+            {
+                EventID id = requirements[i].Event;
+
+                if (!id.IsValid)
+                {
+                    continue;
+                }
+
+                EventDatabase.Unsubscribe(id, callback);
+            }
+
+            IsCompleted = true;
+            isStarted = false;
+            callback = null;
+        }
+        private void OnEvent(EventContext context)
+        {
+            if (IsCompleted)
+            {
+                return;
+            }
+
+            QuestRequirement[] requirements = Definition.Requirements;
+
+            for (int i = 0; i < requirements.Length; i++)
+            {
+                QuestRequirement requirement = requirements[i];
+
+                if (requirement.Event != context.ID)
+                {
+                    continue;
+                }
+
+                if (!requirement.IsMatch(context))
                 {
                     continue;
                 }
 
                 int previous = Progress[i];
-                Progress[i] = Math.Min(previous + amount, requirement.Amount);
+
+                Progress[i] = Math.Min(previous + context.Amount, requirement.Amount);
 
                 if (previous != Progress[i])
                 {
-                    hasChanged = true;
+                    QuestDatabase.NotifyProgress(this);
                 }
             }
-
-            return hasChanged;
         }
     }
 }

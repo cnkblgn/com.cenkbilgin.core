@@ -1,7 +1,8 @@
-using Core.Actors;
-using System;
+﻿using System;
+using System.Text;
 using System.Collections.Generic;
 using UnityEngine;
+using Core.Actors;
 
 namespace Core.Quest
 {
@@ -13,14 +14,14 @@ namespace Core.Quest
 
         private static readonly Dictionary<string, int> idLookup = new();
         private static QuestDefinition[] definitions = Array.Empty<QuestDefinition>();
-        private static List<QuestInstance> quests = new();
+        private static List<QuestInstance> instances = new();
 
         internal static void Build(QuestEntry[] entries)
         {
             OnQuestProgress = null;
             OnQuestStarted = null;
             OnQuestCompleted = null;
-            quests = new();
+            instances = new();
 
             if (entries == null)
             {
@@ -42,7 +43,7 @@ namespace Core.Quest
             Debug.Log($"Quest database build successfull!");
         }
 
-        public static List<QuestInstance> Export() => new(quests);
+        public static List<QuestInstance> Export() => new(instances);
         public static void Import(List<QuestInstance> data)
         {
             data.Clear();
@@ -60,18 +61,15 @@ namespace Core.Quest
                 return false;
             }
 
-            foreach (QuestInstance quest in quests)
+            if (GetInstance(id) != null)
             {
-                if (quest.Definition.ID != id)
-                {
-                    continue;
-                }
-
                 return false;
             }
 
             QuestInstance instance = id.CreateInstance();
-            quests.Add(instance);
+            instances.Add(instance);
+
+            instance.Start();
 
             HandleQuestStarted(id);
 
@@ -80,14 +78,14 @@ namespace Core.Quest
         }
         public static bool TryComplete(QuestID id)
         {
-            QuestInstance quest = GetInstance(id);
+            QuestInstance instance = GetInstance(id);
 
-            if (quest == null)
+            if (instance == null)
             {
                 return false;
             }
 
-            return TryComplete(quest);
+            return TryComplete(instance);
         }
         private static bool TryComplete(QuestInstance quest)
         {
@@ -96,13 +94,27 @@ namespace Core.Quest
                 return false;
             }
 
-            quest.IsCompleted = true;
+            quest.Complete();
+
             HandleQuestCompleted(quest.Definition.ID);
             return true;
         }
-        
-        public static bool IsActive(QuestID id) => !GetInstance(id).CanComplete();
-        public static bool IsCompleted(QuestID id) => GetInstance(id).CanComplete();
+        internal static void NotifyProgress(QuestInstance instance)
+        {
+            OnQuestProgress?.Invoke(instance.Definition.ID);
+            TryComplete(instance);
+        }
+
+        public static bool IsActive(QuestID id)
+        {
+            QuestInstance quest = GetInstance(id);
+            return quest != null && !quest.IsCompleted;
+        }
+        public static bool IsCompleted(QuestID id)
+        {
+            QuestInstance quest = GetInstance(id);
+            return quest != null && quest.IsCompleted;
+        }
 
         private static void HandleQuestStarted(QuestID id)
         {
@@ -133,36 +145,6 @@ namespace Core.Quest
                 TryStart(definition.NextID);
             }
         }
-        private static void HandleQuestProgressed(QuestID id)
-        {
-            OnQuestProgress?.Invoke(id);
-        }
-
-        public static void Notify(QuestEvent @event, ActorID id, ulong tags, int amount = 1)
-        {
-            int count = quests.Count;
-
-            for (int i = 0; i < count; i++)
-            {
-                QuestInstance quest = quests[i];
-
-                if (quest.IsCompleted)
-                {
-                    continue;
-                }
-
-                if (quest.Notify(@event, id, tags, amount))
-                {
-                    HandleQuestProgressed(quest.Definition.ID);
-                }
-
-                TryComplete(quest);
-            }
-        }
-        public static void Notify(QuestEvent @event, ActorID id, ActorTag tag, int amount = 1) => Notify(@event, id, tag.Mask, amount);
-        public static void Notify(QuestEvent @event, ActorID id, ActorTag[] tags, int amount = 1) => Notify(@event, id, tags.CreateMask(), amount);
-        public static void Notify(QuestEvent @event, ActorID id, int amount = 1) => Notify(@event, id, 0, amount);
-        public static void Notify(QuestEvent @event, ActorID id) => Notify(@event, id, 0, 1);
 
         public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
         public static IReadOnlyList<QuestDefinition> GetDefinitions() => definitions;
@@ -186,7 +168,7 @@ namespace Core.Quest
         }
         public static QuestInstance GetInstance(QuestID id)
         {
-            foreach (QuestInstance quest in quests)
+            foreach (QuestInstance quest in instances)
             {
                 if (quest.Definition.ID == id)
                 {
@@ -197,5 +179,96 @@ namespace Core.Quest
             return null;
         }
         public static QuestInstance CreateInstance(QuestID id) => new(GetDefinition(id));
+
+#if UNITY_EDITOR
+        public static void LogAll()
+        {
+            for (int i = 0; i < instances.Count; i++)
+            {
+                Log(instances[i]);
+            }
+        }
+        public static void Log(QuestID id) => Log(GetInstance(id));
+        private static void Log(QuestInstance instance)
+        {
+            if (instance == null)
+            {
+                Debug.LogWarning($"Quest log failed! instance is null!");
+                return;
+            }
+
+            QuestRequirement[] requirements = instance.Definition.Requirements;
+            QuestCondition[] conditions = instance.Definition.Conditions;
+
+            StringBuilder sb = new();
+            sb.AppendLine($"ID {instance.Definition.ID.Key}");
+            sb.AppendLine($"  Completed: {instance.IsCompleted}");
+
+            if (requirements.Length > 0)
+            {
+                sb.AppendLine("  Requirements:");
+
+                for (int i = 0; i < requirements.Length; i++)
+                {
+                    QuestRequirement requirement = requirements[i];
+
+                    sb.Append("    [");
+                    sb.Append(i);
+                    sb.Append("] ");
+                    sb.Append(requirement.Event.Key);
+                    sb.Append(" | ");
+                    sb.Append(instance.Progress[i]);
+                    sb.Append(" / ");
+                    sb.Append(requirement.Amount);
+
+                    if (requirement.Actor.IsValid)
+                    {
+                        sb.Append(" | Actor: ");
+                        sb.Append(requirement.Actor.Key);
+                    }
+
+                    ulong tagMask = requirement.Tags.CreateMask();
+
+                    if (tagMask != 0)
+                    {
+                        sb.Append(" | Tags: ");
+                        sb.Append(tagMask);
+                    }
+
+                    if (instance.Progress[i] >= requirement.Amount)
+                    {
+                        sb.Append(" ✓");
+                    }
+                    else
+                    {
+                        sb.Append(" ...");
+                    }
+
+                    sb.AppendLine();
+                }
+            }
+
+            if (conditions.Length > 0)
+            {
+                sb.AppendLine("  Conditions:");
+
+                for (int i = 0; i < conditions.Length; i++)
+                {
+                    bool satisfied = conditions[i].IsSatisfied();
+
+                    sb.Append("    [");
+                    sb.Append(i);
+                    sb.Append("] ");
+                    sb.Append(satisfied ? "✓ Satisfied" : "... Not satisfied");
+                    sb.AppendLine();
+                }
+            }
+
+            sb.Append("  Can Complete: ");
+            sb.Append(instance.CanComplete());
+
+            Debug.Log(sb.ToString());
+        }
+#endif
     }
 }
