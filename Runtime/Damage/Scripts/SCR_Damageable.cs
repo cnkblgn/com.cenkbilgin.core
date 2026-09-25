@@ -41,9 +41,10 @@ namespace Core.Damage
 
             lastContext.Damage = damage;
 
+            health.SetCurrent(health.GetCurrent() - damage);
+
             if (!health.IsDepleted())
             {
-                health.SetCurrent(health.GetCurrent() - damage);
                 lastContext.State = DamageState.HIT;
             }
             else
