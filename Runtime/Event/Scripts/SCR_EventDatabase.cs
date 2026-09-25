@@ -89,6 +89,8 @@ namespace Core.Event
                 return;
             }
 
+            Debug.Log("Subscribe test3! " + id);
+
             listeners[id.Index].Add(callback);
 
 #if UNITY_EDITOR
@@ -172,7 +174,7 @@ namespace Core.Event
             }
         }
 
-        public static bool EnableDebug() => isDebugEnabled = false;
+        public static bool EnableDebug() => isDebugEnabled = true;
         public static bool DisableDebug() => isDebugEnabled = false;
 
         public static bool HasListener(EventID id) => IsValid(id) && listeners[id.Index].Count > 0;
