@@ -108,7 +108,7 @@ namespace Core.Actors
         }
         public static int GetTagIndex(string key) => tagLookup.TryGetValue(key, out int index) ? index : -1;
 
-        internal static bool TryGetAnyActor(ActorID id, out Actor actor)
+        public static bool TryGetAnyActor(ActorID id, out Actor actor)
         {
             actor = null;
 
@@ -130,9 +130,9 @@ namespace Core.Actors
             actor = entries[0].Actor;
             return true;
         }
-        internal static bool TryGetAnyActor(ActorTag tag, out Actor actor) => TryGetAnyActor(tag.Mask, out actor);
-        internal static bool TryGetAnyActor(ActorTag[] tags, out Actor actor) => TryGetAnyActor(tags.CreateMask(), out actor);
-        internal static bool TryGetAnyActor(ulong tags, out Actor actor)
+        public static bool TryGetAnyActor(ActorTag tag, out Actor actor) => TryGetAnyActor(tag.Mask, out actor);
+        public static bool TryGetAnyActor(ActorTag[] tags, out Actor actor) => TryGetAnyActor(tags.CreateMask(), out actor);
+        public static bool TryGetAnyActor(ulong tags, out Actor actor)
         {
             actor = null;
 
@@ -159,7 +159,7 @@ namespace Core.Actors
 
             return false;
         }
-        internal static bool TryGetAllActors(ActorID id, out IReadOnlyList<ActorEntry> actors)
+        public static bool TryGetAllActors(ActorID id, out IReadOnlyList<ActorEntry> actors)
         {
             actors = GetEntries(id);
 
@@ -173,9 +173,9 @@ namespace Core.Actors
 
             return actors.Count > 0;
         }
-        internal static bool TryGetAllActors(ActorTag tag, out List<Actor> actors) => TryGetAllActors(tag.Mask, out actors);
-        internal static bool TryGetAllActors(ActorTag[] tags, out List<Actor> actors) => TryGetAllActors(tags.CreateMask(), out actors);
-        internal static bool TryGetAllActors(ulong tags, out List<Actor> actors)
+        public static bool TryGetAllActors(ActorTag tag, out List<Actor> actors) => TryGetAllActors(tag.Mask, out actors);
+        public static bool TryGetAllActors(ActorTag[] tags, out List<Actor> actors) => TryGetAllActors(tags.CreateMask(), out actors);
+        public static bool TryGetAllActors(ulong tags, out List<Actor> actors)
         {
             actors = new();
 
