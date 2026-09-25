@@ -19,6 +19,8 @@ namespace Core.Event
                 return;
             }
 
+            Debug.Log("Event Build test0!");
+
             invokeDepth = 0;
             idLookup.Clear();
             listeners = new List<Action<EventContext>>[_ids.Length];
@@ -39,6 +41,7 @@ namespace Core.Event
                 listeners[i] = new();
             }
 
+            Debug.Log("Event Build test1!");
             Debug.Log($"Event database build successfull!");
         }
         public static void Clear()
@@ -63,16 +66,22 @@ namespace Core.Event
         }
         public static void Subscribe(EventID id, Action<EventContext> callback)
         {
+            Debug.Log("Subscribe test0! " + id);
+
             if (invokeDepth > 0)
             {
                 Debug.LogError($"Event database subscribe failed! Cannot subscribe to event [{id}] while invoking.");
                 return;
             }
 
+            Debug.Log("Subscribe test1! " + id);
+
             if (!IsValid(id))
             {
                 return;
             }
+
+            Debug.Log("Subscribe test2! " + id);
 
             if (callback == null)
             {
