@@ -8,18 +8,10 @@ namespace Core.Event
     {
         private static readonly Dictionary<string, int> idLookup = new();
         private static EventID[] ids = Array.Empty<EventID>();
-
         private static List<Action<EventContext>>[] listeners = Array.Empty<List<Action<EventContext>>>();
         private static int invokeDepth;
         private static bool isDebugEnabled;
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void OnRuntimeInitialize()
-        {
-            DisableDebug();
-
-            Clear();
-        }
         internal static void Build(string[] _ids)
         {
             if (_ids == null)
@@ -27,6 +19,7 @@ namespace Core.Event
                 return;
             }
 
+            invokeDepth = 0;
             idLookup.Clear();
             listeners = new List<Action<EventContext>>[_ids.Length];
             ids = new EventID[_ids.Length];
