@@ -16,10 +16,11 @@ namespace Core.Damage
         [SerializeField] private Resource health = new(100, 100);
 
         [Header("_")]
-        [SerializeField, Required] private Transform origin = null;
+        [SerializeField, Required] private Transform origin;
         [SerializeField] private DamageTag[] ignoreTags;
 
-        private IDamageableHandler thisHandler = null;
+        private IDamageableHandler thisHandler;
+        private DamageContext lastContext;
         private ulong ignoredTagMask;
 
         private void Awake()
@@ -34,29 +35,26 @@ namespace Core.Damage
 
         public void Damage(in DamageData data, out DamageContext ctx)
         {
-            ctx = new(data);
-
-            if (health.IsDepleted())
-            {
-                return;
-            }
+            lastContext = new(data);
 
             float damage = ResolveDamage(in data);
-            ctx.Damage = damage;
 
-            health.SetCurrent(health.GetCurrent() - damage);
+            lastContext.Damage = damage;
 
-            if (health.IsDepleted())
+            if (!health.IsDepleted())
             {
-                ctx.State = DamageState.DEATH;
+                health.SetCurrent(health.GetCurrent() - damage);
+                lastContext.State = DamageState.HIT;
             }
             else
             {
-                ctx.State = DamageState.HIT;
+                lastContext.State = DamageState.DEATH;
             }
 
-            thisHandler?.HandleHit(in ctx);
-            OnHit?.Invoke(ctx);
+            ctx = lastContext;
+
+            thisHandler?.HandleHit(in lastContext);
+            OnHit?.Invoke(lastContext);
         }
         private float ResolveDamage(in DamageData data)
         {
@@ -74,6 +72,8 @@ namespace Core.Damage
 
             return value;
         }
+
+        public DamageContext GetLastContext() => lastContext;
 
         public DamageTag[] GetIgnoredTags() => ignoreTags;
         public void SetIgnoredTags(DamageTag[] tags)
