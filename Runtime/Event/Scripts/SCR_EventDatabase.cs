@@ -60,6 +60,13 @@ namespace Core.Event
             {
                 listeners[i].Clear();
             }
+
+#if UNITY_EDITOR
+            if (isDebugEnabled)
+            {
+                Debug.Log("Event database cleared!");
+            }
+#endif
         }
         public static void Subscribe(EventID id, Action<EventContext> callback)
         {
@@ -81,6 +88,13 @@ namespace Core.Event
             }
 
             listeners[id.Index].Add(callback);
+
+#if UNITY_EDITOR
+            if (isDebugEnabled)
+            {
+                Debug.Log($"Event database event subscribed! [{id}]");
+            }           
+#endif
         }
         public static void Unsubscribe(EventID id, Action<EventContext> callback)
         {
@@ -102,6 +116,13 @@ namespace Core.Event
             }
 
             listeners[id.Index].Remove(callback);
+
+#if UNITY_EDITOR
+            if (isDebugEnabled)
+            {
+                Debug.Log($"Event database event unsubscribed! [{id}]");
+            }
+#endif
         }
         public static void Invoke(EventID id, int actor, ulong tags, int amount = 1) => Invoke(new EventContext(id, actor, tags, amount));
         public static void Invoke(EventID id, int actor, int amount = 1) => Invoke(new EventContext(id, actor, amount));
