@@ -77,9 +77,9 @@ namespace Core.UI
         public void HideNotification() => notificationView.Hide();
         public void ClearNotification() => notificationView.Clear();
 
-        public void InsertWaypoint(in UIWaypointData data, Vector3 offset, bool show = true)
+        public void AddWaypoint(in UIWaypointData data, Vector3 offset, bool show = true)
         {
-            waypointView.Insert(data, offset, inputContext.Camera);
+            waypointView.Add(data, offset, inputContext.Camera);
 
             if (show)
             {

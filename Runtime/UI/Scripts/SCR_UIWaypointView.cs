@@ -68,7 +68,7 @@ namespace Core.UI
             isOpened = false;
         }
 
-        public void Insert(in UIWaypointData data, Vector3 offset, Camera camera)
+        public void Add(in UIWaypointData data, Vector3 offset, Camera camera)
         {
             UIWaypointItem entity = waypointPool.Spawn(data, offset);
 
