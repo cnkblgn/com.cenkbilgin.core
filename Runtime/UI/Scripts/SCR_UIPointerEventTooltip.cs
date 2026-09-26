@@ -11,7 +11,7 @@ namespace Core.UI
 
         [Header("_")]
         [Info("Optional")]
-        [SerializeField] private UITooltipController targetTooltip = null;
+        [SerializeField] private UITooltipView targetTooltip = null;
 
         [Header("_")]
         [SerializeField] private bool disableEventPosition = true;

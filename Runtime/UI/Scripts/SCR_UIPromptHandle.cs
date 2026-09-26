@@ -5,9 +5,9 @@ namespace Core.UI
     public readonly struct UIPromptHandle : IEquatable<UIPromptHandle>
     {
         internal readonly Guid ID;
-        internal readonly UIPromptView View;
+        internal readonly UIPromptItem View;
 
-        internal UIPromptHandle(Guid id, UIPromptView view)
+        internal UIPromptHandle(Guid id, UIPromptItem view)
         {
             ID = id;
             View = view != null ? view : throw new ArgumentNullException(nameof(view), "UI Prompt handle view reference is missing!?");

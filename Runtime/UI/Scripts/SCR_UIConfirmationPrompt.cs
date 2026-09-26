@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Core.UI
 {
     [DisallowMultipleComponent]
-    [RequireComponent(typeof(UIPromptView))]
+    [RequireComponent(typeof(UIPromptItem))]
     internal sealed class UIConfirmationPrompt : MonoBehaviour, IUIPromptHandler<UIConfirmationPromptContext>
     {
         private Action onAcceptEvent = null;

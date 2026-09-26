@@ -8,7 +8,7 @@ namespace Core.UI
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Canvas))]
     [RequireComponent(typeof(GraphicRaycaster))]
-    internal sealed class UIContextMenuController : MonoBehaviour, IUIContextItemHandler, IUICursorStateHandler, IGameStateHandler
+    internal sealed class UIContextMenuView : MonoBehaviour, IUIContextItemHandler, IUICursorStateHandler, IGameStateHandler
     {
         public bool IsActive => thisHandle != default;
 

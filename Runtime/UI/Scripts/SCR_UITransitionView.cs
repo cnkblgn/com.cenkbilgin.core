@@ -2,12 +2,11 @@ using UnityEngine;
 
 namespace Core.UI
 {
-    using static CoreUtility;
     using static TaskUtility;
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(CanvasGroup))]
-    public sealed class UITransitionController : MonoBehaviour
+    public sealed class UITransitionView : MonoBehaviour
     {
         private CanvasGroup thisCanvas = null;
         private TaskInstanceTweenFadeCanvas thisTween = null;
@@ -74,7 +73,6 @@ namespace Core.UI
                 ctx.OnFinish?.Invoke();
             });
         }
-
         public void Hide()
         {
             thisCanvas.Hide();

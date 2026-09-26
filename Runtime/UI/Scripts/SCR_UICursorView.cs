@@ -9,11 +9,8 @@ namespace Core.UI
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Canvas))]
-    internal sealed class UICursorController : MonoBehaviour
+    internal sealed class UICursorView : MonoBehaviour
     {
-        [Header("_")]
-        [SerializeField] private bool debug;
-
         [Header("_")]
         [SerializeField, Required] private RectTransform cursorTransform;
         [SerializeField, Required] private Image cursorImage;
@@ -56,7 +53,7 @@ namespace Core.UI
             Debug.LogWarning($"[{id}] is not defined");
             return false;
         }
-        internal void MoveCursor(Vector2 screenPosition)
+        public void MoveCursor(Vector2 screenPosition)
         {
             if (!hasFocus)
             {
@@ -82,14 +79,14 @@ namespace Core.UI
 
             cursorTransform.localPosition = position;
         }
-        internal void SetCursor(string id)
+        public void SetCursor(string id)
         {
             if (TryGetCursor(id, out UICursorData cursor))
             {
                 cursorImage.sprite = cursor.Icon;
             }
         }
-        internal void ShowCursor()
+        public void ShowCursor()
         {
             bool canShow = true;
 
@@ -105,12 +102,7 @@ namespace Core.UI
 
                 if (!Handlers[i].HandleCanShowCursor())
                 {
-                    if (debug)
-                    {
-                        Debug.Log("Show Cursor Failed!");
-                    }
-
-                    canShow = false;                    
+                    canShow = false;
                 }
             }
 
@@ -122,13 +114,8 @@ namespace Core.UI
             canvas.Show();
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Confined;
-
-            if (debug)
-            {
-                Debug.Log("Show Cursor Success!");
-            }
         }
-        internal void HideCursor()
+        public void HideCursor()
         {
             bool canHide = true;
 
@@ -144,11 +131,6 @@ namespace Core.UI
 
                 if (!Handlers[i].HandleCanHideCursor())
                 {
-                    if (debug)
-                    {
-                        Debug.Log("Hide Cursor Failed!");
-                    }
-
                     canHide = false;
                 }
             }
@@ -161,11 +143,6 @@ namespace Core.UI
             canvas.Hide();
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
-
-            if (debug)
-            {
-                Debug.Log("Hide Cursor Success!");
-            }
         }
     }
 }

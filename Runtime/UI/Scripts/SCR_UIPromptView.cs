@@ -1,100 +1,117 @@
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using System;
 
 namespace Core.UI
 {
     [DisallowMultipleComponent]
-    [RequireComponent(typeof(CanvasGroup))]
-    internal sealed class UIPromptView : MonoBehaviour
+    [RequireComponent(typeof(Canvas))]
+    [RequireComponent(typeof(GraphicRaycaster))]
+    internal sealed class UIPromptView : MonoBehaviour, IUICursorStateHandler, IGameStateHandler, IUIPromptUser
     {
-        public bool IsActive => thisHandle != default;
-
         [Header("_")]
-        [SerializeField] private TextMeshProUGUI descriptionText = null;
-        [SerializeField, Required] private Button acceptButton = null;
-        [SerializeField, Required] private Button cancelButton = null;
+        [SerializeField, Required] private UIPromptItem[] views = null;
 
-        private CanvasGroup thisCanvas = null;
-        private IUIPromptHandler thisHandler = null;
-        private IUIPromptUser thisUser = null;
-        private UIPromptHandle thisHandle = default;
+        private Canvas thisCanvas = null;
+        private UIPromptItem activeView = null;
 
-        private void Awake()
+        private void Start()
         {
-            thisCanvas = GetComponent<CanvasGroup>();
-            thisHandler = GetComponent<IUIPromptHandler>();
+            thisCanvas = GetComponent<Canvas>();
             thisCanvas.Hide();
         }
         private void OnEnable()
         {
-            acceptButton.onClick.AddListener(OnAcceptButtonClicked);
-            cancelButton.onClick.AddListener(OnCancelButtonClicked);
+            ManagerGame.BindHandler(this);
+            UICursorSystem.BindHandler(this);
         }
         private void OnDisable()
         {
-            acceptButton.onClick.RemoveListener(OnAcceptButtonClicked);
-            cancelButton.onClick.RemoveListener(OnCancelButtonClicked);
+            ManagerGame.UnbindHandler(this);
+            UICursorSystem.UnbindHandler(this);
         }
 
-        private void OnAcceptButtonClicked()
+        private bool HasActivePrompt()
         {
-            thisHandler?.HandleAccept();
-
-            Hide();
-        }
-        private void OnCancelButtonClicked()
-        {
-            Hide();
-        }
-
-        public UIPromptHandle Show<TContext>(string description, in TContext context, IUIPromptUser user) where TContext : struct
-        {
-            if (IsActive)
-            {
-                return default;
-            }
-
-            if (thisHandler is not IUIPromptHandler<TContext> handler)
-            {
-                return default;
-            }
-
-            if (descriptionText != null)
-            {
-                descriptionText.text = description;
-            }
-
-            thisCanvas.Show();
-            thisUser = user;
-            thisHandle = new(Guid.NewGuid(), this);
-            handler.HandleShow(context);
-            return thisHandle;
-        }
-        public bool TryHide(UIPromptHandle handle)
-        {
-            if (thisHandle != handle)
+            if (activeView == null)
             {
                 return false;
             }
 
-            Hide();
-            return true;
+            if (activeView.IsActive)
+            {
+                return true;
+            }
+
+            activeView = null;
+            return false;
         }
-        public void Hide()
+
+        public UIPromptHandle Show<TContext>(string description, in TContext context) where TContext : struct
         {
-            if (!IsActive)
+            if (HasActivePrompt())
+            {
+                return default;
+            }
+
+            for (int i = 0; i < views.Length; i++)
+            {
+                UIPromptHandle handle = views[i].Show(description, context, this);
+
+                if (handle == default)
+                {
+                    continue;
+                }
+
+                activeView = views[i];
+                thisCanvas.Show();
+                ManagerUI.Instance.ShowCursor();
+                return handle;
+            }
+
+            return default;
+        }
+        public void Hide(UIPromptHandle handle)
+        {
+            if (handle == default || !HasActivePrompt())
             {
                 return;
             }
 
-            thisHandle = default;
-            thisCanvas.Hide();
-            thisHandler?.HandleCancel();
-            thisHandler?.HandleHide();
-            thisUser?.HandlePromptHide();
-            thisUser = null;
+            activeView.TryHide(handle);
         }
+
+        public void HandlePromptHide()
+        {
+            if (activeView == null)
+            {
+                return;
+            }
+
+            activeView = null;
+            thisCanvas.Hide();
+            ManagerUI.Instance.HideCursor();
+        }
+        public bool HandleCanResumeGame()
+        {
+            if (!HasActivePrompt())
+            {
+                return true;
+            }
+
+            activeView.Hide();
+            return false;
+        }
+        public bool HandleCanPauseGame()
+        {
+            if (!HasActivePrompt())
+            {
+                return true;
+            }
+
+            activeView.Hide();
+            return false;
+        }
+        public bool HandleCanShowCursor() => true;
+        public bool HandleCanHideCursor() => !HasActivePrompt();
     }
 }

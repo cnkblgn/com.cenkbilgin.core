@@ -5,9 +5,9 @@ namespace Core.UI
     public readonly struct UIContextMenuHandle : IEquatable<UIContextMenuHandle>
     {
         internal readonly Guid ID;
-        internal readonly UIContextMenuController Controller;
+        internal readonly UIContextMenuView Controller;
 
-        internal UIContextMenuHandle(Guid id, UIContextMenuController controller)
+        internal UIContextMenuHandle(Guid id, UIContextMenuView controller)
         {
             ID = id;
             Controller = controller != null ? controller : throw new ArgumentNullException(nameof(controller), "UI Context menu handle controller is missing!?");

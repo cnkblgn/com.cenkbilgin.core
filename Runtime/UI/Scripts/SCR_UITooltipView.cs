@@ -1,13 +1,10 @@
-using System;
 using UnityEngine;
 
 namespace Core.UI
 {
-    using static CoreUtility;
-
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Canvas))]
-    public sealed class UITooltipController : MonoBehaviour
+    public sealed class UITooltipView : MonoBehaviour
     {
         [Header("_")]
         [SerializeField, Required] private UITextBox textBox = null;

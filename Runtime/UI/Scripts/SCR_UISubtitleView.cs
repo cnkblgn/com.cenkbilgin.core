@@ -7,7 +7,7 @@ namespace Core.UI
     using static CoreUtility;
 
     [RequireComponent(typeof(Canvas))]
-    internal sealed class UISubtitleController : MonoBehaviour
+    internal sealed class UISubtitleView : MonoBehaviour
     {
         private const string CMD_SPEAKER = "SPEAKER";
         private const string CMD_LINE = "LINE";

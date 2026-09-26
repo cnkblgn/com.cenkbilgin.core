@@ -1,181 +1,117 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 
 namespace Core.UI
 {
-    using static CoreUtility;
-
     [DisallowMultipleComponent]
-    [RequireComponent(typeof(RectTransform))]
-    [RequireComponent(typeof(CanvasGroup))]
+    [RequireComponent(typeof(Canvas))]
     internal sealed class UIWaypointView : MonoBehaviour
     {
-        public UIWaypointData Data { get; private set; }
-        public bool IsCompleted { get; private set; }
-
         [Header("_")]
-        [SerializeField, Required] private Image icon = null;
-        [SerializeField, Required] private TextMeshProUGUI text = null;
+        [SerializeField, Required] private UIWaypointItem waypointTemplate;
+        [SerializeField, Range(1, 128)] private int waypointCapacity = 16;
 
-        [Header("_")]
-        [SerializeField] private bool showDistance = false;
-        [SerializeField] private bool hideBehind = false;
+        private Canvas thisCanvas;
+        private RectTransform thisTransform;
+        private Camera cameraController;
+        private Transform cameraTransform;
+        private UIWaypointPool waypointPool;
+        private readonly Dictionary<Guid, UIWaypointItem> waypointTable = new();
+        private bool isOpened;
 
-        private CanvasGroup thisCanvas = null;
-        private RectTransform thisTransform = null;
-        private Action completeCallback = null;
-        private Vector3 offset = Vector3.zero;
-        private float textTimer = 0;
-        private float cachedWidth = 0;
-        private float cachedHeight = 0;
-        private bool isInitialized = false;
-        private bool isVisible = false;
-        private bool isActive = false;
-
-        public void Tick(Camera cameraController, Transform cameraTransform)
+        private void Awake()
         {
-            if (!isActive)
-            {
-                return;
-            }
-
-            if (cameraController == null || cameraTransform == null)
-            {
-                Complete();
-                return;
-            }
-
-            if (Data.HasTarget && Data.TargetTransform == null)
-            {
-                Complete();
-                return;
-            }
-
-            if (showDistance)
-            {
-                textTimer += Time.deltaTime;
-
-                if (textTimer >= 0.5f)
-                {
-                    float distance = Vector3.Distance(Data.Position, cameraTransform.position);
-                    string distanceString = $"{(int)distance} m";
-
-                    text.text = string.IsNullOrEmpty(Data.Text) ? distanceString : $"{Data.Text}\n{distanceString}";
-                    textTimer = 0;
-                }
-            }
-
-            float minX = cachedWidth;
-            float maxX = Screen.width - minX;
-            float minY = cachedHeight;
-            float maxY = Screen.height - minY;
-
-            Vector3 worldPosition = Data.Position + offset;
-            Vector3 screenPosition = cameraController.WorldToScreenPoint(worldPosition);
-            bool isBehind = screenPosition.z < 0f;
-
-            if (isBehind)
-            {
-                screenPosition.x = Screen.width - screenPosition.x;
-                screenPosition.y = Screen.height - screenPosition.y;
-            }
-
-            if (hideBehind)
-            {
-                bool isOffscreen = isBehind || screenPosition.x < 0f || screenPosition.x > Screen.width || screenPosition.y < 0f || screenPosition.y > Screen.height;
-
-                if (isOffscreen)
-                {
-                    if (isVisible)
-                    {
-                        thisCanvas.Hide();
-                        isVisible = false;
-                    }
-                }
-                else
-                {
-                    if (!isVisible)
-                    {
-                        thisCanvas.Show(false, false);
-                        isVisible = true;
-                    }
-                }
-            }
-
-            screenPosition.x = Mathf.Clamp(screenPosition.x, minX, maxX);
-            screenPosition.y = Mathf.Clamp(screenPosition.y, minY, maxY);
-            thisTransform.position = screenPosition;
-        }
-
-        internal void Initialize()
-        {
-            if (isInitialized)
-            {
-                return;
-            }
-
+            thisCanvas = GetComponent<Canvas>();
             thisTransform = GetComponent<RectTransform>();
-            thisCanvas = GetComponent<CanvasGroup>();
-            completeCallback = Complete;
 
-            isInitialized = true;
-        }
-        internal void Deinitialize()
+            waypointTemplate.gameObject.SetActive(false);
+            waypointPool = new(PoolType.RELEASE, waypointTemplate, thisTransform, waypointCapacity);
+        }        
+        private void LateUpdate()
         {
-            if (!isInitialized)
+            if (!isOpened)
             {
                 return;
             }
 
-            Complete();
+            for (int i = 0; i < waypointCapacity; i++)
+            {
+                if (!waypointPool.Pool.TryGet(i, out UIWaypointItem entity))
+                {
+                    continue;
+                }
 
-            isActive = false;
-            IsCompleted = false;
+                if (entity.IsCompleted)
+                {
+                    waypointPool.Pool.Release(entity);
+                    continue;
+                }
+
+                if (!entity.gameObject.activeSelf)
+                {
+                    continue;
+                }
+
+                entity.Tick(cameraController, cameraTransform);
+            }
         }
 
-        public void Show(in UIWaypointData data, Vector3 offset)
+        public void Show()
         {
-            if (!isInitialized)
-            {
-                return;
-            }
-
-            gameObject.SetActive(true);
-
-            Data = data;
-            isActive = true;
-            IsCompleted = false;
-            isVisible = true;
-
-            this.offset = offset;
-            text.text = Data.Text;
-            icon.color = Data.Color;
-            icon.sprite = Data.Icon != null ? Data.Icon : icon.sprite;
-
-            cachedWidth = thisTransform.rect.width * 0.5f;
-            cachedHeight = thisTransform.rect.height * 0.5f;
-
-            thisTransform.localScale = Vector3.zero;
-            thisTransform.Scale(Vector3.one, 0.25f);
+            isOpened = true;
+            thisCanvas.Show();
         }
         public void Hide()
         {
-            if (!isInitialized || !isActive)
+            thisCanvas.Hide();
+            isOpened = false;
+        }
+
+        public void Insert(in UIWaypointData data, Vector3 offset, Camera camera)
+        {
+            UIWaypointItem entity = waypointPool.Spawn(data, offset);
+
+            Guid id = data.ID;
+
+            if (entity == null)
             {
+                Debug.LogError("waypoint entity not found in pool!");
                 return;
             }
 
-            isActive = false;
-            thisTransform.Scale(Vector3.zero, 0.25f, 0.25f, TweenType.SCALED, EaseType.LINEAR, completeCallback);
-        }
+            if (camera == null)
+            {
+                Debug.LogError("waypoint camera is null!");
+                return;
+            }
 
-        private void Complete()
+            if (waypointTable.ContainsKey(id))
+            {
+                Debug.LogError($"duplicate waypoint [{id}]");
+                return;
+            }
+
+            cameraController = camera;
+            cameraTransform = camera.transform;
+
+            waypointTable.Add(id, entity);
+        }
+        public void Remove(in Guid id)
         {
-            IsCompleted = true;
-            thisCanvas.Show(false, false);
-            gameObject.SetActive(false);
+            if (!waypointTable.TryGetValue(id, out UIWaypointItem entity))
+            {
+                Debug.Log($"waypoint [{id}] not found!");
+                return;
+            }
+
+            entity.Hide();
+            waypointTable.Remove(id);
+        }
+        public void Clear()
+        {
+            waypointPool.Pool.Reset(false, true);
+            Hide();
         }
     }
 }

@@ -1,0 +1,90 @@
+using UnityEngine;
+using TMPro;
+
+namespace Core.UI
+{
+    using static CoreUtility;
+
+    [DisallowMultipleComponent]
+    [RequireComponent(typeof(RectTransform))]
+    internal sealed class UINotificationItem : MonoBehaviour
+    {
+        public bool IsActive => isActive;
+        public bool IsInitialized => isInitialized;
+
+        [Header("_")]
+        [SerializeField, Required] private TextMeshProUGUI description = null;
+
+        [Header("_")]
+        [SerializeField] private Vector2 sizePadding = new(36, 0);
+
+        [Header("_")]
+        [SerializeField, Min(0)] private float offsetInDuration = 1;
+        [SerializeField] private EaseType offsetInEaseType = EaseType.EASE_OUT_BOUNCE;
+        [SerializeField, Min(0)] private float offsetOutDuration = 0.5f;
+        [SerializeField] private EaseType offsetOutEaseType = EaseType.LINEAR;
+
+        private RectTransform thisTransform = null;
+        private TaskInstanceTweenOffsetRectX thisTween = null;
+        private Vector2 defaultPosition = Vector2.zero;
+        private Vector2 defaultSize = Vector2.zero;
+        private bool isInitialized = false;
+        private bool isActive = false;
+
+        public void Initialize()
+        {
+            if (isInitialized)
+            {
+                return;
+            }
+
+            thisTransform = GetComponent<RectTransform>();
+            thisTransform.AlignTopLeft();
+            defaultPosition = thisTransform.anchoredPosition;
+            defaultSize = thisTransform.sizeDelta;
+
+            isInitialized = true;
+        }
+        public void Hide()
+        {
+            thisTween?.Stop();
+            isActive = false;
+
+            thisTransform.anchoredPosition = defaultPosition;
+            thisTransform.sizeDelta = defaultSize;
+
+            gameObject.SetActive(false);
+        }
+        public void Show(string text, float duration)
+        {
+            gameObject.SetActive(true);
+
+            isActive = true;
+            thisTween?.Stop();
+
+            description.alignment = TextAlignmentOptions.MidlineLeft;
+            description.textWrappingMode = TextWrappingModes.NoWrap;
+            description.SetText(text);
+            description.ForceMeshUpdate();
+
+            Vector2 textSize = description.GetRenderedValues(false) + sizePadding;
+
+            if (defaultSize.x < textSize.x)
+            {
+                thisTransform.sizeDelta = new(textSize.x, thisTransform.sizeDelta.y);
+            }
+
+            float startEndX = thisTransform.anchoredPosition.x;
+            float startStartX = startEndX - (thisTransform.sizeDelta.x + 128);
+
+            thisTween = thisTransform.OffsetX(startStartX, startEndX, offsetInDuration, duration, TweenType.SCALED, offsetInEaseType, () =>
+            {
+                float exitStartX = thisTransform.anchoredPosition.x;
+                float exitEndX = startStartX;
+
+                thisTween = thisTransform.OffsetX(exitStartX, exitEndX, offsetOutDuration, 0, TweenType.SCALED, offsetOutEaseType, Hide);
+            });
+        }
+        public void Offset(Vector2 offset) => thisTransform.anchoredPosition += offset;       
+    }
+}

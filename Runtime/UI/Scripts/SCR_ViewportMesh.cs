@@ -13,7 +13,7 @@ namespace Core.UI
         public GameObject Connection => connection;
 
         [Header("_")]
-        [SerializeField, Required] private UIViewportView prefab = null;
+        [SerializeField, Required] private UIViewportItem prefab = null;
         [SerializeField, Required] private GameObject connection = null;
 
         [Header("_")]

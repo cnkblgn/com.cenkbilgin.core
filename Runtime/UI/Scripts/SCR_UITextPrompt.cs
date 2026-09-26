@@ -5,7 +5,7 @@ using TMPro;
 namespace Core.UI
 {
     [DisallowMultipleComponent]
-    [RequireComponent(typeof(UIPromptView))]
+    [RequireComponent(typeof(UIPromptItem))]
     internal sealed class UITextPrompt : MonoBehaviour, IUIPromptHandler<UITextPromptContext>
     {
         [Header("_")]

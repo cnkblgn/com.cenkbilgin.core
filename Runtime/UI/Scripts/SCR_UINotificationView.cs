@@ -1,90 +1,111 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
 
 namespace Core.UI
 {
-    using static CoreUtility;
-
     [DisallowMultipleComponent]
-    [RequireComponent(typeof(RectTransform))]
-    internal sealed class UINotification : MonoBehaviour
+    [RequireComponent(typeof(Canvas))]
+    internal sealed class UINotificationView : MonoBehaviour
     {
-        public bool IsActive => isActive;
-        public bool IsInitialized => isInitialized;
+        [Header("_")]
+        [SerializeField, Range(0, 16)] private int maxSize = 12;
+        [SerializeField, Required] private UINotificationItem itemTemplate = null;
+        [SerializeField, Required] private RectTransform itemContainer = null;
 
         [Header("_")]
-        [SerializeField, Required] private TextMeshProUGUI notificationText = null;
+        [SerializeField, Min(0)] private float yPadding = 8;
 
-        [Header("_")]
-        [SerializeField] private Vector2 sizePadding = new(36, 0);
+        private Canvas thisCanvas = null;
+        private List<UINotificationItem> activeEntities = new(1);
+        private Vector2 objectOffset = Vector2.zero;
+        private Vector2 objectPadding = Vector2.zero;
 
-        [Header("_")]
-        [SerializeField, Min(0)] private float offsetInDuration = 1;
-        [SerializeField] private EaseType offsetInEaseType = EaseType.EASE_OUT_BOUNCE;
-        [SerializeField, Min(0)] private float offsetOutDuration = 0.5f;
-        [SerializeField] private EaseType offsetOutEaseType = EaseType.LINEAR;
-
-        private RectTransform thisTransform = null;
-        private TaskInstanceTweenOffsetRectX thisTween = null;
-        private Vector2 defaultPosition = Vector2.zero;
-        private Vector2 defaultSize = Vector2.zero;
-        private bool isInitialized = false;
-        private bool isActive = false;
-
-        public void Initialize()
+        private void Awake()
         {
-            if (isInitialized)
+            thisCanvas = GetComponent<Canvas>();
+            activeEntities = new(maxSize);
+
+            itemTemplate.gameObject.SetActive(false);
+
+            objectOffset = new(0, itemTemplate.GetComponent<RectTransform>().rect.height);
+            objectPadding = new(0, yPadding);
+
+            for (int i = 0; i < maxSize; i++)
+            {
+                UINotificationItem obj = Instantiate(itemTemplate, itemContainer);
+
+                obj.Initialize();
+
+                activeEntities.Add(obj);
+            }
+        }
+
+        public void Show(string text, float duration)
+        {
+            thisCanvas.Show();
+
+            UINotificationItem temp = null;
+
+            foreach (UINotificationItem active in activeEntities)
+            {
+                if (!active.IsActive)
+                {
+                    temp = active;
+                    break;
+                }
+            }
+
+            if (temp == null)
+            {
+                temp = activeEntities[0];
+                Hide(temp);
+            }
+
+            activeEntities.Remove(temp);
+            activeEntities.Add(temp);
+
+            for (int i = 0; i < activeEntities.Count; i++)
+            {
+                if (activeEntities[i].IsActive)
+                {
+                    activeEntities[i].Offset(-objectOffset - objectPadding);
+                }
+            }
+
+            Show(temp, text, duration);
+        }
+        public void Hide()
+        {
+            thisCanvas.Hide();
+        }
+        public void Clear()
+        {
+            foreach (UINotificationItem entity in activeEntities)
+            {
+                Hide(entity);
+            }
+
+            Hide();
+        }
+
+        private void Show(UINotificationItem notification, string text, float duration)
+        {
+            if (notification == null)
             {
                 return;
             }
 
-            thisTransform = GetComponent<RectTransform>();
-            thisTransform.AlignTopLeft();
-            defaultPosition = thisTransform.anchoredPosition;
-            defaultSize = thisTransform.sizeDelta;
-
-            isInitialized = true;
+            notification.Show(text, duration);
         }
-        public void Hide()
+        private void Hide(UINotificationItem notification)
         {
-            thisTween?.Stop();
-            isActive = false;
-
-            thisTransform.anchoredPosition = defaultPosition;
-            thisTransform.sizeDelta = defaultSize;
-
-            gameObject.SetActive(false);
-        }
-        public void Show(string text, float duration)
-        {
-            gameObject.SetActive(true);
-
-            isActive = true;
-            thisTween?.Stop();
-
-            notificationText.alignment = TextAlignmentOptions.MidlineLeft;
-            notificationText.textWrappingMode = TextWrappingModes.NoWrap;
-            notificationText.SetText(text);
-            notificationText.ForceMeshUpdate();
-
-            Vector2 textSize = notificationText.GetRenderedValues(false) + sizePadding;
-
-            if (defaultSize.x < textSize.x)
+            if (notification == null)
             {
-                thisTransform.sizeDelta = new(textSize.x, thisTransform.sizeDelta.y);
+                return;
             }
 
-            float startEndX = thisTransform.anchoredPosition.x;
-            float startStartX = startEndX - (thisTransform.sizeDelta.x + 128);
-
-            thisTween = thisTransform.OffsetX(startStartX, startEndX, offsetInDuration, duration, TweenType.SCALED, offsetInEaseType, () =>
-            {
-                float exitStartX = thisTransform.anchoredPosition.x;
-                float exitEndX = startStartX;
-
-                thisTween = thisTransform.OffsetX(exitStartX, exitEndX, offsetOutDuration, 0, TweenType.SCALED, offsetOutEaseType, Hide);
-            });
+            notification.Hide();
         }
-        public void Offset(Vector2 offset) => thisTransform.anchoredPosition += offset;       
     }
 }

@@ -1,468 +1,425 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 namespace Core.UI
 {
     [DisallowMultipleComponent]
-    public abstract class UIViewportView : MonoBehaviour
+    internal sealed class UIViewportView : MonoBehaviour
     {
-        internal string ID => id;
-        internal bool IsActive => isActive;
-        internal bool IsRendering => isRendering;
-        internal bool CanRender => !renderOnce || !hasRenderedOnce;
-        internal bool CanReceiveInput => receiveInput;
-        internal bool HasTickedOnce => hasTickedOnce;
-        internal bool HasRenderedOnce => hasRenderedOnce;
-        internal float Size => canvasSize;
-        internal float FPS => isFocused ? maxFPS : Mathf.Lerp(maxFPS, minFPS, distanceRatio);
-        protected Camera Camera => data[0].Camera;
-        internal Canvas Canvas => data[0].Canvas;
-        internal RectTransform Transform => data[0].Transform;
-        internal RenderTexture Texture => renderTexture;
-        internal ViewportMesh Mesh => mesh;
-        protected Vector2 PointerPosition => pointerPosition;
-
         [Header("_")]
         [SerializeField] private bool debug = false;
 
         [Header("_")]
-        [SerializeField, Required] private string id = string.Empty;
-        [SerializeField, Required] private RenderTexture renderTexture = null;
-        [SerializeField, Min(1)] private float canvasSize = 165;
+        [SerializeField, Required] private Camera rendererCamera = null;
+        [SerializeField, Required] private Camera inputCamera = null;
+        [SerializeField, Min(0)] private float cullingDistance = 16;
+        [SerializeField] private LayerMask viewportDetectionMask = 0;
 
         [Header("_")]
-        [SerializeField] private bool receiveInput = false;
-        [SerializeField] private bool renderOnce = false;
-        [SerializeField, Range(0, 59)] private float minFPS = 1;
-        [SerializeField, Range(0, 59)] private float maxFPS = 59;
+        [SerializeField, Required] private Transform container = null;
 
-        private UIViewportCanvas[] data = null;
-        private ViewportMesh mesh = null;
-        private EventSystem eventSystem = null;
-        private PointerEventData eventData = null;
-        private GameObject currentPressedObject = null;
-        private GameObject currentHoveredObject = null;
-        private GameObject currentDraggedObject = null;
-        private readonly List<RaycastResult> hitResults = new(16);
-        private Vector2 pointerPosition = Vector2.zero;
-        private Vector2 lastPixelPosition = Vector2.zero;
-        private Vector2 lastPressedPosition = Vector2.zero;
-        private float distanceRatio = 0;
-        private bool isInitialized = false;
-        private bool isRendering = false;
-        private bool isActive = false;
-        private bool isFocused = false;
-        private bool hasRenderedOnce = false;
-        private bool hasTickedOnce = false;
+        private UIViewportItem focusedItem = null;
+        private readonly List<string> ids = new(4);
+        private readonly List<UIViewportItem> items = new(4);
+        private readonly RaycastHit[] collisionBuffer = new RaycastHit[5];
+        private float[] renderTimers = Array.Empty<float>();
+        private int renderIndex = 0;
 
-        private void OnEnable()
+        private void Awake()
         {
-            ManagerGame.OnGameStateChanged += OnGameStateChanged;
+            if (rendererCamera == null)
+            {
+                throw new NullReferenceException($"Viewport renderer camera not found! {nameof(rendererCamera)}");
+            }
+
+            if (inputCamera == null)
+            {
+                throw new NullReferenceException($"Viewport input camera not found! {nameof(inputCamera)}");
+            }
+
+            rendererCamera.enabled = false;
+            inputCamera.enabled = false;
         }
-        private void OnDisable()
-        {
-            ManagerGame.OnGameStateChanged -= OnGameStateChanged;
+        private void OnEnable() => ManagerGame.OnBeforeSceneChanged += OnBeforeSceneChanged;
+        private void OnDisable() => ManagerGame.OnBeforeSceneChanged -= OnBeforeSceneChanged;
 
-            OnDeinitialized();
-        }
+        private void OnBeforeSceneChanged(string obj) => Clear();
 
-        /// <summary> Called every frame. </summary>
-        protected abstract void OnTick();
-        /// <summary> Called after tick. </summary>
-        protected abstract void OnRender();
-        /// <summary> Called when created. </summary>
-        protected abstract void OnInitialized();
-        /// <summary> Called when destroyed. </summary>
-        protected abstract void OnDeinitialized();
-        /// <summary> Called when interaction enter. </summary>
-        protected abstract void OnShow(ViewportMesh mesh);
-        /// <summary> Called when interaction exit. </summary>
-        protected abstract void OnHide();
-        /// <summary> Called when game state changed. </summary>
-        protected virtual void OnGameStateChanged(GameState gameState) { }
-
-        internal void Tick()
+        public void Tick(in UIInputContext ctx)
         {
-            OnTick();
-            hasTickedOnce = true;
-        }
-        internal void Render()
-        {
-            OnRender();
-            hasRenderedOnce = true;
-        }
-
-        protected void MarkDirty() => hasRenderedOnce = false;
-        protected void EnableInput()
-        {
-            if (receiveInput)
+            if (ManagerGame.Instance.GetGameState() != GameState.RESUME)
             {
                 return;
             }
 
-            receiveInput = true;
-            ClearInput();
+            if (ctx.Camera == null)
+            {
+                return;
+            }
+
+            float deltaTime = Time.deltaTime;
+
+            UpdateInput(in ctx);
+
+            for (int i = 0; i < items.Count; i++)
+            {
+                if (items[i].IsActive)
+                {
+                    items[i].Tick();
+                }
+
+                UpdateTimer(i, deltaTime);
+            }
+
+            CullRender(ctx.Camera);
+            NextRender();
         }
-        protected void DisableInput()
+
+        private void UpdateInput(in UIInputContext ctx)
         {
-            if (!receiveInput)
+            Ray ray = ctx.Camera.ScreenPointToRay(ctx.PointerPosition);
+
+            int count = Physics.RaycastNonAlloc(ray, collisionBuffer, 5.0f, viewportDetectionMask, QueryTriggerInteraction.Ignore);
+
+            ViewportMesh targetMesh = null;
+            Vector2 texturePosition = Vector2.zero;
+            float closestDistance = float.MaxValue;
+
+            for (int i = 0; i < count; i++)
             {
-                return;
+                RaycastHit hit = collisionBuffer[i];
+
+                if (hit.distance >= closestDistance)
+                {
+                    continue;
+                }
+
+                if (!hit.collider.TryGetComponent(out ViewportMesh mesh))
+                {
+                    continue;
+                }
+
+                closestDistance = hit.distance;
+                targetMesh = mesh;
+                texturePosition = hit.textureCoord;
             }
 
-            receiveInput = false; 
-            ClearInput();
-        }
-        internal void UpdateInput(in UIInputContext ctx, Vector2 screenPosition)
-        {
-            if (!receiveInput)
+            UIViewportItem targetViewport = null;
+
+            if (targetMesh != null)
             {
-                return;
-            }
-
-            if (!isActive)
-            {
-                return;
-            }
-
-            isFocused = true;
-
-            Vector2 scrollDelta = ctx.PointerScroll * 32f;
-            bool keyDown = ctx.KeyDown;
-            bool keyUp = ctx.KeyUp;
-
-            float renderWidth = Texture.width;
-            float renderHeight = Texture.height;
-
-            pointerPosition = new(Mathf.Clamp01(screenPosition.x) * renderWidth, Mathf.Clamp01(screenPosition.y) * renderHeight);
-
-            eventData.Reset();
-
-            eventData.delta = pointerPosition - lastPixelPosition;
-            lastPixelPosition = pointerPosition;
-
-            eventData.position = pointerPosition;
-            eventData.scrollDelta = scrollDelta;
-
-            hitResults.Clear();
-            for (int i = 0; i < data.Length; i++)
-            {
-                if (data[i].Raycaster != null)
+                for (int i = 0; i < items.Count; i++)
                 {
-                    data[i].Raycaster.Raycast(eventData, hitResults);
+                    UIViewportItem view = items[i];
+
+                    if (!view.IsActive)
+                    {
+                        continue;
+                    }
+
+                    if (!view.CanReceiveInput)
+                    {
+                        continue;
+                    }
+
+                    if (view.Mesh != targetMesh)
+                    {
+                        continue;
+                    }
+
+                    targetViewport = view;
+                    break;
                 }
             }
 
-            // Filtre
-            hitResults.RemoveAll(r =>
+            if (focusedItem != targetViewport)
             {
-                GameObject gameObject = r.gameObject;
-
-                if (gameObject.TryGetComponent(out Graphic graphic) && !graphic.raycastTarget)
+                if (focusedItem != null)
                 {
-                    return true;
+                    focusedItem.ClearInput();
                 }
 
-                if (!gameObject.activeInHierarchy)
-                {
-                    return true;
-                }
+                focusedItem = targetViewport;
+            }
 
-                if (gameObject.TryGetComponent(out LayoutElement layout) && layout.ignoreLayout)
-                {
-                    return true;
-                }
-
-                return false;
-            });
-
-            // Sort
-            hitResults.Sort((a, b) =>
+            if (focusedItem != null)
             {
-                int sortOrder = b.sortingOrder.CompareTo(a.sortingOrder);
-
-                if (sortOrder != 0)
-                {
-                    return sortOrder;
-                }
-
-                int depth = b.depth.CompareTo(a.depth);
-
-                if (depth != 0)
-                {
-                    return depth;
-                }
-
-                return a.distance.CompareTo(b.distance);
-            });
-
-            GameObject topObject = hitResults.Count > 0 ? hitResults[0].gameObject : null;
-            RaycastResult topRaycast = hitResults.Count > 0 ? hitResults[0] : default;
+                inputCamera.targetTexture = focusedItem.Texture;
+                inputCamera.orthographicSize = focusedItem.Size;
+                focusedItem.UpdateInput(in ctx, texturePosition);
+            }
 
             if (debug)
             {
                 Debug.Log
                 (
-                    $"VIEW={ID} " +
-                    $"TOP={(topObject != null ? topObject.name : null ?? "NULL")} " +
-                    $"HITS={hitResults.Count} " +
-                    $"CAMERA_TEXTURE={(Camera.targetTexture != null ? Camera.targetTexture.name : null ?? "NULL")} " +
-                    $"CAMERA_SIZE={Camera.pixelWidth}x{Camera.pixelHeight}"
+                    $"TARGET: {(targetViewport != null ? targetViewport.ID : null ?? "NULL")} | " +
+                    $"FOCUS: {(focusedItem != null ? focusedItem.ID : null ?? "NULL")} | " +
+                    $"KEY_DOWN: {ctx.KeyDown} | KEY_UP: {ctx.KeyUp}"
                 );
             }
-
-            if (topObject != currentHoveredObject)
+        }
+        private void UpdateTimer(int index, float deltaTime)
+        {
+            if (index < 0 || index >= renderTimers.Length)
             {
-                if (currentHoveredObject != null)
+                return;
+            }
+
+            renderTimers[index] += deltaTime;
+        }
+        private void RebuildTimers(int removedIndex)
+        {
+            float[] newTimers = new float[items.Count];
+
+            for (int i = 0; i < items.Count; i++)
+            {
+                int oldIndex = i;
+
+                if (oldIndex >= removedIndex)
                 {
-                    // Pointer Exit
-                    ExecuteEvents.Execute(currentHoveredObject, eventData, ExecuteEvents.pointerExitHandler);
+                    oldIndex++;
                 }
 
-                if (topObject != null)
+                if (oldIndex >= renderTimers.Length)
                 {
-                    // Pointer Enter
-                    ExecuteEvents.Execute(topObject, eventData, ExecuteEvents.pointerEnterHandler);
+                    continue;
                 }
 
-                currentHoveredObject = topObject;
+                newTimers[i] = renderTimers[oldIndex];
             }
 
-            // Scroll
-            if (scrollDelta.sqrMagnitude > 0.0f && topObject != null)
+            int newIndex = renderIndex;
+
+            if (renderIndex > removedIndex)
             {
-                ExecuteEvents.ExecuteHierarchy(topObject, eventData, ExecuteEvents.scrollHandler);
+                newIndex--;
             }
 
-            // Pointer Down
-            if (keyDown)
+            if (items.Count > 0)
             {
-                currentPressedObject = topObject;
-                lastPressedPosition = this.pointerPosition;
-                eventData.pressPosition = this.pointerPosition;
-                eventData.pointerPressRaycast = topRaycast;
-                eventData.pointerCurrentRaycast = topRaycast;
-                eventData.button = PointerEventData.InputButton.Left;
-                eventData.eligibleForClick = true;
-                eventData.useDragThreshold = true;
-
-                ExecuteEvents.Execute(topObject, eventData, ExecuteEvents.pointerDownHandler);
-            }
-
-            // -------- Drag Logic --------
-            if (currentPressedObject != null && currentDraggedObject == null)
-            {
-                float dist = Vector2.Distance(lastPressedPosition, this.pointerPosition);
-
-                const float dragStartDistance = 8f;
-                if (dist >= dragStartDistance)
-                {
-                    currentDraggedObject = currentPressedObject;
-
-                    // Begin Drag
-                    ExecuteEvents.Execute(currentDraggedObject, eventData, ExecuteEvents.beginDragHandler);
-                }
-            }
-
-            if (currentDraggedObject != null)
-            {
-                // Drag
-                ExecuteEvents.Execute(currentDraggedObject, eventData, ExecuteEvents.dragHandler);
-            }
-
-            if (keyUp)
-            {
-                // End Drag
-                if (currentDraggedObject != null)
-                {
-                    ExecuteEvents.Execute(currentDraggedObject, eventData, ExecuteEvents.endDragHandler);
-                    currentDraggedObject = null;
-                }
-
-                // Pointer Up
-                ExecuteEvents.Execute(topObject, eventData, ExecuteEvents.pointerUpHandler);
-
-                if (currentPressedObject != null && topObject == currentPressedObject)
-                {
-                    // Pointer Click
-                    ExecuteEvents.Execute(topObject, eventData, ExecuteEvents.pointerClickHandler);
-                }
-
-                currentPressedObject = null;
-            }
-        }
-        internal void ClearInput()
-        {
-            if (eventData == null)
-            {
-                return;
-            }
-
-            if (currentHoveredObject != null)
-            {
-                ExecuteEvents.Execute(currentHoveredObject, eventData, ExecuteEvents.pointerExitHandler);
-            }
-
-            if (currentDraggedObject != null)
-            {
-                ExecuteEvents.Execute(currentDraggedObject, eventData, ExecuteEvents.endDragHandler);
-            }
-
-            eventData.position = Vector2.zero;
-            eventData.delta = Vector2.zero;
-            pointerPosition = Vector2.zero;
-            lastPixelPosition = Vector2.zero;
-            currentPressedObject = null;
-            currentDraggedObject = null;
-            currentHoveredObject = null;
-            eventData.Reset();
-            hitResults.Clear();
-            isFocused = false;
-        }
-
-        internal void Initialize(Camera renderCamera)
-        {
-            if (isInitialized)
-            {
-                return;
-            }
-
-            isInitialized = true;
-            isRendering = false;
-            isActive = false;
-
-            Canvas[] canvases = GetComponentsInChildren<Canvas>();
-            data = new UIViewportCanvas[canvases.Length];
-
-            for (int i = 0; i < data.Length; i++)
-            {
-                data[i] = new
-                (
-                    renderCamera, 
-                    canvases[i], 
-                    canvases[i].GetComponent<RectTransform>(), 
-                    canvases[i].GetComponent<GraphicRaycaster>()
-                );
-            }           
-
-            Canvas.Hide();
-
-            eventSystem = EventSystem.current;
-            eventData = new(eventSystem);
-
-            OnInitialized();
-        }
-        internal void Deinitialize()
-        {
-            if (!isInitialized)
-            {
-                return;
-            }
-
-            isInitialized = false;
-            OnDeinitialized();
-        }
-
-        internal void ShowRenderer()
-        {
-            if (!isActive)
-            {
-                return;
-            }
-
-            if (isRendering)
-            {
-                return;
-            }
-
-            Canvas.Show();
-
-            isRendering = true;
-
-            if (mesh != null)
-            {
-                mesh.ShowRenderer();
-            }
-        }
-        internal void HideRenderer()
-        {
-            if (!isActive)
-            {
-                return;
-            }
-
-            if (!isRendering)
-            {
-                return;
-            }
-
-            Canvas.Hide();
-
-            isRendering = false;
-
-            if (mesh != null)
-            {
-                mesh.HideRenderer();
-            }
-        }
-
-        internal void ShowViewport(ViewportMesh mesh)
-        {
-            if (isActive)
-            {
-                return;
-            }
-
-            if (receiveInput)
-            {
-                ManagerUI.Instance.ShowCursor();
-            }
-
-            hasRenderedOnce = false;
-            isActive = true;
-
-            OnShow(this.mesh = mesh);
-            ShowRenderer();
-        }      
-        internal void HideViewport()
-        {
-            if (!isActive)
-            {
-                return;
-            }
-
-            if (receiveInput)
-            {
-                ManagerUI.Instance.HideCursor();
-            }
-
-            OnHide();
-            HideRenderer();
-            ClearInput();
-
-            isActive = false;
-        }
-
-        internal void TryCull(Transform target, float cullingDistance)
-        {
-            if (!IsActive)
-            {
-                return;
-            }
-
-            bool isInView = mesh.CheckVisibility(target, cullingDistance, out float actualDistance);
-
-            distanceRatio = Mathf.Clamp01(actualDistance / cullingDistance);
-
-            if (!isInView)
-            {
-                HideRenderer();
+                newIndex = Mathf.Clamp(newIndex, 0, items.Count - 1);
             }
             else
             {
-                ShowRenderer();
+                newIndex = 0;
+            }
+
+            renderTimers = newTimers;
+            renderIndex = newIndex;
+        }
+
+        private void NextRender()
+        {
+            int count = items.Count;
+
+            if (count == 0)
+            {
+                return;
+            }
+
+            int safety = count;
+
+            while (safety-- > 0)
+            {
+                int index = renderIndex;
+
+                renderIndex = (renderIndex + 1) % count;
+
+                UIViewportItem view = items[index];
+
+                if (!view.IsActive)
+                {
+                    continue;
+                }
+
+                if (!view.IsRendering)
+                {
+                    continue;
+                }
+
+                if (!view.CanRender)
+                {
+                    continue;
+                }
+
+                float interval = 1f / Mathf.Max(1f, view.FPS);
+
+                if (renderTimers[index] < interval)
+                {
+                    continue;
+                }
+
+                renderTimers[index] -= interval;
+
+                StartRender(view);
+                break;
+            }
+        }
+        private void PreRender(UIViewportItem view)
+        {
+            for (int i = 0; i < items.Count; i++)
+            {
+                UIViewportItem current = items[i];
+
+                if (current != view)
+                {
+                    current.HideRenderer();
+                }
+            }
+        }
+        private void StartRender(UIViewportItem view)
+        {
+            PreRender(view);
+
+            rendererCamera.targetTexture = view.Texture;
+            rendererCamera.orthographicSize = view.Size;
+
+            view.Render();
+
+            rendererCamera.Render();
+
+            PostRender(view);
+        }
+        private void PostRender(UIViewportItem view)
+        {
+            for (int i = 0; i < items.Count; i++)
+            {
+                UIViewportItem current = items[i];
+
+                if (current != view)
+                {
+                    current.ShowRenderer();
+                }
+            }
+        }
+        private void CullRender(Camera camera)
+        {
+            for (int i = 0; i < items.Count; i++)
+            {
+                items[i].TryCull(camera.transform, cullingDistance);
+            }
+        }
+
+        public void Add(UIViewportItem prefab)
+        {
+            if (prefab == null)
+            {
+                Debug.LogError("You are trying to add null viewport prefab!");
+                return;
+            }
+
+            if (ids.Contains(prefab.ID))
+            {
+#if UNITY_EDITOR
+                Debug.LogWarning($"Viewport [{prefab.ID}] is already added to manager! ignore if its intented");
+#endif
+                return;
+            }
+
+            UIViewportItem view = GameObject.Instantiate(prefab, container);
+            view.Initialize(prefab.CanReceiveInput ? inputCamera : rendererCamera);
+
+            rendererCamera.enabled = false;
+
+            ids.Add(view.ID);
+            items.Add(view);
+
+            Array.Resize(ref renderTimers, items.Count);
+            renderTimers[^1] = 0f;
+        }
+        public void Remove(string id)
+        {
+            if (!ids.Contains(id))
+            {
+#if UNITY_EDITOR
+                Debug.LogWarning("you are trying to remove stage object that does not exists! ignore if its intented");
+#endif
+                return;
+            }
+
+            for (int i = 0; i < items.Count; i++)
+            {
+                if (items[i].ID == id)
+                {
+                    UIViewportItem view = items[i];
+
+                    if (focusedItem == view)
+                    {
+                        view.ClearInput();
+                        focusedItem = null;
+                    }
+
+                    ids.Remove(id);
+                    items.Remove(view);
+                    Destroy(view.gameObject);
+
+                    RebuildTimers(i);
+                    break;
+                }
+            }
+        }
+        public void Clear()
+        {
+            for (int i = 0; i < items.Count; i++)
+            {
+                items[i].Deinitialize();
+                Destroy(items[i].gameObject);
+            }
+
+            focusedItem = null;
+
+            ids.Clear();
+            items.Clear();
+
+            renderTimers = Array.Empty<float>();
+            renderIndex = 0;
+        }
+
+        public void Show(string id, ViewportMesh mesh)
+        {
+            if (mesh == null)
+            {
+                Debug.LogError("viewport mesh is null!");
+                return;
+            }
+
+            if (!ids.Contains(id))
+            {
+                Debug.LogError("You are trying to show viewport that does not exists!");
+                return;
+            }
+
+            for (int i = 0; i < items.Count; i++)
+            {
+                if (items[i].ID != id)
+                {
+                    continue;
+                }
+
+                items[i].ShowViewport(mesh);
+                renderTimers[i] = 1f / Mathf.Max(1f, items[i].FPS);
+                break;
+            }
+        }
+        public void Hide(string id)
+        {
+            if (!ids.Contains(id))
+            {
+                Debug.LogError("You are trying to hide viewport that does not exists!");
+                return;
+            }
+
+            for (int i = 0; i < items.Count; i++)
+            {
+                if (items[i].ID != id)
+                {
+                    continue;
+                }
+
+                items[i].HideViewport();
+                break;
             }
         }
     }
