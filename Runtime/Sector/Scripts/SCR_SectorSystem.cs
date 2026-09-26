@@ -7,17 +7,16 @@ namespace Core.Sector
 
     public class SectorSystem : MonoBehaviour
     {
-        private enum GridSize : int 
+        private enum GridSize : int
         {
             _256 = 256,
             _512 = 512,
             _1024 = 1024,
-            _2048 = 2048, 
-            _4096 = 4096 
+            _2048 = 2048,
+            _4096 = 4096
         }
-
-        private enum TileCount : int 
-        { 
+        private enum TileCount : int
+        {
             _2 = 2,
             _4 = 4,
             _8 = 8,
@@ -28,8 +27,8 @@ namespace Core.Sector
         private const int NEIGHBOR_COUNT = 8;
         private const float SHIFT_THRESHOLD = 512;
 
-        public static Vector3 OriginOffset { get; private set; }
         public static event Action<Vector3> OnOriginShift = null;
+        public static Vector3 OriginOffset { get; private set; }
 
         [Header("_")]
         [Info("If not visible please generate sectors.")]
@@ -104,8 +103,8 @@ namespace Core.Sector
 
                 return gizmosStyle;
             }
-        } private static GUIStyle gizmosStyle;
-
+        }
+        private static GUIStyle gizmosStyle;
         private void OnDrawGizmos()
         {
             if (!showGizmos)
@@ -135,6 +134,21 @@ namespace Core.Sector
         }
 #endif
 
+        [ContextMenu("Generate")]
+        public void Initialize()
+        {
+            totalSize = (int)gridSize;
+            gridCount = (int)tileCount;
+
+            sectorSize = totalSize / gridCount;
+            sectorCount = gridCount * gridCount;
+
+            sectors = new Sector[sectorCount];
+            neighbors = new int[sectorCount * NEIGHBOR_COUNT];
+
+            GenerateSectors();
+        }
+
         private void ShiftOrigin(Vector3 offset)
         {
             OriginOffset += offset;
@@ -150,21 +164,6 @@ namespace Core.Sector
             {
                 throw new ArgumentOutOfRangeException("sector id is not exists!");
             }
-        }
-
-        [ContextMenu("Generate")]
-        public void Initialize()
-        {
-            totalSize = (int)gridSize;
-            gridCount = (int)tileCount;
-
-            sectorSize = totalSize / gridCount;
-            sectorCount = gridCount * gridCount;
-
-            sectors = new Sector[sectorCount];
-            neighbors = new int[sectorCount * NEIGHBOR_COUNT];
-
-            GenerateSectors();
         }
 
         private static void GenerateSectors()
@@ -332,6 +331,66 @@ namespace Core.Sector
                    position.z <= center.z + half.z;
         }
 
+        public static Vector4 GetMapEdgeDistances(Vector3 position)
+        {
+            float left = position.x;
+            float right = totalSize - position.x;
+            float bottom = position.z;
+            float top = totalSize - position.z;
+
+            return new Vector4(left, right, bottom, top);
+        }
+        public static Vector4 GetSectorEdgeDistances(int id, Vector3 position)
+        {
+            Sector sector = GetSector(id);
+            Vector3 half = sector.Size * 0.5f;
+            Vector3 center = sector.Position - OriginOffset;
+
+            float left = position.x - (center.x - half.x);
+            float right = (center.x + half.x) - position.x;
+            float bottom = position.z - (center.z - half.z);
+            float top = (center.z + half.z) - position.z;
+
+            return new Vector4(left, right, bottom, top);
+        }
+
+        public static Vector3 GetTargetMapPosition()
+        {
+            if (target == null)
+            {
+                throw new NullReferenceException("Get target map position failed! Target is not set!");
+            }
+
+            return target.position + OriginOffset;
+        }
+        public static Vector4 GetTargetMapEdgeDistances()
+        {
+            Vector4 distances = GetMapEdgeDistances(GetTargetMapPosition());
+
+            return distances;
+        }
+        public static Vector4 GetTargetSectorEdgeDistances()
+        {
+            Vector3 position = target.position;
+            Sector sector = GetSector(position);
+
+            return GetSectorEdgeDistances(sector.ID, position);
+        }
+
+        public static float GetTargetDistanceToNearestMapEdge()
+        {
+            Vector4 distances = GetTargetMapEdgeDistances();
+
+            return Mathf.Min(Mathf.Min(distances.x, distances.y), Mathf.Min(distances.z, distances.w));
+        }
+        public static float GetTargetDistanceToNearestSectorEdge()
+        {
+            Vector4 distances = GetTargetSectorEdgeDistances();
+
+            return Mathf.Min(Mathf.Min(distances.x, distances.y), Mathf.Min(distances.z, distances.w));
+        }
+
+        
         public static void SetTarget(Transform transform) => target = transform == null ? throw new ArgumentNullException(nameof(transform)) : transform;
 
         public static Transform GetRoot() => root;

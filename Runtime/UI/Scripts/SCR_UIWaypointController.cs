@@ -57,7 +57,18 @@ namespace Core.UI
             }
         }
 
-        public void Show(in UIWaypointData data, Vector3 offset, Camera camera)
+        public void Show()
+        {
+            isOpened = true;
+            thisCanvas.Show();
+        }
+        public void Hide()
+        {
+            thisCanvas.Hide();
+            isOpened = false;
+        }
+
+        public void Insert(in UIWaypointData data, Vector3 offset, Camera camera)
         {
             UIWaypointView entity = waypointPool.Spawn(data, offset);
 
@@ -85,15 +96,8 @@ namespace Core.UI
             cameraTransform = camera.transform;
 
             waypointTable.Add(id, entity);
-
-            ShowAll();
         }
-        public void ShowAll()
-        {
-            isOpened = true;
-            thisCanvas.Show();
-        }
-        public void Hide(in Guid id)
+        public void Remove(in Guid id)
         {
             if (!waypointTable.TryGetValue(id, out UIWaypointView entity))
             {
@@ -104,15 +108,10 @@ namespace Core.UI
             entity.Hide();
             waypointTable.Remove(id);
         }
-        public void HideAll()
-        {
-            thisCanvas.Hide();
-            isOpened = false;
-        }
         public void Clear()
         {
             waypointPool.Pool.Reset(false, true);
-            HideAll();
+            Hide();
         }
     }
 }
