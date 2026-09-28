@@ -19,6 +19,8 @@ namespace Core.PostProcessing
         private static readonly int QuantizeStepsID = Shader.PropertyToID("_QuantizeSteps");
         private static readonly int DitherStrengthID = Shader.PropertyToID("_DitherStrength");
         private static readonly int DitherSizeID = Shader.PropertyToID("_DitherSize");
+        private static readonly int DitherSpreadID = Shader.PropertyToID("_DitherSpread");
+        private static readonly int DitherStepsID = Shader.PropertyToID("_DitherSteps");
         private static LocalKeyword ClarifyKeyword;
         private static LocalKeyword VibranceKeyword;
         private static LocalKeyword SharpenKeyword;
@@ -55,6 +57,8 @@ namespace Core.PostProcessing
             public bool DitherEnabled;
             public float DitherStrength;
             public float DitherSize;
+            public float DitherSpread;
+            public float DitherSteps;
         }
 
         public void Setup(Material material, RenderPassEvent renderPassEvent)
@@ -84,11 +88,13 @@ namespace Core.PostProcessing
             data.Material.SetFloat(SharpenClampID, data.SharpenClamp);
 
             data.Material.SetKeyword(QuantizeKeyword, data.QuantizeEnabled);
-            data.Material.SetFloat(QuantizeStepsID, data.QuantizeSteps);
+            data.Material.SetInt(QuantizeStepsID, data.QuantizeSteps);
 
             data.Material.SetKeyword(DitherKeyword, data.DitherEnabled);
             data.Material.SetFloat(DitherStrengthID, data.DitherStrength);
             data.Material.SetFloat(DitherSizeID, data.DitherSize);
+            data.Material.SetFloat(DitherSpreadID, data.DitherSpread);
+            data.Material.SetFloat(DitherStepsID, data.DitherSteps);
 
             Blitter.BlitTexture(context.cmd, data.Source, new Vector4(1, 1, 0, 0), data.Material, 0);
         }
@@ -139,6 +145,8 @@ namespace Core.PostProcessing
                 passData.DitherEnabled = dither.active && dither.Enabled.value && dither.Strength.value != 0;
                 passData.DitherStrength = dither.Strength.value;
                 passData.DitherSize = dither.Size.value;
+                passData.DitherSpread = dither.Spread.value;
+                passData.DitherSteps = dither.Steps.value;
             }
             
             builder.UseTexture(passData.Source, AccessFlags.Read);
