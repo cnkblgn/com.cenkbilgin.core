@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Core.Localization;
-using System.Linq;
 
 namespace Core.Item
 {
@@ -58,6 +58,7 @@ namespace Core.Item
             GameObject @object = new("_DO_NOT_DELETE_ORPHAN_INVENTORY_!", typeof(InventoryEntity));
             InventoryEntity entity = @object.GetComponent<InventoryEntity>();
 
+            entity.name = new("ORPHAN_INVENTORY");
             entity.startingItems = Array.Empty<ItemID>();
             entity.whitelistedItems = ItemDatabase.GetTags().ToArray();
             entity.width = width;

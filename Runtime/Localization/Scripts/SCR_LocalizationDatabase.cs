@@ -6,6 +6,8 @@ using UnityEngine;
 
 namespace Core.Localization
 {
+    using static CoreUtility;
+
     public static class LocalizationDatabase
     {
         public static event Action<int> OnLocalizationChanged = null;
@@ -75,6 +77,13 @@ namespace Core.Localization
             if (!IsParsed)
             {
                 throw new InvalidOperationException($"Localization database is not parsed!");
+            }
+
+            if (key == null)
+            {
+                Debug.LogError("Localization get string failed! key is null!?");
+                value = STRING_EMPTY;
+                return false;
             }
 
             if (currentLanguageData.TryGetValue(key, out value))
