@@ -85,6 +85,7 @@ namespace Core.Item
         public IReadOnlyCollection<Guid> GetItems() => thisInventory.GetItems();
         public int GetItemCount() => GetItems().Count;
         public int GetItemCount(ItemID baseID) => thisInventory.GetItemCount(baseID);
+        public int GetItemCount<TContext>(Func<ItemData, TContext, bool> filter, TContext ctx) => thisInventory.GetItemCount(filter, ctx);
         public ItemData[,] GetSnapshot() => thisInventory.GetSnapshot();
 
         public void SetDropOrigin(Transform transform) => dropOrigin = transform;
@@ -104,13 +105,17 @@ namespace Core.Item
         /// <summary> Finds the first item that matches any of the given tags. </summary>
         public bool TryGetItemByTag(ulong tags, out ItemData registered, out InventoryResult result) => thisInventory.TryGetItemByTag(tags, out registered, out result);
         /// <summary> Finds all items that match any of the given tags. </summary>
-        public bool TryGetItemsByTag(ItemTag[] tags, out List<ItemData> registered, out InventoryResult result) => thisInventory.TryGetItemsByTag(tags.CreateMask(), out registered, out result);
+        public bool TryGetItemsByTag(ItemTag[] tags, List<ItemData> registered, out InventoryResult result) => thisInventory.TryGetItemsByTag(tags.CreateMask(), registered, out result);
         /// <summary> Finds all items that match any of the given tags. </summary>
-        public bool TryGetItemsByTag(ulong tags, out List<ItemData> registered, out InventoryResult result) => thisInventory.TryGetItemsByTag(tags, out registered, out result);
+        public bool TryGetItemsByTag(ulong tags, List<ItemData> registered, out InventoryResult result) => thisInventory.TryGetItemsByTag(tags, registered, out result);
         /// <summary> Finds the first item with the given base ID. </summary>
         public bool TryGetItemByBaseID(ItemID baseID, out ItemData registered, out InventoryResult result) => thisInventory.TryGetItemByBaseID(baseID, out registered, out result);
-        /// <summary> Adds all items with the given base ID to the provided list. </summary>
+        /// <summary> Finds all items with the given base ID to the provided list. </summary>
         public bool TryGetItemsByBaseID(ItemID baseID, List<ItemData> registered, out InventoryResult result) => thisInventory.TryGetItemsByBaseID(baseID, registered, out result);
+        /// <summary> Finds the first item with the given filter. </summary>
+        public bool TryGetItemByFilter<TContext>(Func<ItemData, TContext, bool> filter, TContext ctx, out ItemData registered, out InventoryResult result) => thisInventory.TryGetItemByFilter(filter, ctx, out registered, out result);
+        /// <summary> Finds all items with the given filter. </summary>
+        public bool TryGetItemsByFilter<TContext>(Func<ItemData, TContext, bool> filter, TContext ctx, List<ItemData> registered, out InventoryResult result) => thisInventory.TryGetItemsByFilter(filter, ctx, registered, out result);
         /// <summary> Finds an item by its unique instance ID. </summary>
         public bool TryGetItemByInstanceID(Guid instanceID, out ItemData registered, out InventoryResult result) => thisInventory.TryGetItemByInstanceID(instanceID, out registered, out result);
         /// <summary> Finds the item occupying the given grid position. </summary>

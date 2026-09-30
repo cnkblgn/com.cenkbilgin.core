@@ -69,13 +69,20 @@ namespace Core.Item
             Notify(InventoryState.INITIALIZED, InventoryResult.SUCCESS);
         }
         public IReadOnlyCollection<Guid> GetItems() => itemTable.Keys;
-        public int GetItemCount(ItemID baseID)
+        public int GetItemCount(ItemID baseID) => GetItemCount(static (item, baseID) => item.BaseID == baseID, baseID);
+        public int GetItemCount<TContext>(Func<ItemData, TContext, bool> filter, TContext ctx)
         {
+            if (filter == null)
+            {
+                Debug.LogError("Get item count failed! filter is null!?");
+                return 0;
+            }
+
             int count = 0;
 
             foreach (ItemData item in itemTable.Values)
             {
-                if (item.BaseID == baseID)
+                if (filter(item, ctx))
                 {
                     count++;
                 }
@@ -83,6 +90,7 @@ namespace Core.Item
 
             return count;
         }
+
         public ItemData[,] GetSnapshot()
         {
             ItemData[,] snapshot = new ItemData[GridWidth, GridHeight];
@@ -246,45 +254,24 @@ namespace Core.Item
             return false;
         }
         /// <summary> Finds the first item that matches any of the given tags. </summary>
-        public bool TryGetItemByTag(ulong tags, out ItemData registered, out InventoryResult result)
-        {
-            foreach (ItemData item in itemTable.Values)
-            {
-                if (item.Tags.HasAny(tags))
-                {
-                    registered = item;
-                    result = InventoryResult.SUCCESS;
-                    return true;
-                }
-            }
-
-            registered = null;
-            result = InventoryResult.NOT_REGISTERED;
-            return false;
-        }
+        public bool TryGetItemByTag(ulong tags, out ItemData registered, out InventoryResult result) => TryGetItemByFilter(static (item, tags) => item.Tags.HasAny(tags), tags, out registered, out result);
         /// <summary> Finds all items that match any of the given tags. </summary>
-        public bool TryGetItemsByTag(ulong tags, out List<ItemData> items, out InventoryResult result)
+        public bool TryGetItemsByTag(ulong tags, List<ItemData> registered, out InventoryResult result) => TryGetItemsByFilter(static (item, tags) => item.Tags.HasAny(tags), tags, registered, out result);
+        /// <summary> Finds the first item with the given base ID. </summary>
+        public bool TryGetItemByBaseID(ItemID baseID, out ItemData registered, out InventoryResult result) => TryGetItemByFilter(static (item, baseID) => item.BaseID == baseID, baseID, out registered, out result);
+        /// <summary> Finds all items with the given base ID to the provided list. </summary>
+        public bool TryGetItemsByBaseID(ItemID baseID, List<ItemData> registered, out InventoryResult result) => TryGetItemsByFilter(static (item, baseID) => item.BaseID == baseID, baseID, registered, out result);
+        /// <summary> Finds the first item with the given filter. </summary>
+        public bool TryGetItemByFilter<TContext>(Func<ItemData, TContext, bool> filter, TContext ctx, out ItemData registered, out InventoryResult result)
         {
-            items = new();
-            result = InventoryResult.NOT_REGISTERED;
-
-            foreach (ItemData item in itemTable.Values)
+            if (filter == null)
             {
-                if (item.Tags.HasAny(tags))
-                {
-                    items.Add(item);
-                    result = InventoryResult.SUCCESS;
-                }
+                throw new ArgumentNullException(nameof(filter), $"Get items by filter failed! filter cannot be null!");
             }
 
-            return result == InventoryResult.SUCCESS;
-        }
-        /// <summary> Finds the first item with the given base ID. </summary>
-        public bool TryGetItemByBaseID(ItemID baseID, out ItemData registered, out InventoryResult result)
-        {
             foreach (ItemData item in itemTable.Values)
             {
-                if (item.BaseID == baseID)
+                if (filter(item, ctx))
                 {
                     result = InventoryResult.SUCCESS;
                     registered = item;
@@ -296,19 +283,24 @@ namespace Core.Item
             registered = null;
             return false;
         }
-        /// <summary> Adds all items with the given base ID to the provided list. </summary>
-        public bool TryGetItemsByBaseID(ItemID baseID, List<ItemData> registered, out InventoryResult result)
+        /// <summary> Finds all items with the given filter. </summary>
+        public bool TryGetItemsByFilter<TContext>(Func<ItemData, TContext, bool> filter, TContext ctx, List<ItemData> registered, out InventoryResult result)
         {
+            if (filter == null)
+            {
+                throw new ArgumentNullException(nameof(filter), $"Get items by filter failed! filter cannot be null!");
+            }
+
             if (registered == null)
             {
-                throw new ArgumentNullException(nameof(registered), $"Get items by base id failed! Registered list cannot be null!");
+                throw new ArgumentNullException(nameof(registered), $"Get items by filter failed! Registered list cannot be null!");
             }
 
             result = InventoryResult.NOT_REGISTERED;
 
             foreach (ItemData item in itemTable.Values)
             {
-                if (item.BaseID == baseID)
+                if (filter(item, ctx))
                 {
                     result = InventoryResult.SUCCESS;
                     registered.Add(item);
@@ -377,7 +369,7 @@ namespace Core.Item
             Vector2Int position = item.GetPosition();
             Vector2Int scale = item.GetScale();
 
-            void ScanEdge(List<ItemData> list, int startX, int startY, int width, int height)
+            void scanEdge(List<ItemData> list, int startX, int startY, int width, int height)
             {
                 for (int y = startY; y < startY + height; y++)
                 {
@@ -398,10 +390,10 @@ namespace Core.Item
                 }
             }
 
-            ScanEdge(items, position.x - 1, position.y, 1, scale.y);              // sol kenar
-            ScanEdge(items, position.x + scale.x, position.y, 1, scale.y);        // sað kenar
-            ScanEdge(items, position.x, position.y - 1, scale.x, 1);              // üst kenar
-            ScanEdge(items, position.x, position.y + scale.y, scale.x, 1);        // alt kenar
+            scanEdge(items, position.x - 1, position.y, 1, scale.y);              // sol kenar
+            scanEdge(items, position.x + scale.x, position.y, 1, scale.y);        // sað kenar
+            scanEdge(items, position.x, position.y - 1, scale.x, 1);              // üst kenar
+            scanEdge(items, position.x, position.y + scale.y, scale.x, 1);        // alt kenar
 
             return items.Count != 0;
         }
