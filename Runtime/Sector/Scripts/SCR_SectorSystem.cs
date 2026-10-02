@@ -25,10 +25,13 @@ namespace Core.Sector
         }
 
         private const int NEIGHBOR_COUNT = 8;
-        private const float SHIFT_THRESHOLD = 512;
 
         public static event Action<Vector3> OnOriginShift = null;
         public static Vector3 OriginOffset { get; private set; }
+
+        [Header("_")]
+        [Info("Distance threshold. The root is offset when the target reaches this distance.")]
+        [SerializeField, Range((int)(GridSize._256), (int)(GridSize._4096))] private float shiftThreshold = 512;
 
         [Header("_")]
         [Info("If not visible please generate sectors.")]
@@ -87,7 +90,7 @@ namespace Core.Sector
 
             Vector3 position = target.position;
 
-            if (position.sqrMagnitude > SHIFT_THRESHOLD * SHIFT_THRESHOLD)
+            if (position.sqrMagnitude > shiftThreshold * shiftThreshold)
             {
                 ShiftOrigin(position);
             }
