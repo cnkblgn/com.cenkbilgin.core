@@ -17,7 +17,7 @@ namespace Core
         {
             task.Reset();
 
-            TaskSystem.TryCreate(task);
+            TaskSystem.Insert(task);
         }
         public static void Schedule(this TaskInstanceWaitSeconds task, float duration)
         {
@@ -25,7 +25,7 @@ namespace Core
 
             task.Reset();
 
-            TaskSystem.TryCreate(task);
+            TaskSystem.Insert(task);
         }
         public static void Schedule(this TaskInstanceWaitSecondsRealtime task, float duration)
         {
@@ -33,7 +33,7 @@ namespace Core
 
             task.Reset();
 
-            TaskSystem.TryCreate(task);
+            TaskSystem.Insert(task);
         }
 
         public static void Schedule(this TaskInstanceTweenTranslate task, Space space, Vector3 start, Vector3 target)
@@ -44,7 +44,7 @@ namespace Core
             task.OverrideStart(start);
             task.OverrideTarget(target);
 
-            TaskSystem.TryCreate(task);
+            TaskSystem.Insert(task);
         }
         public static void Schedule(this TaskInstanceTweenRotate task, Space space, Quaternion start, Quaternion target)
         {
@@ -54,7 +54,7 @@ namespace Core
             task.OverrideStart(start);
             task.OverrideTarget(target);
 
-            TaskSystem.TryCreate(task);
+            TaskSystem.Insert(task);
         }
         public static void Schedule(this TaskInstanceTweenScale task, Vector3 start, Vector3 target)
         {
@@ -63,14 +63,14 @@ namespace Core
             task.OverrideStart(start);
             task.OverrideTarget(target);
 
-            TaskSystem.TryCreate(task);
+            TaskSystem.Insert(task);
         }
 
         public static void WaitUntil(this MonoBehaviour host, Func<bool> predicate, Action onStart, Action onComplete)
         {
             onStart?.Invoke();
 
-            TaskSystem.TryCreate(new TaskInstanceWaitUntil(host, predicate, onComplete));
+            TaskSystem.Insert(new TaskInstanceWaitUntil(host, predicate, onComplete));
         }
         public static TaskInstance WaitUntilExt(this MonoBehaviour host, Func<bool> predicate, Action onStart, Action onComplete)
         {
@@ -78,19 +78,19 @@ namespace Core
 
             TaskInstanceWaitUntil instance = new(host, predicate, onComplete);
 
-            TaskSystem.TryCreate(instance);
+            TaskSystem.Insert(instance);
 
             return instance;
         }
         public static void WaitUntil(this MonoBehaviour host, Func<bool> predicate, Action onComplete)
         {
-            TaskSystem.TryCreate(new TaskInstanceWaitUntil(host, predicate, onComplete));
+            TaskSystem.Insert(new TaskInstanceWaitUntil(host, predicate, onComplete));
         }
         public static TaskInstance WaitUntilExt(this MonoBehaviour host, Func<bool> predicate, Action onComplete)
         {
             TaskInstanceWaitUntil instance = new(host, predicate, onComplete);
 
-            TaskSystem.TryCreate(instance);
+            TaskSystem.Insert(instance);
 
             return instance;
         }
@@ -104,7 +104,7 @@ namespace Core
                 return;
             }
 
-            TaskSystem.TryCreate(new TaskInstanceWaitSeconds(host, duration, onComplete));
+            TaskSystem.Insert(new TaskInstanceWaitSeconds(host, duration, onComplete));
         }
         public static TaskInstance WaitSecondsExt(this MonoBehaviour host, float duration, Action onStart, Action onComplete)
         {
@@ -118,7 +118,7 @@ namespace Core
 
             TaskInstanceWaitSeconds instance = new(host, duration, onComplete);
 
-            TaskSystem.TryCreate(instance);
+            TaskSystem.Insert(instance);
 
             return instance;
         }
@@ -130,7 +130,7 @@ namespace Core
                 return;
             }
 
-            TaskSystem.TryCreate(new TaskInstanceWaitSeconds(host, duration, onComplete));
+            TaskSystem.Insert(new TaskInstanceWaitSeconds(host, duration, onComplete));
         }
         public static TaskInstance WaitSecondsExt(this MonoBehaviour host, float duration, Action onComplete)
         {
@@ -142,7 +142,7 @@ namespace Core
 
             TaskInstanceWaitSeconds instance = new(host, duration, onComplete);
 
-            TaskSystem.TryCreate(instance);
+            TaskSystem.Insert(instance);
 
             return instance;
         }
@@ -156,7 +156,7 @@ namespace Core
                 return;
             }
 
-            TaskSystem.TryCreate(new TaskInstanceWaitSecondsRealtime(host, duration, onComplete));
+            TaskSystem.Insert(new TaskInstanceWaitSecondsRealtime(host, duration, onComplete));
         }
         public static TaskInstance WaitSecondsRealtimeExt(this MonoBehaviour host, float duration, Action onStart, Action onComplete)
         {
@@ -170,7 +170,7 @@ namespace Core
 
             TaskInstanceWaitSecondsRealtime instance = new(host, duration, onComplete);
 
-            TaskSystem.TryCreate(instance);
+            TaskSystem.Insert(instance);
 
             return instance;
         }
@@ -182,7 +182,7 @@ namespace Core
                 return;
             }
 
-            TaskSystem.TryCreate(new TaskInstanceWaitSecondsRealtime(host, duration, onComplete));
+            TaskSystem.Insert(new TaskInstanceWaitSecondsRealtime(host, duration, onComplete));
         }
         public static TaskInstance WaitSecondsExtRealtime(this MonoBehaviour host, float duration, Action onComplete)
         {
@@ -194,26 +194,26 @@ namespace Core
 
             TaskInstanceWaitSecondsRealtime instance = new(host, duration, onComplete);
 
-            TaskSystem.TryCreate(instance);
+            TaskSystem.Insert(instance);
 
             return instance;
         }
         public static void WaitFrame(this MonoBehaviour host, Action onComplete)
         {
-            TaskSystem.TryCreate(new TaskInstanceWaitFrame(host, onComplete));
+            TaskSystem.Insert(new TaskInstanceWaitFrame(host, onComplete));
         }
         public static void WaitFrame(this MonoBehaviour host, Action onStart, Action onComplete)
         {
             onStart?.Invoke();
 
-            TaskSystem.TryCreate(new TaskInstanceWaitFrame(host, onComplete));
+            TaskSystem.Insert(new TaskInstanceWaitFrame(host, onComplete));
         }
 
         public static TaskInstanceTweenTranslate Translate(this Transform transform, Space space, Vector3 target, float fadeSeconds, float waitSeconds = 0, TweenType tweenType = TweenType.SCALED, EaseType easeType = EaseType.LINEAR, Action onComplete = null)
         {
             TaskInstanceTweenTranslate obj = new(transform, space, target, fadeSeconds, waitSeconds, tweenType, easeType, onComplete);
 
-            TaskSystem.TryCreate(obj);
+            TaskSystem.Insert(obj);
 
             return obj;
         }
@@ -221,7 +221,7 @@ namespace Core
         {
             TaskInstanceTweenRotate obj = new(transform, space, target, fadeSeconds, waitSeconds, tweenType, easeType, onComplete);
 
-            TaskSystem.TryCreate(obj);
+            TaskSystem.Insert(obj);
 
             return obj;
         }
@@ -229,7 +229,7 @@ namespace Core
         {
             TaskInstanceTweenScale obj = new(transform, target, fadeSeconds, waitSeconds, tweenType, easeType, onComplete);
 
-            TaskSystem.TryCreate(obj);
+            TaskSystem.Insert(obj);
 
             return obj;
         }

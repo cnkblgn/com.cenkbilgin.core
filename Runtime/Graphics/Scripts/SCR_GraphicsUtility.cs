@@ -11,13 +11,13 @@ namespace Core.Graphics
             task.OverrideStart(start);
             task.OverrideTarget(target);
 
-            TaskSystem.TryCreate(task);
+            TaskSystem.Insert(task);
         }
 
         public static TaskInstanceTweenFadeDecal Fade(this DecalEmitter decal, float target, float fadeSeconds, float waitSeconds = 0, TweenType tweenType = TweenType.UNSCALED, EaseType easeType = EaseType.LINEAR, Action onComplete = null)
         {
             TaskInstanceTweenFadeDecal obj = new(decal, target, fadeSeconds, waitSeconds, tweenType, easeType, onComplete);
-            TaskSystem.TryCreate(obj);
+            TaskSystem.Insert(obj);
 
             return obj;
         }

@@ -7,9 +7,9 @@ namespace Core
     public static class TaskSystem
     {
         private const int MAX_TASKS = 2048;
-        private static readonly SwapBackArray<TaskInstance> ACTIVE_TASKS = new(MAX_TASKS);
-        private static GameObject ACTIVE_TASK_OBJECT = null;
-        private static Updater ACTIVE_TASK_UPDATER = null;
+        private static readonly SwapBackArray<TaskInstance> activeTasks = new(MAX_TASKS);
+        private static GameObject activeObject = null;
+        private static Updater activeUpdater = null;
         private static bool isShuttingDown = false;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -17,9 +17,9 @@ namespace Core
         {
             isShuttingDown = false;
 
-            ACTIVE_TASK_OBJECT = null;
-            ACTIVE_TASK_UPDATER = null;
-            ACTIVE_TASKS.Clear();
+            activeObject = null;
+            activeUpdater = null;
+            activeTasks.Clear();
         }
         private static bool IsValid()
         {
@@ -33,11 +33,11 @@ namespace Core
                 return false;
             }
 
-            if (ACTIVE_TASK_OBJECT == null)
+            if (activeObject == null)
             {
-                ACTIVE_TASK_OBJECT = new GameObject("[Task Updater]") { hideFlags = HideFlags.NotEditable };
-                ACTIVE_TASK_UPDATER = ACTIVE_TASK_OBJECT.AddComponent<Updater>();
-                UnityEngine.Object.DontDestroyOnLoad(ACTIVE_TASK_OBJECT);
+                activeObject = new GameObject("[Task Updater]") { hideFlags = HideFlags.NotEditable };
+                activeUpdater = activeObject.AddComponent<Updater>();
+                UnityEngine.Object.DontDestroyOnLoad(activeObject);
             }
 
             return true;
@@ -45,32 +45,31 @@ namespace Core
         private static void Update()
         {
             int write = 0;
-            for (int read = 0; read < ACTIVE_TASKS.Count; read++)
+            for (int read = 0; read < activeTasks.Count; read++)
             {
-                TaskInstance task = ACTIVE_TASKS[read];
+                TaskInstance task = activeTasks[read];
 
                 if (!task.IsCompleted)
                 {
                     task.Update();
-                    ACTIVE_TASKS[write++] = task;
+                    activeTasks[write++] = task;
                 }
             }
 
-            ACTIVE_TASKS.Truncate(write);
+            activeTasks.Truncate(write);
         }
         private static void Clear()
         {
-            ACTIVE_TASKS.Clear();
+            activeTasks.Clear();
         }
-        public static bool TryCreate(TaskInstance taskInstance)
+        public static void Insert(TaskInstance taskInstance)
         {
             if (!IsValid())
             {
-                return false;
+                return;
             }
 
-            ACTIVE_TASKS.Add(taskInstance);
-            return true;
+            activeTasks.Add(taskInstance);
         }
 
         private sealed class Updater : MonoBehaviour
@@ -83,7 +82,7 @@ namespace Core
 
             private void Update()
             {
-                currentActiveTasks = ACTIVE_TASKS.Count;
+                currentActiveTasks = activeTasks.Count;
                 maximumActiveTasks = MAX_TASKS;
 
                 TaskSystem.Update();

@@ -58,7 +58,7 @@ namespace Core.Event
             }
 
             intervalTask = new TaskInstanceWaitInterval(this, minInterval, maxInterval, duration, callback);
-            TaskSystem.TryCreate(intervalTask);
+            TaskSystem.Insert(intervalTask);
         }
     }
 }
