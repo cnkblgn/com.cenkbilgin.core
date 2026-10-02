@@ -1073,6 +1073,16 @@ namespace Core
         #endregion
 
         #region TRANSFORM
+        public static void GetPositionRotationScale(this Transform transform, out Vector3 position, out Quaternion rotation, out Vector3 scale)
+        {
+            transform.GetPositionAndRotation(out position, out rotation);
+            scale = transform.localScale;
+        }
+        public static void SetPositionRotationScale(this Transform transform, Vector3 position, Quaternion rotation, Vector3 scale)
+        {
+            transform.SetPositionAndRotation(position, rotation);
+            transform.localScale = scale;
+        }
         public static void SnapToGround(this Transform transform, Vector3 point, Vector3 normal)
         {
             Renderer[] renderers = transform.GetComponentsInChildren<Renderer>();

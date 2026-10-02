@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Text;
 using UnityEditor;
 using UnityEngine;
@@ -12,9 +10,6 @@ namespace Core.Editor
 
     public static class EditorUtility
     {
-        private const int SIM_STEP_COUNT = 300;
-        private const float SIM_STEP_SECOND = 0.02f;
-
         private static GameObject copiedObject;
 
         [MenuItem("Tools/Toggle Gizmos %g", false, 0)] // Ctrl+G or Cmd+G
@@ -93,168 +88,7 @@ namespace Core.Editor
         [MenuItem("Tools/Paste All Components %#v", true, 2)]
         private static bool ValidatePaste() => copiedObject != null && Selection.activeGameObject != null;
 
-        [MenuItem("Tools/Reset Transform %#r", false, 3)]
-        private static void ResetTransform()
-        {
-            foreach (GameObject go in Selection.gameObjects)
-            {
-                Undo.RecordObject(go.transform, "Reset Transform");
-
-                go.transform.localPosition = Vector3.zero;
-                go.transform.localRotation = Quaternion.identity;
-                go.transform.localScale = Vector3.one;
-
-                UnityEditor.EditorUtility.SetDirty(go.transform);
-            }
-        }
-
-        [MenuItem("Tools/Reset Transform %#r", true, 3)]
-        private static bool ValidateResetTransform() => !EditorApplication.isPlaying && Selection.gameObjects.Length > 0;
-
-        [MenuItem("Tools/Simulate Transforms %#e", false, 4)]
-        private static void SimulateTransform()
-        {
-            GameObject[] selected = Selection.gameObjects;
-            if (selected.Length == 0)
-            {
-                Debug.LogWarning("Simulate transform failed! No selected game object.");
-                return;
-            }
-
-            Undo.SetCurrentGroupName("Simulate Transforms");
-            int undoGroup = Undo.GetCurrentGroup();
-
-            var tempRigidbodies = new List<Rigidbody>();
-            var tempColliders = new List<Collider>();
-
-            foreach (GameObject go in selected)
-            {
-                Undo.RecordObject(go.transform, "Simulate Transforms");
-
-                if (!go.TryGetComponent<Rigidbody>(out var rb))
-                {
-                    rb = Undo.AddComponent<Rigidbody>(go);
-                    tempRigidbodies.Add(rb);
-                }
-
-                if (go.GetComponent<Collider>() == null)
-                {
-                    Collider col = Undo.AddComponent<BoxCollider>(go);
-                    tempColliders.Add(col);
-                }
-
-                rb.linearVelocity = Vector3.zero;
-                rb.angularVelocity = Vector3.zero;
-            }
-
-            SimulationMode previousMode = Physics.simulationMode;
-            Physics.simulationMode = SimulationMode.Script;
-
-            for (int i = 0; i < SIM_STEP_COUNT; i++)
-            {
-                Physics.Simulate(SIM_STEP_SECOND);
-            }
-
-            Physics.simulationMode = previousMode;
-
-            foreach (Rigidbody rb in tempRigidbodies)
-            {
-                if (rb != null) Undo.DestroyObjectImmediate(rb);
-            }
-            foreach (Collider col in tempColliders)
-            {
-                if (col != null) Undo.DestroyObjectImmediate(col);
-            }
-
-            Undo.CollapseUndoOperations(undoGroup);
-
-            Debug.Log($"Simulate transform successfull! Total simulated: {selected.Length}");
-        }
-
-        [MenuItem("Tools/Simulate Transforms %#e", true, 4)]
-        private static bool ValidateSimulateTransform() => !EditorApplication.isPlaying && Selection.gameObjects.Length > 0;
-
-        [MenuItem("Tools/Snap Transform %#t", false, 5)]
-        private static void SnapTransform()
-        {
-            GameObject[] selected = Selection.gameObjects;
-
-            if (selected.Length == 0)
-            {
-                Debug.LogWarning("Snap transform failed! No selected game object.");
-                return;
-            }
-
-            const float STEP_HEIGHT = 0.25f;
-            const float RAY_HEIGHT = 0.5f;
-            const float MAX_SEARCH_HEIGHT = 8f;
-            const float MAX_SNAP_HEIGHT = 8f;
-
-            Undo.SetCurrentGroupName("Snap Transforms");
-            int undoGroup = Undo.GetCurrentGroup();
-
-            int snappedCount = 0;
-
-            foreach (GameObject go in selected)
-            {
-                Transform transform = go.transform;
-                Vector3 position = transform.position;
-
-                RaycastHit? bestHit = null;
-                float bestVerticalDistance = float.MaxValue;
-
-                for (float height = 0f; height <= MAX_SEARCH_HEIGHT; height += STEP_HEIGHT)
-                {
-                    Vector3 rayOrigin = position + Vector3.up * height;
-
-                    RaycastHit[] hits = Physics.RaycastAll(rayOrigin, Vector3.down, RAY_HEIGHT, ~0, QueryTriggerInteraction.Ignore);
-
-                    foreach (RaycastHit hit in hits)
-                    {
-                        Transform hitTransform = hit.collider.transform;
-
-                        if (hitTransform == transform || hitTransform.IsChildOf(transform))
-                        {
-                            continue;
-                        }
-
-                        float hitHeight = Mathf.Abs(hit.point.y - position.y);
-
-                        if (hitHeight > MAX_SNAP_HEIGHT)
-                        {
-                            continue;
-                        }
-
-                        if (hitHeight < bestVerticalDistance)
-                        {
-                            bestVerticalDistance = hitHeight;
-                            bestHit = hit;
-                        }
-                    }
-                }
-
-                if (!bestHit.HasValue)
-                {
-                    Debug.LogWarning($"Snap transform failed! '{go.name}' has no viable collider to snap!", go );
-
-                    continue;
-                }
-
-                RaycastHit groundHit = bestHit.Value;
-                Undo.RecordObject(transform, "Snap Transform");
-
-                transform.SnapToGround(groundHit.point, groundHit.normal);
-                snappedCount++;
-            }
-
-            Undo.CollapseUndoOperations(undoGroup);
-            Debug.Log($"Snap transform successful! Total snapped: {snappedCount}/{selected.Length}");
-        }
-
-        [MenuItem("Tools/Snap Transform %#t", true, 5)]
-        private static bool ValidateSnapTransform() => !EditorApplication.isPlaying && Selection.gameObjects.Length > 0;
-
-        [MenuItem("Tools/Search and Remap Materials", false, 6)]
+        [MenuItem("Tools/Search and Remap Materials", false, 3)]
         private static void SearchAndRemapMaterials()
         {
             UnityEngine.Object[] objects = Selection.objects;
@@ -293,10 +127,10 @@ namespace Core.Editor
             }
         }
 
-        [MenuItem("Tools/Search and Remap Materials", true, 6)]
+        [MenuItem("Tools/Search and Remap Materials", true, 3)]
         private static bool ValidateSearchAndRemapMaterials() => !EditorApplication.isPlaying && Selection.gameObjects.Length > 0;
 
-        [MenuItem("Tools/Search and Remove Missing Components", false, 7)]
+        [MenuItem("Tools/Search and Remove Missing Components", false, 4)]
         private static void SearchAndRemoveMissingComponents()
         {
             int totalRemoved = 0;
@@ -335,7 +169,7 @@ namespace Core.Editor
             Debug.Log($"Removed {totalRemoved} missing component(s).");
         }
 
-        [MenuItem("Tools/Search and Remove Missing Components", true, 7)]
+        [MenuItem("Tools/Search and Remove Missing Components", true, 4)]
         private static bool ValidateSearchAndRemoveMissingComponents() => !EditorApplication.isPlaying && Selection.gameObjects.Length > 0;
 
         public static void DrawButton(string name, UnityEngine.Object target, Action action)
