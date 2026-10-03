@@ -108,6 +108,7 @@ namespace Core.UI
 
             screenPosition.x = Mathf.Clamp(screenPosition.x, minX, maxX);
             screenPosition.y = Mathf.Clamp(screenPosition.y, minY, maxY);
+            screenPosition.z = 0;
             thisTransform.position = screenPosition;
         }
 
