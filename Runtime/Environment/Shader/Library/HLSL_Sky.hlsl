@@ -5,6 +5,7 @@
 #include "HLSL_Environment.hlsl"
 #include "HLSL_Cloud.hlsl"
 #include "HLSL_Celestial.hlsl"
+#include "HLSL_Stars.hlsl"
 
 struct SkySettings
 {
@@ -74,7 +75,19 @@ void GetSky_float(float3 _worldPosition, float3 _viewDirection, out float3 color
     float3 cloudColor = cloudSun.rgb + cloudMoon.rgb;
     float cloudAlpha = cloudDensity.value;
 
-    float3 baseColor = skyColor + sunColor + moonColor;
+    StarSettings starSettings;
+    starSettings.color = _STAR_COLOR;
+    starSettings.density = _STAR_DENSITY;
+    starSettings.size = _STAR_SIZE;
+    starSettings.brightness = _STAR_BRIGHTNESS;
+    starSettings.amount = _STAR_AMOUNT;
+    starSettings.twinkleSpeed = _STAR_TWINKLE_SPEED;
+    starSettings.twinkleAmount = _STAR_TWINKLE_AMOUNT;
+    float3 starColor = DrawStars(_viewDirection, starSettings);   
+    starColor *= (1.0 - cloudDensity.value);
+    starColor *= (1.0 - saturate(dot(moonColor, 1.0)));
+    
+    float3 baseColor = skyColor + sunColor + moonColor + starColor;
     color = lerp(baseColor, cloudColor, cloudAlpha);
 }
 

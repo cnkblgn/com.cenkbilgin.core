@@ -29,6 +29,7 @@ namespace Core.Environment
         internal static bool isFogEnabled = true;
         internal static bool isCloudEnabled = true;
         internal static bool isCelestialEnabled = true;
+        internal static bool isStarsEnabled = true;
         internal static readonly int _FOG_COLOR_ID = Shader.PropertyToID("_FOG_COLOR");
         internal static readonly int _FOG_DENSITY_ID = Shader.PropertyToID("_FOG_DENSITY");
         internal static readonly int _FOG_DISTANCE_START_ID = Shader.PropertyToID("_FOG_DISTANCE_START");
@@ -68,6 +69,13 @@ namespace Core.Environment
         internal static readonly int _CLOUD_DARKNESS_ID = Shader.PropertyToID("_CLOUD_DARKNESS");
         internal static readonly int _CLOUD_RIM_WIDTH_ID = Shader.PropertyToID("_CLOUD_RIM_WIDTH");
         internal static readonly int _CLOUD_RIM_STRENGTH_ID = Shader.PropertyToID("_CLOUD_RIM_STRENGTH");
+        internal static readonly int _STAR_COLOR_ID = Shader.PropertyToID("_STAR_COLOR");
+        internal static readonly int _STAR_AMOUNT_ID = Shader.PropertyToID("_STAR_AMOUNT");
+        internal static readonly int _STAR_DENSITY_ID = Shader.PropertyToID("_STAR_DENSITY");
+        internal static readonly int _STAR_SIZE_ID =  Shader.PropertyToID("_STAR_SIZE");
+        internal static readonly int _STAR_BRIGHTNESS_ID = Shader.PropertyToID("_STAR_BRIGHTNESS");
+        internal static readonly int _STAR_TWINKLE_AMOUNT_ID = Shader.PropertyToID("_STAR_TWINKLE_AMOUNT");
+        internal static readonly int _STAR_TWINKLE_SPEED_ID = Shader.PropertyToID("_STAR_TWINKLE_SPEED");
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void OnRuntimeInitialize()
@@ -82,6 +90,7 @@ namespace Core.Environment
             isFogEnabled = true;
             isCloudEnabled = true;
             isCelestialEnabled = true;
+            isStarsEnabled = true;
         }
 
         private void Update()
@@ -149,6 +158,9 @@ namespace Core.Environment
 
         public static void ShowCelestial() => isCelestialEnabled = true;
         public static void HideCelestial() => isCelestialEnabled = false;
+
+        public static void ShowStars() => isStarsEnabled = true;
+        public static void HideStars() => isStarsEnabled = false;
 
         private void Refresh()
         {
@@ -223,6 +235,7 @@ namespace Core.Environment
         private static void ApplySky(EnvironmentSettings settings)
         {
             SkySettings sky = settings.Sky;
+            StarSettings stars = settings.Stars;
             CelestialSettings sun = settings.Sun;
             CelestialSettings moon = settings.Moon;
             CloudSettings cloud = settings.Cloud;
@@ -269,6 +282,14 @@ namespace Core.Environment
             Shader.SetGlobalFloat(_CLOUD_DARKNESS_ID, cloud.Darkness);
             Shader.SetGlobalFloat(_CLOUD_RIM_WIDTH_ID, cloud.RimWidth);
             Shader.SetGlobalFloat(_CLOUD_RIM_STRENGTH_ID, cloud.RimStrength);
+
+            Shader.SetGlobalColor(_STAR_COLOR_ID, stars.StarColor);
+            Shader.SetGlobalFloat(_STAR_AMOUNT_ID, isStarsEnabled ? stars.StarAmount : 0);
+            Shader.SetGlobalFloat(_STAR_DENSITY_ID, stars.StarDensity);
+            Shader.SetGlobalFloat(_STAR_SIZE_ID, stars.StarSize);
+            Shader.SetGlobalFloat(_STAR_BRIGHTNESS_ID, stars.StarBrightness);
+            Shader.SetGlobalFloat(_STAR_TWINKLE_AMOUNT_ID, stars.StarTwinkleAmount);
+            Shader.SetGlobalFloat(_STAR_TWINKLE_SPEED_ID, stars.StarTwinkleSpeed);
         }
     }
 }

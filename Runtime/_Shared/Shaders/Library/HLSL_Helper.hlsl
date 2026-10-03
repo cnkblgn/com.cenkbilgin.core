@@ -20,6 +20,21 @@ static const float Bayer4x4[16] =
     0.937500, 0.437500, 0.812500, 0.312500
 };
 
+float3 Hash33(float3 p)
+{
+    p = frac(p * float3(0.1031, 0.1030, 0.0973));
+    p += dot(p, p.yxz + 33.33);
+    return frac((p.xxy + p.yxx) * p.zyx);
+}
+void GetHash33_float(float3 _p, out float3 value)
+{
+    value = Hash33(_p);
+}
+void GetHash33_half(half3 _p, out half3 value)
+{
+    GetHash33_float(_p, value);
+}
+
 float Hash31(float3 _p)
 {
     _p = frac(_p * 0.3183099 + 0.1);

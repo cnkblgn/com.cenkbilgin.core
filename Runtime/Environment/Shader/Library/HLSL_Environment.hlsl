@@ -53,4 +53,14 @@ uniform float _CLOUD_RIM_WIDTH = 0.05;
 uniform float _CLOUD_RIM_STRENGTH = 5;
 // CLOUDS END
 
+// STARS START
+uniform float3 _STAR_COLOR = float3(1, 1, 1);
+uniform float _STAR_AMOUNT = 1;
+uniform float _STAR_DENSITY = 256;
+uniform float _STAR_SIZE = 0.05;
+uniform float _STAR_BRIGHTNESS = 0.05;
+uniform float _STAR_TWINKLE_AMOUNT = 0.25;
+uniform float _STAR_TWINKLE_SPEED = 0.05;
+// STARS END
+
 #endif

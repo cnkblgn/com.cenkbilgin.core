@@ -14,11 +14,12 @@ namespace Core.Environment
 
         [Header("_")]
         public SkySettings Sky;
-        public AmbientSettings Ambient;
+        public StarSettings Stars;
         public CelestialSettings Sun;
         public CelestialSettings Moon;
         public FogSettings Fog;
         public CloudSettings Cloud;
+        public AmbientSettings Ambient;
 
         [HideInInspector] public float Blend;
         [HideInInspector] public Texture2D CloudTextureB;
@@ -36,11 +37,15 @@ namespace Core.Environment
                 HorizonThickness = 0.0f,
             };
 
-            Ambient = new()
+            Stars = new()
             {
-                SkyColor = Color.aliceBlue,
-                EquatorColor = Color.whiteSmoke,
-                GroundColor = Color.gray,
+                StarColor = Color.wheat,
+                StarAmount = 0,
+                StarDensity = 256,
+                StarSize = 0.05f,
+                StarBrightness = 0.1f,
+                StarTwinkleAmount = 0.1f,
+                StarTwinkleSpeed = 0.025f,
             };
 
             Sun = new()
@@ -90,6 +95,13 @@ namespace Core.Environment
                 Darkness = 0.5f,
                 RimWidth = 0.035f,
                 RimStrength = 5f,
+            };
+
+            Ambient = new()
+            {
+                SkyColor = Color.aliceBlue,
+                EquatorColor = Color.whiteSmoke,
+                GroundColor = Color.gray,
             };
         }
     }
