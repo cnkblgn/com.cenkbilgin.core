@@ -74,6 +74,10 @@ namespace Core.UI
             Vector3 screenPosition = cameraController.WorldToScreenPoint(worldPosition);
             bool isBehind = screenPosition.z < 0f;
 
+
+            Debug.Log($"[{name}] active={isActive} visible={isVisible} screen={screenPosition} behind={isBehind} dist={Vector3.Distance(Data.Position, cameraTransform.position):F0} target={(Data.HasTarget ? (Data.TargetTransform ? Data.TargetTransform.name : "NULL") : "none")}" + $"Far: {cameraController.farClipPlane}", this);
+
+
             if (isBehind)
             {
                 screenPosition.x = Screen.width - screenPosition.x;
