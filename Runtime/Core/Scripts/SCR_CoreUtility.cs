@@ -661,17 +661,17 @@ namespace Core
 
         public static Color32 Randomize(this Color32 color, float threshold = 0f)
         {
-            color.r = (byte)(Mathf.Max(threshold, (color.r * UnityEngine.Random.Range(0, 1f))));
-            color.g = (byte)(Mathf.Max(threshold, (color.g * UnityEngine.Random.Range(0, 1f))));
-            color.b = (byte)(Mathf.Max(threshold, (color.b * UnityEngine.Random.Range(0, 1f))));
+            color.r = (byte)(color.r * UnityEngine.Random.Range(threshold, 1f));
+            color.g = (byte)(color.g * UnityEngine.Random.Range(threshold, 1f));
+            color.b = (byte)(color.b * UnityEngine.Random.Range(threshold, 1f));
 
             return color;
         }
         public static Color Randomize(this Color color, float threshold = 0f)
         {
-            color.r = Mathf.Max(threshold, (color.r * UnityEngine.Random.Range(0, 1f)));
-            color.g = Mathf.Max(threshold, (color.g * UnityEngine.Random.Range(0, 1f)));
-            color.b = Mathf.Max(threshold, (color.b * UnityEngine.Random.Range(0, 1f)));
+            color.r *= UnityEngine.Random.Range(threshold, 1f);
+            color.g *= UnityEngine.Random.Range(threshold, 1f);
+            color.b *= UnityEngine.Random.Range(threshold, 1f);
 
             return color;
         }
