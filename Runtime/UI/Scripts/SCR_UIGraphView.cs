@@ -5,7 +5,7 @@ namespace Core.UI
 {
     [DisallowMultipleComponent]
     [RequireComponent(typeof(CanvasRenderer))]
-    public sealed class UIGraphView : Graphic
+    public sealed class UIGraphView : MaskableGraphic
     {
         [Header("_")]
         [Info("Maximum available points on screen")]
