@@ -14,7 +14,18 @@ namespace Core.UI
         [SerializeField, Required] private Camera rendererCamera = null;
         [SerializeField, Required] private Camera inputCamera = null;
         [SerializeField, Min(0)] private float cullingDistance = 16;
+        [SerializeField, Range(-1, 1)] private float cullingDotThreshold = 0.1f;
         [SerializeField] private LayerMask viewportDetectionMask = 0;
+
+        [Header("_")]
+        [Info("kapalýysa zamaný gelen hepsi ayný frame'de render edilir")]
+        [SerializeField] private bool useRingBuffer = true;                
+        [Info("sadece ring buffer açýkken geçerli")]
+        [SerializeField, Min(1)] private int maxRendersPerFrame = 1;       
+        [Info("0 = sýnýrsýz, >0 = frame baþýna render bütçesi")]
+        [SerializeField, Min(0)] private float maxRenderBudgetMs = 0f;     
+        [Info("geride kalan timer'ýn birikebileceði üst sýnýr")]
+        [SerializeField, Min(1)] private float maxBacklogIntervals = 2f;   
 
         [Header("_")]
         [SerializeField, Required] private Transform container = null;
@@ -23,6 +34,7 @@ namespace Core.UI
         private readonly List<string> ids = new(4);
         private readonly List<UIViewportItem> items = new(4);
         private readonly RaycastHit[] collisionBuffer = new RaycastHit[5];
+        private readonly List<UIViewportItem> renderQueue = new(8);
         private float[] renderTimers = Array.Empty<float>();
         private int renderIndex = 0;
 
@@ -167,7 +179,9 @@ namespace Core.UI
                 return;
             }
 
-            renderTimers[index] += deltaTime;
+            float interval = 1f / Mathf.Max(1f, items[index].FPS);
+
+            renderTimers[index] = Mathf.Min(renderTimers[index] + deltaTime, interval * maxBacklogIntervals);
         }
         private void RebuildTimers(int removedIndex)
         {
@@ -219,27 +233,16 @@ namespace Core.UI
                 return;
             }
 
-            int safety = count;
+            int limit = useRingBuffer ? maxRendersPerFrame : int.MaxValue;
 
-            while (safety-- > 0)
+            renderQueue.Clear();
+
+            for (int n = 0; n < count && renderQueue.Count < limit; n++)
             {
-                int index = renderIndex;
-
-                renderIndex = (renderIndex + 1) % count;
-
+                int index = (renderIndex + n) % count;
                 UIViewportItem view = items[index];
 
-                if (!view.IsActive)
-                {
-                    continue;
-                }
-
-                if (!view.IsRendering)
-                {
-                    continue;
-                }
-
-                if (!view.CanRender)
+                if (!view.IsActive || !view.IsRendering || !view.CanRender)
                 {
                     continue;
                 }
@@ -252,53 +255,67 @@ namespace Core.UI
                 }
 
                 renderTimers[index] -= interval;
+                renderQueue.Add(view);
 
-                StartRender(view);
-                break;
+                renderIndex = (index + 1) % count;
+            }
+
+            if (renderQueue.Count > 0)
+            {
+                RenderBatch();
             }
         }
-        private void PreRender(UIViewportItem view)
+        private void RenderBatch()
         {
+            float start = Time.realtimeSinceStartup;
+
+            // sadece dinlenmede açýk olanlar (input'lu) gerçekten toggle olur
             for (int i = 0; i < items.Count; i++)
             {
-                UIViewportItem current = items[i];
+                items[i].SuspendForPass();
+            }
 
-                if (current != view)
+            for (int i = 0; i < renderQueue.Count; i++)
+            {
+                UIViewportItem view = renderQueue[i];
+
+                view.BeginPass();
+
+                rendererCamera.targetTexture = view.Texture;
+                rendererCamera.orthographicSize = view.Size;
+
+                view.Render();
+                rendererCamera.Render();
+
+                view.SuspendForPass();
+
+                if (maxRenderBudgetMs > 0f && (Time.realtimeSinceStartup - start) * 1000f >= maxRenderBudgetMs)
                 {
-                    current.HideRenderer();
+                    for (int j = i + 1; j < renderQueue.Count; j++)
+                    {
+                        int idx = items.IndexOf(renderQueue[j]);
+
+                        if (idx >= 0)
+                        {
+                            renderTimers[idx] += 1f / Mathf.Max(1f, renderQueue[j].FPS);
+                        }
+                    }
+
+                    break;
                 }
             }
-        }
-        private void StartRender(UIViewportItem view)
-        {
-            PreRender(view);
 
-            rendererCamera.targetTexture = view.Texture;
-            rendererCamera.orthographicSize = view.Size;
-
-            view.Render();
-
-            rendererCamera.Render();
-
-            PostRender(view);
-        }
-        private void PostRender(UIViewportItem view)
-        {
+            // dinlenme durumuna dön
             for (int i = 0; i < items.Count; i++)
             {
-                UIViewportItem current = items[i];
-
-                if (current != view)
-                {
-                    current.ShowRenderer();
-                }
+                items[i].EndPass();
             }
         }
         private void CullRender(Camera camera)
         {
             for (int i = 0; i < items.Count; i++)
             {
-                items[i].TryCull(camera.transform, cullingDistance);
+                items[i].TryCull(camera.transform, cullingDotThreshold, cullingDistance);
             }
         }
 

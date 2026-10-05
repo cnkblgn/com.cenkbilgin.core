@@ -72,7 +72,7 @@ namespace Core.UI
             //collider.enabled = false;
         }
 
-        internal bool CheckVisibility(Transform target, float minDistance, out float actualDistance)
+        internal bool CheckVisibility(Transform target, float dotThreshold, float minDistance, out float actualDistance)
         {
             actualDistance = float.MaxValue;
 
@@ -94,7 +94,7 @@ namespace Core.UI
                 return true;
             }
 
-            return IsFacingEachOther(transform.position, target.position, flipZ ? -transform.forward : transform.forward, target.forward, 0.1f, debugVisibility);
+            return IsFacingEachOther(transform.position, target.position, flipZ ? -transform.forward : transform.forward, target.forward, dotThreshold, debugVisibility);
         }
     }
 }

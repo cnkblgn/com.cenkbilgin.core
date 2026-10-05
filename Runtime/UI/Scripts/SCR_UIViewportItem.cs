@@ -15,6 +15,7 @@ namespace Core.UI
         internal bool CanReceiveInput => receiveInput;
         internal bool HasTickedOnce => hasTickedOnce;
         internal bool HasRenderedOnce => hasRenderedOnce;
+        internal bool RestShown => isActive && isRendering && receiveInput;
         internal float Size => canvasSize;
         internal float FPS => isFocused ? maxFPS : Mathf.Lerp(maxFPS, minFPS, distanceRatio);
         protected Camera Camera => viewportCanvases[0].Camera;
@@ -33,6 +34,7 @@ namespace Core.UI
         [SerializeField, Min(1)] private float canvasSize = 165;
 
         [Header("_")]
+        [SerializeField] private bool forceBeginPassOnShown = false;
         [SerializeField] private bool receiveInput = false;
         [SerializeField] private bool renderOnce = false;
         [SerializeField, Range(0, 59)] private float minFPS = 1;
@@ -54,8 +56,10 @@ namespace Core.UI
         private bool isRendering = false;
         private bool isActive = false;
         private bool isFocused = false;
+        private bool hasCanvasShown = false;
         private bool hasRenderedOnce = false;
         private bool hasTickedOnce = false;
+       
 
         private void OnEnable()
         {
@@ -367,19 +371,13 @@ namespace Core.UI
 
         internal void ShowRenderer()
         {
-            if (!isActive)
+            if (!isActive || isRendering)
             {
                 return;
             }
-
-            if (isRendering)
-            {
-                return;
-            }
-
-            Canvas.Show();
 
             isRendering = true;
+            SetCanvas(RestShown);
 
             if (viewportMesh != null)
             {
@@ -388,19 +386,13 @@ namespace Core.UI
         }
         internal void HideRenderer()
         {
-            if (!isActive)
+            if (!isActive || !isRendering)
             {
                 return;
             }
-
-            if (!isRendering)
-            {
-                return;
-            }
-
-            Canvas.Hide();
 
             isRendering = false;
+            SetCanvas(false);
 
             if (viewportMesh != null)
             {
@@ -425,6 +417,13 @@ namespace Core.UI
 
             OnShow(this.viewportMesh = mesh);
             ShowRenderer();
+
+            if (forceBeginPassOnShown)
+            {
+                BeginPass();
+                Canvas.ForceUpdateCanvases();
+                EndPass();
+            }
         }      
         internal void HideViewport()
         {
@@ -445,14 +444,36 @@ namespace Core.UI
             isActive = false;
         }
 
-        internal void TryCull(Transform target, float cullingDistance)
+        private void SetCanvas(bool shown)
+        {
+            if (hasCanvasShown == shown)
+            {
+                return;
+            }
+
+            hasCanvasShown = shown;
+
+            if (shown)
+            {
+                Canvas.Show();
+            }
+            else
+            {
+                Canvas.Hide();
+            }
+        }
+        internal void BeginPass() => SetCanvas(true);
+        internal void SuspendForPass() => SetCanvas(false);
+        internal void EndPass() => SetCanvas(RestShown);
+
+        internal void TryCull(Transform target, float dotThreshold, float cullingDistance)
         {
             if (!IsActive)
             {
                 return;
             }
 
-            bool isInView = viewportMesh.CheckVisibility(target, cullingDistance, out float actualDistance);
+            bool isInView = viewportMesh.CheckVisibility(target, dotThreshold, cullingDistance, out float actualDistance);
 
             distanceRatio = Mathf.Clamp01(actualDistance / cullingDistance);
 
