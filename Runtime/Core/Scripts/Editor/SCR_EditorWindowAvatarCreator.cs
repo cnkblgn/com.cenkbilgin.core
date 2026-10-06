@@ -12,7 +12,9 @@ namespace Core.Editor
         private SerializedProperty propertyRootNodeName = null;
         private SerializedObject serializedObject = null;
 
-        [MenuItem("Tools/Avatar Creator")] public static void ShowTool() => GetWindow<EditorWindowAvatarCreator>("Avatar Creator");
+        [MenuItem("Tools/Avatar Creator")] 
+        public static void ShowWindow() => GetWindow<EditorWindowAvatarCreator>("Avatar Creator");
+
         private void OnEnable() 
         { 
             serializedObject = new SerializedObject(this); 

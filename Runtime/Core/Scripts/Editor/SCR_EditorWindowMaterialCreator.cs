@@ -32,7 +32,7 @@ namespace Core.Editor
         }
 
         [MenuItem("Tools/Material Creator")]
-        public static void ShowTool() => GetWindow<EditorWindowMaterialCreator>("Material Creator");
+        public static void ShowWindow() => GetWindow<EditorWindowMaterialCreator>("Material Creator");
 
         private void OnGUI()
         {
