@@ -12,12 +12,12 @@ namespace Core.Editor
         private enum Axis { NONE, X, Y, Z }
 
         private const KeyCode KEY_GRAB = KeyCode.G;
-        private const KeyCode KEY_ROTATE = KeyCode.E;
-        private const KeyCode KEY_SCALE = KeyCode.R;
+        private const KeyCode KEY_ROTATE = KeyCode.R;
+        private const KeyCode KEY_SCALE = KeyCode.E;
         private const KeyCode KEY_SIMULATE = KeyCode.L;
 
         private const int MAX_SIMULATION_STEPS = 500;
-        private const int MIN_SIMULATION_STEPS = 10;      
+        private const int MIN_SIMULATION_STEPS = 10;
         private const float SIMULATION_STEP_SECONDS = 0.02f;
 
         private static SceneView sceneView;
@@ -72,6 +72,17 @@ namespace Core.Editor
 
             if (placerMode == Mode.NONE)
             {
+                // YENÝ: reset kýsayollarý (alt+G / alt+R / alt+E)
+                if (@event.type == EventType.KeyDown
+                    && !@event.alt && @event.control && !@event.shift && !@event.command
+                    && !EditorGUIUtility.editingTextField
+                    && Tools.viewTool != ViewTool.FPS
+                    && Selection.activeTransform != null
+                    && TryReset(@event.keyCode))
+                {
+                    @event.Use();
+                }
+
                 if (@event.type == EventType.KeyDown
                     && !@event.alt && !@event.control && !@event.shift && !@event.command
                     && !EditorGUIUtility.editingTextField
@@ -109,10 +120,10 @@ namespace Core.Editor
             // Hedeflerden biri silindiyse güvenli çýk
             foreach (Transform target in placerTargets)
             {
-                if (target == null) 
-                { 
-                    End(false); 
-                    return; 
+                if (target == null)
+                {
+                    End(false);
+                    return;
                 }
             }
 
@@ -196,19 +207,21 @@ namespace Core.Editor
                 return false;
             }
 
-            Undo.RecordObjects(placerTargets, "Placer Transform");
             sceneView.Repaint();
             return true;
         }
         private static void End(bool confirm)
         {
-            if (!confirm && placerTargets != null)
+            if (placerTargets != null)
             {
-                RestoreTargets();
-            }
-            else
-            {
-                Undo.SetCurrentGroupName("Placer Transform");
+                if (confirm)
+                {
+                    CommitTargets();
+                }
+                else
+                {
+                    RestoreTargets();
+                }
             }
 
             placerMode = Mode.NONE;
@@ -225,6 +238,31 @@ namespace Core.Editor
             startScales = null;
 
             SceneView.RepaintAll();
+        }
+
+        private static void CommitTargets()
+        {
+            int count = placerTargets.Length;
+
+            Vector3[] finalPositions = new Vector3[count];
+            Quaternion[] finalRotations = new Quaternion[count];
+            Vector3[] finalScales = new Vector3[count];
+
+            for (int i = 0; i < count; i++)
+            {
+                placerTargets[i].GetPositionRotationScale(out finalPositions[i], out finalRotations[i], out finalScales[i]);
+            }
+
+            // Baþlangýca dön, undo snapshot'ýný al, sonra final deðeri uygula
+            RestoreTargets();
+
+            Undo.RecordObjects(placerTargets, "Placer Transform");
+            Undo.SetCurrentGroupName("Placer Transform");
+
+            for (int i = 0; i < count; i++)
+            {
+                placerTargets[i].SetPositionRotationScale(finalPositions[i], finalRotations[i], finalScales[i]);
+            }
         }
         private static void RestoreTargets()
         {
@@ -295,45 +333,45 @@ namespace Core.Editor
                 case KEY_GRAB:
                 case KEY_ROTATE:
                 case KEY_SCALE:
-                {
-                    Mode mode = GetMode(@event.keyCode);
-
-                    if (mode == placerMode)
                     {
-                        End(true);
-                    }
-                    else
-                    {
-                        RestoreTargets();
-                        placerMode = mode;
-                        placerAxis = Axis.NONE;
-                        numberBuffer = "";
+                        Mode mode = GetMode(@event.keyCode);
 
-                        if (Rebaseline(@event))
+                        if (mode == placerMode)
                         {
-                            Apply(@event);
+                            End(true);
                         }
                         else
                         {
-                            End(false);
-                        }
-                    }
+                            RestoreTargets();
+                            placerMode = mode;
+                            placerAxis = Axis.NONE;
+                            numberBuffer = "";
 
-                    @event.Use();
-                    break;
-                }
+                            if (Rebaseline(@event))
+                            {
+                                Apply(@event);
+                            }
+                            else
+                            {
+                                End(false);
+                            }
+                        }
+
+                        @event.Use();
+                        break;
+                    }
                 case KeyCode.N:
                     alignToNormal = !alignToNormal;
                     Apply(@event);
                     @event.Use();
                     break;
-                case KeyCode.X: 
-                    ToggleAxis(Axis.X, @event); 
+                case KeyCode.X:
+                    ToggleAxis(Axis.X, @event);
                     break;
-                case KeyCode.Y: 
-                    ToggleAxis(Axis.Y, @event); 
+                case KeyCode.Y:
+                    ToggleAxis(Axis.Y, @event);
                     break;
-                case KeyCode.Z: 
+                case KeyCode.Z:
                     ToggleAxis(Axis.Z, @event);
                     break;
             }
@@ -436,7 +474,7 @@ namespace Core.Editor
 
             return 0f;
         }
-        
+
         private static void Apply(Event @event)
         {
             lastMouse = @event.mousePosition;
@@ -779,6 +817,43 @@ namespace Core.Editor
 
             return true;
         }
+        private static bool TryReset(KeyCode key)
+        {
+            if (key != KEY_GRAB && key != KEY_ROTATE && key != KEY_SCALE)
+            {
+                return false;
+            }
+
+            Transform[] selected = Selection.GetTransforms(SelectionMode.TopLevel | SelectionMode.Editable);
+
+            if (selected == null || selected.Length == 0)
+            {
+                return false;
+            }
+
+            string label = key == KEY_GRAB ? "Reset Position" : key == KEY_ROTATE ? "Reset Rotation" : "Reset Scale";
+
+            Undo.RecordObjects(selected, label);
+
+            foreach (Transform target in selected)
+            {
+                if (key == KEY_GRAB)
+                {
+                    target.localPosition = Vector3.zero;
+                }
+                else if (key == KEY_ROTATE)
+                {
+                    target.localRotation = Quaternion.identity;
+                }
+                else
+                {
+                    target.localScale = Vector3.one;
+                }
+            }
+
+            SceneView.RepaintAll();
+            return true;
+        }
 
         private static bool IsInSelection(Transform transform, Transform[] selected)
         {
@@ -928,10 +1003,10 @@ namespace Core.Editor
             {
                 float d = Mathf.Abs(Vector3.Dot(localAxes[i], direction));
 
-                if (d > bestDot) 
-                { 
+                if (d > bestDot)
+                {
                     bestDot = d;
-                    best = i; 
+                    best = i;
                 }
             }
 
@@ -939,6 +1014,6 @@ namespace Core.Editor
             s[best] *= factor;
 
             return s;
-        } 
+        }
     }
 }
