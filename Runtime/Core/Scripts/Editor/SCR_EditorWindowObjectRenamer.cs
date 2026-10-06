@@ -50,12 +50,6 @@ namespace Core.Editor
             removeBefore = EditorGUILayout.TextField("Remove Before", removeBefore);
             removeAfter = EditorGUILayout.TextField("Remove After", removeAfter);
             removeWord = EditorGUILayout.TextField("Remove Word", removeWord);
-            removeNumbers = EditorGUILayout.Toggle("Remove Numbers", removeNumbers);
-
-            if (!removeNumbers)
-            {
-                separateNumbers = EditorGUILayout.Toggle("Separate Numbers (_)", separateNumbers);
-            }
 
             EditorGUILayout.Space();
             GUILayout.Label("Find & Replace", EditorStyles.boldLabel);
@@ -68,6 +62,18 @@ namespace Core.Editor
 
             EditorGUILayout.Space();
             caseMode = (CaseMode)EditorGUILayout.EnumPopup("Case", caseMode);
+
+            if (caseMode != CaseMode.None)
+            {
+                EditorGUI.indentLevel++;
+                removeNumbers = EditorGUILayout.Toggle("Remove Numbers", removeNumbers);
+
+                if (!removeNumbers)
+                {
+                    separateNumbers = EditorGUILayout.Toggle("Separate Numbers (_)", separateNumbers);
+                }
+                EditorGUI.indentLevel--;
+            }
 
             EditorGUILayout.Space();
             sequenceNumbering = EditorGUILayout.Toggle("Sequence Numbering", sequenceNumbering);
@@ -220,8 +226,11 @@ namespace Core.Editor
                 name = name.Replace(findWord, replaceWith ?? "");
             }
 
-            name = ApplyCase(name, caseMode, removeNumbers, separateNumbers);
-            name = name.Replace(" ", "");
+            if (caseMode != CaseMode.None)
+            {
+                name = ApplyCase(name, caseMode, removeNumbers, separateNumbers);
+                name = name.Replace(" ", "");
+            }
 
             if (!string.IsNullOrEmpty(prefix))
             {
@@ -247,7 +256,7 @@ namespace Core.Editor
             switch (mode)
             {
                 case CaseMode.None:
-                    return JoinPlain(words, separateNumbers, w => w);
+                    return input;
 
                 case CaseMode.UPPERCASE:
                     return JoinPlain(words, separateNumbers, w => w.ToUpperInvariant());
