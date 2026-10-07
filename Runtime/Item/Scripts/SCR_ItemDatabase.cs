@@ -98,7 +98,7 @@ namespace Core.Item
 
             CreateOrphanInventory();
 
-            GameObject spawned = data.BaseID.GetDefinition().EntityID.Spawn(position, rotation, parent == null ? root : parent);
+            GameObject spawned = data.BaseID.GetDefinition().PrefabID.Spawn(position, rotation, parent == null ? root : parent);
 
             if (spawned == null)
             {

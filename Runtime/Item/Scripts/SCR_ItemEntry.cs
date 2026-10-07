@@ -16,8 +16,7 @@ namespace Core.Item
         [Info("Please generate id if its not visible")]
         public ItemID ID;
         public ItemTag[] Tags;
-        public PrefabID EntityID;
-        public PrefabID EquipableID;
+        public PrefabID PrefabID;
         public MeshID MeshID;
         public IconID IconID;
         public LocalizedID NameID;
@@ -26,15 +25,14 @@ namespace Core.Item
         [Range(InventoryData.MIN_HEIGHT, InventoryData.MAX_HEIGHT)] public int Height;
         [Min(1)] public int Stack;
         [Range(InventoryData.MIN_WEIGHT, InventoryData.MAX_WEIGHT)] public float Weight;
-        [SerializeReference, Reference] public ItemComponent Component;
+        [SerializeReference, Reference] public IItemComponent Component;
         [SerializeReference, Reference] public ItemAction[] Actions;
 
-        public ItemEntry(ItemID id, ItemTag[] tags, PrefabID entityID, PrefabID equipableID, MeshID meshID, IconID iconID, LocalizedID nameID, LocalizedID descID, int width, int height, int stack, float weight, ItemComponent component, ItemAction[] actions)
+        public ItemEntry(ItemID id, ItemTag[] tags, PrefabID prefabID, MeshID meshID, IconID iconID, LocalizedID nameID, LocalizedID descID, int width, int height, int stack, float weight, IItemComponent component, ItemAction[] actions)
         {
             ID = id;
             Tags = tags;
-            EntityID = entityID;
-            EquipableID = equipableID;
+            PrefabID = prefabID;
             MeshID = meshID;
             IconID = iconID;
             NameID = nameID;
@@ -57,6 +55,18 @@ namespace Core.Item
         {
             Name = ID.Key;
             Component?.OnValidate();
+
+            if (PrefabID.IsValid)
+            {
+                if (PrefabID.Get().TryGetComponent(out ItemEntity entity))
+                {
+                    entity.Override(ID);
+                }
+                else
+                {
+                    Debug.LogError($"Item [{ID}], Prefab [{PrefabID}] does not have [ItemEntity] component!", PrefabID.Get());
+                }               
+            }
         }
 #endif
     }

@@ -8,9 +8,10 @@ namespace Core.Item
         public ItemID ID => id;
 
         [Header("_")]
-        [Info("Toggle 'overrideData' only if you want to keep overrides.")]
+        [Info("Toggle 'overrideData' only if you want to override data.")]
         [SerializeField] private ItemID id;
         [SerializeField] private bool overrideData;
+        [Info("Toggle 'overrideStack' only if you want to override stack.")]
         [SerializeField, Min(0)] private int overrideStack;
 
         private ItemData thisData;
@@ -44,7 +45,12 @@ namespace Core.Item
         }
 
 #if UNITY_EDITOR
-        public void Override(ItemID id) => this.id = id;
+        public void Override(ItemID id)
+        {
+            this.id = id;
+
+            Debug.Log($"Item Entity [{gameObject}] ID overrided to [{id.Key}]");
+        }
 #endif
     }
 }

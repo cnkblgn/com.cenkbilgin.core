@@ -9,10 +9,8 @@ namespace Core.Item
     {
         public readonly ItemID ID;
         public readonly ulong Tags;
-        public readonly PrefabID EntityID;
-        public readonly PrefabID EquipableID;
+        public readonly PrefabID PrefabID;
         public readonly MeshID MeshID;
-
         public readonly IconID IconID;
         public readonly LocalizedID NameID;
         public readonly LocalizedID DescID;
@@ -22,15 +20,14 @@ namespace Core.Item
         public readonly int Stack;
         public readonly float Weight;
 
-        public readonly ItemComponent Component;
+        public readonly IItemComponent Component;
         public readonly ItemAction[] Actions;
 
-        internal ItemDefinition(ItemID id, ItemTag[] tags, PrefabID entityID, PrefabID equipableID, MeshID meshID, IconID iconID, LocalizedID nameID, LocalizedID descID, int width, int height, int stack, float weight, ItemComponent component, ItemAction[] actions)
+        internal ItemDefinition(ItemID id, ItemTag[] tags, PrefabID prefabID, MeshID meshID, IconID iconID, LocalizedID nameID, LocalizedID descID, int width, int height, int stack, float weight, IItemComponent component, ItemAction[] actions)
         {
             ID = id;
             Tags = tags == null ? 0 : tags.CreateMask();
-            EntityID = entityID.IsValid ? entityID : throw new ArgumentNullException($"Item entity id is not valid! [{entityID.Key}]");
-            EquipableID = equipableID;
+            PrefabID = prefabID.IsValid ? prefabID : throw new ArgumentNullException($"Item entity id is not valid! [{prefabID.Key}]");
             MeshID = meshID;
             IconID = iconID;
             NameID = nameID;
@@ -39,15 +36,14 @@ namespace Core.Item
             Height = height;
             Stack = stack;
             Weight = weight;
-            Component = component ?? ItemComponent.DEFAULT;
+            Component = component ?? IItemComponent.DEFAULT;
             Actions = actions ?? Array.Empty<ItemAction>();
         }
         internal ItemDefinition(ItemEntry entry) : this
         (
             entry.ID,
             entry.Tags,
-            entry.EntityID,
-            entry.EquipableID,
+            entry.PrefabID,
             entry.MeshID,
             entry.IconID,
             entry.NameID,
