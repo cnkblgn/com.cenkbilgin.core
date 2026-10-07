@@ -24,6 +24,8 @@ namespace Core.Environment
 
         public void Setup(Material fogMaterial, Material skyMaterial)
         {
+            requiresIntermediateTexture = true;
+
             this.fogMaterial = fogMaterial;
             this.skyMaterial = skyMaterial;
 
@@ -39,6 +41,11 @@ namespace Core.Environment
             UniversalCameraData cameraData = frameData.Get<UniversalCameraData>();
 
             if (cameraData.cameraType == CameraType.Preview)
+            {
+                return;
+            }
+
+            if (cameraData.cameraType == CameraType.Reflection)
             {
                 return;
             }
@@ -79,6 +86,12 @@ namespace Core.Environment
             }
 
             TextureHandle source = resourceData.activeColorTexture;
+
+            if (!source.IsValid())
+            {
+                return;
+            }
+
             TextureDesc description = renderGraph.GetTextureDesc(source);
             description.name = TEXTURE_NAME;
             description.clearBuffer = false;
