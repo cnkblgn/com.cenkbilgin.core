@@ -96,6 +96,7 @@ namespace Core.Damage
 
         public DamageContext GetLastContext() => lastContext;
 
+        public IReadOnlyList<DamageProtection> GetProtections() => protections;
         public void AddProtection(DamageProtection protection)
         {
             for (int i = 0; i < protections.Count; i++)
