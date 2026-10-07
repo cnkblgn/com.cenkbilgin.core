@@ -30,7 +30,7 @@ namespace Core.PostProcessing
 
         public RendererPassPostProcessing()
         {
-            requiresIntermediateTexture = false;
+            requiresIntermediateTexture = true;
 
             ConfigureInput(ScriptableRenderPassInput.Color);
         }
@@ -101,6 +101,13 @@ namespace Core.PostProcessing
 
         public override void RecordRenderGraph(RenderGraph renderGraph, ContextContainer frameData)
         {
+            UniversalCameraData cameraData = frameData.Get<UniversalCameraData>();
+
+            if (cameraData.cameraType == CameraType.Preview || cameraData.cameraType == CameraType.Reflection)
+            {
+                return;
+            }
+
             UniversalResourceData resourceData = frameData.Get<UniversalResourceData>();
 
             if (resourceData.isActiveTargetBackBuffer)
@@ -116,6 +123,12 @@ namespace Core.PostProcessing
             Dither dither = stack.GetComponent<Dither>();
 
             TextureHandle source = resourceData.activeColorTexture;
+
+            if (!source.IsValid())
+            {
+                return;
+            }
+
             TextureDesc description = renderGraph.GetTextureDesc(source);
             description.name = TEXTURE_NAME;
             description.clearBuffer = false;

@@ -16,6 +16,7 @@ namespace Core.Environment
         public RendererPassEnvironment()
         {
             requiresIntermediateTexture = false;
+
             renderPassEvent = RenderPassEvent.BeforeRenderingTransparents;
 
             ConfigureInput(ScriptableRenderPassInput.Depth | ScriptableRenderPassInput.Normal);
@@ -24,8 +25,6 @@ namespace Core.Environment
 
         public void Setup(Material fogMaterial, Material skyMaterial)
         {
-            requiresIntermediateTexture = true;
-
             this.fogMaterial = fogMaterial;
             this.skyMaterial = skyMaterial;
 
