@@ -15,7 +15,7 @@ namespace Core.Item
         public void GetDescription(Dictionary<string, DataNode> data, in StringBuilder sb);
 
         /// <summary> Called when editor validates component. </summary>
-        public void OnValidate();
+        public void OnValidate(ItemID id);
     }
 
     [Serializable]
@@ -23,6 +23,6 @@ namespace Core.Item
     {
         public void GetDefaults(Dictionary<string, DataNode> data) { }
         public void GetDescription(Dictionary<string, DataNode> data, in StringBuilder sb) { }
-        public void OnValidate() { }
+        public void OnValidate(ItemID id) { }
     }
 }

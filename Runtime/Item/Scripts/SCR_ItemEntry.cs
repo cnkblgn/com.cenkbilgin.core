@@ -54,7 +54,7 @@ namespace Core.Item
         public void OnValidate()
         {
             Name = ID.Key;
-            Component?.OnValidate();
+            Component?.OnValidate(ID);
 
             if (PrefabID.IsValid)
             {
