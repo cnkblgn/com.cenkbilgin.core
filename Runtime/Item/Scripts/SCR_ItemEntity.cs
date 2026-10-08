@@ -5,7 +5,7 @@ namespace Core.Item
     [DisallowMultipleComponent]
     public sealed class ItemEntity : MonoBehaviour
     {
-        public ItemID ID => id; [SerializeField, HideInInspector] private ItemID id;
+        public ItemID ID => id; [SerializeField, HideInInspector] internal ItemID id;
 
         [Header("_")]       
         [Info("Toggle 'overrideData' only if you want to override data.")]
@@ -28,34 +28,19 @@ namespace Core.Item
 
             if (!overrideData)
             {
-                thisHandler?.HandleImport(thisData.Data);
+                thisHandler?.HandleImport(id, thisData.Data);
             }
         }
 
         public void ExportTo(out ItemData data)
         {
-            thisHandler?.HandleExport(this.thisData.Data);
+            thisHandler?.HandleExport(id, this.thisData.Data);
             data = new(this.thisData);
         }
         public void ImportFrom(ItemData data)
         {
             this.thisData = new(data);
-            thisHandler?.HandleImport(this.thisData.Data);
+            thisHandler?.HandleImport(id, this.thisData.Data);
         }
-
-#if UNITY_EDITOR
-        internal void Override(ItemID id)
-        {
-            if (this.id == id)
-            {
-                return;
-            }
-
-            this.id = id;
-            UnityEditor.EditorUtility.SetDirty(this);
-            UnityEditor.PrefabUtility.SavePrefabAsset(gameObject);
-            Debug.Log($"Item Entity [{gameObject}] ID overrided to [{id.Key}]");
-        }
-#endif
     }
 }

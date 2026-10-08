@@ -55,18 +55,6 @@ namespace Core.Item
         {
             Name = ID.Key;
             Component?.OnValidate(ID);
-
-            if (PrefabID.IsValid)
-            {
-                if (PrefabID.Get().TryGetComponent(out ItemEntity entity))
-                {
-                    entity.Override(ID);
-                }
-                else
-                {
-                    Debug.LogError($"Item [{ID}], Prefab [{PrefabID}] does not have [ItemEntity] component!", PrefabID.Get());
-                }               
-            }
         }
 #endif
     }

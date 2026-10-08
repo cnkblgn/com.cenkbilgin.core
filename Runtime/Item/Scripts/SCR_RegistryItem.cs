@@ -44,8 +44,37 @@ namespace Core.Item
         public override void Reload()
         {
             BuildDatabase();
+            SyncPrefabs();
             GenerateTags();
             GenerateIDs();
+        }
+        private void SyncPrefabs()
+        {
+            for (int i = 0; i < entries.Length; i++)
+            {
+                ItemEntry entry = entries[i];
+
+                if (!entry.PrefabID.IsValid)
+                {
+                    continue;
+                }
+
+                if (!entry.PrefabID.Get().TryGetComponent(out ItemEntity entity))
+                {
+                    Debug.LogError($"Item [{entry.ID}], Prefab [{entry.PrefabID}] does not have [ItemEntity] component!", entity.gameObject);
+                    continue;
+                }
+
+                if (entity.id == entry.ID)
+                {
+                    continue;
+                }
+
+                entity.id = entry.ID;
+                UnityEditor.EditorUtility.SetDirty(entity);
+                UnityEditor.PrefabUtility.SavePrefabAsset(entity.gameObject);
+                Debug.Log($"Item Entity [{entity.gameObject}] ID overrided to [{entry.ID}]");
+            }
         }
         private void GenerateTags()
         {
