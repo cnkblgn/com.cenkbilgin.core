@@ -4,7 +4,7 @@ namespace Core.Item
 {
     public interface IItemHandler
     {
-        public void HandleExport(Dictionary<string, DataNode> thisData);
-        public void HandleImport(Dictionary<string, DataNode> thisData);
+        public void HandleExport(Dictionary<string, DataNode> data);
+        public void HandleImport(Dictionary<string, DataNode> data);
     }
 }
