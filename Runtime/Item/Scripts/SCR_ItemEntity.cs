@@ -5,11 +5,10 @@ namespace Core.Item
     [DisallowMultipleComponent]
     public sealed class ItemEntity : MonoBehaviour
     {
-        public ItemID ID => id;
+        public ItemID ID => id; [SerializeField, HideInInspector] private ItemID id;
 
-        [Header("_")]
+        [Header("_")]       
         [Info("Toggle 'overrideData' only if you want to override data.")]
-        [SerializeField] private ItemID id;
         [SerializeField] private bool overrideData;
         [Info("Toggle 'overrideStack' only if you want to override stack.")]
         [SerializeField, Min(0)] private int overrideStack;
@@ -45,10 +44,16 @@ namespace Core.Item
         }
 
 #if UNITY_EDITOR
-        public void Override(ItemID id)
+        internal void Override(ItemID id)
         {
-            this.id = id;
+            if (this.id == id)
+            {
+                return;
+            }
 
+            this.id = id;
+            UnityEditor.EditorUtility.SetDirty(this);
+            UnityEditor.PrefabUtility.SavePrefabAsset(gameObject);
             Debug.Log($"Item Entity [{gameObject}] ID overrided to [{id.Key}]");
         }
 #endif
