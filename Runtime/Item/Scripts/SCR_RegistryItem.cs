@@ -59,9 +59,11 @@ namespace Core.Item
                     continue;
                 }
 
-                if (!entry.PrefabID.Get().TryGetComponent(out ItemEntity entity))
+                GameObject prefab = entry.PrefabID.Get();
+
+                if (!prefab.TryGetComponent(out ItemEntity entity))
                 {
-                    Debug.LogError($"Item [{entry.ID}], Prefab [{entry.PrefabID}] does not have [ItemEntity] component!", entity.gameObject);
+                    Debug.LogError($"Item [{entry.ID}], Prefab [{entry.PrefabID}] does not have [ItemEntity] component!", prefab);
                     continue;
                 }
 
