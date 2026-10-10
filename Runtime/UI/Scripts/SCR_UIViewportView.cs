@@ -18,25 +18,22 @@ namespace Core.UI
         [SerializeField] private LayerMask viewportDetectionMask = 0;
 
         [Header("_")]
-        [Info("kapalýysa zamaný gelen hepsi ayný frame'de render edilir")]
-        [SerializeField] private bool useRingBuffer = true;                
-        [Info("sadece ring buffer açýkken geçerli")]
-        [SerializeField, Min(1)] private int maxRendersPerFrame = 1;       
-        [Info("0 = sýnýrsýz, >0 = frame baþýna render bütçesi")]
-        [SerializeField, Min(0)] private float maxRenderBudgetMs = 0f;     
-        [Info("geride kalan timer'ýn birikebileceði üst sýnýr")]
-        [SerializeField, Min(1)] private float maxBacklogIntervals = 2f;   
+        [Info("priority 0 (uzak / kenarda) = minFPS, priority 1 (yakýn / karþýda) = maxFPS. focus'taki item her zaman maxFPS")]
+        [SerializeField, Range(1, 60)] private float minFPS = 2;
+        [SerializeField, Range(1, 60)] private float maxFPS = 30;
+        [SerializeField, Min(1)] private int maxRendersPerFrame = 1;
+        [SerializeField, Min(1)] private float maxBacklogIntervals = 2f;
 
         [Header("_")]
         [SerializeField, Required] private Transform container = null;
 
         private UIViewportItem focusedItem = null;
-        private readonly List<string> ids = new(4);
         private readonly List<UIViewportItem> items = new(4);
         private readonly RaycastHit[] collisionBuffer = new RaycastHit[5];
         private readonly List<UIViewportItem> renderQueue = new(8);
         private float[] renderTimers = Array.Empty<float>();
         private int renderIndex = 0;
+
 
         private void Awake()
         {
@@ -172,6 +169,16 @@ namespace Core.UI
                 );
             }
         }
+
+        private float GetFPS(UIViewportItem item)
+        {
+            return item.IsFocused ? maxFPS : Mathf.Lerp(minFPS, maxFPS, item.Priority);
+        }
+        private float GetInterval(UIViewportItem item)
+        {
+            return 1f / Mathf.Max(1f, GetFPS(item));
+        }
+
         private void UpdateTimer(int index, float deltaTime)
         {
             if (index < 0 || index >= renderTimers.Length)
@@ -179,7 +186,7 @@ namespace Core.UI
                 return;
             }
 
-            float interval = 1f / Mathf.Max(1f, items[index].FPS);
+            float interval = GetInterval(items[index]);
 
             renderTimers[index] = Mathf.Min(renderTimers[index] + deltaTime, interval * maxBacklogIntervals);
         }
@@ -233,13 +240,14 @@ namespace Core.UI
                 return;
             }
 
-            int limit = useRingBuffer ? maxRendersPerFrame : int.MaxValue;
+            int limit = maxRendersPerFrame;
 
             renderQueue.Clear();
 
             for (int n = 0; n < count && renderQueue.Count < limit; n++)
             {
                 int index = (renderIndex + n) % count;
+
                 UIViewportItem view = items[index];
 
                 if (!view.IsActive || !view.IsRendering || !view.CanRender)
@@ -247,7 +255,7 @@ namespace Core.UI
                     continue;
                 }
 
-                float interval = 1f / Mathf.Max(1f, view.FPS);
+                float interval = GetInterval(view);
 
                 if (renderTimers[index] < interval)
                 {
@@ -267,9 +275,6 @@ namespace Core.UI
         }
         private void RenderBatch()
         {
-            float start = Time.realtimeSinceStartup;
-
-            // sadece dinlenmede açýk olanlar (input'lu) gerçekten toggle olur
             for (int i = 0; i < items.Count; i++)
             {
                 items[i].SuspendForPass();
@@ -288,24 +293,8 @@ namespace Core.UI
                 rendererCamera.Render();
 
                 view.SuspendForPass();
-
-                if (maxRenderBudgetMs > 0f && (Time.realtimeSinceStartup - start) * 1000f >= maxRenderBudgetMs)
-                {
-                    for (int j = i + 1; j < renderQueue.Count; j++)
-                    {
-                        int idx = items.IndexOf(renderQueue[j]);
-
-                        if (idx >= 0)
-                        {
-                            renderTimers[idx] += 1f / Mathf.Max(1f, renderQueue[j].FPS);
-                        }
-                    }
-
-                    break;
-                }
             }
 
-            // dinlenme durumuna dön
             for (int i = 0; i < items.Count; i++)
             {
                 items[i].EndPass();
@@ -327,7 +316,7 @@ namespace Core.UI
                 return;
             }
 
-            if (ids.Contains(prefab.ID))
+            if (Contains(prefab.ID))
             {
 #if UNITY_EDITOR
                 Debug.LogWarning($"Viewport [{prefab.ID}] is already added to manager! ignore if its intented");
@@ -340,7 +329,6 @@ namespace Core.UI
 
             rendererCamera.enabled = false;
 
-            ids.Add(view.ID);
             items.Add(view);
 
             Array.Resize(ref renderTimers, items.Count);
@@ -348,7 +336,7 @@ namespace Core.UI
         }
         public void Remove(string id)
         {
-            if (!ids.Contains(id))
+            if (!Contains(id))
             {
 #if UNITY_EDITOR
                 Debug.LogWarning("you are trying to remove stage object that does not exists! ignore if its intented");
@@ -368,7 +356,6 @@ namespace Core.UI
                         focusedItem = null;
                     }
 
-                    ids.Remove(id);
                     items.Remove(view);
                     Destroy(view.gameObject);
 
@@ -387,7 +374,6 @@ namespace Core.UI
 
             focusedItem = null;
 
-            ids.Clear();
             items.Clear();
 
             renderTimers = Array.Empty<float>();
@@ -402,7 +388,7 @@ namespace Core.UI
                 return;
             }
 
-            if (!ids.Contains(id))
+            if (!Contains(id))
             {
                 Debug.LogError("You are trying to show viewport that does not exists!");
                 return;
@@ -416,13 +402,13 @@ namespace Core.UI
                 }
 
                 items[i].ShowViewport(mesh);
-                renderTimers[i] = 1f / Mathf.Max(1f, items[i].FPS);
+                renderTimers[i] = GetInterval(items[i]);
                 break;
             }
         }
         public void Hide(string id)
         {
-            if (!ids.Contains(id))
+            if (!Contains(id))
             {
                 Debug.LogError("You are trying to hide viewport that does not exists!");
                 return;
@@ -438,6 +424,19 @@ namespace Core.UI
                 items[i].HideViewport();
                 break;
             }
+        }
+
+        private bool Contains(string id)
+        {
+            for (int i = 0; i < items.Count; i++)
+            {
+                if (items[i].ID == id)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

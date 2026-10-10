@@ -71,30 +71,30 @@ namespace Core.UI
             renderer.enabled = false;
             //collider.enabled = false;
         }
-
-        internal bool CheckVisibility(Transform target, float dotThreshold, float minDistance, out float actualDistance)
+        internal bool CheckVisibility(Transform target, float dotThreshold, float maxDistance, out float distance, out float dot)
         {
-            actualDistance = float.MaxValue;
+            distance = float.MaxValue;
+            dot = -1f;
 
             if (renderer == null)
             {
                 return false;
             }
 
-            Vector3 vector = (renderer.bounds.center - target.position);
-            actualDistance = vector.magnitude;
+            Vector3 center = renderer.bounds.center;
 
-            if (actualDistance > minDistance)
+            distance = Vector3.Distance(center, target.position);
+
+            if (distance > maxDistance)
             {
                 return false;
             }
 
-            if (actualDistance < 3.0f)
-            {
-                return true;
-            }
+            bool facing = IsFacingEachOther(target.position, center, target.forward, flipZ ? -transform.forward : transform.forward, dotThreshold, out float aDot, out float bDot);
 
-            return IsFacingEachOther(transform.position, target.position, flipZ ? -transform.forward : transform.forward, target.forward, dotThreshold, debugVisibility);
+            dot = Mathf.Min(aDot, bDot);
+
+            return facing;
         }
     }
 }

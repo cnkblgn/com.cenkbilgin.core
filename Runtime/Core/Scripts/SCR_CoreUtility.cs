@@ -181,15 +181,15 @@ namespace Core
             return dot >= threshold;
         }
         /// <summary> Based on forward +z axis </summary>
-        public static bool IsFacingEachOther(Transform a, Transform b, float threshold = 0.1f) => IsFacingEachOther(a.position, b.position, a.forward, b.forward, threshold);
+        public static bool IsFacingEachOther(Transform a, Transform b, float threshold, out float aDot, out float bDot) => IsFacingEachOther(a.position, b.position, a.forward, b.forward, threshold, out aDot, out bDot, false);
         /// <summary> Based on forward +z axis </summary>
-        public static bool IsFacingEachOther(Vector3 aPos, Vector3 bPos, Vector3 aFwd, Vector3 bFwd, float threshold = 0.1f, bool debug = false)
+        public static bool IsFacingEachOther(Vector3 aPos, Vector3 bPos, Vector3 aFwd, Vector3 bFwd, float threshold, out float aDot, out float bDot, bool debug = false)
         {
             Vector3 aToB = (bPos - aPos).normalized;
             Vector3 bToA = -aToB;
 
-            float aDot = Vector3.Dot(aFwd, aToB);
-            float bDot = Vector3.Dot(bFwd, bToA);
+            aDot = Vector3.Dot(aFwd, aToB);
+            bDot = Vector3.Dot(bFwd, bToA);
 
 #if UNITY_EDITOR
             if (debug)
