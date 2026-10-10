@@ -161,11 +161,22 @@ namespace Core.UI
 
             if (debug)
             {
+
+
                 Debug.Log
                 (
                     $"TARGET: {(targetViewport != null ? targetViewport.ID : null ?? "NULL")} | " +
                     $"FOCUS: {(focusedItem != null ? focusedItem.ID : null ?? "NULL")} | " +
-                    $"KEY_DOWN: {ctx.KeyDown} | KEY_UP: {ctx.KeyUp}"
+                    $"KEY_DOWN: {ctx.KeyDown} | KEY_UP: {ctx.KeyUp} | " +
+                    $"IsActive: {(focusedItem != null ? focusedItem.IsActive : null ?? "NULL")} | " +
+                    $"IsRendering: {(focusedItem != null ? focusedItem.IsRendering : null ?? "NULL")} | " +
+                    $"IsFocused: {(focusedItem != null ? focusedItem.IsFocused : null ?? "NULL")} | " +
+                    $"CanRender: {(focusedItem != null ? focusedItem.CanRender : null ?? "NULL")} | " +
+                    $"CanReceiveInput: {(focusedItem != null ? focusedItem.CanReceiveInput : null ?? "NULL")} | " +
+                    $"HasTickedOnce: {(focusedItem != null ? focusedItem.HasTickedOnce : null ?? "NULL")} | " +
+                    $"HasRenderedOnce: {(focusedItem != null ? focusedItem.HasRenderedOnce : null ?? "NULL")} | " +
+                    $"RestShown: {(focusedItem != null ? focusedItem.RestShown : null ?? "NULL")} | " +
+                    $"Priority: {(focusedItem != null ? focusedItem.Priority : null ?? "NULL")} | "
                 );
             }
         }
