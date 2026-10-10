@@ -183,7 +183,7 @@ namespace Core.UI
 
         private float GetFPS(UIViewportItem item)
         {
-            return item.IsFocused ? maxFPS : Mathf.Lerp(minFPS, maxFPS, item.Priority);
+            return item.IsFocused || !item.EnableCulling ? maxFPS : Mathf.Lerp(minFPS, maxFPS, item.Priority);
         }
         private float GetInterval(UIViewportItem item)
         {
