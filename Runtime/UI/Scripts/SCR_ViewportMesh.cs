@@ -89,8 +89,8 @@ namespace Core.UI
             {
                 return false;
             }
-
-            bool facing = IsFacingEachOther(target.position, center, target.forward, flipZ ? -transform.forward : transform.forward, dotThreshold, out float aDot, out float bDot);
+             
+            bool facing = IsFacingEachOther(target.position, center, target.forward, flipZ ? -transform.forward : transform.forward, dotThreshold, out float aDot, out float bDot, debugVisibility);
 
             dot = Mathf.Min(aDot, bDot);
 
