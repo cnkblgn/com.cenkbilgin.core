@@ -8,7 +8,6 @@ namespace Core.Graphics
         private Transform thisTransform = null;
         private ParticleSystem[] thisEmitters = null;
         private int[] emitterCounts = null;
-        private int lastEmitFrame = -1;
 
         private void Awake()
         {
@@ -35,47 +34,26 @@ namespace Core.Graphics
 
         public void Emit(Vector3 position, Vector3 direction)
         {
-            if (lastEmitFrame == Time.frameCount)
-            {
-                return;
-            }
-
             Align(position, direction);
 
             for (int i = 0; i < thisEmitters.Length; i++)
             {
                 thisEmitters[i].Emit(emitterCounts[i]);
             }
-
-            lastEmitFrame = Time.frameCount;
         }
         public void Emit(in ParticleSystem.EmitParams emitParams)
         {
-            if (lastEmitFrame == Time.frameCount)
-            {
-                return;
-            }
-
             for (int i = 0; i < thisEmitters.Length; i++)
             {
                 thisEmitters[i].Emit(emitParams, emitterCounts[i]);
             }
-
-            lastEmitFrame = Time.frameCount;
         }
         public void Emit()
         {
-            if (lastEmitFrame == Time.frameCount)
-            {
-                return;
-            }
-
             for (int i = 0; i < thisEmitters.Length; i++)
             {
                 thisEmitters[i].Emit(emitterCounts[i]);
             }
-
-            lastEmitFrame = Time.frameCount;
         }
         public void Play()
         {
