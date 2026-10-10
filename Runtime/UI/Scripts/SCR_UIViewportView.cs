@@ -315,7 +315,10 @@ namespace Core.UI
         {
             for (int i = 0; i < items.Count; i++)
             {
-                items[i].TryCull(camera.transform, cullingDotThreshold, cullingDistance);
+                if (items[i].EnableCulling)
+                {
+                    items[i].TryCull(camera.transform, cullingDotThreshold, cullingDistance);
+                }               
             }
         }
 

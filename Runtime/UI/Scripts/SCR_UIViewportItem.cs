@@ -17,6 +17,7 @@ namespace Core.UI
         internal bool HasTickedOnce => hasTickedOnce;
         internal bool HasRenderedOnce => hasRenderedOnce;
         internal bool RestShown => isActive && isRendering && receiveInput;
+        internal bool EnableCulling => enableCulling;
         internal float Size => canvasSize;
         internal float Priority => priority;
         protected Camera Camera => viewportCanvases[0].Camera;
@@ -35,6 +36,7 @@ namespace Core.UI
         [SerializeField, Min(1)] private float canvasSize = 165;
 
         [Header("_")]
+        [SerializeField] private bool enableCulling = true;
         [SerializeField] private bool receiveInput = false;
         [SerializeField] private bool renderOnce = false;
 
