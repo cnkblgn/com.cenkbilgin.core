@@ -144,7 +144,13 @@ namespace Core.Interaction
             }
 
             currentTarget.Interact(thisActor, out InteractionContext ctx);
+
             SetState(ctx);
+
+            if (currentTarget == null)
+            {
+                SetState(new(ctx.Interactable, ctx.Interactor, ctx.Action, InteractionState.FOCUS_EXIT));
+            }
         }
         private void ClearTarget()
         {

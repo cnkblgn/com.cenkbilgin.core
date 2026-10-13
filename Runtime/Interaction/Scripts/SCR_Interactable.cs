@@ -10,7 +10,7 @@ namespace Core.Interaction
     [SelectionBase]
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Collider))]
-    public class Interactable : MonoBehaviour
+    public sealed class Interactable : MonoBehaviour
     {
         public event Action<InteractionContext> OnStateChanged = null;
 
@@ -35,6 +35,7 @@ namespace Core.Interaction
                 OverrideDescription(descriptionID.Get());
             }
         }
+        private void OnDisable() => ExitFocus(null, out _);
 
         private void SetState(in InteractionContext ctx)
         {
