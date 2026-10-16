@@ -50,7 +50,8 @@ namespace Core
             {
                 Collider collider = overlapBuffer[i];
 
-                Vector3 point = collider.ClosestPoint(origin);
+                //Vector3 point = collider.ClosestPoint(origin); // convex olmayanlarda hata veriyor
+                Vector3 point = collider.bounds.center;
                 Vector3 direction = point - origin;
                 float distance = direction.magnitude;
 
@@ -99,8 +100,10 @@ namespace Core
 
                 if (hit.distance <= 0f)
                 {
-                    Vector3 point = hit.collider.ClosestPoint(start);
-                    Vector3 normal = (point - start).normalized;
+                    //Vector3 point = hit.collider.ClosestPoint(start); // convex olmayanlarda hata veriyor
+                    //Vector3 normal = (point - start).normalized;
+                    Vector3 point = start;
+                    Vector3 normal = -direction.normalized;
 
                     if (normal.sqrMagnitude < Mathf.Epsilon)
                     {
@@ -147,7 +150,8 @@ namespace Core
             for (int i = 0; i < areaHits && hits < resultBuffer.Length; i++)
             {
                 Collider collider = overlapBuffer[i];
-                Vector3 point = collider.ClosestPoint(origin);
+                //Vector3 point = collider.ClosestPoint(origin); // convex olmayanlarda hata veriyor
+                Vector3 point = collider.bounds.center;
                 Vector3 direction = point - origin;
                 float distance = direction.magnitude;
 
