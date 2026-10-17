@@ -1,12 +1,12 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Core.Sector
 {
     using static CoreUtility;
 
-    public class SectorSystem : MonoBehaviour
+    [DisallowMultipleComponent]
+    public sealed class SectorSystem : MonoBehaviour
     {
         private enum GridSize : int
         {
@@ -136,6 +136,7 @@ namespace Core.Sector
                 UnityEditor.Handles.Label(center + Vector3.up, "Sector ID: " + i, GizmosStyle);
             }
         }
+        private void OnValidate() => Initialize();
 #endif
 
         [ContextMenu("Generate")]
