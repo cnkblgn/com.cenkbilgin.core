@@ -66,9 +66,12 @@ namespace Core.Graphics
         private void OnApplicationQuit() => SetRenderScale(1);
         private void OnValidate()
         {
-            foreach (DecalGroup group in decalGroup)
+            if (decalGroup != null)
             {
-                group.Validate();
+                foreach (DecalGroup group in decalGroup)
+                {
+                    group.Validate();
+                }
             }
         }
 #endif
@@ -192,7 +195,7 @@ namespace Core.Graphics
 
         public AntialiasingMode GetAntialiasing()
         {
-            if (GetMainCamera() != null)
+            if (TryGetMainCamera(out _))
             {
                 if (mainCamera.TryGetComponent(out UniversalAdditionalCameraData cameraData))
                 {
@@ -204,7 +207,7 @@ namespace Core.Graphics
         }
         public void SetAntialiasing(AntialiasingMode antialiasingMode)
         {
-            if (GetMainCamera() != null)
+            if (TryGetMainCamera(out _))
             {
                 if (mainCamera.TryGetComponent(out UniversalAdditionalCameraData cameraData))
                 {
@@ -231,7 +234,7 @@ namespace Core.Graphics
         }
         public void SetShadowQuality(int value)
         {
-            if (GetMainCamera() != null)
+            if (TryGetMainCamera(out _))
             {
                 if (mainCamera.TryGetComponent(out UniversalAdditionalCameraData cameraData))
                 {
@@ -281,7 +284,12 @@ namespace Core.Graphics
             mainCamera.farClipPlane = Mathf.Max(10, value);
         }
 
-        public Camera GetMainCamera() => mainCamera;
+        public bool TryGetMainCamera(out Camera camera)
+        {
+            camera = mainCamera;
+
+            return camera != null;
+        }
         public void SetMainCamera(Camera target)
         {
             if (target == null)

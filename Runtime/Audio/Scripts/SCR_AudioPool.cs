@@ -52,7 +52,7 @@ namespace Core.Audio
 
             return true;
         }
-        public AudioEmitter Spawn(AudioClip clip, Transform listener, AudioMixerGroup group, Vector3 position, float blend, float volume, float pitch, float minDistance, float maxDistance, LayerMask occlusionMask, float occlusionAngle, float occlusionBlend, AnimationCurve occlusionLowpass, AnimationCurve occlusionVolume)
+        public AudioEmitter Spawn(AudioClip clip, Transform listener, AudioMixerGroup group, Vector3 position, float blend, float volume, float pitch, float minDistance, float maxDistance, float spread, LayerMask occlusionMask, float occlusionAngle, float occlusionBlend, AnimationCurve occlusionLowpass, AnimationCurve occlusionVolume)
         {
             if (TrySpawn(clip, listener, position, blend, maxDistance, out AudioEmitter emitter))
             {
@@ -66,6 +66,7 @@ namespace Core.Audio
                     pitch,
                     minDistance,
                     maxDistance,
+                    spread,
                     false,
                     occlusionMask,
                     occlusionAngle,
@@ -79,7 +80,7 @@ namespace Core.Audio
 
             return null;
         }
-        public AudioEmitter Spawn(AudioClip clip, Transform listener, AudioMixerGroup group, Vector3 position, float blend, float volume, float pitch, float minDistance, float maxDistance)
+        public AudioEmitter Spawn(AudioClip clip, Transform listener, AudioMixerGroup group, Vector3 position, float blend, float volume, float pitch, float minDistance, float maxDistance, float spread)
         {
             if (TrySpawn(clip, listener, position, blend, maxDistance, out AudioEmitter emitter))
             {
@@ -93,6 +94,7 @@ namespace Core.Audio
                     pitch,
                     minDistance,
                     maxDistance,
+                    spread,
                     false
                 );
 

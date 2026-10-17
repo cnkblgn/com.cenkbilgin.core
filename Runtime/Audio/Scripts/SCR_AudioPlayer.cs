@@ -110,7 +110,7 @@ namespace Core.Audio
                     thisTransform = GetComponent<Transform>();
                 }
 
-                ManagerAudio.Instance.PlaySound(clip, audioGroup, thisTransform.position, blend, volume * (randomizeVolume ? Random.Range(0.75f, 1.15f) : 1), pitch * (randomizePitch ? Random.Range(0.9f, 1.1f) : 1), minDistance, maxDistance, useOcculusion);
+                ManagerAudio.Instance.PlaySound(clip, audioGroup, thisTransform.position, blend, volume * (randomizeVolume ? Random.Range(0.75f, 1.15f) : 1), pitch * (randomizePitch ? Random.Range(0.9f, 1.1f) : 1), minDistance, maxDistance, spread, useOcculusion);
 
                 return;
             }
@@ -141,6 +141,7 @@ namespace Core.Audio
                     pitch * (randomizePitch ? Random.Range(0.9f, 1.1f) : 1),
                     minDistance,
                     maxDistance,
+                    spread,
                     playOnLoop,
                     m.OcclusionMask,
                     m.OcclusionAngle,
@@ -161,6 +162,7 @@ namespace Core.Audio
                     pitch * (randomizePitch ? Random.Range(0.9f, 1.1f) : 1),
                     minDistance,
                     maxDistance,
+                    spread,
                     playOnLoop
                 );
             }

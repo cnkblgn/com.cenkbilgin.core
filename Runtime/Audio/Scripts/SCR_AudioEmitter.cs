@@ -193,9 +193,9 @@ namespace Core.Audio
             thisAudioSource.pitch = pitch;
         }
 
-        public void Play(AudioClip clip, Transform listener, AudioMixerGroup group, float blend, float volume, float pitch, float minDistance, float maxDistance, bool loop, LayerMask occlusionMask, float occlusionAngle, float occlusionBlend, AnimationCurve occlusionLowpass, AnimationCurve occlusionVolume)
+        public void Play(AudioClip clip, Transform listener, AudioMixerGroup group, float blend, float volume, float pitch, float minDistance, float maxDistance, float spread, bool loop, LayerMask occlusionMask, float occlusionAngle, float occlusionBlend, AnimationCurve occlusionLowpass, AnimationCurve occlusionVolume)
         {
-            Play(clip, listener, group, blend, volume, pitch, minDistance, maxDistance, loop);
+            Play(clip, listener, group, blend, volume, pitch, minDistance, maxDistance, spread, loop);
 
             occlusionEnabled = blend >= 1;
 
@@ -213,7 +213,7 @@ namespace Core.Audio
             occlusionUpdateTime = 0f;
             Occlude(true);
         }
-        public void Play(AudioClip clip, Transform listener, AudioMixerGroup group, float blend, float volume, float pitch, float minDistance, float maxDistance, bool loop)
+        public void Play(AudioClip clip, Transform listener, AudioMixerGroup group, float blend, float volume, float pitch, float minDistance, float maxDistance, float spread, bool loop)
         {
             if (clip == null)
             {
@@ -241,6 +241,7 @@ namespace Core.Audio
             thisAudioSource.maxDistance = maxDistance;
             thisAudioSource.volume = volume * volumeMultiplier;
             thisAudioSource.spatialBlend = blend;
+            thisAudioSource.spread = spread;
             thisAudioSource.pitch = pitch * pitchMultiplier;
             thisAudioSource.loop = loop;
 

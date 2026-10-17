@@ -828,18 +828,18 @@ namespace Core.Audio
             audioMixer.SetFloat(REVERB_ROOM, endRoom);
         }
 
-        public AudioEmitter PlaySound(AudioClip clip, AudioGroup group, Vector3 position, float blend, float volume, float pitch, float minDistance, float maxDistance, bool occulusion)
+        public AudioEmitter PlaySound(AudioClip clip, AudioGroup group, Vector3 position, float blend, float volume, float pitch, float minDistance, float maxDistance, float spread, bool occulusion)
         {
             if (!occulusion)
             {
-                return audioEmitterPool.Spawn(clip, audioListener, GetAudioGroup(group), position, blend, volume, pitch, minDistance, maxDistance);
+                return audioEmitterPool.Spawn(clip, audioListener, GetAudioGroup(group), position, blend, volume, pitch, minDistance, maxDistance, spread);
             }
             else
             {
-                return audioEmitterPool.Spawn(clip, audioListener, GetAudioGroup(group), position, blend, volume, pitch, minDistance, maxDistance, occlusionMask, occlusionAngle, occlusionBlend, occlusionLowpass, occlusionVolume);
+                return audioEmitterPool.Spawn(clip, audioListener, GetAudioGroup(group), position, blend, volume, pitch, minDistance, maxDistance, spread, occlusionMask, occlusionAngle, occlusionBlend, occlusionLowpass, occlusionVolume);
             }
         }
-        public AudioEmitter PlaySound(AudioClip[] clip, AudioGroup group, Vector3 position, float blend, float volume, float pitch, float minDistance, float maxDistance, bool occulusion)
+        public AudioEmitter PlaySound(AudioClip[] clip, AudioGroup group, Vector3 position, float blend, float volume, float pitch, float minDistance, float maxDistance, float spread, bool occulusion)
         {
             if (clip == null)
             {
@@ -852,7 +852,7 @@ namespace Core.Audio
                 return null;
             }
 
-            return PlaySound(clip[Random.Range(0, clip.Length)], group, position, blend, volume, pitch, minDistance, maxDistance, occulusion);
+            return PlaySound(clip[Random.Range(0, clip.Length)], group, position, blend, volume, pitch, minDistance, maxDistance, spread, occulusion);
         }
     }
 }
