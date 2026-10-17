@@ -330,8 +330,6 @@ namespace Core.Sector
 
             return position.x >= center.x - half.x &&
                    position.x <= center.x + half.x &&
-                   position.y >= center.y - half.y &&
-                   position.y <= center.y + half.y &&
                    position.z >= center.z - half.z &&
                    position.z <= center.z + half.z;
         }
