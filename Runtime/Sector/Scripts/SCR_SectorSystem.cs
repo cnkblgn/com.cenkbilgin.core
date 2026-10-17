@@ -153,6 +153,17 @@ namespace Core.Sector
             GenerateSectors();
         }
 
+        private static bool IsValid()
+        {
+            if (!isInitialized)
+            {
+                Debug.LogError("Sector system is not initialized!");
+                return false;
+            }
+
+            return true;
+        }
+
         private void ShiftOrigin(Vector3 offset)
         {
             OriginOffset += offset;
@@ -164,11 +175,19 @@ namespace Core.Sector
         }
         private static void ValidateID(int id)
         {
+            if (!IsValid())
+            {
+                return;
+            }
+
             if (id >= sectorCount || id < 0)
             {
                 throw new ArgumentOutOfRangeException("sector id is not exists!");
             }
         }
+
+        public static int GetTiles() => gridCount;
+        public static int GetSize() => totalSize;
 
         private static void GenerateSectors()
         {
@@ -193,6 +212,11 @@ namespace Core.Sector
         public static int GetSectors() => sectorCount;
         public static Sector GetSector(Vector3 position)
         {
+            if (!IsValid())
+            {
+                return null;
+            }
+
             for (int i = 0; i < sectorCount; i++)
             {
                 Sector sector = GetSector(i);
@@ -208,6 +232,11 @@ namespace Core.Sector
         }
         public static Sector GetSector(int x, int y)
         {
+            if (!IsValid())
+            {
+                return null;
+            }
+
             if (x >= gridCount || x < 0 || y >= gridCount || y < 0)
             {
                 throw new ArgumentOutOfRangeException("sector x,y out of bounds!");
