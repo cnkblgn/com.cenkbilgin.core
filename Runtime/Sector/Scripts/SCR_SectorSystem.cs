@@ -55,10 +55,10 @@ namespace Core.Sector
             (-1, 0),    // W
             (-1, 1)     // NW
         };
-        private static int totalSize;
+        private static int gridTotalSize;
+        private static int gridTileCount;
         private static int sectorSize;
         private static int sectorCount;
-        private static int gridCount;
         private static bool isInitialized = false;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -141,11 +141,11 @@ namespace Core.Sector
         [ContextMenu("Generate")]
         public void Initialize()
         {
-            totalSize = (int)gridSize;
-            gridCount = (int)tileCount;
+            gridTotalSize = (int)gridSize;
+            gridTileCount = (int)tileCount;
 
-            sectorSize = totalSize / gridCount;
-            sectorCount = gridCount * gridCount;
+            sectorSize = gridTotalSize / gridTileCount;
+            sectorCount = gridTileCount * gridTileCount;
 
             sectors = new Sector[sectorCount];
             neighbors = new int[sectorCount * NEIGHBOR_COUNT];
@@ -186,16 +186,18 @@ namespace Core.Sector
             }
         }
 
-        public static int GetTiles() => gridCount;
-        public static int GetSize() => totalSize;
+        public static int GetGridTileCount() => gridTileCount;
+        public static int GetGridTotalSize() => gridTotalSize;
+        public static int GetSectorCount() => sectorCount;
+        public static int GetSectorSize() => sectorSize;
 
         private static void GenerateSectors()
         {
-            for (int y = 0; y < gridCount; y++)
+            for (int y = 0; y < gridTileCount; y++)
             {
-                for (int x = 0; x < gridCount; x++)
+                for (int x = 0; x < gridTileCount; x++)
                 {
-                    int index = y * gridCount + x;
+                    int index = y * gridTileCount + x;
                     float width = (sectorSize * x) + (sectorSize * 0.5f);
                     float height = (sectorSize * y) + (sectorSize * 0.5f);
 
@@ -209,7 +211,6 @@ namespace Core.Sector
             GenerateNeighbors();
             isInitialized = true;
         }
-        public static int GetSectors() => sectorCount;
         public static Sector GetSector(Vector3 position)
         {
             if (!IsValid())
@@ -237,12 +238,12 @@ namespace Core.Sector
                 return null;
             }
 
-            if (x >= gridCount || x < 0 || y >= gridCount || y < 0)
+            if (x >= gridTileCount || x < 0 || y >= gridTileCount || y < 0)
             {
                 throw new ArgumentOutOfRangeException("sector x,y out of bounds!");
             }
 
-            return sectors[y * gridCount + x];
+            return sectors[y * gridTileCount + x];
         }
         public static Sector GetSector(int id)
         {
@@ -253,11 +254,11 @@ namespace Core.Sector
 
         private static void GenerateNeighbors()
         {
-            for (int y = 0; y < gridCount; y++)
+            for (int y = 0; y < gridTileCount; y++)
             {
-                for (int x = 0; x < gridCount; x++)
+                for (int x = 0; x < gridTileCount; x++)
                 {
-                    int index = y * gridCount + x;
+                    int index = y * gridTileCount + x;
                     int baseOffset = index * NEIGHBOR_COUNT;
 
                     for (int d = 0; d < NEIGHBOR_COUNT; d++)
@@ -265,9 +266,9 @@ namespace Core.Sector
                         int nx = x + directions[d].dx;
                         int ny = y + directions[d].dy;
 
-                        bool valid = nx >= 0 && nx < gridCount && ny >= 0 && ny < gridCount;
+                        bool valid = nx >= 0 && nx < gridTileCount && ny >= 0 && ny < gridTileCount;
 
-                        neighbors[baseOffset + d] = valid ? ny * gridCount + nx : -1;
+                        neighbors[baseOffset + d] = valid ? ny * gridTileCount + nx : -1;
                     }
                 }
             }
@@ -366,9 +367,9 @@ namespace Core.Sector
         public static Vector4 GetMapEdgeDistances(Vector3 position)
         {
             float left = position.x;
-            float right = totalSize - position.x;
+            float right = gridTotalSize - position.x;
             float bottom = position.z;
-            float top = totalSize - position.z;
+            float top = gridTotalSize - position.z;
 
             return new Vector4(left, right, bottom, top);
         }
