@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Core.Sector
@@ -189,6 +190,7 @@ namespace Core.Sector
             GenerateNeighbors();
             isInitialized = true;
         }
+        public static int GetSectors() => sectorCount;
         public static Sector GetSector(Vector3 position)
         {
             for (int i = 0; i < sectorCount; i++)
