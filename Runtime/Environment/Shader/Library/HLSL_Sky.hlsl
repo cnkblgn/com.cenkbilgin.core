@@ -17,17 +17,19 @@ struct SkySettings
 
 float3 DrawSky(float3 _viewDirection, SkySettings settings)
 {
-    float height = _viewDirection.y;
-    
-    float zenithMask = smoothstep(0, 0.25, height);
-    float3 zenithColor = lerp(settings.zenithColor, settings.horizonColor, zenithMask);
-    
-    float horizonMask = 1 - smoothstep(settings.horizonThickness, settings.horizonThickness + settings.horizonSoftness, height * -1);
-    float3 skyColor = lerp(zenithColor, settings.horizonColor, horizonMask);
-    
+    float height = -normalize(_viewDirection).y;
+
+    float zenithHeight = saturate(height / 0.5);
+    float zenithMask = pow(zenithHeight, 0.65);
+
+    float horizonDistance = abs(height);
+    float horizonMask = 1.0 - smoothstep(settings.horizonThickness, settings.horizonThickness + settings.horizonSoftness, horizonDistance);
+
+    float3 skyColor = lerp(settings.horizonColor, settings.zenithColor, zenithMask);
+    skyColor = lerp(skyColor, settings.horizonColor, horizonMask);
+
     return skyColor;
 }
-
 void GetSky_float(float3 _worldPosition, float3 _viewDirection, out float3 color)
 {
     SkySettings skySettings;

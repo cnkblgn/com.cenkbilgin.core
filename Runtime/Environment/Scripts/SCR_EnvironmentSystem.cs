@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Core.Environment
 {
@@ -30,6 +31,9 @@ namespace Core.Environment
         internal static bool isCloudEnabled = true;
         internal static bool isCelestialEnabled = true;
         internal static bool isStarsEnabled = true;
+        internal static GlobalKeyword _FOG_VOLUMETRIC_ON;
+        internal static GlobalKeyword _FOG_BLUR_ON;
+        internal static readonly int _FOG_BLUR_STRENGTH_ID = Shader.PropertyToID("_FOG_BLUR_STRENGTH");
         internal static readonly int _FOG_COLOR_ID = Shader.PropertyToID("_FOG_COLOR");
         internal static readonly int _FOG_DENSITY_ID = Shader.PropertyToID("_FOG_DENSITY");
         internal static readonly int _FOG_DISTANCE_START_ID = Shader.PropertyToID("_FOG_DISTANCE_START");
@@ -41,6 +45,7 @@ namespace Core.Environment
         internal static readonly int _FOG_NOISE_STRENGTH_ID = Shader.PropertyToID("_FOG_NOISE_STRENGTH");
         internal static readonly int _FOG_NOISE_SCALE_ID = Shader.PropertyToID("_FOG_NOISE_SCALE");
         internal static readonly int _FOG_NOISE_SPEED_ID = Shader.PropertyToID("_FOG_NOISE_SPEED");
+        internal static readonly int _FOG_STEP_COUNT_ID = Shader.PropertyToID("_FOG_STEP_COUNT");
         internal static readonly int _ZENITH_COLOR_ID = Shader.PropertyToID("_ZENITH_COLOR");
         internal static readonly int _HORIZON_COLOR_ID = Shader.PropertyToID("_HORIZON_COLOR");
         internal static readonly int _HORIZON_THICKNESS_ID = Shader.PropertyToID("_HORIZON_THICKNESS");
@@ -91,6 +96,9 @@ namespace Core.Environment
             isCloudEnabled = true;
             isCelestialEnabled = true;
             isStarsEnabled = true;
+
+            _FOG_VOLUMETRIC_ON = GlobalKeyword.Create("_FOG_VOLUMETRIC_ON");
+            _FOG_BLUR_ON = GlobalKeyword.Create("_FOG_BLUR_ON");
         }
 
         private void Update()
@@ -120,6 +128,7 @@ namespace Core.Environment
                 Refresh();
             }
         }
+        private void Reset() => OnRuntimeInitialize();
         private void OnDisable() => OnRuntimeInitialize();
 
         private static bool IsValid()
@@ -221,6 +230,11 @@ namespace Core.Environment
                 cachedFogTexture = texture;
             }
 
+            Shader.SetKeyword(_FOG_VOLUMETRIC_ON, settings.FogMode == FogMode.VOLUMETRIC);
+
+            Shader.SetKeyword(_FOG_BLUR_ON, settings.FogBlur > 0.01f);
+            Shader.SetGlobalFloat(_FOG_BLUR_STRENGTH_ID, settings.FogBlur);
+
             Shader.SetGlobalColor(_FOG_COLOR_ID, fog.Color);
             Shader.SetGlobalFloat(_FOG_DENSITY_ID, isFogEnabled ? fog.Density : 0);
             Shader.SetGlobalFloat(_FOG_DISTANCE_START_ID, fog.DistanceStart);
@@ -231,6 +245,7 @@ namespace Core.Environment
             Shader.SetGlobalFloat(_FOG_NOISE_STRENGTH_ID, fog.NoiseStrength);
             Shader.SetGlobalFloat(_FOG_NOISE_SPEED_ID, fog.NoiseTurbulance);
             Shader.SetGlobalFloat(_FOG_NOISE_SCALE_ID, fog.NoiseScale);
+            Shader.SetGlobalFloat(_FOG_STEP_COUNT_ID, (int)settings.FogQuality);
         }
         private static void ApplySky(EnvironmentSettings settings)
         {

@@ -5,16 +5,20 @@
 
 float4 blurBox(Texture2D _tex2D, SamplerState _samp2D, float2 _uv, float _strength)
 {
-    float4 c = 0;
-	
+    uint width, height;  
+    _tex2D.GetDimensions(width, height);
+
+    float2 texelSize = 1.0 / float2(width, height);
+    float2 texelOffset = texelSize * _strength;
+    float4 color = 0.0;
+
+    [unroll]
     for (int i = 0; i < 9; i++)
     {
-        float2 uv = OFFSETS[i] * _strength * 0.001;
-        
-        c += _tex2D.Sample(_samp2D, _uv + uv);
+        color += _tex2D.Sample(_samp2D, _uv + OFFSETS[i] * texelOffset);
     }
-	
-    return c / 9;
+
+    return color * (1.0 / 9.0);
 }
 float4 blurGaussian(Texture2D _tex2D, SamplerState _samp2D, float2 _uv, float _strength, int _radius, float _downsample)
 {

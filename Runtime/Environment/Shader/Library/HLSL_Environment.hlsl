@@ -14,6 +14,8 @@ uniform sampler2D _FOG_NOISE_TEX;
 uniform float _FOG_NOISE_SCALE = 0.05;
 uniform float _FOG_NOISE_SPEED = 0.5;
 uniform float _FOG_NOISE_STRENGTH = 0.5;
+
+uniform float _FOG_STEP_COUNT = 12;
 // FOG END
 
 // SKY START

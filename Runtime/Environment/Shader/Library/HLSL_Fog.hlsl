@@ -1,7 +1,10 @@
 ﻿#ifndef HLSLFOG_INCLUDED
 #define HLSLFOG_INCLUDED
 
+// gölgeler için!
+#pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
 #include "../../../_Shared/Shaders/Library/HLSL_Helper.hlsl"
+#include "../../../_Shared/Shaders/Library/HLSL_Light.hlsl"
 #include "HLSL_Environment.hlsl"
 
 struct FogSettings
@@ -12,7 +15,7 @@ struct FogSettings
     float heightStart;
     float heightFalloff;
 };
-
+    
 struct FogDensity
 {
     float distance;
@@ -43,8 +46,8 @@ float3 GetFogAmbient(float3 _worldPosition, float3 _cameraPosition, float3 _sunD
 
 float GetFogSample(float3 _worldPosition, float _fade, sampler2D _noiseTex, float _noiseScale, float _noiseSpeed)
 {
-    float2 uv1 = _worldPosition.xz * _noiseScale + float2(_Time.y * _noiseSpeed * 0.1, 0);
-    float2 uv2 = _worldPosition.xz * _noiseScale * 2.3 + float2(0, _Time.y * _noiseSpeed * 0.07);
+    float2 uv1 = _worldPosition.xz * (_noiseScale * 0.01) + float2(_Time.y * _noiseSpeed * 0.1, 0);
+    float2 uv2 = _worldPosition.xz * (_noiseScale * 0.01) * 2.3 + float2(0, _Time.y * _noiseSpeed * 0.07);
 
     float n1 = tex2D(_noiseTex, uv1).r;
     float n2 = tex2D(_noiseTex, uv2).r;
@@ -68,7 +71,6 @@ FogDensity GetFogDensity(float3 _worldPosition, float3 _cameraPosition, FogSetti
     result.value = distanceFog * heightFog * settings.density;
     
     return result;
-
 }
 
 float GetFogFactor(float3 _worldPosition, float3 _cameraPosition, FogSettings settings)
@@ -91,7 +93,7 @@ float GetFogFactor(float3 _worldPosition, float3 _worldNormal, float3 _cameraPos
     return saturate(factor);
 }
 
-void GetFog_float(float3 _worldPosition, float3 _worldNormal, float3 _cameraPosition, float2 _uv, out float3 color, out float factor)
+void GetFogDefault_float(float3 _worldPosition, float3 _worldNormal, float3 _cameraPosition, out float3 color, out float factor)
 {
     FogSettings settings;
     settings.density = _FOG_DENSITY;
@@ -99,7 +101,7 @@ void GetFog_float(float3 _worldPosition, float3 _worldNormal, float3 _cameraPosi
     settings.distanceFalloff = _FOG_DISTANCE_FALLOFF;
     settings.heightStart = _FOG_HEIGHT_START;
     settings.heightFalloff = _FOG_HEIGHT_FALLOFF;
-    
+        
     float fogFactor = GetFogFactor(_worldPosition, _worldNormal, _cameraPosition, _FOG_NOISE_TEX, _FOG_NOISE_SCALE, _FOG_NOISE_SPEED, _FOG_NOISE_STRENGTH, settings);
     float3 fogAmbient = GetFogAmbient(_worldPosition, _cameraPosition, _SUN_DIRECTION, _SUN_COLOR, _FOG_COLOR);
     float3 fogScatter = GetFogScatter(_worldPosition, _cameraPosition, _SUN_DIRECTION, _SUN_COLOR, _FOG_SCATTERING);
@@ -108,9 +110,9 @@ void GetFog_float(float3 _worldPosition, float3 _worldNormal, float3 _cameraPosi
     factor = fogFactor;
 }
 
-void GetFog_half(half3 _worldPosition, half3 _worldNormal, half3 _cameraPosition, float2 _uv, out half3 color, out half factor)
+void GetFogDefault_half(half3 _worldPosition, half3 _worldNormal, half3 _cameraPosition, out half3 color, out half factor)
 {
-    GetFog_float(_worldPosition, _worldNormal, _cameraPosition, _uv, color, factor);
+    GetFogDefault_half(_worldPosition, _worldNormal, _cameraPosition, color, factor);
 }
 
 void GetFogSimple_float(float3 _worldPosition, float3 _cameraPosition, out float3 color, out float factor)
@@ -132,5 +134,83 @@ void GetFogSimple_float(float3 _worldPosition, float3 _cameraPosition, out float
 void GetFogSimple_half(half3 _worldPosition, half3 _cameraPosition, out half3 color, out half factor)
 {
     GetFogSimple_float(_worldPosition, _cameraPosition, color, factor);
+}
+
+void GetFogVolumetric_float(float3 _worldPosition, float3 _worldNormal, float3 _cameraPosition, out float3 color, out float factor)
+{
+    FogSettings settings;
+    settings.density = _FOG_DENSITY;
+    settings.distanceStart = _FOG_DISTANCE_START;
+    settings.distanceFalloff = _FOG_DISTANCE_FALLOFF;
+    settings.heightStart = _FOG_HEIGHT_START;
+    settings.heightFalloff = _FOG_HEIGHT_FALLOFF;
+
+    float3 rayDir = normalize(_worldPosition - _cameraPosition);
+    float maxDist = length(_worldPosition - _cameraPosition);
+
+    int stepCount = _FOG_STEP_COUNT;
+    float stepSize = maxDist / stepCount;
+
+    float stepRandom = frac(sin(dot(_worldPosition.xz, float2(12.9898, 78.233))) * 43758.5453);
+    float stepOffset = (stepRandom - 0.5) * stepSize;
+
+    float3 accumulatedColor = float3(0, 0, 0);
+    float accumulatedFactor = 0;
+
+    [unroll(32)]
+    for (int i = 0; i < stepCount; i++)
+    {
+        if (accumulatedFactor >= 0.99)
+        {
+            break;
+        }
+
+        float currentDistance = i * stepSize + stepOffset;
+        float3 currentPosition = _cameraPosition + rayDir * currentDistance;
+
+        FogDensity density = GetFogDensity(currentPosition, _cameraPosition, settings);      
+        float stepFactor = density.value;
+
+        if (stepFactor < 0.001)
+        {
+            continue;
+        }
+
+        float distanceFromCamera = density.distance;
+        
+        if (distanceFromCamera < settings.distanceStart)
+        {
+            float noiseMask = smoothstep(0.2, 0.6, abs(_worldNormal.y));
+            float noiseFade = (1 - saturate(distanceFromCamera / settings.distanceStart)) * noiseMask;
+            float noiseFog = GetFogSample(currentPosition, noiseFade, _FOG_NOISE_TEX, _FOG_NOISE_SCALE, _FOG_NOISE_SPEED);
+            
+            stepFactor = stepFactor + (stepFactor * noiseFog * _FOG_NOISE_STRENGTH * 4);
+        }
+
+        float3 lightDirection;
+        float3 lightColor;
+        float shadowAttenuation;
+        float shadowInfluence;
+        float shadowStrength = 1;
+        GetMainLight_float(currentPosition, lightDirection, lightColor, shadowAttenuation);
+        shadowInfluence = lerp(1.0, shadowAttenuation, shadowStrength);
+
+        stepFactor *= shadowInfluence;
+
+        float3 stepAmbient = GetFogAmbient(currentPosition, _cameraPosition, _SUN_DIRECTION, _SUN_COLOR, _FOG_COLOR);
+        float3 stepScatter = GetFogScatter(currentPosition, _cameraPosition, _SUN_DIRECTION, _SUN_COLOR, _FOG_SCATTERING) * shadowInfluence;
+        float3 stepColor = stepAmbient + stepScatter;
+
+        accumulatedColor += stepColor * stepFactor * (1 - accumulatedFactor);
+        accumulatedFactor += stepFactor * (1 - accumulatedFactor);
+    }
+
+    color = accumulatedColor;
+    factor = saturate(accumulatedFactor);
+}
+
+void GetFogVolumetric_half(half3 _worldPosition, half3 _worldNormal, half3 _cameraPosition, out half3 color, out half factor)
+{
+    GetFogVolumetric_float(_worldPosition, _worldNormal, _cameraPosition, color, factor);
 }
 #endif

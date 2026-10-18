@@ -9,8 +9,14 @@ namespace Core.Environment
         [Header("_")]
         [Info("R -> Mask, G -> Distortion (X), B -> Distortion (Y)")]
         public Texture2D CloudTexture;
+
+        [Header("_")]
+        public FogMode FogMode;
+        public FogResolution FogResolution;
+        public FogQuality FogQuality;
         [Info("R -> Mask")]
         public Texture2D FogTexture;
+        [Range(0, 1)] public float FogBlur;
 
         [Header("_")]
         public SkySettings Sky;
@@ -27,7 +33,11 @@ namespace Core.Environment
         internal EnvironmentSettings()
         {
             CloudTexture = default;
+            FogMode = FogMode.DEFAULT;
+            FogQuality = FogQuality.HIGH;
+            FogResolution = FogResolution.HALF;
             FogTexture = default;
+            FogBlur = 0;
 
             Sky = new()
             {
@@ -76,7 +86,7 @@ namespace Core.Environment
                 HeightFalloff = 4f,
                 Scattering = 4f,
                 NoiseStrength = 0.25f,
-                NoiseScale = 0.05f,
+                NoiseScale = 0.5f,
                 NoiseTurbulance = 0.5f,
             };
 
