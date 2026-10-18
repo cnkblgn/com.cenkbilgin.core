@@ -36,13 +36,16 @@ namespace Core.Environment
         internal static readonly int _FOG_BLUR_STRENGTH_ID = Shader.PropertyToID("_FOG_BLUR_STRENGTH");
         internal static readonly int _FOG_COLOR_ID = Shader.PropertyToID("_FOG_COLOR");
         internal static readonly int _FOG_DENSITY_ID = Shader.PropertyToID("_FOG_DENSITY");
+        internal static readonly int _FOG_OPACITY_ID = Shader.PropertyToID("_FOG_OPACITY");
         internal static readonly int _FOG_DISTANCE_START_ID = Shader.PropertyToID("_FOG_DISTANCE_START");
         internal static readonly int _FOG_DISTANCE_FALLOFF_ID = Shader.PropertyToID("_FOG_DISTANCE_FALLOFF");
         internal static readonly int _FOG_HEIGHT_START_ID = Shader.PropertyToID("_FOG_HEIGHT_START");
         internal static readonly int _FOG_HEIGHT_FALLOFF_ID = Shader.PropertyToID("_FOG_HEIGHT_FALLOFF");
         internal static readonly int _FOG_SCATTERING_ID = Shader.PropertyToID("_FOG_SCATTERING");
         internal static readonly int _FOG_NOISE_TEX_ID = Shader.PropertyToID("_FOG_NOISE_TEX");
-        internal static readonly int _FOG_NOISE_STRENGTH_ID = Shader.PropertyToID("_FOG_NOISE_STRENGTH");
+        internal static readonly int _FOG_NOISE_OPACITY_ID = Shader.PropertyToID("_FOG_NOISE_OPACITY");
+        internal static readonly int _FOG_NOISE_MODULATION_ID = Shader.PropertyToID("_FOG_NOISE_MODULATION");
+        internal static readonly int _FOG_NOISE_OFFSET_ID = Shader.PropertyToID("_FOG_NOISE_OFFSET");
         internal static readonly int _FOG_NOISE_SCALE_ID = Shader.PropertyToID("_FOG_NOISE_SCALE");
         internal static readonly int _FOG_NOISE_SPEED_ID = Shader.PropertyToID("_FOG_NOISE_SPEED");
         internal static readonly int _FOG_STEP_COUNT_ID = Shader.PropertyToID("_FOG_STEP_COUNT");
@@ -54,10 +57,12 @@ namespace Core.Environment
         internal static readonly int _SUN_DIRECTION_ID = Shader.PropertyToID("_SUN_DIRECTION");
         internal static readonly int _SUN_SIZE_ID = Shader.PropertyToID("_SUN_SIZE");
         internal static readonly int _SUN_GLOW_ID = Shader.PropertyToID("_SUN_GLOW");
+        internal static readonly int _SUN_POWER_ID = Shader.PropertyToID("_SUN_POWER");
         internal static readonly int _MOON_COLOR_ID = Shader.PropertyToID("_MOON_COLOR");
         internal static readonly int _MOON_DIRECTION_ID = Shader.PropertyToID("_MOON_DIRECTION");
         internal static readonly int _MOON_SIZE_ID = Shader.PropertyToID("_MOON_SIZE");
         internal static readonly int _MOON_GLOW_ID = Shader.PropertyToID("_MOON_GLOW");
+        internal static readonly int _MOON_POWER_ID = Shader.PropertyToID("_MOON_POWER");
         internal static readonly int _CLOUD_TEX_A_ID = Shader.PropertyToID("_CLOUD_TEX_A");
         internal static readonly int _CLOUD_TEX_B_ID = Shader.PropertyToID("_CLOUD_TEX_B");
         internal static readonly int _CLOUD_BLEND_ID = Shader.PropertyToID("_CLOUD_BLEND");
@@ -237,13 +242,16 @@ namespace Core.Environment
 
             Shader.SetGlobalColor(_FOG_COLOR_ID, fog.Color);
             Shader.SetGlobalFloat(_FOG_DENSITY_ID, isFogEnabled ? fog.Density : 0);
+            Shader.SetGlobalFloat(_FOG_OPACITY_ID, isFogEnabled ? fog.Opacity : 0);
             Shader.SetGlobalFloat(_FOG_DISTANCE_START_ID, fog.DistanceStart);
             Shader.SetGlobalFloat(_FOG_DISTANCE_FALLOFF_ID, fog.DistanceFalloff);
             Shader.SetGlobalFloat(_FOG_HEIGHT_START_ID, fog.HeightStart);
             Shader.SetGlobalFloat(_FOG_HEIGHT_FALLOFF_ID, fog.HeightFalloff);
             Shader.SetGlobalFloat(_FOG_SCATTERING_ID, fog.Scattering);
-            Shader.SetGlobalFloat(_FOG_NOISE_STRENGTH_ID, fog.NoiseStrength);
-            Shader.SetGlobalFloat(_FOG_NOISE_SPEED_ID, fog.NoiseTurbulance);
+            Shader.SetGlobalFloat(_FOG_NOISE_OPACITY_ID, fog.NoiseOpacity);
+            Shader.SetGlobalFloat(_FOG_NOISE_MODULATION_ID, fog.NoiseModulation);
+            Shader.SetGlobalFloat(_FOG_NOISE_OFFSET_ID, fog.NoiseOffset);
+            Shader.SetGlobalFloat(_FOG_NOISE_SPEED_ID, fog.NoiseSpeed);
             Shader.SetGlobalFloat(_FOG_NOISE_SCALE_ID, fog.NoiseScale);
             Shader.SetGlobalFloat(_FOG_STEP_COUNT_ID, (int)settings.FogQuality);
         }
@@ -274,14 +282,16 @@ namespace Core.Environment
             Shader.SetGlobalColor(_HORIZON_COLOR_ID, sky.HorizonColor);
             Shader.SetGlobalFloat(_HORIZON_THICKNESS_ID, sky.HorizonThickness);
             Shader.SetGlobalFloat(_HORIZON_SOFTNESS_ID, sky.HorizonSmoothness);
-            Shader.SetGlobalColor(_SUN_COLOR_ID, sun.Color * sun.Power);
+            Shader.SetGlobalColor(_SUN_COLOR_ID, sun.Color);
             Shader.SetGlobalVector(_SUN_DIRECTION_ID, -sunDirection);
             Shader.SetGlobalFloat(_SUN_SIZE_ID, isCelestialEnabled ? sun.Size : 0);
             Shader.SetGlobalFloat(_SUN_GLOW_ID, sun.Glow);
-            Shader.SetGlobalColor(_MOON_COLOR_ID, moon.Color * moon.Power);
+            Shader.SetGlobalFloat(_SUN_POWER_ID, sun.Power);
+            Shader.SetGlobalColor(_MOON_COLOR_ID, moon.Color);
             Shader.SetGlobalVector(_MOON_DIRECTION_ID, -moonDirection);
             Shader.SetGlobalFloat(_MOON_SIZE_ID, isCelestialEnabled ? moon.Size : 0);
             Shader.SetGlobalFloat(_MOON_GLOW_ID, moon.Glow);
+            Shader.SetGlobalFloat(_MOON_POWER_ID, moon.Power);
 
             Shader.SetGlobalFloat(_CLOUD_BLEND_ID, settings.Blend);
             Shader.SetGlobalColor(_CLOUD_TINT_ID, cloud.Tint);

@@ -6,13 +6,14 @@ struct CelestialSettings
     float3 color;
     float direction;
     float glow;
+    float power;
     float size;
 };
 
-float3 GetCelestialDisc(float3 _color, float _size, float _direction)
+float3 GetCelestialDisc(float3 _color, float _power, float _size, float _direction)
 {
     float disc = smoothstep(1 - _size, 1, _direction);
-    return disc * _color;
+    return disc * _color * _power;
 }
 
 float3 GetCelestialGlow(float3 _color, float _glow, float _direction)
@@ -23,7 +24,7 @@ float3 GetCelestialGlow(float3 _color, float _glow, float _direction)
 
 float3 DrawCelestial(CelestialSettings settings)
 {
-    float3 disc = GetCelestialDisc(settings.color, settings.size, settings.direction);
+    float3 disc = GetCelestialDisc(settings.color, settings.power, settings.size, settings.direction);
     float3 glow = GetCelestialGlow(settings.color, settings.glow, settings.direction);
     
     return disc + glow;

@@ -43,6 +43,7 @@ void GetSky_float(float3 _worldPosition, float3 _viewDirection, out float3 color
     celestialSunSettings.color = _SUN_COLOR;
     celestialSunSettings.direction = saturate(dot(_viewDirection, _SUN_DIRECTION));
     celestialSunSettings.glow = _SUN_GLOW;
+    celestialSunSettings.power = _SUN_POWER;
     celestialSunSettings.size = _SUN_SIZE;
     float3 sunColor = DrawCelestial(celestialSunSettings);
 
@@ -50,6 +51,7 @@ void GetSky_float(float3 _worldPosition, float3 _viewDirection, out float3 color
     celestialMoonSettings.color = _MOON_COLOR;
     celestialMoonSettings.direction = saturate(dot(_viewDirection, _MOON_DIRECTION));
     celestialMoonSettings.glow = _MOON_GLOW;
+    celestialMoonSettings.power = _MOON_POWER;
     celestialMoonSettings.size = _MOON_SIZE;
     float3 moonColor = DrawCelestial(celestialMoonSettings);
 

@@ -80,14 +80,17 @@ namespace Core.Environment
             {
                 Color = Color.gray,
                 Density = 0f,
+                Opacity = 1f,
                 DistanceStart = 512f,
                 DistanceFalloff = 1,
                 HeightStart = 10000f,
                 HeightFalloff = 4f,
                 Scattering = 4f,
-                NoiseStrength = 0.25f,
+                NoiseOpacity = 1f,
+                NoiseModulation = 0.25f,
+                NoiseOffset = 0.15f,
                 NoiseScale = 0.5f,
-                NoiseTurbulance = 0.5f,
+                NoiseSpeed = 0.5f,
             };
 
             Cloud = new()

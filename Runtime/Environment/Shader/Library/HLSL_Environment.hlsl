@@ -4,6 +4,7 @@
 // FOG START
 uniform float3 _FOG_COLOR = float3(0.4, 0.4, 0.4);
 uniform float _FOG_DENSITY = 1;
+uniform float _FOG_OPACITY = 1;
 uniform float _FOG_DISTANCE_START = 64;
 uniform float _FOG_DISTANCE_FALLOFF = 1;
 uniform float _FOG_HEIGHT_START = 64;
@@ -13,8 +14,9 @@ uniform float _FOG_SCATTERING = 5;
 uniform sampler2D _FOG_NOISE_TEX;
 uniform float _FOG_NOISE_SCALE = 0.05;
 uniform float _FOG_NOISE_SPEED = 0.5;
-uniform float _FOG_NOISE_STRENGTH = 0.5;
-
+uniform float _FOG_NOISE_OPACITY = 1;
+uniform float _FOG_NOISE_MODULATION = 0.5;
+uniform float _FOG_NOISE_OFFSET = 0.15;
 uniform float _FOG_STEP_COUNT = 12;
 // FOG END
 
@@ -28,11 +30,13 @@ uniform float3 _SUN_COLOR = float3(1, 1, 1);
 uniform float3 _SUN_DIRECTION = float3(0, -1, 0);
 uniform float _SUN_SIZE = 0.02;
 uniform float _SUN_GLOW = 32;
+uniform float _SUN_POWER = 1;
 
 uniform float3 _MOON_COLOR = float3(1, 1, 1);
 uniform float3 _MOON_DIRECTION = float3(0, 1, 0);
 uniform float _MOON_SIZE = 0.02;
 uniform float _MOON_GLOW = 32;
+uniform float _MOON_POWER = 1;
 // SKY END
 
 // CLOUDS START
