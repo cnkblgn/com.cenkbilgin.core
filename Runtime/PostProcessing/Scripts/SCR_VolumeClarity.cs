@@ -4,7 +4,7 @@ using UnityEngine.Rendering;
 namespace Core.PostProcessing
 {
     [Serializable]
-    [VolumeComponentMenu("Post-processing/Clarify")]
+    [VolumeComponentMenu("Image/Clarify")]
     public sealed class Clarify : VolumeComponent
     {
         public BoolParameter Enabled = new(false, true);

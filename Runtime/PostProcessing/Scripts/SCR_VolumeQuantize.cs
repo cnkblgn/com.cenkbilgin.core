@@ -4,7 +4,7 @@ using UnityEngine.Rendering;
 namespace Core.PostProcessing
 {
     [Serializable]
-    [VolumeComponentMenu("Post-processing/Quantize")]
+    [VolumeComponentMenu("Image/Quantize")]
     public sealed class Quantize : VolumeComponent
     {
         public BoolParameter Enabled = new(false, true);

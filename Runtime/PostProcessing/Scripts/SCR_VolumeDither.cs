@@ -4,7 +4,7 @@ using UnityEngine.Rendering;
 namespace Core.PostProcessing
 {
     [Serializable]
-    [VolumeComponentMenu("Post-processing/Dither")]
+    [VolumeComponentMenu("Image/Dither")]
     public sealed class Dither : VolumeComponent
     {
         public BoolParameter Enabled = new(false, true);

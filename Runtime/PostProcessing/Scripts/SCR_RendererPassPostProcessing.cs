@@ -7,8 +7,8 @@ namespace Core.PostProcessing
 {
     internal sealed class RendererPassPostProcessing : ScriptableRenderPass
     {
-        private const string PASS_NAME = "PostProcessingPass";
-        private const string TEXTURE_NAME = "CameraColor" + "_" + PASS_NAME;
+        private const string PASS_NAME = "_PostProcessingPass";
+        private const string TEXTURE_NAME = "PostProcessingTexture";
 
         private static readonly int ClarifyStrengthID = Shader.PropertyToID("_ClarifyStrength");
         private static readonly int VibranceStrengthID = Shader.PropertyToID("_VibranceStrength");
@@ -66,11 +66,11 @@ namespace Core.PostProcessing
             this.material = material;
             this.renderPassEvent = renderPassEvent;
 
-            ClarifyKeyword = new(material.shader, "_CLARIFY");
-            VibranceKeyword = new(material.shader, "_VIBRANCE");
-            SharpenKeyword = new(material.shader, "_SHARPEN");
-            QuantizeKeyword = new(material.shader, "_QUANTIZE");
-            DitherKeyword = new(material.shader, "_DITHER");
+            ClarifyKeyword = new(material.shader, "_CLARIFY_ON");
+            VibranceKeyword = new(material.shader, "_VIBRANCE_ON");
+            SharpenKeyword = new(material.shader, "_SHARPEN_ON");
+            QuantizeKeyword = new(material.shader, "_QUANTIZE_ON");
+            DitherKeyword = new(material.shader, "_DITHER_ON");
         }
 
         private static void ExecutePass(PassData data, RasterGraphContext context)

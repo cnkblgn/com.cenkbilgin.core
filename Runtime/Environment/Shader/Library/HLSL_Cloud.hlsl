@@ -1,9 +1,11 @@
 ﻿#ifndef HLSLCLOUD_INCLUDED
 #define HLSLCLOUD_INCLUDED
 
+#include "../../../_Shared/Shaders/Library/HLSL_Helper.hlsl"
+
 struct CloudSettings
 {
-    float3 tint;
+    float3 color;
     float blend;
     float coverage;
     float opacity;
@@ -24,6 +26,17 @@ struct CloudDensity
     float shape;
     float value;
 };
+
+float GetCloudHash(float3 _viewDirection, float _speed, float _scale)
+{
+    float time = _Time.y * _speed;
+    float3 direction = normalize(_viewDirection) * _scale;
+    float3 position = float3(direction.x + direction.y * 0.37 + direction.z * 0.19, direction.y + direction.z * 0.43 + direction.x * 0.23, direction.z + direction.x * 0.31 + direction.y * 0.17);
+
+    position += float3(time * 0.45, -time * 0.31, time * 0.17);
+
+    return Hash31(floor(position));
+}
 
 float3 GetCloudUVPoint(float3 _viewDirection, float _curve, float _height)
 {
@@ -79,12 +92,12 @@ float4 DrawCloud(float3 _viewDirection, float3 _lightDirection, float3 _lightCol
 {
     float3 viewDirection = normalize(-_viewDirection);
 
-    float sunDot = saturate(dot(viewDirection, _lightDirection));
-    sunDot = pow(sunDot, 4);
+    float sunDot = pow(saturate(dot(viewDirection, _lightDirection)), 4);
     float sunHeight = saturate(_lightDirection.y);
 
     float absorption = exp(-_density.value * _density.value);
     float transmittance = lerp(absorption, 1, sunDot * 0.6 + sunHeight * 0.4);
+    
     transmittance = saturate(transmittance * _density.shape * sunDot * _settings.transmittance * 2);
 
     float3 shadowColor = _skyColor * (_skyColor + (1.0 - _settings.darkness));
@@ -97,7 +110,8 @@ float4 DrawCloud(float3 _viewDirection, float3 _lightDirection, float3 _lightCol
     float3 rimColor = _lightColor * pow(sunDot, 8.0) * rimMask * _settings.rimStrength;
 
     cloudColor += rimColor;
+    cloudColor *= lerp(0.75, 1.05, GetCloudHash(_viewDirection, 12, 512));
 
-    return float4(cloudColor * _settings.tint, saturate(_density.value));
+    return float4(cloudColor * _settings.color, saturate(_density.value));
 }
 #endif

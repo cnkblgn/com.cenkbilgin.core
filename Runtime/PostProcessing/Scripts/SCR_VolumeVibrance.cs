@@ -5,7 +5,7 @@ using UnityEngine.Rendering;
 namespace Core.PostProcessing
 {
     [Serializable]
-    [VolumeComponentMenu("Post-processing/Vibrance")]
+    [VolumeComponentMenu("Image/Vibrance")]
     public sealed class Vibrance : VolumeComponent
     {
         public BoolParameter Enabled = new(false, true);

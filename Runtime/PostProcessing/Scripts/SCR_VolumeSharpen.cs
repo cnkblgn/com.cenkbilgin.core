@@ -4,7 +4,7 @@ using UnityEngine.Rendering;
 namespace Core.PostProcessing
 {
     [Serializable]
-    [VolumeComponentMenu("Post-processing/Sharpen")]
+    [VolumeComponentMenu("Image/Sharpen")]
     public sealed class Sharpen : VolumeComponent
     {
         public BoolParameter Enabled = new(false, true);

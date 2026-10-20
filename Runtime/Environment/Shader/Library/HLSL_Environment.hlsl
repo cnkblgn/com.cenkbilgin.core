@@ -10,14 +10,15 @@ uniform float _FOG_DISTANCE_FALLOFF = 1;
 uniform float _FOG_HEIGHT_START = 64;
 uniform float _FOG_HEIGHT_FALLOFF = 1;
 uniform float _FOG_SCATTERING = 5;
-
 uniform sampler2D _FOG_NOISE_TEX;
+uniform float _FOG_NOISE_OPACITY = 1;
 uniform float _FOG_NOISE_SCALE = 0.05;
 uniform float _FOG_NOISE_SPEED = 0.5;
-uniform float _FOG_NOISE_OPACITY = 1;
 uniform float _FOG_NOISE_MODULATION = 0.5;
 uniform float _FOG_NOISE_OFFSET = 0.15;
-uniform float _FOG_STEP_COUNT = 12;
+uniform sampler2D _FOG_RAMP_TEX;
+uniform float _FOG_RAMP_OPACITY;
+uniform float _FOG_RAMP_SCALE;
 // FOG END
 
 // SKY START
@@ -25,13 +26,11 @@ uniform float3 _ZENITH_COLOR = float3(0.75, 0.86, 0.75);
 uniform float3 _HORIZON_COLOR = float3(0.4, 0.4, 0.4);
 uniform float _HORIZON_THICKNESS = 0.15;
 uniform float _HORIZON_SOFTNESS = 0.25;
-
 uniform float3 _SUN_COLOR = float3(1, 1, 1);
 uniform float3 _SUN_DIRECTION = float3(0, -1, 0);
 uniform float _SUN_SIZE = 0.02;
 uniform float _SUN_GLOW = 32;
 uniform float _SUN_POWER = 1;
-
 uniform float3 _MOON_COLOR = float3(1, 1, 1);
 uniform float3 _MOON_DIRECTION = float3(0, 1, 0);
 uniform float _MOON_SIZE = 0.02;
@@ -40,11 +39,10 @@ uniform float _MOON_POWER = 1;
 // SKY END
 
 // CLOUDS START
-uniform sampler2D _CLOUD_TEX_A; // R -> Mask, G -> +Distortion, B -> -Distortion
-uniform sampler2D _CLOUD_TEX_B; // R -> Mask, G -> +Distortion, B -> -Distortion
-uniform float _CLOUD_TEX_BLEND = 0;
-
-uniform float3 _CLOUD_TINT = float3(1, 1, 1);
+uniform sampler2D _CLOUD_BASE_TEX; // R -> Mask, G -> +Distortion, B -> -Distortion
+uniform sampler2D _CLOUD_TARGET_TEX; // R -> Mask, G -> +Distortion, B -> -Distortion
+uniform float _CLOUD_BLEND = 0;
+uniform float3 _CLOUD_COLOR = float3(1, 1, 1);
 uniform float _CLOUD_COVERAGE = 1;
 uniform float _CLOUD_OPACITY = 1;
 uniform float _CLOUD_FADE = 0;
@@ -65,8 +63,8 @@ uniform float _STAR_AMOUNT = 1;
 uniform float _STAR_DENSITY = 256;
 uniform float _STAR_SIZE = 0.05;
 uniform float _STAR_BRIGHTNESS = 0.05;
-uniform float _STAR_TWINKLE_AMOUNT = 0.25;
-uniform float _STAR_TWINKLE_SPEED = 0.05;
+uniform float _STAR_ANIMATION_STRENGTH = 0.25;
+uniform float _STAR_ANIMATION_SPEED = 0.05;
 // STARS END
 
 #endif

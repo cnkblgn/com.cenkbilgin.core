@@ -42,6 +42,7 @@ namespace Core.Localization
 
             LocalizationDatabase.Build(csvContent, interpolators);
         }
+        /// <summary> Does not support new added languages! only existing ones </summary>
         public void AppendEntries(string csvContent)
         {
             if (string.IsNullOrEmpty(csvContent))

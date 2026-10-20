@@ -56,8 +56,8 @@ void GetSky_float(float3 _worldPosition, float3 _viewDirection, out float3 color
     float3 moonColor = DrawCelestial(celestialMoonSettings);
 
     CloudSettings cloudSettings;
-    cloudSettings.tint = _CLOUD_TINT;
-    cloudSettings.blend = _CLOUD_TEX_BLEND;
+    cloudSettings.color = _CLOUD_COLOR;
+    cloudSettings.blend = _CLOUD_BLEND;
     cloudSettings.coverage = _CLOUD_COVERAGE;
     cloudSettings.opacity = _CLOUD_OPACITY;
     cloudSettings.fade = _CLOUD_FADE;
@@ -71,7 +71,7 @@ void GetSky_float(float3 _worldPosition, float3 _viewDirection, out float3 color
     cloudSettings.rimWidth = _CLOUD_RIM_WIDTH;
     cloudSettings.rimStrength = _CLOUD_RIM_STRENGTH;
 
-    CloudDensity cloudDensity = GetCloudDensity(_viewDirection, _CLOUD_TEX_A, _CLOUD_TEX_B, cloudSettings);
+    CloudDensity cloudDensity = GetCloudDensity(_viewDirection, _CLOUD_BASE_TEX, _CLOUD_TARGET_TEX, cloudSettings);
     
     float4 cloudSun = DrawCloud(_viewDirection, -_SUN_DIRECTION, _SUN_COLOR, skyColor, cloudDensity, cloudSettings);
     float4 cloudMoon = DrawCloud(_viewDirection, -_MOON_DIRECTION, _MOON_COLOR, skyColor, cloudDensity, cloudSettings);
@@ -85,8 +85,8 @@ void GetSky_float(float3 _worldPosition, float3 _viewDirection, out float3 color
     starSettings.size = _STAR_SIZE;
     starSettings.brightness = _STAR_BRIGHTNESS;
     starSettings.amount = _STAR_AMOUNT;
-    starSettings.twinkleSpeed = _STAR_TWINKLE_SPEED;
-    starSettings.twinkleAmount = _STAR_TWINKLE_AMOUNT;
+    starSettings.animationStrength = _STAR_ANIMATION_STRENGTH;
+    starSettings.animationSpeed = _STAR_ANIMATION_SPEED;
     float3 starColor = DrawStars(_viewDirection, starSettings);   
     starColor *= (1.0 - cloudDensity.value);
     starColor *= (1.0 - saturate(dot(moonColor, 1.0)));
