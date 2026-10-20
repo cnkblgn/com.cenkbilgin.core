@@ -46,11 +46,11 @@ namespace Core.Quest
         public static List<QuestInstance> Export() => new(instances);
         public static void Import(List<QuestInstance> data)
         {
-            data.Clear();
+            instances.Clear();
 
             for (int i = 0; i < data.Count; i++)
             {
-                data.Add(data[i]);
+                instances.Add(data[i]);
             }
         }
 

@@ -12,7 +12,7 @@ namespace Core.Item
 #if UNITY_EDITOR
         [HideInInspector] public string Name;
 #endif
-
+         
         [Info("Please generate id if its not visible")]
         public ItemID ID;
         public ItemTag[] Tags;
