@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Core.Actors;
+using UnityEngine;
 
 namespace Core.Trait
 {
@@ -45,39 +45,16 @@ namespace Core.Trait
 
             return false;
         }
-        public bool IsCompatibleWith(TraitID id)
-        {
-            for (int i = 0; i < traits.Count; i++)
-            {
-                if (traits[i].ID.IsCompatibleWith(id))
-                {
-                    return true;
-                }
-            }
+        public bool IsInCompatibleWith(TraitID id, GameObject actor) => id.IsInCompatibleWith(GetTraits(), actor);
 
-            return false;
-        }
-        public bool IsIncompatibleWith(TraitID id)
-        {
-            for (int i = 0; i < traits.Count; i++)
-            {
-                if (traits[i].ID.IsIncompatibleWith(id))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public bool TryAddTrait(TraitID id, Actor actor)
+        public bool TryAddTrait(TraitID id, GameObject actor)
         {
             if (HasTrait(id))
             {
                 return false;
             }
 
-            if (!IsCompatibleWith(id))
+            if (!IsInCompatibleWith(id, actor))
             {
                 return false;
             }
@@ -94,7 +71,7 @@ namespace Core.Trait
 
             return true;
         }
-        public bool TryRemoveTrait(TraitID id, Actor actor)
+        public bool TryRemoveTrait(TraitID id, GameObject actor)
         {
             for (int i = 0; i < traits.Count; i++)
             {
@@ -110,7 +87,7 @@ namespace Core.Trait
             return false;
         }
 
-        private void ApplyAction(Actor actor, ref TraitInstance instance)
+        private void ApplyAction(GameObject actor, ref TraitInstance instance)
         {
             TraitAction[] actions = instance.ID.GetDefinition().Actions;
 
@@ -119,7 +96,7 @@ namespace Core.Trait
                 actions[i].Apply(actor, ref instance);
             }
         }
-        private void RemoveAction(Actor actor, ref TraitInstance instance)
+        private void RemoveAction(GameObject actor, ref TraitInstance instance)
         {
             TraitAction[] actions = instance.ID.GetDefinition().Actions;
 
@@ -128,7 +105,7 @@ namespace Core.Trait
                 actions[i].Remove(actor, ref instance);
             }
         }
-        private void RemoveTrait(Actor actor, int index, ref TraitInstance instance)
+        private void RemoveTrait(GameObject actor, int index, ref TraitInstance instance)
         {
             SetState(TraitState.REMOVED, instance);
 

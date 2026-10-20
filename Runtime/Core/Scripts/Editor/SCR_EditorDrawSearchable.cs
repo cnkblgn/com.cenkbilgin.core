@@ -249,7 +249,7 @@ namespace Core.Editor
         {
             return new
             (
-                position.x,
+                position.x - 12,
                 position.y,
                 position.width,
                 SEARCH_HEIGHT

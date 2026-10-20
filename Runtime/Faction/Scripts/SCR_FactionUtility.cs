@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Core.Faction
 {
@@ -22,7 +23,7 @@ namespace Core.Faction
 
             data.SetData(RELATIONS, relationTable);
         }
-        public static void ImportFrom(this FactionContainer obj, Dictionary<string, DataNode> data)
+        public static void ImportFrom(this FactionContainer obj, Dictionary<string, DataNode> data, GameObject actor)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
 
@@ -30,7 +31,7 @@ namespace Core.Faction
             int index = FactionDatabase.GetIDIndex(key);
             FactionRelation[] relations = CreateFactionRelationsFrom(data.GetData(RELATIONS));
 
-            obj.TrySetFaction(new(key, index));
+            obj.TrySetFaction(new(key, index), actor);
 
             for (int i = 0; i < relations.Length; i++)
             {

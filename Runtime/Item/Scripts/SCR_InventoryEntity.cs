@@ -2,31 +2,22 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using Core.Localization;
 
 namespace Core.Item
 {
-    using static CoreUtility;
-    using static InventoryData;
-
     [DisallowMultipleComponent]
     public sealed class InventoryEntity : MonoBehaviour, IInventoryUser
     {
         public event Action<InventoryContext> OnStateChanged = null;
-
-        public string Name => name.Get();
-
-        [Header("_")]
-        [SerializeField] private new LocalizedID name;
 
         [Header("_")]
         [SerializeField] private ItemID[] startingItems = new ItemID[] { };
         [SerializeField] private ItemTag[] whitelistedItems = new ItemTag[] {};
 
         [Header("_")]
-        [SerializeField, Range(MIN_WIDTH, MAX_WIDTH)] private int width = 5;
-        [SerializeField, Range(MIN_HEIGHT, MAX_HEIGHT)] private int height = 5;
-        [SerializeField, Range(MIN_WEIGHT, MAX_WEIGHT)] private int weight = 100;
+        [SerializeField, Range(InventoryData.MIN_WIDTH, InventoryData.MAX_WIDTH)] private int width = 5;
+        [SerializeField, Range(InventoryData.MIN_HEIGHT, InventoryData.MAX_HEIGHT)] private int height = 5;
+        [SerializeField, Range(InventoryData.MIN_WEIGHT, InventoryData.MAX_WEIGHT)] private int weight = 100;
 
         [Header("_")]
         [SerializeField, Required] private Transform dropOrigin = null;

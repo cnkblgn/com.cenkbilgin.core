@@ -1,21 +1,28 @@
 using System;
 using UnityEngine;
-using Core.Graphics;
-using Core.Localization;
 
 namespace Core.Faction
 {
     [Serializable]
-    public sealed class FactionEntry
+    public struct FactionEntry
     {
 #if UNITY_EDITOR
         [HideInInspector] public string Name;
 #endif
         public FactionID ID;
         public FactionRelation[] Relations;
-        public IconID IconID;
-        public LocalizedID NameID;
-        public LocalizedID DescID;
+        [Required] public FactionValidator[] Validators;
+
+        public FactionEntry(FactionID id, FactionRelation[] relations, FactionValidator[] validators)
+        {
+            ID = id;
+            Relations = relations;
+            Validators = validators;
+
+#if UNITY_EDITOR
+            Name = ID.Key;
+#endif
+        }
 
 #if UNITY_EDITOR
         public void OnValidate()

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
 
 namespace Core.Trait
@@ -13,16 +12,14 @@ namespace Core.Trait
         [SerializeField] private TraitEntry[] entries;
 
         [Header("_")]
-        [Info("You can use 'dreampuf.github.io' for graph view")]
         [SerializeField, Required] private string idPath = "Assets/Scripts/SCR_GeneratedTraitIDs.cs";
-        [SerializeField, Required] private string graphPath = "Assets/Data/SCO_GeneratedTraitGraph.dot";
 
         private readonly Dictionary<string, TraitEntry> extraEntries = new();
 
         public override void OnAfterAssembliesLoaded() => BuildDatabase();
         public override void OnAfterScriptLoad() => BuildDatabase();
         public void BuildDatabase() => TraitDatabase.Build(CoreUtility.MergeEntries(entries, extraEntries, static entry => entry.ID.Key));
-        public void AppendEntries(IReadOnlyList<TraitEntry> entries) => CoreUtility.AppendEntries(entries, extraEntries, static entry => entry.ID.Key, static entry => entry.ID.IsValid);
+        public void AppendEntries(IReadOnlyList<TraitEntry> entries) => CoreUtility.AppendEntries(entries, extraEntries, static entry => entry.ID.Key, static entry => !string.IsNullOrWhiteSpace(entry.ID.Key));
 
 
 #if UNITY_EDITOR
@@ -34,14 +31,11 @@ namespace Core.Trait
             {
                 entries[i].OnValidate();
             }
-
-            Editor.ReferenceUtility.FixReferences(this);
         }
         public override void Reload()
         {
             BuildDatabase();
             GenerateIDs();
-            GenerateGraph();
         }
         private void GenerateIDs()
         {
@@ -65,36 +59,6 @@ namespace Core.Trait
             }
 
             Editor.EditorUtility.GenerateTextFile(idPath, generator.ToString());
-        }
-        private void GenerateGraph()
-        {
-            StringBuilder sb = new();
-            sb.AppendLine("digraph Traits");
-            sb.AppendLine("{");
-            {
-                foreach (TraitDefinition definition in TraitDatabase.GetDefinitions())
-                {
-                    bool hasIncompatibles = definition.IncompatibleIDs.Length > 0;
-
-                    if (hasIncompatibles)
-                    {
-                        foreach (TraitID incompatibleID in definition.IncompatibleIDs)
-                        {
-                            if (incompatibleID.IsValid)
-                            {
-                                sb.AppendLine($"  \"{definition.ID.Key}\" -> \"{incompatibleID.Key}\";");
-                            }
-                        }
-                    }
-                    else
-                    {
-                        sb.AppendLine($"  \"{definition.ID.Key}\";");
-                    }
-                }
-            }
-            sb.AppendLine("}");
-
-            Editor.EditorUtility.GenerateTextFile(graphPath, sb.ToString());
         }
 #endif
     }

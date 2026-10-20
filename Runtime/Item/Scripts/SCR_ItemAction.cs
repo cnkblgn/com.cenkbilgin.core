@@ -1,11 +1,13 @@
-using System;
+using UnityEngine;
 
 namespace Core.Item
 {
-    [Serializable]
-    public abstract class ItemAction
+    public abstract class ItemAction : ScriptableObject
     {
-        public abstract string GetName();
+        internal static readonly ItemAction[] NONE = new ItemAction[0];
+
+        public abstract string Name { get; }
+
         public abstract bool IsValid(in ItemActionContext context);
         public abstract ItemActionResult Apply(in ItemActionContext context);
     }

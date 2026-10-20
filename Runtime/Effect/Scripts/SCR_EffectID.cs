@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Core.Effect
@@ -42,5 +43,33 @@ namespace Core.Effect
 
         public readonly EffectDefinition GetDefinition() => EffectDatabase.GetDefinition(this);
         public readonly EffectInstance CreateInstance(float duration) => EffectDatabase.CreateInstance(this, duration);
+        public readonly bool IsInCompatibleWith(IReadOnlyList<EffectInstance> traits, GameObject actor)
+        {
+            EffectValidator[] validators = GetDefinition().Validators;
+
+            for (int i = 0; i < validators.Length; i++)
+            {
+                if (!validators[i].IsInCompatibleWith(this, traits, actor))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        public readonly bool IsInCompatibleWith(EffectID id)
+        {
+            EffectValidator[] validators = GetDefinition().Validators;
+
+            for (int i = 0; i < validators.Length; i++)
+            {
+                if (!validators[i].IsInCompatibleWith(this, id))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 }

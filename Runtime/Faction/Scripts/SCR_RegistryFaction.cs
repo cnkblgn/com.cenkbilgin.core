@@ -19,7 +19,7 @@ namespace Core.Faction
         public override void OnAfterAssembliesLoaded() => BuildDatabase();
         public override void OnAfterScriptLoad() => BuildDatabase();
         public void BuildDatabase() => FactionDatabase.Build(CoreUtility.MergeEntries(entries, extraEntries, static entry => entry.ID.Key));
-        public void AppendEntries(IReadOnlyList<FactionEntry> entries) => CoreUtility.AppendEntries(entries, extraEntries, static entry => entry.ID.Key, static entry => entry.ID.IsValid);
+        public void AppendEntries(IReadOnlyList<FactionEntry> entries) => CoreUtility.AppendEntries(entries, extraEntries, static entry => entry.ID.Key, static entry => !string.IsNullOrWhiteSpace(entry.ID.Key));
 
 
 #if UNITY_EDITOR

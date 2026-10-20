@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Reflection;
 using UnityEditor;
 
@@ -11,19 +10,9 @@ namespace Core.Editor
     {
         private static readonly Dictionary<Type, SearchCollection<Type>> database = new();
 
-        internal static readonly ConditionalWeakTable<object, Dictionary<string, int>> LastRefSizes = new();
-        internal static readonly Dictionary<Type, FieldInfo[]> ArrayFieldsCache = new();
-        internal static readonly Dictionary<Type, FieldInfo[]> RefFieldsCache = new();
+        static ReferenceDatabase() { AssemblyReloadEvents.beforeAssemblyReload += ClearCollections; }
 
-        static ReferenceDatabase() { AssemblyReloadEvents.beforeAssemblyReload += ClearAll; }
-
-        public static void ClearAll()
-        {
-            database.Clear();
-            ArrayFieldsCache.Clear();
-            RefFieldsCache.Clear();
-        }
-
+        public static void ClearCollections() => database.Clear();
         public static SearchCollection<Type> GetCollection(Type baseType)
         {
             if (database.TryGetValue(baseType, out SearchCollection<Type> collection))

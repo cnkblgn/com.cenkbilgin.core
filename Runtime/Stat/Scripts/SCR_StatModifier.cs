@@ -34,7 +34,7 @@ namespace Core.Stat
 
             operation = IsPositive(definition) ? operation.ToGreen() : operation.ToRed();
 
-            return $"{definition.NameID.Get()} {operation}{Value:0.00}";
+            return $"{operation}{Value:0.00}";
         }
     }
 }

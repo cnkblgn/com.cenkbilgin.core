@@ -5,9 +5,10 @@ namespace Core.Item
     [DisallowMultipleComponent]
     public sealed class ItemEntity : MonoBehaviour
     {
-        public ItemID ID => id; [SerializeField, HideInInspector] internal ItemID id;
+        public ItemID ID => id; 
 
-        [Header("_")]       
+        [Header("_")]
+        [SerializeField] private ItemID id;
         [Info("Toggle 'overrideData' only if you want to override data.")]
         [SerializeField] private bool overrideData;
         [Info("Toggle 'overrideStack' only if you want to override stack.")]

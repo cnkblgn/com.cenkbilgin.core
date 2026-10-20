@@ -1,27 +1,14 @@
-using System;
-using Core.Actors;
+using UnityEngine;
 
 namespace Core.Trait
 {
-    using static CoreUtility;
-
-    [Serializable]
-    public abstract class TraitAction
+    public abstract class TraitAction : ScriptableObject
     {
-        public abstract string Description { get; }
-        public abstract void Apply(Actor actor, ref TraitInstance instance);
-        public abstract void Remove(Actor actor, ref TraitInstance instance);
+        internal static readonly TraitAction[] NONE = new TraitAction[0];
 
-#if UNITY_EDITOR
-        public virtual void OnValidate() { }
-#endif
-    }
+        public string Description { get; }
 
-    [Serializable]
-    public sealed class TraitActionNone : TraitAction
-    {
-        public override string Description => STRING_EMPTY;
-        public override void Apply(Actor actor, ref TraitInstance instance) { }
-        public override void Remove(Actor actor, ref TraitInstance instance) { }
+        public abstract void Apply(GameObject actor, ref TraitInstance instance);
+        public abstract void Remove(GameObject actor, ref TraitInstance instance);
     }
 }

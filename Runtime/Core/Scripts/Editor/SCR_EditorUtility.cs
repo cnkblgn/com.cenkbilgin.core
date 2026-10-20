@@ -172,6 +172,8 @@ namespace Core.Editor
         [MenuItem("Tools/Search and Remove Missing Components", true, 4)]
         private static bool ValidateSearchAndRemoveMissingComponents() => !EditorApplication.isPlaying && Selection.gameObjects.Length > 0;
 
+        public static void SetDirty(UnityEngine.Object @object) => UnityEditor.EditorUtility.SetDirty(@object);
+
         public static void DrawButton(string name, UnityEngine.Object target, Action action)
         {
             EditorGUILayout.Space();

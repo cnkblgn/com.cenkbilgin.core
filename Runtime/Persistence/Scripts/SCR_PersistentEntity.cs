@@ -1,16 +1,15 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Core.Prefab;
 
 namespace Core.Persistence
 {
     [DisallowMultipleComponent]
     public abstract class PersistentEntity : MonoBehaviour
     {
-        public static event Action<PersistentEntity> OnMarkedForDestroy;
+        internal static event Action<PersistentEntity> OnMarkedForDestroy;
 
-        public abstract PrefabID PrefabID { get; }
+        public abstract string PrefabID { get; }
         public Guid InstanceID => instanceID;
 
         [Header("_")]

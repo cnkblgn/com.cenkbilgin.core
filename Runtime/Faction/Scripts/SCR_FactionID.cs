@@ -41,5 +41,19 @@ namespace Core.Faction
         public static bool operator !=(FactionID left, FactionID right) => !left.Equals(right);
 
         public readonly FactionDefinition GetDefinition() => FactionDatabase.GetDefinition(this);
+        public readonly bool IsInCompatibleWith(GameObject actor)
+        {
+            FactionValidator[] validators = GetDefinition().Validators;
+
+            for (int i = 0; i < validators.Length; i++)
+            {
+                if (!validators[i].IsInCompatibleWith(this, actor))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 }

@@ -10,7 +10,7 @@ namespace Core.Persistence
 
         private static readonly Dictionary<Guid, PersistentEntity> availableEntities = new();
         private static readonly HashSet<Guid> deletedEntities = new();
-        private static Transform entityRoot;
+        private static PersistentEntitySpawner spawner;
         private static bool isLoading = false;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -21,7 +21,7 @@ namespace Core.Persistence
             availableEntities.Clear();
             deletedEntities.Clear();
 
-            entityRoot = null;
+            spawner = null;
         }
         private static void OnEntityMarkedForDestroy(PersistentEntity entity)
         {
@@ -149,6 +149,11 @@ namespace Core.Persistence
                 }
             }
 
+            if (spawner == null)
+            {
+                throw new ArgumentNullException(nameof(spawner), "Persistent database entity spawner missing!?");
+            }
+
             // Save’de var ama sahnede yok → dinamik spawn
             foreach (var remainingEntities in sceneData.AvailableEntities)
             {
@@ -157,7 +162,7 @@ namespace Core.Persistence
                     continue;
                 }
 
-                GameObject spawned = remainingEntities.Value.PrefabID.Spawn(Vector3.zero, Quaternion.identity, entityRoot);
+                GameObject spawned = spawner(remainingEntities.Value.PrefabID);
 
                 if (spawned != null)
                 {
@@ -168,19 +173,18 @@ namespace Core.Persistence
                     }
                     else
                     {
-                        Debug.LogWarning($"[PersistentInstanceEntity] component not found in [{spawned.name}]");
+                        Debug.LogWarning($"[{nameof(PersistentEntity)}] component not found in [{spawned.name}]");
                     }
                 }
                 else
                 {
-                    Debug.LogWarning($"Prefab not found for Orphan data: [{remainingEntities.Value.PrefabID}]");
+                    Debug.LogWarning($"Persistent entity spawn failed! prefab not found for orphan data: [{remainingEntities.Value.PrefabID}]");
                 }
             }
 
             isLoading = false;
         }
 
-        public static Transform GetRoot() => entityRoot;
-        public static void SetRoot(Transform transform) => entityRoot = transform;
+        public static void SetSpawner(PersistentEntitySpawner value) => spawner = value;
     }
 }

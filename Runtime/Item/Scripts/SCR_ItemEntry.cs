@@ -1,8 +1,5 @@
 using System;
 using UnityEngine;
-using Core.Graphics;
-using Core.Localization;
-using Core.Prefab;
 
 namespace Core.Item
 {
@@ -16,27 +13,17 @@ namespace Core.Item
         [Info("Please generate id if its not visible")]
         public ItemID ID;
         public ItemTag[] Tags;
-        public PrefabID PrefabID;
-        public MeshID MeshID;
-        public IconID IconID;
-        public LocalizedID NameID;
-        public LocalizedID DescID;
+        [Min(1)] public int Stack;
         [Range(InventoryData.MIN_WIDTH, InventoryData.MAX_WIDTH)] public int Width;
         [Range(InventoryData.MIN_HEIGHT, InventoryData.MAX_HEIGHT)] public int Height;
-        [Min(1)] public int Stack;
         [Range(InventoryData.MIN_WEIGHT, InventoryData.MAX_WEIGHT)] public float Weight;
-        [SerializeReference, Reference] public IItemComponent Component;
-        [SerializeReference, Reference] public ItemAction[] Actions;
+        public ItemComponent Component;
+        [Required] public ItemAction[] Actions;
 
-        public ItemEntry(ItemID id, ItemTag[] tags, PrefabID prefabID, MeshID meshID, IconID iconID, LocalizedID nameID, LocalizedID descID, int width, int height, int stack, float weight, IItemComponent component, ItemAction[] actions)
+        public ItemEntry(ItemID id, ItemTag[] tags, int stack, int width, int height, float weight, ItemComponent component, ItemAction[] actions)
         {
             ID = id;
             Tags = tags;
-            PrefabID = prefabID;
-            MeshID = meshID;
-            IconID = iconID;
-            NameID = nameID;
-            DescID = descID;
             Width = width;
             Height = height;
             Stack = stack;
@@ -54,7 +41,11 @@ namespace Core.Item
         public void OnValidate()
         {
             Name = ID.Key;
-            Component?.OnValidate(ID);
+
+            if (Component != null)
+            {
+                Component.Validate(ID);
+            }
         }
 #endif
     }

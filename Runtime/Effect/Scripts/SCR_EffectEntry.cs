@@ -1,7 +1,5 @@
 using System;
 using UnityEngine;
-using Core.Graphics;
-using Core.Localization;
 
 namespace Core.Effect
 {
@@ -14,34 +12,25 @@ namespace Core.Effect
 
         public EffectID ID;
         public EffectTag Tag;
-        public LocalizedID NameID;
-        public IconID IconID;
         [Min(0)] public int Interval;
-        [SerializeReference, Reference] public EffectAction[] Actions;
+        [Required] public EffectValidator[] Validators;
+        [Required] public EffectAction[] Actions;
 
-        public EffectEntry(EffectID id, EffectTag tag, LocalizedID nameID, IconID iconID, int interval, EffectAction[] actions)
+        public EffectEntry(EffectID id, EffectTag tag, int interval, EffectValidator[] validators, EffectAction[] actions)
         {
             ID = id;
             Tag = tag;
-            NameID = nameID;
-            IconID = iconID;
             Interval = interval;
+            Validators = validators;
             Actions = actions;
 
-#if UNITY_EDITOR
             Name = ID.Key;
-#endif
         }
 
 #if UNITY_EDITOR
         public void OnValidate()
         {
             Name = ID.Key;
-
-            for (int i = 0; i < Actions.Length; i++)
-            {
-                Actions[i].OnValidate();
-            }
         }
 #endif
     }

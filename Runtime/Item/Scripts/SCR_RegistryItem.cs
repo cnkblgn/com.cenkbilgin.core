@@ -25,7 +25,7 @@ namespace Core.Item
         public override void OnAfterAssembliesLoaded() => BuildDatabase();
         public override void OnAfterScriptLoad() => BuildDatabase();
         public void BuildDatabase() => ItemDatabase.Build(CoreUtility.MergeEntries(entries, extraEntries, static entry => entry.ID.Key), CoreUtility.MergeEntries(tags, extraTags));
-        public void AppendEntries(IReadOnlyList<ItemEntry> entries) => CoreUtility.AppendEntries(entries, extraEntries, static entry => entry.ID.Key, static entry => entry.ID.IsValid);
+        public void AppendEntries(IReadOnlyList<ItemEntry> entries) => CoreUtility.AppendEntries(entries, extraEntries, static entry => entry.ID.Key, static entry => !string.IsNullOrWhiteSpace(entry.ID.Key));
         public void AppendTags(IReadOnlyList<string> tags) => CoreUtility.AppendUnique(tags, extraTags, StringComparer.Ordinal);
 
 
@@ -38,46 +38,14 @@ namespace Core.Item
             {
                 entries[i].OnValidate();
             }
-
-            Editor.ReferenceUtility.FixReferences(this);
         }
         public override void Reload()
         {
             BuildDatabase();
-            SyncPrefabs();
             GenerateTags();
             GenerateIDs();
         }
-        private void SyncPrefabs()
-        {
-            for (int i = 0; i < entries.Length; i++)
-            {
-                ItemEntry entry = entries[i];
 
-                if (!entry.PrefabID.IsValid)
-                {
-                    continue;
-                }
-
-                GameObject prefab = entry.PrefabID.Get();
-
-                if (!prefab.TryGetComponent(out ItemEntity entity))
-                {
-                    Debug.LogError($"Item [{entry.ID}], Prefab [{entry.PrefabID}] does not have [ItemEntity] component!", prefab);
-                    continue;
-                }
-
-                if (entity.id == entry.ID)
-                {
-                    continue;
-                }
-
-                entity.id = entry.ID;
-                UnityEditor.EditorUtility.SetDirty(entity);
-                UnityEditor.PrefabUtility.SavePrefabAsset(entity.gameObject);
-                Debug.Log($"Item Entity [{entity.gameObject}] ID overrided to [{entry.ID}]");
-            }
-        }
         private void GenerateTags()
         {
             Editor.SourceGenerator generator = new();

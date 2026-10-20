@@ -29,7 +29,6 @@ namespace Core.Faction
             string relation = $"{operation}{Relation}";
             Name = $"{ID.Key} [{relation}]";
         }
-
         public static FactionRelation[] GetNormalized(FactionRelation[] current)
         {
             if (current == null)

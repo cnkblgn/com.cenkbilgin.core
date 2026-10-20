@@ -1,15 +1,14 @@
-using Core.Graphics;
-using Core.Localization;
-
 namespace Core.Faction
 {
     public sealed class FactionDefinition
     {
         public readonly FactionID ID;
+        internal readonly FactionValidator[] Validators;
         internal readonly FactionRelation[] Relations;
-        public readonly IconID IconID;
-        public readonly LocalizedID NameID;
-        public readonly LocalizedID DescID;
+
+        public readonly string IconID;
+        public readonly string NameID;
+        public readonly string DescID;
 
         internal FactionAttitude GetAttitude(FactionID target) => FactionDatabase.EvaluateAttitude(GetRelation(target));
         internal int GetRelation(FactionID target)
@@ -22,15 +21,16 @@ namespace Core.Faction
             return Relations[target.Index].Relation;
         }
 
-        internal FactionDefinition(FactionID id, FactionRelation[] relations, IconID iconID, LocalizedID nameID, LocalizedID descID)
+        internal FactionDefinition(FactionID id, FactionValidator[] validators, FactionRelation[] relations)
         {
             ID = id;
-            IconID = iconID;
-            NameID = nameID;
-            DescID = descID;
+            IconID = $"ICON_{ID.Key}";
+            NameID = $"faction.{ID.Key}.name";
+            DescID = $"faction.{ID.Key}.desc";
 
+            Validators = validators ?? FactionValidator.NONE;
             Relations = relations ?? (new FactionRelation[0] { });
         }
-        internal FactionDefinition(FactionEntry entry) : this(entry.ID, entry.Relations, entry.IconID, entry.NameID, entry.DescID) { }
+        internal FactionDefinition(FactionEntry entry) : this(entry.ID, entry.Validators, entry.Relations) { }
     }
 }

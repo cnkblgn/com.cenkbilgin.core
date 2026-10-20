@@ -1,5 +1,6 @@
 using System;
-using Core.Actors;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace Core.Effect
 {
@@ -23,9 +24,11 @@ namespace Core.Effect
             }
         }
 
+        public IReadOnlyList<EffectInstance> GetEffects() => effects;
+
         private void SetState(EffectState state, EffectInstance instance) => OnChanged?.Invoke(new(state, instance));
 
-        public void Tick(Actor actor, float deltaTime)
+        public void Tick(GameObject actor, float deltaTime)
         {
             for (int i = effects.Count - 1; i >= 0; i--)
             {
@@ -55,8 +58,13 @@ namespace Core.Effect
             }
         }
 
-        public bool TryAddEffect(Actor actor, EffectInstance instance)
+        public bool TryAddEffect(GameObject actor, EffectInstance instance)
         {
+            if (!instance.ID.IsInCompatibleWith(GetEffects(), actor))
+            {
+                return false;
+            }
+
             for (int i = 0; i < effects.Count; i++)
             {
                 ref EffectInstance registered = ref effects.GetRef(i);
@@ -77,7 +85,7 @@ namespace Core.Effect
 
             return true;
         }
-        public bool TryRemoveEffect(Actor actor, EffectID id)
+        public bool TryRemoveEffect(GameObject actor, EffectID id)
         {
             for (int i = 0; i < effects.Count; i++)
             {
@@ -93,7 +101,7 @@ namespace Core.Effect
             return false;
         }
         
-        private void TickAction(Actor actor, EffectDefinition definition, ref EffectInstance instance)
+        private void TickAction(GameObject actor, EffectDefinition definition, ref EffectInstance instance)
         {
             EffectAction[] actions = definition.Actions;
 
@@ -102,7 +110,7 @@ namespace Core.Effect
                 actions[i].Tick(actor, ref instance);
             }
         }
-        private void ApplyAction(Actor actor, EffectDefinition definition, ref EffectInstance instance)
+        private void ApplyAction(GameObject actor, EffectDefinition definition, ref EffectInstance instance)
         {
             EffectAction[] actions = definition.Actions;
 
@@ -111,7 +119,7 @@ namespace Core.Effect
                 actions[i].Apply(actor, ref instance);
             }
         }
-        private void RemoveAction(Actor actor, EffectDefinition definition, ref EffectInstance instance)
+        private void RemoveAction(GameObject actor, EffectDefinition definition, ref EffectInstance instance)
         {
             EffectAction[] actions = definition.Actions;
 
@@ -120,7 +128,7 @@ namespace Core.Effect
                 actions[i].Removed(actor, ref instance);
             }
         }
-        private void RemoveEffect(Actor actor, int index, ref EffectInstance instance)
+        private void RemoveEffect(GameObject actor, int index, ref EffectInstance instance)
         {
             SetState(EffectState.REMOVED, instance);
 

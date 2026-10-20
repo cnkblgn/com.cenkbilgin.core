@@ -1,7 +1,5 @@
 using System;
 using UnityEngine;
-using Core.Graphics;
-using Core.Localization;
 
 namespace Core.Trait
 {
@@ -13,21 +11,14 @@ namespace Core.Trait
 #endif
 
         public TraitID ID;
-        public TraitID[] IncompatibleIDs;
-        public IconID IconID;
-        public LocalizedID NameID;
-        public LocalizedID DescID;
-
         [Min(0)] public int Cost;
-        [SerializeReference, Reference] public TraitAction[] Actions;
+        [Required] public TraitValidator[] Validators;
+        [Required] public TraitAction[] Actions;
 
-        public TraitEntry(TraitID id, TraitID[] incompatibleIDs, IconID iconID, LocalizedID nameID, LocalizedID descID, int cost, TraitAction[] actions)
+        public TraitEntry(TraitID id, int cost, TraitValidator[] validator, TraitAction[] actions)
         {
             ID = id;
-            IncompatibleIDs = incompatibleIDs;
-            IconID = iconID;
-            NameID = nameID;
-            DescID = descID;
+            Validators = validator;
             Cost = cost;
             Actions = actions;
 
@@ -40,11 +31,6 @@ namespace Core.Trait
         public void OnValidate()
         {
             Name = ID.Key;
-
-            for (int i = 0; i < Actions.Length; i++)
-            {
-                Actions[i].OnValidate();
-            }
         }
 #endif
     }

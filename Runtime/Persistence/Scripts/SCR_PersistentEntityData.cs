@@ -1,19 +1,18 @@
 using System;
 using System.Collections.Generic;
-using Core.Prefab;
 
 namespace Core.Persistence
 {
     public sealed class PersistentEntityData
     {
-        public readonly PrefabID PrefabID;
+        public readonly string PrefabID;
         public readonly Guid InstanceID;
 
         public bool IsMarkedForDestroy;
 
         public readonly Dictionary<string, DataNode> Data;
 
-        public PersistentEntityData(PrefabID prefabID, Guid instanceID, bool isMarkedForDestroy, Dictionary<string, DataNode> data)
+        public PersistentEntityData(string prefabID, Guid instanceID, bool isMarkedForDestroy, Dictionary<string, DataNode> data)
         {
             PrefabID = prefabID;
             InstanceID = instanceID;

@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
+using static UnityEngine.ParticleSystem;
 
 namespace Core.Trait
 {
-    using static CoreUtility;
-
     [Serializable]
     public struct TraitID : IEquatable<TraitID>
     {
@@ -46,70 +44,33 @@ namespace Core.Trait
 
         public readonly TraitDefinition GetDefinition() => TraitDatabase.GetDefinition(this);
         public readonly TraitInstance CreateInstance() => TraitDatabase.CreateInstance(this);
-        public readonly bool IsCompatibleWith(TraitID id) => !IsIncompatibleWith(id);
-        public readonly bool IsIncompatibleWith(TraitID id)
+        public readonly bool IsInCompatibleWith(IReadOnlyList<TraitInstance> traits, GameObject actor)
         {
-            TraitDefinition definition = GetDefinition();
+            TraitValidator[] validators = GetDefinition().Validators;
 
-            for (int i = 0; i < definition.IncompatibleIDs.Length; i++)
+            for (int i = 0; i < validators.Length; i++)
             {
-                if (definition.IncompatibleIDs[i] == id)
+                if (!validators[i].IsInCompatibleWith(this, traits, actor))
                 {
-                    return true;
+                    return false;
                 }
             }
 
-            return false;
+            return true;
         }
-        public readonly bool TryGetIncompatibleDesc(StringBuilder sb)
+        public readonly bool IsInCompatibleWith(TraitID id)
         {
-            if (sb == null)
-            {
-                Debug.LogError("Get incompatible races desc failed! string builder is null!?");
-                return false;
-            }
+            TraitValidator[] validators = GetDefinition().Validators;
 
-            IReadOnlyList<TraitDefinition> database = TraitDatabase.GetDefinitions();
-            bool found = false;
-
-            foreach (TraitDefinition trait in database)
+            for (int i = 0; i < validators.Length; i++)
             {
-                if (!IsIncompatibleWith(trait.ID))
+                if (!validators[i].IsInCompatibleWith(this, id))
                 {
-                    continue;
+                    return false;
                 }
-
-                sb.Append(" -> ".ToRed());
-                sb.AppendLine(trait.NameID.Get().ToRed());
-                found = true;
             }
 
-            return found;
-        }
-        public readonly bool TryGetCompatibleDesc(StringBuilder sb)
-        {
-            if (sb == null)
-            {
-                Debug.LogError("Get compatible races desc failed! string builder is null!?");
-                return false;
-            }
-
-            IReadOnlyList<TraitDefinition> database = TraitDatabase.GetDefinitions();
-            bool found = false;
-
-            foreach (TraitDefinition trait in database)
-            {
-                if (!IsCompatibleWith(trait.ID))
-                {
-                    continue;
-                }
-
-                sb.Append(" -> ".ToGreen());
-                sb.AppendLine(trait.NameID.Get().ToGreen());
-                found = true;
-            }
-
-            return found;
+            return true;
         }
     }
 }

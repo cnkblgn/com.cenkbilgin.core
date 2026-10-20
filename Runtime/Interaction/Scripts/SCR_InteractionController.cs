@@ -1,13 +1,11 @@
 using System;
 using UnityEngine;
-using Core.Actors;
 
 namespace Core.Interaction
 {
     using static CoreUtility;
 
     [DisallowMultipleComponent]
-    [RequireComponent(typeof(Actor))]
     public sealed class InteractionController : MonoBehaviour
     {
         public event Action<InteractionContext> OnStateChanged = null;
@@ -19,7 +17,6 @@ namespace Core.Interaction
         [SerializeField] private LayerMask mask = 0;
         [SerializeField, Min(0.1f)] private float distance = 2.5f;
 
-        private Actor thisActor = null;
         private IInteractionUser thisUser = null;
         private Interactable currentTarget = null;
         private readonly StackBool canInteract = new();
@@ -34,9 +31,7 @@ namespace Core.Interaction
                 Debug.LogWarning("Interaction origin is missing! assigning default transform to origin!", gameObject);
             }
 
-            thisActor = GetComponent<Actor>();
             thisUser = GetComponent<IInteractionUser>();
-
             nextInteractTime = Time.time + 0.01f;
         }
         private void Update()
@@ -75,7 +70,7 @@ namespace Core.Interaction
             }
             else
             {
-                SetState(new(null, thisActor, null, InteractionState.INTERACT_DENIED));
+                SetState(new(null, gameObject, null, InteractionState.INTERACT_DENIED));
             }
 
             return true;
@@ -132,18 +127,18 @@ namespace Core.Interaction
             ClearTarget();
 
             currentTarget = newTarget;
-            currentTarget.EnterFocus(thisActor, out InteractionContext ctx);
+            currentTarget.EnterFocus(gameObject, out InteractionContext ctx);
             SetState(ctx);
         }
         private void InteractTarget()
         {
             if (currentTarget == null)
             {
-                SetState(new(null, thisActor, null, InteractionState.INTERACT_DENIED));
+                SetState(new(null, gameObject, null, InteractionState.INTERACT_DENIED));
                 return;
             }
 
-            currentTarget.Interact(thisActor, out InteractionContext ctx);
+            currentTarget.Interact(gameObject, out InteractionContext ctx);
 
             SetState(ctx);
         }
@@ -154,7 +149,7 @@ namespace Core.Interaction
                 return;
             }
 
-            currentTarget.ExitFocus(thisActor, out InteractionContext ctx);
+            currentTarget.ExitFocus(gameObject, out InteractionContext ctx);
             currentTarget = null;
 
             SetState(ctx);

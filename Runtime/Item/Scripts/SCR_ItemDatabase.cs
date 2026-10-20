@@ -11,8 +11,7 @@ namespace Core.Item
         private static readonly Dictionary<string, int> tagLookup = new();
         private static ItemDefinition[] definitions = Array.Empty<ItemDefinition>();
         private static ItemTag[] tags = Array.Empty<ItemTag>();
-        private static ItemProcessor processor;
-        private static Transform root;
+        private static ItemEntitySpawner spawner;
 
         internal static void Build(ItemEntry[] entries, string[] _tags)
         {
@@ -96,9 +95,14 @@ namespace Core.Item
                 throw new ArgumentNullException($"Trying to create item entity with null data! {nameof(data)}");
             }
 
+            if (spawner == null)
+            {
+                throw new ArgumentNullException(nameof(spawner), "Item database entity spawner missing!?");
+            }
+
             CreateOrphanInventory();
 
-            GameObject spawned = data.BaseID.GetDefinition().PrefabID.Spawn(position, rotation, parent == null ? root : parent);
+            GameObject spawned = spawner(data.BaseID.GetDefinition().PrefabID, position, rotation, parent);
 
             if (spawned == null)
             {
@@ -107,11 +111,10 @@ namespace Core.Item
 
             if (!spawned.TryGetComponent(out ItemEntity entity))
             {
-                throw new ArgumentNullException("Spawned entity does not have [ItemEntity] component?");
+                throw new ArgumentNullException($"[{nameof(ItemEntity)}] component not found in [{spawned.name}]");
             }
 
             entity.ImportFrom(data);
-            processor?.Invoke(entity);
             return entity;
         }
 
@@ -134,11 +137,7 @@ namespace Core.Item
             }
         }
 
-        internal static ItemProcessor GetProcessor() => processor;
-        public static void SetProcessor(ItemProcessor value) => processor = value;
-
-        internal static Transform GetRoot() => root;
-        public static void SetRoot(Transform transform) => root = transform;
+        public static void SetSpawner(ItemEntitySpawner value) => spawner = value;
 
         public static InventoryEntity GetOrphanInventory()
         {

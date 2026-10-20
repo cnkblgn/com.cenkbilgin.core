@@ -1,6 +1,4 @@
 using System;
-using Core.Graphics;
-using Core.Localization;
 
 namespace Core.Effect
 {
@@ -8,20 +6,25 @@ namespace Core.Effect
     {
         public readonly EffectID ID;
         public readonly EffectTag Tag;
-        public readonly LocalizedID NameID;
-        public readonly IconID IconID;
-        internal readonly EffectAction[] Actions;
         internal readonly int Interval;
+        internal readonly EffectValidator[] Validators;
+        internal readonly EffectAction[] Actions;
 
-        internal EffectDefinition(EffectID id, EffectTag tag, LocalizedID nameID, IconID iconID, EffectAction[] actions, int interval)
+        public readonly string IconID;
+        public readonly string NameID;
+        public readonly string DescID;
+
+        internal EffectDefinition(EffectID id, EffectTag tag, int interval, EffectValidator[] validators, EffectAction[] actions)
         {
             ID = !id.IsValid ? throw new NullReferenceException("Effect id is null or empty! please assign new id!") : id;
             Tag = tag;
-            IconID = iconID;
-            NameID = nameID;
-            Actions = actions ?? (new EffectAction[] { new EffectActionNone() });
+            IconID = $"ICON_{ID.Key}";
+            NameID = $"effect.{ID.Key}.name";
+            DescID = $"effect.{ID.Key}.desc";
+            Validators = validators ?? EffectValidator.NONE;
+            Actions = actions ?? EffectAction.NONE;
             Interval = interval;
         }
-        internal EffectDefinition(EffectEntry entry) : this(entry.ID, entry.Tag, entry.NameID, entry.IconID, entry.Actions, entry.Interval) { }
+        internal EffectDefinition(EffectEntry entry) : this(entry.ID, entry.Tag, entry.Interval, entry.Validators, entry.Actions) { }
     }
 }

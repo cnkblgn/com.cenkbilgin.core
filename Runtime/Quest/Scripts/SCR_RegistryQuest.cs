@@ -22,7 +22,7 @@ namespace Core.Quest
         public override void OnAfterAssembliesLoaded() => BuildDatabase();
         public override void OnAfterScriptLoad() => BuildDatabase();
         public void BuildDatabase() => QuestDatabase.Build(CoreUtility.MergeEntries(entries, extraEntries, static entry => entry.ID.Key));
-        public void AppendEntries(IReadOnlyList<QuestEntry> entries) => CoreUtility.AppendEntries(entries, extraEntries, static entry => entry.ID.Key, static entry => entry.ID.IsValid);
+        public void AppendEntries(IReadOnlyList<QuestEntry> entries) => CoreUtility.AppendEntries(entries, extraEntries, static entry => entry.ID.Key, static entry => !string.IsNullOrWhiteSpace(entry.ID.Key));
 
 
 #if UNITY_EDITOR
@@ -34,8 +34,6 @@ namespace Core.Quest
             {
                 entries[i].OnValidate();
             }
-
-            Editor.ReferenceUtility.FixReferences(this);
         }
         public override void Reload()
         {

@@ -9,6 +9,8 @@ namespace Core.Graphics
         private static readonly Dictionary<string, int> idLookup = new();
         private static Sprite[] sprites = Array.Empty<Sprite>();
 
+        private static readonly Sprite defaultSprite = Sprite.Create(new(1, 1), new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f) );
+
         internal static void Build(Sprite[] _sprites)
         {
             if (_sprites == null)
@@ -63,7 +65,8 @@ namespace Core.Graphics
         {
             if (!id.IsValid)
             {
-                throw new ArgumentNullException($"[{nameof(id)}] iconID is not valid!");
+                Debug.Log($"[{nameof(id)}] iconID is not valid!");
+                return defaultSprite;
             }
 
             return GetSprite(id.Index);

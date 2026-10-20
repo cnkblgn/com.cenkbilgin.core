@@ -1,29 +1,14 @@
-using System;
-using Core.Actors;
+using UnityEngine;
 
 namespace Core.Effect
 {
-    using static CoreUtility;
-
-    [Serializable]
-    public abstract class EffectAction
+    public abstract class EffectAction : ScriptableObject
     {
-        public abstract string Description { get; }
-        public abstract void Tick(Actor actor, ref EffectInstance instance);
-        public abstract void Apply(Actor actor, ref EffectInstance instance);
-        public abstract void Removed(Actor actor, ref EffectInstance instance);
+        internal static readonly EffectAction[] NONE = new EffectAction[0];
 
-#if UNITY_EDITOR
-        public virtual void OnValidate() { }
-#endif
-    }
-
-    [Serializable]
-    public sealed class EffectActionNone : EffectAction
-    {
-        public override string Description => STRING_EMPTY;
-        public override void Tick(Actor actor, ref EffectInstance instance) { }
-        public override void Apply(Actor actor, ref EffectInstance instance) { }
-        public override void Removed(Actor actor, ref EffectInstance instance) { }
+        public string Description { get; }
+        public abstract void Tick(GameObject actor, ref EffectInstance instance);
+        public abstract void Apply(GameObject actor, ref EffectInstance instance);
+        public abstract void Removed(GameObject actor, ref EffectInstance instance);
     }
 }
