@@ -70,6 +70,12 @@ namespace Core.Editor
                 foreach (string reference in data.references)
                 {
                     string toName = ResolveName(reference, guidToName);
+
+                    if (string.IsNullOrEmpty(toName))
+                    {
+                        continue;
+                    }
+
                     sb.AppendLine($"  \"{fromName}\" -> \"{SanitizeName(toName)}\";");
                 }
             }
@@ -91,7 +97,7 @@ namespace Core.Editor
             if (reference.StartsWith(PREFIX, StringComparison.Ordinal))
             {
                 string guid = reference[PREFIX.Length..];
-                return guidToName.TryGetValue(guid, out string name) ? name : $"Unknown_{guid}";
+                return guidToName.TryGetValue(guid, out string name) ? name : null;
             }
 
             if (reference.StartsWith("Unity", StringComparison.OrdinalIgnoreCase))
