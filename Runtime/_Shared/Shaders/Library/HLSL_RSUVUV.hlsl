@@ -5,7 +5,7 @@
 
 void Get_float(out float2 offset, out float2 tiling)
 {
-    uint data = getData();
+    uint data = GetData();
 
     uint uScale = (data >> 0) & 0x3FF;
     uint uOffX = (data >> 10) & 0x3FF;
@@ -35,7 +35,7 @@ void GetWithFlag_float(out float2 offset, out float2 tiling)
     decodedOffset.x = (uOffX / 1023.0) * 8.0 - 4.0;
     decodedOffset.y = (uOffY / 1023.0) * 8.0 - 4.0;
 
-    float useRSV = hasData(data) ? 1.0 : 0.0;
+    float useRSV = HasData(data) ? 1.0 : 0.0;
 
     tiling = lerp(1.0.xx, float2(decodedScale, decodedScale), useRSV);
     offset = lerp(1.0.xx, decodedOffset, useRSV);

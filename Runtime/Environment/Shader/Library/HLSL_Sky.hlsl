@@ -30,6 +30,7 @@ float3 DrawSky(float3 _viewDirection, SkySettings settings)
 
     return skyColor;
 }
+
 void GetSky_float(float3 _worldPosition, float3 _viewDirection, out float3 color)
 {
     SkySettings skySettings;

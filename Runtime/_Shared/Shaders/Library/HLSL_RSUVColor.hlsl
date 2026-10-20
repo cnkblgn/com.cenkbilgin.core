@@ -28,7 +28,7 @@ uint ColorAToByte(float4 _c)
 
 void Get_float(out float4 Color)
 {
-    Color = decodeUintToFloat4(getData());
+    Color = DecodeUintToFloat4(GetData());
 }
 void Get_half(out half4 Color)
 {
@@ -36,7 +36,7 @@ void Get_half(out half4 Color)
 }
 void GetWithFlag_float(out float4 Color)
 {
-    float4 data = decodeUintToFloat4(getData());
+    float4 data = DecodeUintToFloat4(GetData());
     
     float enabled = data.a > 0.5 ? 1.0 : 0.0;
 
