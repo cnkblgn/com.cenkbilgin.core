@@ -11,11 +11,10 @@ namespace Core
         private const float WINDOW_WIDTH = 760f;
         private const float WINDOW_HEIGHT = 520f;
         private const float LEFT_PANEL_WIDTH = 150f;
-
         private const string TRUE_TEXT = "True";
         private const string FALSE_TEXT = "False";
 
-        public static bool IsVisible => isVisible;
+        public static bool IsOpened => isOpened;
 
         private static readonly List<Category> categories = new();
         private static readonly Dictionary<string, Category> categoryLookup = new();
@@ -27,7 +26,7 @@ namespace Core
         private static GUIStyle labelStyle;
         private static GUIStyle valueStyle;
         private static GUIStyle buttonStyle;
-        private static Updater runner;
+        private static Updater updater;
         private static readonly GUILayoutOption lineHeight = GUILayout.Height(1f);
         private static readonly GUILayoutOption labelWidth = GUILayout.Width(130f);
         private static readonly GUILayoutOption valueWidth = GUILayout.Width(55f);
@@ -37,35 +36,35 @@ namespace Core
         private static readonly GUI.WindowFunction windowFunction = DrawWindow;
 
         private static bool isInitialized;
-        private static bool isVisible;
+        private static bool isOpened;
         private static int selectedCategory;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void Reset()
         {
-            if (runner != null)
+            if (updater != null)
             {
-                UnityEngine.Object.DestroyImmediate(runner.gameObject);
-                runner = null;
+                UnityEngine.Object.DestroyImmediate(updater.gameObject);
+                updater = null;
             }
 
             categories.Clear();
             categoryLookup.Clear();
 
             isInitialized = false;
-            isVisible = false;
+            isOpened = false;
             selectedCategory = 0;
         }
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Install()
         {
-            if (runner != null)
+            if (CommandMenu.updater != null)
             {
                 return;
             }
 
-            GameObject updater = new("[Debug Menu]") { hideFlags = HideFlags.HideAndDontSave };
-            runner = updater.AddComponent<Updater>();
+            GameObject updater = new("[Command Menu]") { hideFlags = HideFlags.HideAndDontSave };
+            CommandMenu.updater = updater.AddComponent<Updater>();
 
             UnityEngine.Object.DontDestroyOnLoad(updater);
         }
@@ -130,9 +129,9 @@ namespace Core
             };
         }
 
-        public static void Show() => isVisible = true;
-        public static void Hide() => isVisible = false;
-        public static void Toggle() => isVisible = !isVisible;
+        public static void Show() => isOpened = true;
+        public static void Hide() => isOpened = false;
+        public static void Toggle() => isOpened = !isOpened;
         public static void Clear(string category)
         {
             if (string.IsNullOrEmpty(category))
@@ -471,7 +470,7 @@ namespace Core
         {
             private void OnGUI()
             {
-                if (!isVisible)
+                if (!isOpened)
                 {
                     return;
                 }
