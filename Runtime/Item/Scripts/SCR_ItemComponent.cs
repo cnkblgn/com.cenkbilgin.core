@@ -6,7 +6,7 @@ namespace Core.Item
 {
     public abstract class ItemComponent : ScriptableObject
     {
-        internal static ItemComponent NONE
+        public static ItemComponent NONE
         {
             get
             {

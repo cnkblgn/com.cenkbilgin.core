@@ -6,7 +6,7 @@ namespace Core.Effect
 {
     public abstract class EffectValidator : ScriptableObject
     {
-        internal static readonly EffectValidator[] NONE = new EffectValidator[0];
+        public static readonly EffectValidator[] NONE = new EffectValidator[0];
 
         public abstract bool IsInCompatibleWith(EffectID idA, EffectID idB);
         public abstract bool IsInCompatibleWith(EffectID id, IReadOnlyList<EffectInstance> effects, GameObject actor);

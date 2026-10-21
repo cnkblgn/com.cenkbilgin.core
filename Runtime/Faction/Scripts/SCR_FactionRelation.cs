@@ -6,6 +6,8 @@ namespace Core.Faction
     [Serializable]
     public struct FactionRelation
     {
+        public static readonly FactionRelation[] NONE = new FactionRelation[0];
+
 #if UNITY_EDITOR
         [HideInInspector] public string Name;
 #endif

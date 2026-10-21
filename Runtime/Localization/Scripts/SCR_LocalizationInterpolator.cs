@@ -1,10 +1,10 @@
 using System;
 using System.Text;
+using UnityEngine;
 
 namespace Core.Localization
 {
-    [Serializable]
-    public abstract class LocalizationInterpolator
+    public abstract class LocalizationInterpolator : ScriptableObject
     {
         public abstract string Key { get; }
 

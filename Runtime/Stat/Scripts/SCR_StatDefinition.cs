@@ -15,7 +15,7 @@ namespace Core.Stat
         {
             ID = id;
             Tag = tag;
-            IconID = $"ICON_{ID.Key}";
+            IconID = $"Icon{ID.Key}";
             NameID = $"stat.{ID.Key}.name";
             DescID = $"stat.{ID.Key}.desc";
             Default = @default;

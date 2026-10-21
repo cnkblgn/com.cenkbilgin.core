@@ -112,11 +112,6 @@ namespace Core.Quest
             {
                 QuestRequirement requirement = requirements[i];
 
-                if (requirement.Event != context.ID)
-                {
-                    continue;
-                }
-
                 if (!requirement.IsMatch(context))
                 {
                     continue;

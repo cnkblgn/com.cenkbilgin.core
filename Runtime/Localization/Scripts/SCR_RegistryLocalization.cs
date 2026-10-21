@@ -9,7 +9,7 @@ namespace Core.Localization
         public override int Priority => -10;
 
         [Header("_")]
-        [SerializeReference, Reference] private LocalizationInterpolator[] interpolators;
+        [SerializeField, Required] private LocalizationInterpolator[] interpolators;
 
         [Header("_")]
         [SerializeField, Required] private TextAsset file = null;

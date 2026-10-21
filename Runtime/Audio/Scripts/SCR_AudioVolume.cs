@@ -88,6 +88,16 @@ namespace Core.Audio
             thisPlayer.SetVolumeMult(currentVolume);
         }
 
+        private static float SafeInverseLerp(float inner, float outer, float dist)
+        {
+            if (outer <= inner)
+            {
+                return dist > inner ? 1f : 0f;
+            }
+
+            return Mathf.Clamp01((dist - inner) / (outer - inner));
+        }
+
 #if UNITY_EDITOR
         private static GUIStyle GizmosStyle
         {

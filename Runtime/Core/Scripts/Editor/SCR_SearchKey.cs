@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Core
+namespace Core.Editor
 {
     public readonly struct SearchKey : IEquatable<SearchKey>
     {

@@ -24,12 +24,12 @@ namespace Core.Faction
         internal FactionDefinition(FactionID id, FactionValidator[] validators, FactionRelation[] relations)
         {
             ID = id;
-            IconID = $"ICON_{ID.Key}";
+            IconID = $"Icon{ID.Key}";
             NameID = $"faction.{ID.Key}.name";
             DescID = $"faction.{ID.Key}.desc";
 
             Validators = validators ?? FactionValidator.NONE;
-            Relations = relations ?? (new FactionRelation[0] { });
+            Relations = relations ?? FactionRelation.NONE;
         }
         internal FactionDefinition(FactionEntry entry) : this(entry.ID, entry.Validators, entry.Relations) { }
     }

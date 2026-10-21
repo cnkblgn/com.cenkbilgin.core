@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Core
+namespace Core.Editor
 {
     public sealed class SearchState<T>
     {

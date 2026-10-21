@@ -221,10 +221,10 @@ namespace Core.Quest
                     sb.Append(" / ");
                     sb.Append(requirement.Amount);
 
-                    if (requirement.Actor.IsValid)
+                    if (requirement.Source.IsValid)
                     {
                         sb.Append(" | Actor: ");
-                        sb.Append(requirement.Actor.Key);
+                        sb.Append(requirement.Source.Key);
                     }
 
                     ulong tagMask = requirement.Tags.CreateMask();

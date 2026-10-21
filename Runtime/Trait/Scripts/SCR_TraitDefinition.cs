@@ -18,7 +18,7 @@ namespace Core.Trait
             Actions = actions ?? TraitAction.NONE;
             Cost = cost;
 
-            IconID = $"ICON_{ID.Key}";
+            IconID = $"Icon{ID.Key}";
             NameID = $"trait.{ID.Key}.name";
             DescID = $"trait.{ID.Key}.desc";
         }

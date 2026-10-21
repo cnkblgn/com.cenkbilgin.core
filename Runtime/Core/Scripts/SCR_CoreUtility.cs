@@ -201,16 +201,6 @@ namespace Core
             return aDot >= threshold && bDot >= threshold;
         }
 
-        public static float SafeInverseLerp(float inner, float outer, float dist)
-        {
-            if (outer <= inner)
-            {
-                return dist > inner ? 1f : 0f;
-            }
-
-            return Mathf.Clamp01((dist - inner) / (outer - inner));
-        }
-
         public static Vector3 GetClosest(this Vector3[] positions, Vector3 position, float threshold = -1)
         {
             Vector3 closestPosition = default;

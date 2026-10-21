@@ -117,8 +117,8 @@ namespace Core.Event
             }
 #endif
         }
-        public static void Invoke(EventID id, int actor, ulong tags, int amount = 1) => Invoke(new EventContext(id, actor, tags, amount));
-        public static void Invoke(EventID id, int actor, int amount = 1) => Invoke(new EventContext(id, actor, amount));
+        public static void Invoke(EventID id, int source, ulong tags, int amount = 1) => Invoke(new EventContext(id, source, tags, amount));
+        public static void Invoke(EventID id, int source, int amount = 1) => Invoke(new EventContext(id, source, amount));
         public static void Invoke(EventID id, int amount = 1) => Invoke(new EventContext(id, amount));
         public static void Invoke(EventContext @event)
         {
@@ -142,7 +142,7 @@ namespace Core.Event
                 Debug.Log
                 (
                     $"Event: {@event.ID.Key} " +
-                    $"Actor: {@event.Actor} " +
+                    $"Actor: {@event.Source} " +
                     $"Tags: {@event.Tags} " +
                     $"Amount: {@event.Amount} " +
                     $"Listeners: {list.Count}"

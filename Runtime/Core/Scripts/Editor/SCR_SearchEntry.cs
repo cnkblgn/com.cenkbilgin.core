@@ -1,4 +1,4 @@
-namespace Core
+namespace Core.Editor
 {
     public readonly struct SearchEntry<T>
     {

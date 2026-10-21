@@ -18,7 +18,7 @@ namespace Core.Effect
         {
             ID = !id.IsValid ? throw new NullReferenceException("Effect id is null or empty! please assign new id!") : id;
             Tag = tag;
-            IconID = $"ICON_{ID.Key}";
+            IconID = $"Icon{ID.Key}";
             NameID = $"effect.{ID.Key}.name";
             DescID = $"effect.{ID.Key}.desc";
             Validators = validators ?? EffectValidator.NONE;

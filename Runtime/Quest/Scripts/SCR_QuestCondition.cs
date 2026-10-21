@@ -1,14 +1,11 @@
-using System;
+using UnityEngine;
 
 namespace Core.Quest
 {
-    [Serializable]
-    public abstract class QuestCondition
+    public abstract class QuestCondition : ScriptableObject
     {
-        public abstract bool IsSatisfied();
+        public static readonly QuestCondition[] NONE = new QuestCondition[0];
 
-#if UNITY_EDITOR
-        public virtual void OnValidate() { }
-#endif
+        public abstract bool IsSatisfied();
     }
 }

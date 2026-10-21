@@ -4,7 +4,7 @@ namespace Core.Effect
 {
     public abstract class EffectAction : ScriptableObject
     {
-        internal static readonly EffectAction[] NONE = new EffectAction[0];
+        public static readonly EffectAction[] NONE = new EffectAction[0];
 
         public string Description { get; }
         public abstract void Tick(GameObject actor, ref EffectInstance instance);

@@ -4,7 +4,7 @@ namespace Core.Item
 {
     public abstract class ItemAction : ScriptableObject
     {
-        internal static readonly ItemAction[] NONE = new ItemAction[0];
+        public static readonly ItemAction[] NONE = new ItemAction[0];
 
         public abstract string Name { get; }
 

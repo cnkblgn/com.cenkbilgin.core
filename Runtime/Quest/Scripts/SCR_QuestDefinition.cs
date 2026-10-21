@@ -1,28 +1,31 @@
-using Core.Localization;
-
 namespace Core.Quest
 {
     public sealed class QuestDefinition
     {
         public readonly QuestID ID;
         public readonly QuestID NextID;
-        public readonly LocalizedID NameID;
-        public readonly LocalizedID DescID;
+
         internal readonly QuestRequirement[] Requirements;
         internal readonly QuestCondition[] Conditions;
         internal readonly QuestAction[] Actions;
 
-        internal QuestDefinition(QuestID id, QuestID nextID, LocalizedID nameID, LocalizedID descID, QuestRequirement[] requirements, QuestCondition[] conditions, QuestAction[] actions)
+        public readonly string IconID;
+        public readonly string NameID;
+        public readonly string DescID;
+
+        internal QuestDefinition(QuestID id, QuestID nextID, QuestRequirement[] requirements, QuestCondition[] conditions, QuestAction[] actions)
         {
             ID = id;
             NextID = nextID;
-            Requirements = requirements ?? (new QuestRequirement[0]);
-            Conditions = conditions ?? (new QuestCondition[0]);
-            Actions = actions ?? (new QuestAction[0]);
-            NameID = nameID;
-            DescID = descID;
+            Requirements = requirements ?? QuestRequirement.NONE;
+            Conditions = conditions ?? QuestCondition.NONE;
+            Actions = actions ?? QuestAction.NONE;
+
+            IconID = $"Icon{ID.Key}";
+            NameID = $"quest.{ID.Key}.name";
+            DescID = $"quest.{ID.Key}.desc";
         }
-        internal QuestDefinition(QuestID id, QuestID nextID, LocalizedID nameID, LocalizedID descID) : this(id, nextID, nameID, descID, default, default, default) { }
-        internal QuestDefinition(QuestEntry entry) : this (entry.ID, entry.NextID, entry.NameID, entry.DescID, entry.Requirements, entry.Conditions, entry.Actions) { }
+        internal QuestDefinition(QuestID id, QuestID nextID) : this(id, nextID, default, default, default) { }
+        internal QuestDefinition(QuestEntry entry) : this (entry.ID, entry.NextID, entry.Requirements, entry.Conditions, entry.Actions) { }
     }
 }

@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using Core.Localization;
 
 namespace Core.Quest
 {
@@ -13,18 +12,14 @@ namespace Core.Quest
 
         public QuestID ID;
         public QuestID NextID;
-        public LocalizedID NameID;
-        public LocalizedID DescID;
         public QuestRequirement[] Requirements;
-        [SerializeReference, Reference] public QuestCondition[] Conditions;
-        [SerializeReference, Reference] public QuestAction[] Actions;
+        [Required] public QuestCondition[] Conditions;
+        [Required] public QuestAction[] Actions;
 
-        public QuestEntry(QuestID id, QuestID nextID, LocalizedID nameID, LocalizedID descID, QuestRequirement[] requirements, QuestCondition[] conditions, QuestAction[] actions)
+        public QuestEntry(QuestID id, QuestID nextID, QuestRequirement[] requirements, QuestCondition[] conditions, QuestAction[] actions)
         {
             ID = id;
             NextID = nextID;
-            NameID = nameID;
-            DescID = descID;
             Requirements = requirements;
             Conditions = conditions;
             Actions = actions;
@@ -38,16 +33,6 @@ namespace Core.Quest
         public void OnValidate()
         {
             Name = ID.Key;
-
-            for (int i = 0; i < Conditions.Length; i++)
-            {
-                Conditions[i].OnValidate();
-            }
-
-            for (int i = 0; i < Actions.Length; i++)
-            {
-                Actions[i].OnValidate();
-            }
         }
 #endif
     }
