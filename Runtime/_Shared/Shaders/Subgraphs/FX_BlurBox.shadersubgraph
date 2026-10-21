@@ -479,7 +479,7 @@
     "m_Group": {
         "m_Id": ""
     },
-    "m_Name": "ComputeBlurBox (Custom Function)",
+    "m_Name": "BlurBox (Custom Function)",
     "m_DrawState": {
         "m_Expanded": true,
         "m_Position": {
@@ -519,7 +519,7 @@
         "m_SerializableColors": []
     },
     "m_SourceType": 0,
-    "m_FunctionName": "ComputeBlurBox",
+    "m_FunctionName": "BlurBox",
     "m_FunctionSource": "4e4a030cde30f4543a846ced87a05777",
     "m_FunctionSourceUsePragmas": true,
     "m_FunctionBody": "Enter function body here..."

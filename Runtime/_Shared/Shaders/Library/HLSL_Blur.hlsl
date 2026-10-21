@@ -98,39 +98,39 @@ float4 BlurGaussianDirectional(Texture2D _tex2D, SamplerState _samp2D, float2 _u
     return totalColor / max(totalWeight, 0.0001);
 }
 
-void ComputeBlurBoxDirectional_float(Texture2D _tex2D, SamplerState _samp2D, float2 _uv, float2 _direction, float _strength, int _radius, out float4 color)
+void BlurBoxDirectional_float(Texture2D _tex2D, SamplerState _samp2D, float2 _uv, float2 _direction, float _strength, int _radius, out float4 color)
 {
     color = BlurBoxDirectional(_tex2D, _samp2D, _uv, _direction, _strength, _radius);
 }
-void ComputeBlurBoxDirectional_half(Texture2D _tex2D, SamplerState _samp2D, half2 _uv, half2 _direction, half _strength, int _radius, out half4 color)
+void BlurBoxDirectional_half(Texture2D _tex2D, SamplerState _samp2D, half2 _uv, half2 _direction, half _strength, int _radius, out half4 color)
 {
-    ComputeBlurBoxDirectional_float(_tex2D, _samp2D, _uv, _direction, _strength, _radius, color);
+    BlurBoxDirectional_float(_tex2D, _samp2D, _uv, _direction, _strength, _radius, color);
 }
 
-void ComputeBlurBox_float(in Texture2D _tex2D, in SamplerState _samp2D, in float2 _uv, in float _strength, out float4 color)
+void BlurBox_float(in Texture2D _tex2D, in SamplerState _samp2D, in float2 _uv, in float _strength, out float4 color)
 {
     color = BlurBox(_tex2D, _samp2D, _uv, _strength);
 }
-void ComputeBlurBox_half(in Texture2D _tex2D, in SamplerState _samp2D, in half2 _uv, in half _strength, out half4 color)
+void BlurBox_half(in Texture2D _tex2D, in SamplerState _samp2D, in half2 _uv, in half _strength, out half4 color)
 {
-    ComputeBlurBox_float(_tex2D, _samp2D, _uv, _strength, color);
+    BlurBox_float(_tex2D, _samp2D, _uv, _strength, color);
 }
 
-void ComputeBlurGaussian_float(in Texture2D _tex2D, in SamplerState _samp2D, in float2 _uv, in float _strength, in int _radius, in float _scale, out float4 color)
+void BlurGaussian_float(in Texture2D _tex2D, in SamplerState _samp2D, in float2 _uv, in float _strength, in int _radius, in float _scale, out float4 color)
 {
     color = BlurGaussian(_tex2D, _samp2D, _uv, _strength, _radius, _scale);
 }
-void ComputeBlurGaussian_half(in Texture2D _tex2D, in SamplerState _samp2D, in half2 _uv, in half _strength, in int _radius, in half _scale, out half4 color)
+void BlurGaussian_half(in Texture2D _tex2D, in SamplerState _samp2D, in half2 _uv, in half _strength, in int _radius, in half _scale, out half4 color)
 {
-    ComputeBlurGaussian_float(_tex2D, _samp2D, _uv, _strength, _radius, _scale, color);
+    BlurGaussian_float(_tex2D, _samp2D, _uv, _strength, _radius, _scale, color);
 }
 
-void ComputeBlurGaussianDirectional_float(in Texture2D _tex2D, in SamplerState _samp2D, in float2 _uv, float2 _direction, in float _strength, in int _radius, out float4 color)
+void BlurGaussianDirectional_float(in Texture2D _tex2D, in SamplerState _samp2D, in float2 _uv, float2 _direction, in float _strength, in int _radius, out float4 color)
 {
     color = BlurGaussianDirectional(_tex2D, _samp2D, _uv, _direction, _strength, _radius);
 }
-void ComputeBlurGaussianDirectional_half(in Texture2D _tex2D, in SamplerState _samp2D, in half2 _uv, half2 _direction, in half _strength, in int _radius, out half4 color)
+void BlurGaussianDirectional_half(in Texture2D _tex2D, in SamplerState _samp2D, in half2 _uv, half2 _direction, in half _strength, in int _radius, out half4 color)
 {
-    ComputeBlurGaussianDirectional_float(_tex2D, _samp2D, _uv, _direction, _strength, _radius, color);
+    BlurGaussianDirectional_float(_tex2D, _samp2D, _uv, _direction, _strength, _radius, color);
 }
 #endif

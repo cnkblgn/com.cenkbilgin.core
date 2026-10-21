@@ -211,7 +211,7 @@
     "m_Group": {
         "m_Id": ""
     },
-    "m_Name": "ComputeBlurGaussian (Custom Function)",
+    "m_Name": "BlurGaussian (Custom Function)",
     "m_DrawState": {
         "m_Expanded": true,
         "m_Position": {
@@ -250,14 +250,14 @@
         "HLSL"
     ],
     "m_Precision": 0,
-    "m_PreviewExpanded": true,
+    "m_PreviewExpanded": false,
     "m_DismissedVersion": 0,
     "m_PreviewMode": 0,
     "m_CustomColors": {
         "m_SerializableColors": []
     },
     "m_SourceType": 0,
-    "m_FunctionName": "ComputeBlurGaussian",
+    "m_FunctionName": "BlurGaussian",
     "m_FunctionSource": "4e4a030cde30f4543a846ced87a05777",
     "m_FunctionSourceUsePragmas": true,
     "m_FunctionBody": "Enter function body here..."

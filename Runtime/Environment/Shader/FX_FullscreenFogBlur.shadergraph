@@ -1105,7 +1105,7 @@
     "m_Group": {
         "m_Id": ""
     },
-    "m_Name": "ComputeBlurGaussianDirectional (Custom Function)",
+    "m_Name": "BlurGaussianDirectional (Custom Function)",
     "m_DrawState": {
         "m_Expanded": true,
         "m_Position": {
@@ -1151,7 +1151,7 @@
         "m_SerializableColors": []
     },
     "m_SourceType": 0,
-    "m_FunctionName": "ComputeBlurGaussianDirectional",
+    "m_FunctionName": "BlurGaussianDirectional",
     "m_FunctionSource": "4e4a030cde30f4543a846ced87a05777",
     "m_FunctionSourceUsePragmas": true,
     "m_FunctionBody": "Enter function body here..."
