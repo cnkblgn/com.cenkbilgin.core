@@ -23,7 +23,7 @@ namespace Core.Faction
 
             data.SetData(RELATIONS, relationTable);
         }
-        public static void ImportFrom(this FactionContainer obj, Dictionary<string, DataNode> data, GameObject actor)
+        public static void ImportFrom(this FactionContainer obj, Dictionary<string, DataNode> data, object actor)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
 

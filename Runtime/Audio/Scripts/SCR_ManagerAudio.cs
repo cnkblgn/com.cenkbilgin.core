@@ -273,7 +273,7 @@ namespace Core.Audio
 
         private void TickEmitters()
         {
-            const int updatesPerFrame = 8;
+            const int updatesPerFrame = 16;
 
             for (int i = 0; i < audioEmitterCollection.Count; i++)
             {

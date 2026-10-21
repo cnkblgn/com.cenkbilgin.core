@@ -6,6 +6,6 @@ namespace Core.Faction
     {
         public static readonly FactionValidator[] NONE = new FactionValidator[0];
 
-        public abstract bool IsInCompatibleWith(FactionID id, GameObject actor);
+        public abstract bool IsCompatibleWith(FactionID id, object actor);
     }
 }

@@ -792,20 +792,47 @@ namespace Core
                 get
                 {
                     if (index < 0 || index >= Count) throw new IndexOutOfRangeException();
+
                     return items[index];
                 }
                 set
                 {
                     if (index < 0 || index >= Count) throw new IndexOutOfRangeException();
+
+                    if (index == Count)
+                    {
+                        Add(value);
+                        return;
+                    }
+
                     items[index] = value;
                 }
             }
-            private readonly T[] items;
             public int Count { get; private set; } = 0;
             public int Capacity => items.Length;
 
-            public SwapBackArray(uint capacity) => items = new T[capacity];
-            public ref T GetRef(int index) => ref items[index];
+
+            private readonly T[] items;
+
+            public SwapBackArray(uint capacity)
+            {
+                if (capacity > int.MaxValue)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(capacity));
+                }
+
+                items = new T[(int)capacity];
+            }
+
+            public ref T GetRef(int index)
+            {
+                if ((uint)index >= (uint)Count)
+                {
+                    throw new IndexOutOfRangeException();
+                }
+
+                return ref items[index];
+            }
             public void Truncate(int newCount)
             {
                 if (newCount < 0 || newCount > Count)
@@ -827,16 +854,27 @@ namespace Core
             }
             public void RemoveAt(int index)
             {
-                if (index >= Count)
+                if ((uint)index >= (uint)Count)
                 {
                     throw new IndexOutOfRangeException();
                 }
 
-                items[index] = items[Count - 1];
-                Count--;
+                int lastIndex = --Count;
+
+                if (index != lastIndex)
+                {
+                    items[index] = items[lastIndex];
+                }
+
+                items[lastIndex] = default;
             }
             public void RemoveAll(Predicate<T> match)
             {
+                if (match == null)
+                {
+                    throw new ArgumentNullException(nameof(match));
+                }
+
                 for (int i = 0; i < Count;)
                 {
                     if (match(items[i]))

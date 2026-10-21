@@ -8,7 +8,7 @@ namespace Core.Effect
     {
         public static readonly EffectValidator[] NONE = new EffectValidator[0];
 
-        public abstract bool IsInCompatibleWith(EffectID idA, EffectID idB);
-        public abstract bool IsInCompatibleWith(EffectID id, IReadOnlyList<EffectInstance> effects, GameObject actor);
+        public abstract bool IsCompatibleWith(EffectID idA, EffectID idB);
+        public abstract bool IsCompatibleWith(EffectID id, IReadOnlyList<EffectInstance> effects, object actor);
     }
 }

@@ -13,9 +13,14 @@ namespace Core.Trait
         private readonly SwapBackArray<TraitInstance> traits;
 
         public TraitContainer(uint capacity = 16) : this(new SwapBackArray<TraitInstance>(capacity)) { }
-        public TraitContainer(TraitContainer container) : this(container.traits) { }
+        public TraitContainer(TraitContainer container) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.traits) { }
         public TraitContainer(SwapBackArray<TraitInstance> traits)
         {
+            if (traits == null)
+            {
+                throw new ArgumentNullException(nameof(traits));
+            }
+
             this.traits = new((uint)traits.Capacity);
 
             for (int i = 0; i < traits.Count; i++)
@@ -45,16 +50,16 @@ namespace Core.Trait
 
             return false;
         }
-        public bool IsInCompatibleWith(TraitID id, GameObject actor) => id.IsInCompatibleWith(GetTraits(), actor);
+        public bool IsCompatibleWith(TraitID id, object actor) => id.IsCompatibleWith(GetTraits(), actor);
 
-        public bool TryAddTrait(TraitID id, GameObject actor)
+        public bool TryAddTrait(TraitID id, object actor)
         {
             if (HasTrait(id))
             {
                 return false;
             }
 
-            if (!IsInCompatibleWith(id, actor))
+            if (!IsCompatibleWith(id, actor))
             {
                 return false;
             }
@@ -65,13 +70,13 @@ namespace Core.Trait
 
             ref TraitInstance added = ref traits.GetRef(traits.Count - 1);
 
-            ApplyAction(actor, ref added);
+            ApplyAction(ref added, actor);
 
             SetState(TraitState.ADDED, added);
 
             return true;
         }
-        public bool TryRemoveTrait(TraitID id, GameObject actor)
+        public bool TryRemoveTrait(TraitID id, object actor)
         {
             for (int i = 0; i < traits.Count; i++)
             {
@@ -79,7 +84,7 @@ namespace Core.Trait
 
                 if (registered.ID == id)
                 {
-                    RemoveTrait(actor, i, ref registered);
+                    RemoveTrait(i, actor);
                     return true;
                 }
             }
@@ -87,31 +92,32 @@ namespace Core.Trait
             return false;
         }
 
-        private void ApplyAction(GameObject actor, ref TraitInstance instance)
+        private void ApplyAction(ref TraitInstance instance, object actor)
         {
             TraitAction[] actions = instance.ID.GetDefinition().Actions;
 
             for (int i = 0; i < actions.Length; i++)
             {
-                actions[i].Apply(actor, ref instance);
+                actions[i].Apply(ref instance, actor);
             }
         }
-        private void RemoveAction(GameObject actor, ref TraitInstance instance)
+        private void RemoveAction(ref TraitInstance instance, object actor)
         {
             TraitAction[] actions = instance.ID.GetDefinition().Actions;
 
             for (int i = 0; i < actions.Length; i++)
             {
-                actions[i].Remove(actor, ref instance);
+                actions[i].Remove(ref instance, actor);
             }
         }
-        private void RemoveTrait(GameObject actor, int index, ref TraitInstance instance)
+        private void RemoveTrait(int index, object actor)
         {
-            SetState(TraitState.REMOVED, instance);
+            TraitInstance removed = traits[index];
 
-            RemoveAction(actor, ref instance);
-
+            RemoveAction(ref removed, actor);
             traits.RemoveAt(index);
+
+            SetState(TraitState.REMOVED, removed);
         }
     }
 }

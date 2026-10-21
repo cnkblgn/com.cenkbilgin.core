@@ -43,13 +43,13 @@ namespace Core.Effect
 
         public readonly EffectDefinition GetDefinition() => EffectDatabase.GetDefinition(this);
         public readonly EffectInstance CreateInstance(float duration) => EffectDatabase.CreateInstance(this, duration);
-        public readonly bool IsInCompatibleWith(IReadOnlyList<EffectInstance> traits, GameObject actor)
+        public readonly bool IsCompatibleWith(IReadOnlyList<EffectInstance> traits, object actor)
         {
             EffectValidator[] validators = GetDefinition().Validators;
 
             for (int i = 0; i < validators.Length; i++)
             {
-                if (!validators[i].IsInCompatibleWith(this, traits, actor))
+                if (!validators[i].IsCompatibleWith(this, traits, actor))
                 {
                     return false;
                 }
@@ -57,13 +57,13 @@ namespace Core.Effect
 
             return true;
         }
-        public readonly bool IsInCompatibleWith(EffectID id)
+        public readonly bool IsCompatibleWith(EffectID id)
         {
             EffectValidator[] validators = GetDefinition().Validators;
 
             for (int i = 0; i < validators.Length; i++)
             {
-                if (!validators[i].IsInCompatibleWith(this, id))
+                if (!validators[i].IsCompatibleWith(this, id))
                 {
                     return false;
                 }

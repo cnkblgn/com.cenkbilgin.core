@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Core.Trait
 {
@@ -22,7 +21,7 @@ namespace Core.Trait
 
             data.SetData(TRAITS, traitTable);
         }
-        public static void ImportFrom(this TraitContainer obj, Dictionary<string, DataNode> data, GameObject actor)
+        public static void ImportFrom(this TraitContainer obj, Dictionary<string, DataNode> data, object actor)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
 

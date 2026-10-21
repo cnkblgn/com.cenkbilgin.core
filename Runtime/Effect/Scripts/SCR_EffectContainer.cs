@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Core.Effect
 {
@@ -13,14 +12,19 @@ namespace Core.Effect
         private readonly SwapBackArray<EffectInstance> effects;
 
         public EffectContainer(uint capacity = 16) : this(new SwapBackArray<EffectInstance>(capacity)) { }
-        public EffectContainer(EffectContainer container) : this(container.effects) { }
-        public EffectContainer(SwapBackArray<EffectInstance> traits)
+        public EffectContainer(EffectContainer container) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.effects) { }
+        public EffectContainer(SwapBackArray<EffectInstance> effects)
         {
-            this.effects = new((uint)traits.Capacity);
-
-            for (int i = 0; i < traits.Count; i++)
+            if (effects == null)
             {
-                this.effects[i] = traits[i];
+                throw new ArgumentNullException(nameof(effects));
+            }
+
+            this.effects = new((uint)effects.Capacity);
+
+            for (int i = 0; i < effects.Count; i++)
+            {
+                this.effects[i] = effects[i];
             }
         }
 
@@ -28,13 +32,12 @@ namespace Core.Effect
 
         private void SetState(EffectState state, EffectInstance instance) => OnChanged?.Invoke(new(state, instance));
 
-        public void Tick(GameObject actor, float deltaTime)
+        public void Tick(float deltaTime, object actor)
         {
             for (int i = effects.Count - 1; i >= 0; i--)
             {
                 ref EffectInstance registered = ref effects.GetRef(i);
-                EffectDefinition definition = registered.ID.GetDefinition();
-
+    
                 registered.TimeRemaining -= deltaTime;
 
                 if (registered.TickInterval > 0)
@@ -47,20 +50,20 @@ namespace Core.Effect
 
                         registered.TickCount++;
 
-                        TickAction(actor, definition, ref registered);
+                        TickAction(ref registered, actor);
                     }
                 }
 
                 if (registered.TimeRemaining <= 0 && registered.Duration > 0)
                 {
-                    RemoveEffect(actor, i, ref registered);
+                    RemoveEffect(i, actor);
                 }
             }
         }
 
-        public bool TryAddEffect(GameObject actor, EffectInstance instance)
+        public bool TryAddEffect(EffectInstance instance, object actor)
         {
-            if (!instance.ID.IsInCompatibleWith(GetEffects(), actor))
+            if (!instance.ID.IsCompatibleWith(GetEffects(), actor))
             {
                 return false;
             }
@@ -79,13 +82,13 @@ namespace Core.Effect
 
             ref EffectInstance added = ref effects.GetRef(effects.Count - 1);
 
-            ApplyAction(actor, added.ID.GetDefinition(), ref added);
+            ApplyAction(ref added, actor);
 
             SetState(EffectState.ADDED, added);
 
             return true;
         }
-        public bool TryRemoveEffect(GameObject actor, EffectID id)
+        public bool TryRemoveEffect(EffectID id, object actor)
         {
             for (int i = 0; i < effects.Count; i++)
             {
@@ -93,7 +96,7 @@ namespace Core.Effect
 
                 if (registered.ID == id)
                 {
-                    RemoveEffect(actor, i, ref registered);
+                    RemoveEffect(i, actor);
                     return true;
                 }
             }
@@ -101,40 +104,41 @@ namespace Core.Effect
             return false;
         }
         
-        private void TickAction(GameObject actor, EffectDefinition definition, ref EffectInstance instance)
+        private void TickAction(ref EffectInstance instance, object actor)
         {
-            EffectAction[] actions = definition.Actions;
+            EffectAction[] actions = instance.ID.GetDefinition().Actions;
 
             for (int i = 0; i < actions.Length; i++)
             {
-                actions[i].Tick(actor, ref instance);
+                actions[i].Tick(ref instance, actor);
             }
         }
-        private void ApplyAction(GameObject actor, EffectDefinition definition, ref EffectInstance instance)
+        private void ApplyAction(ref EffectInstance instance, object actor)
         {
-            EffectAction[] actions = definition.Actions;
+            EffectAction[] actions = instance.ID.GetDefinition().Actions;
 
             for (int i = 0; i < actions.Length; i++)
             {
-                actions[i].Apply(actor, ref instance);
+                actions[i].Apply(ref instance, actor);
             }
         }
-        private void RemoveAction(GameObject actor, EffectDefinition definition, ref EffectInstance instance)
+        private void RemoveAction(ref EffectInstance instance, object actor)
         {
-            EffectAction[] actions = definition.Actions;
+            EffectAction[] actions = instance.ID.GetDefinition().Actions;
 
             for (int i = 0; i < actions.Length; i++)
             {
-                actions[i].Removed(actor, ref instance);
+                actions[i].Removed(ref instance, actor);
             }
         }
-        private void RemoveEffect(GameObject actor, int index, ref EffectInstance instance)
+        private void RemoveEffect(int index, object actor)
         {
-            SetState(EffectState.REMOVED, instance);
+            EffectInstance removed = effects[index];
 
-            RemoveAction(actor, instance.ID.GetDefinition(), ref instance);
-
+            RemoveAction(ref removed, actor);
             effects.RemoveAt(index);
+
+            SetState(EffectState.REMOVED, removed);
         }
     }
 }

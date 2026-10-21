@@ -7,7 +7,7 @@ namespace Core.Trait
     {
         public static readonly TraitValidator[] NONE = new TraitValidator[] { };
 
-        public abstract bool IsInCompatibleWith(TraitID idA, TraitID idB);
-        public abstract bool IsInCompatibleWith(TraitID id, IReadOnlyList<TraitInstance> traits, GameObject actor);
+        public abstract bool IsCompatibleWith(TraitID idA, TraitID idB);
+        public abstract bool IsCompatibleWith(TraitID id, IReadOnlyList<TraitInstance> traits, object actor);
     }
 }

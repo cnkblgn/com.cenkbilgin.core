@@ -49,14 +49,14 @@ namespace Core.Faction
         private void SetState() => OnChanged?.Invoke(new(id, relations));
 
         public FactionID GetFaction() => id;
-        public bool TrySetFaction(FactionID id, GameObject actor)
+        public bool TrySetFaction(FactionID id, object actor)
         {
             if (id == this.id)
             {
                 return false;
             }
 
-            if (!id.IsInCompatibleWith(actor))
+            if (!id.IsCompatibleWith(actor))
             {
                 return false;
             }

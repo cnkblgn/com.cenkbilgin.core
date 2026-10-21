@@ -7,8 +7,8 @@ namespace Core.Effect
         public static readonly EffectAction[] NONE = new EffectAction[0];
 
         public string Description { get; }
-        public abstract void Tick(GameObject actor, ref EffectInstance instance);
-        public abstract void Apply(GameObject actor, ref EffectInstance instance);
-        public abstract void Removed(GameObject actor, ref EffectInstance instance);
+        public abstract void Tick(ref EffectInstance instance, object actor);
+        public abstract void Apply(ref EffectInstance instance, object actor);
+        public abstract void Removed(ref EffectInstance instance, object actor);
     }
 }

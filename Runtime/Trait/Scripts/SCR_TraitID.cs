@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEngine.ParticleSystem;
 
 namespace Core.Trait
 {
@@ -44,13 +43,13 @@ namespace Core.Trait
 
         public readonly TraitDefinition GetDefinition() => TraitDatabase.GetDefinition(this);
         public readonly TraitInstance CreateInstance() => TraitDatabase.CreateInstance(this);
-        public readonly bool IsInCompatibleWith(IReadOnlyList<TraitInstance> traits, GameObject actor)
+        public readonly bool IsCompatibleWith(IReadOnlyList<TraitInstance> traits, object actor)
         {
             TraitValidator[] validators = GetDefinition().Validators;
 
             for (int i = 0; i < validators.Length; i++)
             {
-                if (!validators[i].IsInCompatibleWith(this, traits, actor))
+                if (!validators[i].IsCompatibleWith(this, traits, actor))
                 {
                     return false;
                 }
@@ -58,13 +57,13 @@ namespace Core.Trait
 
             return true;
         }
-        public readonly bool IsInCompatibleWith(TraitID id)
+        public readonly bool IsCompatibleWith(TraitID id)
         {
             TraitValidator[] validators = GetDefinition().Validators;
 
             for (int i = 0; i < validators.Length; i++)
             {
-                if (!validators[i].IsInCompatibleWith(this, id))
+                if (!validators[i].IsCompatibleWith(this, id))
                 {
                     return false;
                 }
