@@ -85,6 +85,10 @@ namespace Core.Editor
                     Rect innerRect = GetInnerRect(dropdownRect);
                     Rect searchRect = GetSearchRect(innerRect);
 
+                    float indentOffset = EditorGUI.IndentedRect(new Rect(0f, 0f, 1000f, EditorGUIUtility.singleLineHeight)).x;
+                    searchRect.x -= indentOffset;
+                    searchRect.width += indentOffset;
+
                     DrawSearch(searchRect, state, out string newSearch);
 
                     if (!string.Equals(newSearch, state.Search, StringComparison.Ordinal))
@@ -162,7 +166,7 @@ namespace Core.Editor
             state.Scroll = GUI.BeginScrollView(rect, state.Scroll, viewRect);
             {
                 float y = 0f;
-   
+
                 DrawRow(ref y, viewRect.width, SEARCH_NONE_TEXT, property, keyProperty, state, current, GetEmpty(), 0);
 
                 for (int i = 0; i < state.Filtered.Count; i++)
@@ -237,8 +241,7 @@ namespace Core.Editor
         }
         private Rect GetInnerRect(Rect position)
         {
-            return new
-            (
+            return new(
                 position.x + 4f,
                 position.y + 4f,
                 position.width - 8f,
@@ -249,7 +252,7 @@ namespace Core.Editor
         {
             return new
             (
-                position.x - 12,
+                position.x,
                 position.y,
                 position.width,
                 SEARCH_HEIGHT
@@ -275,7 +278,6 @@ namespace Core.Editor
                 height
             );
         }
-
         private static SearchState<T> GetState(SerializedProperty property)
         {
             SearchKey key = new(property.serializedObject.targetObject.GetEntityId(), property.propertyPath);

@@ -12,8 +12,8 @@ namespace Core.Trait
 
         public TraitID ID;
         [Min(0)] public int Cost;
-        [Required] public TraitValidator[] Validators;
-        [Required] public TraitAction[] Actions;
+        [Required, Expandable] public TraitValidator[] Validators;
+        [Required, Expandable] public TraitAction[] Actions;
 
         public TraitEntry(TraitID id, int cost, TraitValidator[] validator, TraitAction[] actions)
         {

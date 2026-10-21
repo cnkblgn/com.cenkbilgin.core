@@ -11,6 +11,12 @@ if [ -z "$VERSION" ]; then
   exit 1
 fi
 
+if git show-ref --tags --verify --quiet "refs/tags/v$VERSION" ||
+   git ls-remote --exit-code --tags origin "refs/tags/v$VERSION" >/dev/null 2>&1; then
+  echo "⚠️ v$VERSION tag'i zaten mevcut (local veya remote). Release iptal edildi."
+  exit 1
+fi
+
 # package.json versiyonunu değiştir
 # Bu satır package.json içindeki "version": "..." kısmını günceller
 sed -i.bak -E "s/\"version\": \"[0-9]+\.[0-9]+\.[0-9]+\"/\"version\": \"$VERSION\"/" package.json

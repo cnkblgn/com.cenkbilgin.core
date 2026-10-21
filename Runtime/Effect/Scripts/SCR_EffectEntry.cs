@@ -13,8 +13,8 @@ namespace Core.Effect
         public EffectID ID;
         public EffectTag Tag;
         [Min(0)] public int Interval;
-        [Required] public EffectValidator[] Validators;
-        [Required] public EffectAction[] Actions;
+        [Required, Expandable] public EffectValidator[] Validators;
+        [Required, Expandable] public EffectAction[] Actions;
 
         public EffectEntry(EffectID id, EffectTag tag, int interval, EffectValidator[] validators, EffectAction[] actions)
         {

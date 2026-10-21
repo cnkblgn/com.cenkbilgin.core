@@ -11,7 +11,7 @@ namespace Core.Faction
 #endif
         public FactionID ID;
         public FactionRelation[] Relations;
-        [Required] public FactionValidator[] Validators;
+        [Required, Expandable] public FactionValidator[] Validators;
 
         public FactionEntry(FactionID id, FactionRelation[] relations, FactionValidator[] validators)
         {
