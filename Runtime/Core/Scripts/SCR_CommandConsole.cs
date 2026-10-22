@@ -124,8 +124,6 @@ namespace Core
         {
             private void Start()
             {
-                Show();
-
                 OnSubmit("help");
             }
             private void OnGUI()
