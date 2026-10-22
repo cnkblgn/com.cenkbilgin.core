@@ -419,7 +419,7 @@
     "m_Type": "UnityEditor.ShaderGraph.DynamicVectorMaterialSlot",
     "m_ObjectId": "0696e1899236423dadf45e74c9b8c3d6",
     "m_Id": 0,
-    "m_DisplayName": "Out",
+    "m_DisplayName": "PARTICLE_FOG_ON",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -565,10 +565,10 @@
     "promotedFromAssetID": "",
     "promotedFromCategoryName": "",
     "promotedOrdering": -1,
-    "m_Name": "OVERRIDE_FOG_ON",
+    "m_Name": "PARTICLE_FOG_ON",
     "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "OVERRIDE_FOG_ON",
-    "m_DefaultReferenceName": "_OVERRIDE_FOG_ON",
+    "m_RefNameGeneratedByDisplayName": "PARTICLE_FOG_ON",
+    "m_DefaultReferenceName": "_PARTICLE_FOG_ON",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
@@ -614,7 +614,7 @@
     "m_Type": "UnityEditor.ShaderGraph.DynamicVectorMaterialSlot",
     "m_ObjectId": "2b163d66aeaa4963b93f1b233c65b3f8",
     "m_Id": 0,
-    "m_DisplayName": "Out",
+    "m_DisplayName": "PARTICLE_FOG_ON",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -641,7 +641,7 @@
     "m_Group": {
         "m_Id": ""
     },
-    "m_Name": "FX_Get Fog Simple",
+    "m_Name": "FX_Get Fog",
     "m_DrawState": {
         "m_Expanded": true,
         "m_Position": {
@@ -1104,10 +1104,10 @@
     "promotedFromAssetID": "",
     "promotedFromCategoryName": "",
     "promotedOrdering": -1,
-    "m_Name": "OVERRIDE_FADE_ON",
+    "m_Name": "PARTICLE_FADE_ON",
     "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "OVERRIDE_FADE_ON",
-    "m_DefaultReferenceName": "_OVERRIDE_FADE_ON",
+    "m_RefNameGeneratedByDisplayName": "PARTICLE_FADE_ON",
+    "m_DefaultReferenceName": "_PARTICLE_FADE_ON",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
@@ -1396,7 +1396,7 @@
     "m_Group": {
         "m_Id": ""
     },
-    "m_Name": "OVERRIDE_FOG_ON",
+    "m_Name": "PARTICLE_FOG_ON",
     "m_DrawState": {
         "m_Expanded": true,
         "m_Position": {
@@ -1599,7 +1599,7 @@
     "m_Group": {
         "m_Id": ""
     },
-    "m_Name": "OVERRIDE_FADE_ON",
+    "m_Name": "PARTICLE_FADE_ON",
     "m_DrawState": {
         "m_Expanded": true,
         "m_Position": {
@@ -1655,7 +1655,7 @@
     "m_Type": "UnityEditor.ShaderGraph.DynamicVectorMaterialSlot",
     "m_ObjectId": "8bc5b4ce30e040a38129a573cdbbcf91",
     "m_Id": 0,
-    "m_DisplayName": "OVERRIDE_FADE_ON",
+    "m_DisplayName": "PARTICLE_FADE_ON",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -2049,7 +2049,7 @@
     "m_Group": {
         "m_Id": ""
     },
-    "m_Name": "OVERRIDE_FOG_ON",
+    "m_Name": "PARTICLE_FOG_ON",
     "m_DrawState": {
         "m_Expanded": true,
         "m_Position": {
