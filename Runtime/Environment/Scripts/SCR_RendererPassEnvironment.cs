@@ -119,72 +119,69 @@ namespace Core.Environment
         }
         private void ApplySky(Environment environment)
         {
-            skyMaterial.SetColor(skyZenithColorID, environment.SkyZenithColor.value);
-            skyMaterial.SetColor(skyHorizonColorID, environment.SkyHorizonColor.value);
-            skyMaterial.SetFloat(skyHorizonThicknessID, environment.SkyHorizonThickness.value);
-            skyMaterial.SetFloat(skyHorizonSoftnessID, environment.SkyHorizonSmoothness.value);
+            Shader.SetGlobalColor(skyZenithColorID, environment.SkyZenithColor.value);
+            Shader.SetGlobalColor(skyHorizonColorID, environment.SkyHorizonColor.value);
+            Shader.SetGlobalFloat(skyHorizonThicknessID, environment.SkyHorizonThickness.value);
+            Shader.SetGlobalFloat(skyHorizonSoftnessID, environment.SkyHorizonSmoothness.value);
 
-            skyMaterial.SetColor(sunColorID, environment.SunColor.value);
-            skyMaterial.SetVector(sunDirectionID, -environment.SunDirection.value);
-            skyMaterial.SetFloat(sunSizeID, environment.SunSize.value);
-            skyMaterial.SetFloat(sunGlowID, environment.SunGlow.value);
-            skyMaterial.SetFloat(sunPowerID, environment.SunPower.value);
+            Shader.SetGlobalColor(sunColorID, environment.SunColor.value);
+            Shader.SetGlobalVector(sunDirectionID, -environment.SunDirection.value);
+            Shader.SetGlobalFloat(sunSizeID, environment.SunSize.value);
+            Shader.SetGlobalFloat(sunGlowID, environment.SunGlow.value);
+            Shader.SetGlobalFloat(sunPowerID, environment.SunPower.value);
 
-            skyMaterial.SetColor(moonColorID, environment.MoonColor.value);
-            skyMaterial.SetVector(moonDirectionID, -environment.MoonDirection.value);
-            skyMaterial.SetFloat(moonSizeID, environment.MoonSize.value);
-            skyMaterial.SetFloat(moonGlowID, environment.MoonGlow.value);
-            skyMaterial.SetFloat(moonPowerID, environment.MoonPower.value);
+            Shader.SetGlobalColor(moonColorID, environment.MoonColor.value);
+            Shader.SetGlobalVector(moonDirectionID, -environment.MoonDirection.value);
+            Shader.SetGlobalFloat(moonSizeID, environment.MoonSize.value);
+            Shader.SetGlobalFloat(moonGlowID, environment.MoonGlow.value);
+            Shader.SetGlobalFloat(moonPowerID, environment.MoonPower.value);
 
             bool hasCloud = environment.CloudBaseTexture.value != null || environment.CloudTargetTexture.value != null;
 
-            skyMaterial.SetTexture(cloudBaseTexID, environment.CloudBaseTexture.value);
-            skyMaterial.SetTexture(cloudTargetTexID, environment.CloudTargetTexture.value != null ? environment.CloudTargetTexture.value : environment.CloudBaseTexture.value);
-            skyMaterial.SetFloat(cloudBlendID, environment.CloudBlend.value);
-            skyMaterial.SetColor(cloudColorID, environment.CloudColor.value);
-            skyMaterial.SetFloat(cloudOpacityID, hasCloud ? environment.CloudOpacity.value : 0);
-            skyMaterial.SetFloat(cloudCoverageID, environment.CloudCoverage.value);
-            skyMaterial.SetFloat(cloudFadeID, environment.CloudFade.value);
-            skyMaterial.SetFloat(cloudHeightID, environment.CloudHeight.value);
-            skyMaterial.SetFloat(cloudCurveID, environment.CloudCurve.value);
-            skyMaterial.SetFloat(cloudScaleID, environment.CloudScale.value);
-            skyMaterial.SetFloat(cloudSpeedID, environment.CloudSpeed.value);
-            skyMaterial.SetFloat(cloudTurbulenceID, environment.CloudTurbulance.value);
-            skyMaterial.SetFloat(cloudTransmittanceID, environment.CloudTransmittance.value);
-            skyMaterial.SetFloat(cloudDarknessID, environment.CloudDarkness.value);
-            skyMaterial.SetFloat(cloudRimWidthID, environment.CloudRimWidth.value);
-            skyMaterial.SetFloat(cloudRimStrengthID, environment.CloudRimStrength.value);
+            Shader.SetGlobalTexture(cloudBaseTexID, environment.CloudBaseTexture.value);
+            Shader.SetGlobalTexture(cloudTargetTexID, environment.CloudTargetTexture.value != null ? environment.CloudTargetTexture.value : environment.CloudBaseTexture.value);
+            Shader.SetGlobalFloat(cloudBlendID, environment.CloudBlend.value);
+            Shader.SetGlobalColor(cloudColorID, environment.CloudColor.value);
+            Shader.SetGlobalFloat(cloudOpacityID, hasCloud ? environment.CloudOpacity.value : 0);
+            Shader.SetGlobalFloat(cloudCoverageID, environment.CloudCoverage.value);
+            Shader.SetGlobalFloat(cloudFadeID, environment.CloudFade.value);
+            Shader.SetGlobalFloat(cloudHeightID, environment.CloudHeight.value);
+            Shader.SetGlobalFloat(cloudCurveID, environment.CloudCurve.value);
+            Shader.SetGlobalFloat(cloudScaleID, environment.CloudScale.value);
+            Shader.SetGlobalFloat(cloudSpeedID, environment.CloudSpeed.value);
+            Shader.SetGlobalFloat(cloudTurbulenceID, environment.CloudTurbulance.value);
+            Shader.SetGlobalFloat(cloudTransmittanceID, environment.CloudTransmittance.value);
+            Shader.SetGlobalFloat(cloudDarknessID, environment.CloudDarkness.value);
+            Shader.SetGlobalFloat(cloudRimWidthID, environment.CloudRimWidth.value);
+            Shader.SetGlobalFloat(cloudRimStrengthID, environment.CloudRimStrength.value);
 
-            skyMaterial.SetColor(starColorID, environment.StarColor.value);
-            skyMaterial.SetFloat(starAmountID, environment.StarAmount.value);
-            skyMaterial.SetFloat(starDensityID, environment.StarDensity.value);
-            skyMaterial.SetFloat(starSizeID, environment.StarSize.value);
-            skyMaterial.SetFloat(starBrightnessID, environment.StarBrightness.value);
-            skyMaterial.SetFloat(starAnimationStrengthID, environment.StarAnimationStrength.value);
-            skyMaterial.SetFloat(starAnimationSpeedID, environment.StarAnimationSpeed.value);
+            Shader.SetGlobalColor(starColorID, environment.StarColor.value);
+            Shader.SetGlobalFloat(starAmountID, environment.StarAmount.value);
+            Shader.SetGlobalFloat(starDensityID, environment.StarDensity.value);
+            Shader.SetGlobalFloat(starSizeID, environment.StarSize.value);
+            Shader.SetGlobalFloat(starBrightnessID, environment.StarBrightness.value);
+            Shader.SetGlobalFloat(starAnimationStrengthID, environment.StarAnimationStrength.value);
+            Shader.SetGlobalFloat(starAnimationSpeedID, environment.StarAnimationSpeed.value);
         }
         private void ApplyFog(Environment environment)
         {
-            fogSampleMaterial.SetColor(fogColorID, environment.FogColor.value);
-            fogSampleMaterial.SetFloat(fogDensityID, environment.FogDensity.value);
-            fogSampleMaterial.SetFloat(fogOpacityID, environment.FogDensity.value > 0 ? 1f : 0f);
-            fogSampleMaterial.SetFloat(fogDistanceStartID, environment.FogDistanceStart.value);
-            fogSampleMaterial.SetFloat(fogDistanceFalloffID, environment.FogDistanceFalloff.value);
-            fogSampleMaterial.SetFloat(fogHeightStartID, environment.FogHeightStart.value);
-            fogSampleMaterial.SetFloat(fogHeightFalloffID, environment.FogHeightFalloff.value);
-            fogSampleMaterial.SetFloat(fogScatteringID, environment.FogScattering.value);
-
-            fogSampleMaterial.SetTexture(fogRampTexID, environment.FogRampTexture.value);
-            fogSampleMaterial.SetFloat(fogRampOpacityID, environment.FogRampOpacity.value);
-            fogSampleMaterial.SetFloat(fogRampScaleID, environment.FogRampScale.value);
-
-            fogSampleMaterial.SetTexture(fogNoiseTexID, environment.FogNoiseTexture.value);
-            fogSampleMaterial.SetFloat(fogNoiseOpacityID, environment.FogNoiseOpacity.value);
-            fogSampleMaterial.SetFloat(fogNoiseModulationID, environment.FogNoiseModulation.value);
-            fogSampleMaterial.SetFloat(fogNoiseOffsetID, environment.FogNoiseOffset.value);
-            fogSampleMaterial.SetFloat(fogNoiseSpeedID, environment.FogNoiseSpeed.value);
-            fogSampleMaterial.SetFloat(fogNoiseScaleID, environment.FogNoiseScale.value);
-
+            Shader.SetGlobalColor(fogColorID, environment.FogColor.value);
+            Shader.SetGlobalFloat(fogDensityID, environment.FogDensity.value);
+            Shader.SetGlobalFloat(fogOpacityID, environment.FogDensity.value > 0 ? 1f : 0f);
+            Shader.SetGlobalFloat(fogDistanceStartID, environment.FogDistanceStart.value);
+            Shader.SetGlobalFloat(fogDistanceFalloffID, environment.FogDistanceFalloff.value);
+            Shader.SetGlobalFloat(fogHeightStartID, environment.FogHeightStart.value);
+            Shader.SetGlobalFloat(fogHeightFalloffID, environment.FogHeightFalloff.value);
+            Shader.SetGlobalFloat(fogScatteringID, environment.FogScattering.value);
+            Shader.SetGlobalTexture(fogRampTexID, environment.FogRampTexture.value);
+            Shader.SetGlobalFloat(fogRampOpacityID, environment.FogRampOpacity.value);
+            Shader.SetGlobalFloat(fogRampScaleID, environment.FogRampScale.value);
+            Shader.SetGlobalTexture(fogNoiseTexID, environment.FogNoiseTexture.value);
+            Shader.SetGlobalFloat(fogNoiseOpacityID, environment.FogNoiseOpacity.value);
+            Shader.SetGlobalFloat(fogNoiseModulationID, environment.FogNoiseModulation.value);
+            Shader.SetGlobalFloat(fogNoiseOffsetID, environment.FogNoiseOffset.value);
+            Shader.SetGlobalFloat(fogNoiseSpeedID, environment.FogNoiseSpeed.value);
+            Shader.SetGlobalFloat(fogNoiseScaleID, environment.FogNoiseScale.value);
             fogBlurMaterial.SetFloat(fogBlurStrengthID, environment.FogBlurStrength.value);
             fogBlurMaterial.SetFloat(fogBlurRadiusID, environment.FogBlurRadius.value);
         }

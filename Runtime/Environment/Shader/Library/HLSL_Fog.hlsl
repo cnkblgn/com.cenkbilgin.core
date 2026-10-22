@@ -136,7 +136,7 @@ void GetFogDefault_float(float3 _worldPosition, float3 _worldNormal, float3 _cam
 
 void GetFogDefault_half(half3 _worldPosition, half3 _worldNormal, half3 _cameraPosition, out half3 color, out half factor)
 {
-    GetFogDefault_half(_worldPosition, _worldNormal, _cameraPosition, color, factor);
+    GetFogDefault_float(_worldPosition, _worldNormal, _cameraPosition, color, factor);
 }
 
 void GetFogSimple_float(float3 _worldPosition, float3 _cameraPosition, out float3 color, out float factor)
