@@ -43,11 +43,17 @@ namespace Core.Faction
         public readonly FactionDefinition GetDefinition() => FactionDatabase.GetDefinition(this);
         public readonly bool IsCompatibleWith(object actor)
         {
-            FactionValidator[] validators = GetDefinition().Validators;
-
-            for (int i = 0; i < validators.Length; i++)
+            if (actor == null)
             {
-                if (!validators[i].IsCompatibleWith(this, actor))
+                Debug.LogError("Faction compatibility check failed! actor is null!?");
+                return false;
+            }
+
+            FactionCompatibility[] compatibilities = GetDefinition().Compatibilities;
+
+            for (int i = 0; i < compatibilities.Length; i++)
+            {
+                if (!compatibilities[i].IsCompatibleWith(this, actor))
                 {
                     return false;
                 }

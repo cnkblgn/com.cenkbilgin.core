@@ -51,6 +51,5 @@ namespace Core.Effect
 
             return GetDefinition(id.Index);
         }
-        public static EffectInstance CreateInstance(EffectID id, float duration) => new(GetDefinition(id), duration);
     }
 }

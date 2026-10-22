@@ -13,7 +13,8 @@ namespace Core.Effect
         public float TickTimer;
         public int TickCount;
 
-        public EffectInstance(EffectDefinition definition, float duration)
+        public EffectInstance(EffectID id, float duration) : this(id.GetDefinition(), duration) { }
+        internal EffectInstance(EffectDefinition definition, float duration)
         {
             ID = definition.ID;
             Duration = duration;

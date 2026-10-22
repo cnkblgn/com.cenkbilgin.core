@@ -3,10 +3,10 @@ using UnityEngine;
 
 namespace Core.Trait
 {
-    [CreateAssetMenu(fileName = "SCO_TraitRegistry", menuName = "Resources/Core/Trait Registry", order = 10)]
+    [CreateAssetMenu(fileName = "SCO_TraitRegistry", menuName = "Resources/Core/Trait Registry", order = -8)]
     public sealed class RegistryTrait : Registry
     {
-        public override int Priority => -4;
+        public override int Priority => -8;
 
         [Header("_")]
         [SerializeField] private TraitEntry[] entries;

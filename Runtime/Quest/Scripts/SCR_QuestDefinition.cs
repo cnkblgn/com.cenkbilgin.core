@@ -21,7 +21,7 @@ namespace Core.Quest
             Conditions = conditions ?? QuestCondition.NONE;
             Actions = actions ?? QuestAction.NONE;
 
-            IconID = $"Icon{ID.Key}";
+            IconID = $"Quest{ID.Key}";
             NameID = $"quest.{ID.Key}.name";
             DescID = $"quest.{ID.Key}.desc";
         }

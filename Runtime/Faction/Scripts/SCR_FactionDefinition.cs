@@ -3,8 +3,9 @@ namespace Core.Faction
     public sealed class FactionDefinition
     {
         public readonly FactionID ID;
-        internal readonly FactionValidator[] Validators;
         internal readonly FactionRelation[] Relations;
+        internal readonly FactionAction[] Actions;
+        internal readonly FactionCompatibility[] Compatibilities;
 
         public readonly string IconID;
         public readonly string NameID;
@@ -21,16 +22,17 @@ namespace Core.Faction
             return Relations[target.Index].Relation;
         }
 
-        internal FactionDefinition(FactionID id, FactionValidator[] validators, FactionRelation[] relations)
+        internal FactionDefinition(FactionID id, FactionRelation[] relations, FactionAction[] actions, FactionCompatibility[] compatibilities)
         {
             ID = id;
-            IconID = $"Icon{ID.Key}";
+            IconID = $"Faction{ID.Key}";
             NameID = $"faction.{ID.Key}.name";
             DescID = $"faction.{ID.Key}.desc";
 
-            Validators = validators ?? FactionValidator.NONE;
             Relations = relations ?? FactionRelation.NONE;
+            Actions = actions ?? FactionAction.NONE;
+            Compatibilities = compatibilities ?? FactionCompatibility.NONE;
         }
-        internal FactionDefinition(FactionEntry entry) : this(entry.ID, entry.Validators, entry.Relations) { }
+        internal FactionDefinition(FactionEntry entry) : this(entry.ID, entry.Relations, entry.Actions, entry.Compatibilities) { }
     }
 }

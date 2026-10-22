@@ -4,24 +4,24 @@ namespace Core.Trait
     {
         public readonly TraitID ID;
         public readonly int Cost;
-        internal readonly TraitValidator[] Validators;
+        internal readonly TraitCompatibility[] Compatibilities;
         internal readonly TraitAction[] Actions;
 
         public readonly string IconID;
         public readonly string NameID;
         public readonly string DescID;
 
-        internal TraitDefinition(TraitID id, int cost, TraitValidator[] validator, TraitAction[] actions)
+        internal TraitDefinition(TraitID id, int cost, TraitCompatibility[] compatibilities, TraitAction[] actions)
         {
             ID = id;
-            Validators = validator ?? TraitValidator.NONE;
+            Compatibilities = compatibilities ?? TraitCompatibility.NONE;
             Actions = actions ?? TraitAction.NONE;
             Cost = cost;
 
-            IconID = $"Icon{ID.Key}";
+            IconID = $"Trait{ID.Key}";
             NameID = $"trait.{ID.Key}.name";
             DescID = $"trait.{ID.Key}.desc";
         }
-        internal TraitDefinition(TraitEntry entry) : this(entry.ID, entry.Cost, entry.Validators, entry.Actions) { }
+        internal TraitDefinition(TraitEntry entry) : this(entry.ID, entry.Cost, entry.Compatibilities, entry.Actions) { }
     }
 }

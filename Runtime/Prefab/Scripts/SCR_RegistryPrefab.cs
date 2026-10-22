@@ -3,10 +3,10 @@ using UnityEngine;
 
 namespace Core.Prefab
 {
-    [CreateAssetMenu(fileName = "SCO_PrefabRegistry", menuName = "Resources/Core/Prefab Registry", order = 0)]
+    [CreateAssetMenu(fileName = "SCO_PrefabRegistry", menuName = "Resources/Core/Prefab Registry", order = -15)]
     public sealed class RegistryPrefab : Registry
     {
-        public override int Priority => -10;
+        public override int Priority => -15;
 
         [Header("_")]
         [SerializeField, Required] private List<GameObject> entries = null;

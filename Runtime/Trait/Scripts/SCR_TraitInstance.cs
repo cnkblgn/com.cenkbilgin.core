@@ -4,7 +4,8 @@ namespace Core.Trait
     {
         public readonly TraitID ID;
 
-        public TraitInstance(TraitDefinition definition)
+        public TraitInstance(TraitID id) : this(id.GetDefinition()) { }
+        internal TraitInstance(TraitDefinition definition)
         {
             ID = definition.ID;
         }

@@ -51,6 +51,5 @@ namespace Core.Trait
 
             return GetDefinition(id.Index);
         }
-        public static TraitInstance CreateInstance(TraitID id) => new(GetDefinition(id));
     }
 }

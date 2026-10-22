@@ -3,10 +3,10 @@ using UnityEngine;
 
 namespace Core.Effect
 {
-    [CreateAssetMenu(fileName = "SCO_EffectRegistry", menuName = "Resources/Core/Effect Registry", order = 10)]
+    [CreateAssetMenu(fileName = "SCO_EffectRegistry", menuName = "Resources/Core/Effect Registry", order = -7)]
     public sealed class RegistryEffect : Registry
     {
-        public override int Priority => -3;
+        public override int Priority => -7;
 
         [Header("_")]
         [SerializeField] private EffectEntry[] entries;

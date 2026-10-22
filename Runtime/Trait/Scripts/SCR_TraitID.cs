@@ -42,14 +42,26 @@ namespace Core.Trait
         public static bool operator !=(TraitID left, TraitID right) => !left.Equals(right);
 
         public readonly TraitDefinition GetDefinition() => TraitDatabase.GetDefinition(this);
-        public readonly TraitInstance CreateInstance() => TraitDatabase.CreateInstance(this);
+        public readonly TraitInstance CreateInstance() => new(this);
         public readonly bool IsCompatibleWith(IReadOnlyList<TraitInstance> traits, object actor)
         {
-            TraitValidator[] validators = GetDefinition().Validators;
-
-            for (int i = 0; i < validators.Length; i++)
+            if (traits == null)
             {
-                if (!validators[i].IsCompatibleWith(this, traits, actor))
+                Debug.LogError("Trait compatibility check failed! traits is null!?");
+                return false;
+            }
+
+            if (actor == null)
+            {
+                Debug.LogError("Trait compatibility check failed! actor is null!?");
+                return false;
+            }
+
+            TraitCompatibility[] compatibilities = GetDefinition().Compatibilities;
+
+            for (int i = 0; i < compatibilities.Length; i++)
+            {
+                if (!compatibilities[i].IsCompatibleWith(this, traits, actor))
                 {
                     return false;
                 }
@@ -59,11 +71,16 @@ namespace Core.Trait
         }
         public readonly bool IsCompatibleWith(TraitID id)
         {
-            TraitValidator[] validators = GetDefinition().Validators;
-
-            for (int i = 0; i < validators.Length; i++)
+            if (!id.IsValid)
             {
-                if (!validators[i].IsCompatibleWith(this, id))
+                return false;
+            }
+
+            TraitCompatibility[] compatibilities = GetDefinition().Compatibilities;
+
+            for (int i = 0; i < compatibilities.Length; i++)
+            {
+                if (!compatibilities[i].IsCompatibleWith(this, id))
                 {
                     return false;
                 }

@@ -33,19 +33,9 @@ namespace Core.Faction
                 return;
             }
 
-            for (int i = 0; i < relations.Length; i++)
-            {
-                FactionRelation relation = relations[i];
-
-                if (!relation.ID.IsValid || relation.ID.Index >= this.relations.Length)
-                {
-                    continue;
-                }
-
-                this.relations[relation.ID.Index] = new(relation);
-            }
+            TrySetRelations(relations);
         }
-          
+
         private void SetState() => OnChanged?.Invoke(new(id, relations));
 
         public FactionID GetFaction() => id;
@@ -56,22 +46,66 @@ namespace Core.Faction
                 return false;
             }
 
+            if (!id.IsValid)
+            {
+                Debug.LogError($"Faction set failed! {id} is not valid!");
+                return false;
+            }
+
+            if (actor == null)
+            {
+                Debug.LogError("Faction set failed! actor is null!?");
+                return false;
+            }
+
             if (!id.IsCompatibleWith(actor))
             {
                 return false;
             }
 
+            RemoveAction(this.id, actor);
+
             this.id = id;
-            Array.Clear(relations, 0, relations.Length);
+
+            ClearRelations();
+
             SetState();
+
+            ApplyAction(id, actor);
+
             return true;
+        }
+
+        private void ApplyAction(FactionID id, object actor)
+        {
+            FactionAction[] actions = id.GetDefinition().Actions;
+
+            for (int i = 0; i < actions.Length; i++)
+            {
+                actions[i].Apply(id, actor);
+            }
+        }
+        private void RemoveAction(FactionID id, object actor)
+        {
+            FactionAction[] actions = id.GetDefinition().Actions;
+
+            for (int i = 0; i < actions.Length; i++)
+            {
+                actions[i].Remove(id, actor);
+            }
         }
 
         public FactionAttitude GetAttitude(FactionID id) => FactionDatabase.EvaluateAttitude(GetRelation(id));
         public IReadOnlyList<FactionRelation> GetRelations() => relations;
         public int GetRelation(FactionID id)
         {
-            if (!id.IsValid || id.Index >= relations.Length)
+            if (!id.IsValid)
+            {
+                Debug.LogError($"Faction get relation failed! {id} is not valid!");
+                return 0;
+            }
+
+            if (id.Index >= relations.Length)
             {
                 return 0;
             }
@@ -87,15 +121,51 @@ namespace Core.Faction
         }
         public void SetRelation(FactionID id, int value)
         {
-            if (!id.IsValid || id.Index >= relations.Length)
+            if (!TrySetRelation(id, value))
             {
                 return;
             }
 
-            relations[id.Index] = new(id, Mathf.Clamp(value, -100, 100));
-
             SetState();
         }
+        private bool TrySetRelation(FactionID id, int value)
+        {
+            if (!id.IsValid)
+            {
+                Debug.LogError($"Faction set relation failed! {id} is not valid!");
+                return false;
+            }
+
+            if (id.Index >= relations.Length)
+            {
+                return false;
+            }
+
+            relations[id.Index] = new(id, Mathf.Clamp(value, -100, 100));
+            return true;
+        }
+        private bool TrySetRelation(FactionRelation relation) => TrySetRelation(relation.ID, relation.Relation);
+        private bool TrySetRelations(FactionRelation[] relations)
+        {
+            if (relations == null)
+            {
+                throw new ArgumentNullException(nameof(relations), "Set faction relations failed! relations cannot be null!");
+            }
+
+            ClearRelations();
+            bool success = false;
+
+            for (int i = 0; i < relations.Length; i++)
+            {
+                if (TrySetRelation(relations[i]))
+                {
+                    success = true;
+                }
+            }
+
+            return success;
+        }
+        public void AddRelation(FactionID id, int value) => SetRelation(id, GetRelation(id) + value);
         public void SetRelations(FactionRelation[] relations)
         {
             if (relations == null)
@@ -103,22 +173,10 @@ namespace Core.Faction
                 throw new ArgumentNullException(nameof(relations), "Set faction relations failed! relations cannot be null!");
             }
 
-            Array.Clear(this.relations, 0, this.relations.Length);
-
-            for (int i = 0; i < relations.Length; i++)
-            {
-                FactionRelation relation = relations[i];
-
-                if (!relation.ID.IsValid || relation.ID.Index >= this.relations.Length)
-                {
-                    continue;
-                }
-
-                this.relations[relation.ID.Index] = new(relation);
-            }
+            TrySetRelations(relations);
 
             SetState();
         }
-        public void AddRelation(FactionID id, int value) => SetRelation(id, GetRelation(id) + value);
+        public void ClearRelations() => Array.Clear(relations, 0, relations.Length);
     }
 }

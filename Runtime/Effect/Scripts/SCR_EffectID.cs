@@ -42,10 +42,10 @@ namespace Core.Effect
         public static bool operator !=(EffectID left, EffectID right) => !left.Equals(right);
 
         public readonly EffectDefinition GetDefinition() => EffectDatabase.GetDefinition(this);
-        public readonly EffectInstance CreateInstance(float duration) => EffectDatabase.CreateInstance(this, duration);
+        public readonly EffectInstance CreateInstance(float duration) => new(this, duration);
         public readonly bool IsCompatibleWith(IReadOnlyList<EffectInstance> traits, object actor)
         {
-            EffectValidator[] validators = GetDefinition().Validators;
+            EffectCompatibility[] validators = GetDefinition().Compatibilities;
 
             for (int i = 0; i < validators.Length; i++)
             {
@@ -59,7 +59,7 @@ namespace Core.Effect
         }
         public readonly bool IsCompatibleWith(EffectID id)
         {
-            EffectValidator[] validators = GetDefinition().Validators;
+            EffectCompatibility[] validators = GetDefinition().Compatibilities;
 
             for (int i = 0; i < validators.Length; i++)
             {

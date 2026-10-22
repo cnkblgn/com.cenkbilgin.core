@@ -3,10 +3,10 @@ using UnityEngine;
 
 namespace Core.Stat
 {
-    [CreateAssetMenu(fileName = "SCO_StatRegistry", menuName = "Resources/Core/Stat Registry", order = 10)]
+    [CreateAssetMenu(fileName = "SCO_StatRegistry", menuName = "Resources/Core/Stat Registry", order = -9)]
     public sealed class RegistryStat : Registry
     {
-        public override int Priority => -5;
+        public override int Priority => -9;
 
         [Header("_")]
         [SerializeField] private StatEntry[] entries;

@@ -11,13 +11,15 @@ namespace Core.Faction
 #endif
         public FactionID ID;
         public FactionRelation[] Relations;
-        [Required, Expandable] public FactionValidator[] Validators;
+        [Required, Expandable] public FactionAction[] Actions;
+        [Required, Expandable] public FactionCompatibility[] Compatibilities;
 
-        public FactionEntry(FactionID id, FactionRelation[] relations, FactionValidator[] validators)
+        public FactionEntry(FactionID id, FactionRelation[] relations, FactionAction[] actions, FactionCompatibility[] compatibilities)
         {
             ID = id;
             Relations = relations;
-            Validators = validators;
+            Actions = actions;
+            Compatibilities = compatibilities;
 
 #if UNITY_EDITOR
             Name = ID.Key;

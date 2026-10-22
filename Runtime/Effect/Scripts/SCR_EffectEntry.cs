@@ -13,15 +13,15 @@ namespace Core.Effect
         public EffectID ID;
         public EffectTag Tag;
         [Min(0)] public int Interval;
-        [Required, Expandable] public EffectValidator[] Validators;
+        [Required, Expandable] public EffectCompatibility[] Compatibilities;
         [Required, Expandable] public EffectAction[] Actions;
 
-        public EffectEntry(EffectID id, EffectTag tag, int interval, EffectValidator[] validators, EffectAction[] actions)
+        public EffectEntry(EffectID id, EffectTag tag, int interval, EffectCompatibility[] compatibilities, EffectAction[] actions)
         {
             ID = id;
             Tag = tag;
             Interval = interval;
-            Validators = validators;
+            Compatibilities = compatibilities;
             Actions = actions;
 
             Name = ID.Key;

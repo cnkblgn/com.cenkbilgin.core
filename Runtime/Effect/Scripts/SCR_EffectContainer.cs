@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Core.Effect
 {
@@ -90,6 +91,12 @@ namespace Core.Effect
         }
         public bool TryRemoveEffect(EffectID id, object actor)
         {
+            if (!id.IsValid)
+            {
+                Debug.LogError($"Remove effect failed! {id} is not valid!");
+                return false;
+            }
+
             for (int i = 0; i < effects.Count; i++)
             {
                 ref EffectInstance registered = ref effects.GetRef(i);

@@ -4,10 +4,11 @@ using UnityEngine;
 
 namespace Core.Audio
 {
-    [CreateAssetMenu(fileName = "SCO_SoundRegistry", menuName = "Resources/Core/Sound Registry", order = 0)]
+
+    [CreateAssetMenu(fileName = "SCO_SoundRegistry", menuName = "Resources/Core/Sound Registry", order = -15)]
     public sealed class RegistrySound : Registry
     {
-        public override int Priority => -10;
+        public override int Priority => -15;
 
         [Header("_")]
         [SerializeField, Required] private AudioClip[] entries = null;

@@ -2,10 +2,10 @@ using UnityEngine;
 
 namespace Core.Event
 {
-    [CreateAssetMenu(fileName = "SCO_EventRegistry", menuName = "Resources/Core/Event Registry", order = 10)]
+    [CreateAssetMenu(fileName = "SCO_EventRegistry", menuName = "Resources/Core/Event Registry", order = -15)]
     public sealed class RegistryEvent : Registry
     {
-        public override int Priority => -10;
+        public override int Priority => -15;
 
         [Header("_")]
         [SerializeField, Required] private string[] ids;

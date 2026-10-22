@@ -72,6 +72,12 @@ namespace Core.Stat
         }
         public void SetStat(StatID id, float value)
         {
+            if (!id.IsValid)
+            {
+                Debug.LogError($"Set stat failed! {id} is not valid");
+                return;
+            }
+
             float current = stats[id];
 
             if (current == value)

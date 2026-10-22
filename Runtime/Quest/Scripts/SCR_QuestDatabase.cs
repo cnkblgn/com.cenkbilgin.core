@@ -178,7 +178,6 @@ namespace Core.Quest
 
             return null;
         }
-        public static QuestInstance CreateInstance(QuestID id) => new(GetDefinition(id));
 
 #if UNITY_EDITOR
         public static void LogAll()

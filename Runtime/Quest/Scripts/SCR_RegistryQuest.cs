@@ -4,10 +4,10 @@ using UnityEngine;
 
 namespace Core.Quest
 {
-    [CreateAssetMenu(fileName = "SCO_QuestRegistry", menuName = "Resources/Core/Quest Registry", order = 10)]
+    [CreateAssetMenu(fileName = "SCO_QuestRegistry", menuName = "Resources/Core/Quest Registry", order = -2)]
     public sealed class RegistryQuest : Registry
     {
-        public override int Priority => -1;
+        public override int Priority => -2;
 
         [Header("_")]
         [SerializeField] private QuestEntry[] entries;

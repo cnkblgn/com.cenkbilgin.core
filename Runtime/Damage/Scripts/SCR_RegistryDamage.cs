@@ -4,10 +4,10 @@ using UnityEngine;
 
 namespace Core.Damage
 {
-    [CreateAssetMenu(fileName = "SCO_DamageRegistry", menuName = "Resources/Core/Damage Registry", order = 10)]
+    [CreateAssetMenu(fileName = "SCO_DamageRegistry", menuName = "Resources/Core/Damage Registry", order = -15)]
     public sealed class RegistryDamage : Registry
     {
-        public override int Priority => -10;
+        public override int Priority => -15;
 
         [Header("_")]
         [SerializeField, Required] private string[] tags;

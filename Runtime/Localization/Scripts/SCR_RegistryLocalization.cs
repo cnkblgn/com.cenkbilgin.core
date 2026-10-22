@@ -3,10 +3,10 @@ using UnityEngine;
 
 namespace Core.Localization
 {
-    [CreateAssetMenu(fileName = "SCO_LocalizationRegistry", menuName = "Resources/Core/Localization Registry", order = 0)]
+    [CreateAssetMenu(fileName = "SCO_LocalizationRegistry", menuName = "Resources/Core/Localization Registry", order = -15)]
     public sealed class RegistryLocalization : Registry
     {
-        public override int Priority => -10;
+        public override int Priority => -15;
 
         [Header("_")]
         [SerializeField, Required] private LocalizationInterpolator[] interpolators;

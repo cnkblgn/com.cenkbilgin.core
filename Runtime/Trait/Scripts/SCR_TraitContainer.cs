@@ -35,11 +35,6 @@ namespace Core.Trait
 
         public bool HasTrait(TraitID id)
         {
-            if (!id.IsValid)
-            {
-                return false;
-            }
-
             for (int i = 0; i < traits.Count; i++)
             {
                 if (traits[i].ID == id)
@@ -50,16 +45,21 @@ namespace Core.Trait
 
             return false;
         }
-        public bool IsCompatibleWith(TraitID id, object actor) => id.IsCompatibleWith(GetTraits(), actor);
 
         public bool TryAddTrait(TraitID id, object actor)
         {
+            if (!id.IsValid)
+            {
+                Debug.LogError($"Trait add failed! {id} is not valid!");
+                return false;
+            }
+
             if (HasTrait(id))
             {
                 return false;
             }
 
-            if (!IsCompatibleWith(id, actor))
+            if (!id.IsCompatibleWith(GetTraits(), actor))
             {
                 return false;
             }
@@ -78,6 +78,12 @@ namespace Core.Trait
         }
         public bool TryRemoveTrait(TraitID id, object actor)
         {
+            if (!id.IsValid)
+            {
+                Debug.LogError($"Remove trait failed! {id} is not valid!");
+                return false;
+            }
+
             for (int i = 0; i < traits.Count; i++)
             {
                 ref TraitInstance registered = ref traits.GetRef(i);
@@ -115,6 +121,7 @@ namespace Core.Trait
             TraitInstance removed = traits[index];
 
             RemoveAction(ref removed, actor);
+
             traits.RemoveAt(index);
 
             SetState(TraitState.REMOVED, removed);

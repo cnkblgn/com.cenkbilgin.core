@@ -4,10 +4,10 @@ using UnityEngine;
 
 namespace Core.Item
 {
-    [CreateAssetMenu(fileName = "SCO_ItemRegistry", menuName = "Resources/Core/Item Registry", order = 10)]
+    [CreateAssetMenu(fileName = "SCO_ItemRegistry", menuName = "Resources/Core/Item Registry", order = -3)]
     public sealed class RegistryItem : Registry
     {
-        public override int Priority => -2;
+        public override int Priority => -3;
 
         [Header("_")]
         [SerializeField, Required] private string[] tags;

@@ -13,7 +13,8 @@ namespace Core.Quest
         [NonSerialized] private bool isStarted;
         [NonSerialized] private Action<EventContext> callback;
 
-        public QuestInstance(QuestDefinition definition)
+        public QuestInstance(QuestID id) : this(id.GetDefinition()) { }
+        internal QuestInstance(QuestDefinition definition)
         {
             Definition = definition ?? throw new ArgumentNullException(nameof(definition), "Quest instace ctor failed! definition is null!?");
             Progress = new int[definition.Requirements.Length];

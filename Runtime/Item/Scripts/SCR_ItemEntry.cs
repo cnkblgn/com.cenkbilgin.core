@@ -10,7 +10,6 @@ namespace Core.Item
         [HideInInspector] public string Name;
 #endif
          
-        [Info("Please generate id if its not visible")]
         public ItemID ID;
         public ItemTag[] Tags;
         [Min(1)] public int Stack;

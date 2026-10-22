@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Core.Item
 {
@@ -41,6 +42,7 @@ namespace Core.Item
         public static bool operator !=(ItemID left, ItemID right) => !left.Equals(right);
 
         public readonly ItemDefinition GetDefinition() => ItemDatabase.GetDefinition(this);
+        public readonly ItemEntity CreateEntity(Vector3 position, Quaternion rotation, Transform parent = null) => ItemDatabase.CreateEntity(CreateData(), position, rotation, parent);
         public readonly ItemData CreateData() => new(this);
     }
 }

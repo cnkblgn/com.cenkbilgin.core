@@ -87,7 +87,6 @@ namespace Core.Item
             return GetDefinition(id.Index);
         }
 
-        public static ItemEntity CreateEntity(ItemID id, Vector3 position, Quaternion rotation, Transform parent = null) => CreateEntity(new ItemData(id), position, rotation, parent);
         public static ItemEntity CreateEntity(ItemData data, Vector3 position, Quaternion rotation, Transform parent = null)
         {
             if (data == null)

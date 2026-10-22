@@ -3,10 +3,10 @@ using UnityEngine;
 
 namespace Core.Graphics
 {
-    [CreateAssetMenu(fileName = "SCO_MaterialRegistry", menuName = "Resources/Core/Material Registry", order = 0)]
+    [CreateAssetMenu(fileName = "SCO_MaterialRegistry", menuName = "Resources/Core/Material Registry", order = -15)]
     public sealed class RegistryMaterial : Registry
     {
-        public override int Priority => -10;
+        public override int Priority => -15;
 
         [Header("_")]
         [SerializeField, Required] private Material[] entries = null;

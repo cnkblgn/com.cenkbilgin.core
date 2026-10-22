@@ -41,6 +41,6 @@ namespace Core.Quest
         public static bool operator !=(QuestID left, QuestID right) => !left.Equals(right);
 
         public readonly QuestDefinition GetDefinition() => QuestDatabase.GetDefinition(this);
-        public readonly QuestInstance CreateInstance() => QuestDatabase.CreateInstance(this);
+        public readonly QuestInstance CreateInstance() => new(this);
     }
 }

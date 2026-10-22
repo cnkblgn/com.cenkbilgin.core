@@ -12,13 +12,13 @@ namespace Core.Trait
 
         public TraitID ID;
         [Min(0)] public int Cost;
-        [Required, Expandable] public TraitValidator[] Validators;
+        [Required, Expandable] public TraitCompatibility[] Compatibilities;
         [Required, Expandable] public TraitAction[] Actions;
 
-        public TraitEntry(TraitID id, int cost, TraitValidator[] validator, TraitAction[] actions)
+        public TraitEntry(TraitID id, int cost, TraitCompatibility[] compatibilities, TraitAction[] actions)
         {
             ID = id;
-            Validators = validator;
+            Compatibilities = compatibilities;
             Cost = cost;
             Actions = actions;
 

@@ -27,13 +27,13 @@ namespace Core.Faction
                 string key = entry.ID.Key;
 
                 idLookup[key] = i;
-                definitions[i] = new(entry); 
+                definitions[i] = new(entry);
             }
 
             for (int i = 0; i < definitions.Length; i++)
             {
                 instances[i] = new(definitions[i].ID, definitions[i].Relations, definitions.Length);
-            } 
+            }
 
             Debug.Log($"Faction database build successfull!");
         }

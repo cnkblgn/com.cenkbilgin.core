@@ -3,10 +3,10 @@ using UnityEngine;
 
 namespace Core.Faction
 {
-    [CreateAssetMenu(fileName = "SCO_FactionRegistry", menuName = "Resources/Core/Faction Registry", order = -10)]
+    [CreateAssetMenu(fileName = "SCO_FactionRegistry", menuName = "Resources/Core/Faction Registry", order = -4)]
     public sealed class RegistryFaction : Registry
     {
-        public override int Priority => 0;
+        public override int Priority => -4;
 
         [Header("_")]
         [SerializeField] private FactionEntry[] entries;
