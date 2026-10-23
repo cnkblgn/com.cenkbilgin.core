@@ -25,7 +25,7 @@ namespace Core
         private const float SUGGESTION_HEIGHT = 32f;
         private const float SCROLL_SPEED = 12f;
 
-        public static bool IsOpen => isOpened;
+        public static bool IsOpened => isOpened;
 
         private static Updater updater;
         private static readonly StringBuilder logBuilder = new(8192);
