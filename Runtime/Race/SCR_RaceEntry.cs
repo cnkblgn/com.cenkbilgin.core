@@ -11,13 +11,15 @@ namespace Core.Race
 #endif
 
         public RaceID ID;
+        public RaceTag[] Tags;
         [Required, Expandable] public RaceVisual Visual;
         [Required, Expandable] public RaceCompatibility[] Compatibilities;
         [Required, Expandable] public RaceAction[] Actions;
 
-        public RaceEntry(RaceID id, RaceVisual visual, RaceCompatibility[] compatibilities, RaceAction[] actions)
+        public RaceEntry(RaceID id, RaceTag[] tags, RaceVisual visual, RaceCompatibility[] compatibilities, RaceAction[] actions)
         {
             ID = id;
+            Tags = tags;
             Visual = visual;
             Compatibilities = compatibilities;
             Actions = actions;
