@@ -6,7 +6,7 @@ namespace Core.Quest
     {
         public static readonly QuestAction[] NONE = new QuestAction[0];
 
-        public abstract void Started();
-        public abstract void Completed();
+        public abstract void OnStarted();
+        public abstract void OnCompleted();
     }
 }

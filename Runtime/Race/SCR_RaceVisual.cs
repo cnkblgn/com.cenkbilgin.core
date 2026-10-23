@@ -16,14 +16,7 @@ namespace Core.Race
                 return none;
             }
         } private static RaceVisualNone none;
-
-
-        /// <summary> Called when editor validates component. </summary>
-        public abstract void Validate(RaceID id);
     }
 
-    internal sealed class RaceVisualNone : RaceVisual 
-    {
-        public override void Validate(RaceID id) { }
-    }
+    internal sealed class RaceVisualNone : RaceVisual { }
 }

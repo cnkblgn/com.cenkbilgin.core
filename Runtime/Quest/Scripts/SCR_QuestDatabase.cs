@@ -124,7 +124,7 @@ namespace Core.Quest
 
             foreach (QuestAction action in actions)
             {
-                action.Started();
+                action.OnStarted();
             }
         }
         private static void HandleQuestCompleted(QuestID id)
@@ -135,7 +135,7 @@ namespace Core.Quest
 
             foreach (QuestAction action in actions)
             {
-                action.Completed();
+                action.OnCompleted();
             }
 
             QuestDefinition definition = id.GetDefinition();
