@@ -295,6 +295,16 @@ namespace Core
                 transforms[i].gameObject.tag = tag;
             }
         }
+        public static bool TryGetComponentInChildren<T>(this Component thisComponent, out T component) where T : Component
+        {
+            component = thisComponent != null ? thisComponent.GetComponentInChildren<T>() : null;
+            return component != null;
+        }
+        public static bool TryGetComponentInParent<T>(this Component thisComponent, out T component) where T : Component
+        {
+            component = thisComponent != null ? thisComponent.GetComponentInParent<T>() : null;
+            return component != null;
+        }
         #endregion
 
         #region MESH
