@@ -13,8 +13,8 @@ namespace Core.Effect
         public EffectID ID;
         public EffectTag Tag;
         [Min(0)] public int Interval;
-        [Required, Expandable] public EffectCompatibility[] Compatibilities;
-        [Required, Expandable] public EffectAction[] Actions;
+        [Expandable, Required] public EffectCompatibility[] Compatibilities;
+        [Expandable, Required] public EffectAction[] Actions;
 
         public EffectEntry(EffectID id, EffectTag tag, int interval, EffectCompatibility[] compatibilities, EffectAction[] actions)
         {

@@ -12,8 +12,8 @@ namespace Core.Trait
 
         public TraitID ID;
         [Min(0)] public int Cost;
-        [Required, Expandable] public TraitCompatibility[] Compatibilities;
-        [Required, Expandable] public TraitAction[] Actions;
+        [Expandable, Required] public TraitCompatibility[] Compatibilities;
+        [Expandable, Required] public TraitAction[] Actions;
 
         public TraitEntry(TraitID id, int cost, TraitCompatibility[] compatibilities, TraitAction[] actions)
         {

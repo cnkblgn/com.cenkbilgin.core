@@ -13,8 +13,8 @@ namespace Core.Quest
         public QuestID ID;
         public QuestID NextID;
         public QuestRequirement[] Requirements;
-        [Required, Expandable] public QuestCondition[] Conditions;
-        [Required, Expandable] public QuestAction[] Actions;
+        [Expandable, Required] public QuestCondition[] Conditions;
+        [Expandable, Required] public QuestAction[] Actions;
 
         public QuestEntry(QuestID id, QuestID nextID, QuestRequirement[] requirements, QuestCondition[] conditions, QuestAction[] actions)
         {

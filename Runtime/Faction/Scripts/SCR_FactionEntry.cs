@@ -11,8 +11,8 @@ namespace Core.Faction
 #endif
         public FactionID ID;
         public FactionRelation[] Relations;
-        [Required, Expandable] public FactionAction[] Actions;
-        [Required, Expandable] public FactionCompatibility[] Compatibilities;
+        [Expandable, Required] public FactionAction[] Actions;
+        [Expandable, Required] public FactionCompatibility[] Compatibilities;
 
         public FactionEntry(FactionID id, FactionRelation[] relations, FactionAction[] actions, FactionCompatibility[] compatibilities)
         {

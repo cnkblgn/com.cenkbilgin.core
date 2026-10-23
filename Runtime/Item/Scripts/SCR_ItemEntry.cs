@@ -17,7 +17,7 @@ namespace Core.Item
         [Range(InventoryData.MIN_HEIGHT, InventoryData.MAX_HEIGHT)] public int Height;
         [Range(InventoryData.MIN_WEIGHT, InventoryData.MAX_WEIGHT)] public float Weight;
         [Expandable] public ItemComponent Component;
-        [Required, Expandable] public ItemAction[] Actions;
+        [Expandable, Required] public ItemAction[] Actions;
 
         public ItemEntry(ItemID id, ItemTag[] tags, int stack, int width, int height, float weight, ItemComponent component, ItemAction[] actions)
         {

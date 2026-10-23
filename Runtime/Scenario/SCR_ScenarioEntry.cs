@@ -11,8 +11,8 @@ namespace Core.Scenario
 #endif
 
         public ScenarioID ID;
-        [Required, Expandable] public ScenarioCompatibility[] Compatibilities;
-        [Required, Expandable] public ScenarioAction[] Actions;
+        [Expandable, Required] public ScenarioCompatibility[] Compatibilities;
+        [Expandable, Required] public ScenarioAction[] Actions;
 
         public ScenarioEntry(ScenarioID id, ScenarioCompatibility[] compatibilities, ScenarioAction[] actions)
         {
