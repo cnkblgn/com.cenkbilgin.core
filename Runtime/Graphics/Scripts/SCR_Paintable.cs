@@ -15,7 +15,8 @@ namespace Core.Graphics
         [SerializeField] private bool showGizmosPoints = false;
 
         [Header("_")]
-        [SerializeField, Required] private ComputeShader computeShader = null;
+        [Info("Shaders/FX_ComputePaint")]
+        [SerializeField, Required] private ComputeShader computeShader;
         [SerializeField, Required] private Material targetMaterial;
 
         [Header("_")]
@@ -41,38 +42,11 @@ namespace Core.Graphics
         private static readonly int PaintMapID = Shader.PropertyToID("_PaintMap");
         private static readonly int PaintBoundsMin = Shader.PropertyToID("_PaintBoundsMin");
         private static readonly int PaintBoundsSize = Shader.PropertyToID("_PaintBoundsSize");
+        private bool isInitialized;
 
-        private void Awake()
-        {
-            thisTransform = GetComponent<Transform>();
-            thisFilter = GetComponent<MeshFilter>();
-            thisRenderer = GetComponent<MeshRenderer>();
+        private void OnEnable() => Initialize();
+        private void OnDisable() => Deinitialize();
 
-            if (thisFilter.sharedMesh == null)
-            {
-                throw new MissingReferenceException($"PaintableEntity.Awake() [{nameof(Paintable)}]");
-            }
-
-            if (computeShader == null)
-            {
-                throw new MissingReferenceException($"PaintableEntity.Awake() [{nameof(Paintable)}]");
-            }
-
-            if (targetMaterial == null)
-            {
-                throw new MissingReferenceException($"PaintableEntity.Awake() [{nameof(Paintable)}]");
-            }
-
-            Create();
-
-            thisMaterial = new Material(targetMaterial);
-            thisRenderer.sharedMaterial = thisMaterial;
-
-            thisMaterial.SetTexture(PaintMapID, thisTexture);
-            thisMaterial.SetVector(PaintBoundsMin, thisBounds.min);
-            thisMaterial.SetVector(PaintBoundsSize, thisBounds.size);
-        }
-        private void OnDestroy() => Destroy();
 #if UNITY_EDITOR
         private void OnDrawGizmosSelected()
         {
@@ -127,93 +101,62 @@ namespace Core.Graphics
             Gizmos.matrix = Matrix4x4.identity;
         }
 #endif
-        private Vector3 LocalPositionToUVW(Vector3 position)
-        {
-            Vector3 min = thisBounds.min;
-            Vector3 size = thisBounds.size;
 
-            float x = Mathf.Clamp01(Mathf.InverseLerp(min.x, min.x + size.x, position.x));
-            float y = Mathf.Clamp01(Mathf.InverseLerp(min.y, min.y + size.y, position.y));
-            float z = Mathf.Clamp01(Mathf.InverseLerp(min.z, min.z + size.z, position.z));
-
-            return new(x, y, z);
-        }
-        private Vector3 LocalDirectionToUVW(Vector3 direction)
+        public void Initialize()
         {
-            return new Vector3
-            (
-                direction.x / thisBounds.size.x,
-                direction.y / thisBounds.size.y,
-                direction.z / thisBounds.size.z
-            ).normalized;
-        }
-        private Vector3 GetShapeExtent(in PaintParams @params)
-        {
-            float radius = @params.Radius;
-
-            return @params.Shape switch
+            if (isInitialized)
             {
-                PaintShape.SPHERE => new
-                (
-                    radius, 
-                    radius, 
-                    radius
-                ),
-                PaintShape.CAPSULE => new
-                (
-                    @params.Length + radius,
-                    @params.Length + radius,
-                    @params.Length + radius
-                ),
-                _ => new
-                (
-                    radius, 
-                    radius, 
-                    radius
-                )
-            };
-        }
+                return;
+            } 
 
-        public void RecalculateBounds()
-        {
-            thisBounds = thisFilter.sharedMesh.bounds;
-            thisMaterial.SetVector(PaintBoundsMin, thisBounds.min);
-            thisMaterial.SetVector(PaintBoundsSize, thisBounds.size);
-        }
+            thisTransform = GetComponent<Transform>();
+            thisFilter = GetComponent<MeshFilter>();
+            thisRenderer = GetComponent<MeshRenderer>();
 
-        private void Create()
-        {
-            thisKernel = computeShader.FindKernel("CSMain");
-            thisBounds = thisFilter.sharedMesh.bounds;
-
-            int resolution = (int)this.resolution;
-
-            thisTexture = new(resolution, resolution, 0, RenderTextureFormat.RFloat)
+            if (thisFilter.sharedMesh == null)
             {
-                dimension = TextureDimension.Tex3D,
-                volumeDepth = resolution,
-                enableRandomWrite = true,
-                useMipMap = false,
-                autoGenerateMips = false,
-                wrapMode = TextureWrapMode.Clamp,
-                filterMode = FilterMode.Bilinear
-            };
+                throw new MissingReferenceException($"Paintable.Initialize() [{nameof(thisFilter.sharedMesh)}] is null");
+            }
 
-            thisTexture.Create();
+            if (computeShader == null)
+            {
+                throw new MissingReferenceException($"Paintable.Initialize() [{nameof(computeShader)}] is null");
+            }
 
-            Clear();
+            if (targetMaterial == null)
+            {
+                throw new MissingReferenceException($"Paintable.Initialize() [{nameof(targetMaterial)}] is null");
+            }    
+
+            CreateTexture();
+            CreateMaterial();
+            isInitialized = true;
         }
-        private void Destroy()
+        public void Deinitialize()
         {
+            if (!isInitialized)
+            {
+                return;
+            }
+
             if (thisTexture != null)
             {
                 thisTexture.Release();
                 thisTexture = null;
             }
+
+            if (thisMaterial != null)
+            {
+                Destroy(thisMaterial);
+                thisMaterial = null;
+            }
+
+            isInitialized = false;
         }
-        public void Paint(Vector3 worldPosition, Vector3 worldDirection, in PaintParams @params)
+
+        public void StartPaint(Vector3 worldPosition, Vector3 worldDirection, in PaintParams @params)
         {
-            if (thisTexture == null)
+            if (!isInitialized)
             {
                 return;
             }
@@ -267,14 +210,123 @@ namespace Core.Graphics
             int gz = Mathf.CeilToInt(regionSize.z / 8f);
             computeShader.Dispatch(thisKernel, gx, gy, gz);
         }
-        public void Clear()
+        public void ClearPaint()
         {
+            if (!isInitialized)
+            {
+                return;
+            }
+
             RenderTexture active = RenderTexture.active;
             RenderTexture.active = thisTexture;
-
             GL.Clear(false, true, Color.clear);
-
             RenderTexture.active = active;
+        }
+
+        private void CreateMaterial()
+        {
+            thisMaterial = new Material(targetMaterial);
+            thisRenderer.sharedMaterial = thisMaterial;
+
+            thisMaterial.SetTexture(PaintMapID, thisTexture);
+            thisMaterial.SetVector(PaintBoundsMin, thisBounds.min);
+            thisMaterial.SetVector(PaintBoundsSize, thisBounds.size);
+        }
+        private void CreateTexture()
+        {
+            thisKernel = computeShader.FindKernel("CSMain");
+            thisBounds = thisFilter.sharedMesh.bounds;
+            int resolution = (int)this.resolution;
+
+            thisTexture = new(resolution, resolution, 0, RenderTextureFormat.RFloat)
+            {
+                dimension = TextureDimension.Tex3D,
+                volumeDepth = resolution,
+                enableRandomWrite = true,
+                useMipMap = false,
+                autoGenerateMips = false,
+                wrapMode = TextureWrapMode.Clamp,
+                filterMode = FilterMode.Bilinear
+            };
+
+            thisTexture.Create();
+            ClearPaint();
+        }
+        public void SetTexture(RenderTexture texture)
+        {
+            if (!isInitialized)
+            {
+                return;
+            }
+
+            if (texture == null)
+            {
+                Debug.LogError("Paintable set texture failed! texture is null!?");
+                return;
+            }
+
+            thisTexture = texture;
+            thisMaterial.SetTexture(PaintMapID, texture);
+        }
+        public RenderTexture GetTexture() => thisTexture;
+
+        public void RecalculateBounds()
+        {
+            if (!isInitialized)
+            {
+                return;
+            }
+
+            thisBounds = thisFilter.sharedMesh.bounds;
+            thisMaterial.SetVector(PaintBoundsMin, thisBounds.min);
+            thisMaterial.SetVector(PaintBoundsSize, thisBounds.size);
+        }
+
+        private Vector3 LocalPositionToUVW(Vector3 position)
+        {
+            Vector3 min = thisBounds.min;
+            Vector3 size = thisBounds.size;
+
+            float x = Mathf.Clamp01(Mathf.InverseLerp(min.x, min.x + size.x, position.x));
+            float y = Mathf.Clamp01(Mathf.InverseLerp(min.y, min.y + size.y, position.y));
+            float z = Mathf.Clamp01(Mathf.InverseLerp(min.z, min.z + size.z, position.z));
+
+            return new(x, y, z);
+        }
+        private Vector3 LocalDirectionToUVW(Vector3 direction)
+        {
+            return new Vector3
+            (
+                direction.x / thisBounds.size.x,
+                direction.y / thisBounds.size.y,
+                direction.z / thisBounds.size.z
+            ).normalized;
+        }
+        private Vector3 GetShapeExtent(in PaintParams @params)
+        {
+            float radius = @params.Radius;
+
+            return @params.Shape switch
+            {
+                PaintShape.SPHERE => new
+                (
+                    radius, 
+                    radius, 
+                    radius
+                ),
+                PaintShape.CAPSULE => new
+                (
+                    @params.Length + radius,
+                    @params.Length + radius,
+                    @params.Length + radius
+                ),
+                _ => new
+                (
+                    radius, 
+                    radius, 
+                    radius
+                )
+            };
         }
     }
 }
