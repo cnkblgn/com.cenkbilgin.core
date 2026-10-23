@@ -9,33 +9,23 @@ namespace Core.Editor
     {
         private const float INDENT_WIDTH = 15f;
 
-        private sealed class CacheEntry
-        {
-            public Object Target;
-            public SerializedObject SerializedObject;
-        }
-
-        private static readonly Dictionary<int, CacheEntry> CACHE = new();
+        private sealed class Entry { public Object Target; public SerializedObject SerializedObject; }
+        private static readonly Dictionary<int, Entry> entries = new();
 
         static EditorDrawExpandable()
         {
-            AssemblyReloadEvents.beforeAssemblyReload += ClearCache;
-            EditorApplication.quitting += ClearCache;
+            AssemblyReloadEvents.beforeAssemblyReload += Clear;
+            EditorApplication.quitting += Clear;
         }
-
-        private static void ClearCache()
-        {
-            CACHE.Clear();
-        }
+        private static void Clear() => entries.Clear();
 
         private static SerializedObject GetSerializedObject(Object target)
         {
             int id = target.GetInstanceID();
 
-            if (CACHE.TryGetValue(id, out CacheEntry entry))
+            if (entries.TryGetValue(id, out Entry entry))
             {
-                if (entry.Target == target &&
-                    entry.SerializedObject != null)
+                if (entry.Target == target && entry.SerializedObject != null)
                 {
                     return entry.SerializedObject;
                 }
@@ -43,7 +33,7 @@ namespace Core.Editor
 
             SerializedObject serializedObject = new(target);
 
-            CACHE[id] = new CacheEntry
+            entries[id] = new Entry
             {
                 Target = target,
                 SerializedObject = serializedObject
@@ -51,42 +41,62 @@ namespace Core.Editor
 
             return serializedObject;
         }
-
-        private static bool IsValid(SerializedProperty property)
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            return property.propertyType == SerializedPropertyType.ObjectReference
-                && (property.objectReferenceValue == null
-                    || property.objectReferenceValue is ScriptableObject);
-        }
+            float height = EditorGUIUtility.singleLineHeight;
 
-        public override void OnGUI(
-            Rect position,
-            SerializedProperty property,
-            GUIContent label)
+            if (!IsValid(property))
+            {
+                return height * 2f;
+            }
+
+            if (property.objectReferenceValue == null || !property.isExpanded)
+            {
+                return height;
+            }
+
+            float spacing = EditorGUIUtility.standardVerticalSpacing;
+
+            SerializedObject serializedObject = GetSerializedObject(property.objectReferenceValue);
+            serializedObject.UpdateIfRequiredOrScript();
+
+            SerializedProperty iterator = serializedObject.GetIterator();
+
+            if (!iterator.NextVisible(true))
+            {
+                return height;
+            }
+
+            do
+            {
+                if (iterator.propertyPath == "m_Script")
+                {
+                    continue;
+                }
+
+                height += EditorGUI.GetPropertyHeight(iterator, true) + spacing;
+            }
+            while (iterator.NextVisible(false));
+
+            return height + spacing;
+        }
+        private static bool IsValid(SerializedProperty property) => property.propertyType == SerializedPropertyType.ObjectReference && (property.objectReferenceValue == null || property.objectReferenceValue is ScriptableObject);
+
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property);
 
             if (!IsValid(property))
             {
-                EditorGUI.HelpBox(
-                    position,
-                    "[Expandable] requires a ScriptableObject reference.",
-                    MessageType.Error
-                );
-
+                EditorGUI.HelpBox(position, "[Expandable] requires a ScriptableObject reference.", MessageType.Error);
                 EditorGUI.EndProperty();
                 return;
             }
 
             float lineHeight = EditorGUIUtility.singleLineHeight;
-            float spacing = EditorGUIUtility.standardVerticalSpacing;
+            float lineSpacing = EditorGUIUtility.standardVerticalSpacing;
 
-            Rect fieldRect = new(
-                position.x,
-                position.y,
-                position.width,
-                lineHeight
-            );
+            Rect fieldRect = new(position.x, position.y, position.width, lineHeight );
 
             EditorGUI.PropertyField(fieldRect, property, label);
 
@@ -94,106 +104,45 @@ namespace Core.Editor
 
             if (target != null)
             {
-                property.isExpanded = EditorGUI.Foldout(
-                    fieldRect,
-                    property.isExpanded,
-                    GUIContent.none,
-                    true
-                );
+                property.isExpanded = EditorGUI.Foldout(fieldRect, property.isExpanded, GUIContent.none, true );
 
                 if (property.isExpanded)
                 {
-                    SerializedObject serializedObject =
-                        GetSerializedObject(target);
-
+                    SerializedObject serializedObject = GetSerializedObject(target);
                     serializedObject.UpdateIfRequiredOrScript();
 
-                    Rect contentRect = new(
-                        position.x + INDENT_WIDTH,
-                        position.y + lineHeight + spacing,
-                        position.width - INDENT_WIDTH,
-                        position.height - lineHeight - spacing
-                    );
+                    Rect contentRect = new(position.x + INDENT_WIDTH, position.y + lineHeight + lineSpacing, position.width - INDENT_WIDTH, position.height - lineHeight - lineSpacing);
 
                     EditorGUI.indentLevel++;
-
-                    SerializedProperty iterator =
-                        serializedObject.GetIterator();
-
-                    bool enterChildren = true;
-                    float y = contentRect.y;
-
-                    while (iterator.NextVisible(enterChildren))
                     {
-                        enterChildren = false;
+                        SerializedProperty iterator = serializedObject.GetIterator();
 
-                        if (iterator.propertyPath == "m_Script")
-                            continue;
+                        bool enterChildren = true;
+                        float y = contentRect.y;
 
-                        float height =
-                            EditorGUI.GetPropertyHeight(iterator, true);
+                        while (iterator.NextVisible(enterChildren))
+                        {
+                            enterChildren = false;
 
-                        EditorGUI.PropertyField(
-                            new Rect(
-                                contentRect.x,
-                                y,
-                                contentRect.width,
-                                height
-                            ),
-                            iterator,
-                            true
-                        );
+                            if (iterator.propertyPath == "m_Script")
+                            {
+                                continue;
+                            }
 
-                        y += height + spacing;
+                            float propertyHeight = EditorGUI.GetPropertyHeight(iterator, true);
+       
+                            EditorGUI.PropertyField(new Rect(contentRect.x, y, contentRect.width, propertyHeight), iterator, true);
+
+                            y += propertyHeight + lineSpacing;
+                        }
                     }
 
                     EditorGUI.indentLevel--;
-
                     serializedObject.ApplyModifiedProperties();
                 }
             }
 
             EditorGUI.EndProperty();
-        }
-
-        public override float GetPropertyHeight(
-            SerializedProperty property,
-            GUIContent label)
-        {
-            float height = EditorGUIUtility.singleLineHeight;
-
-            if (!IsValid(property))
-                return height * 2f;
-
-            if (property.objectReferenceValue == null ||
-                !property.isExpanded)
-            {
-                return height;
-            }
-
-            float spacing = EditorGUIUtility.standardVerticalSpacing;
-
-            SerializedObject serializedObject =
-                GetSerializedObject(property.objectReferenceValue);
-
-            serializedObject.UpdateIfRequiredOrScript();
-
-            SerializedProperty iterator = serializedObject.GetIterator();
-
-            if (!iterator.NextVisible(true))
-                return height;
-
-            do
-            {
-                if (iterator.propertyPath == "m_Script")
-                    continue;
-
-                height +=
-                    EditorGUI.GetPropertyHeight(iterator, true) + spacing;
-            }
-            while (iterator.NextVisible(false));
-
-            return height + spacing;
-        }
+        }        
     }
 }

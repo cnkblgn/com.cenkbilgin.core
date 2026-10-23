@@ -65,14 +65,11 @@ namespace Core.Editor
         {
             switch (property.propertyType)
             {
-                // Apply additional types as necessary
                 case SerializedPropertyType.ObjectReference when property.objectReferenceValue:
                 case SerializedPropertyType.ExposedReference when property.exposedReferenceValue:
                 case SerializedPropertyType.AnimationCurve when property.animationCurveValue is { length: > 0 }:
-                case SerializedPropertyType.String when !string.IsNullOrEmpty(property.stringValue):
-                    return false;
-                default:
-                    return true;
+                case SerializedPropertyType.String when !string.IsNullOrEmpty(property.stringValue): return false;
+                default: return true;
             }
         }
     }
