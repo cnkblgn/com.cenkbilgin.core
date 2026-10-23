@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Core.Effect
@@ -8,7 +6,9 @@ namespace Core.Effect
     {
         public static readonly EffectCompatibility[] NONE = new EffectCompatibility[0];
 
-        public abstract bool IsCompatibleWith(EffectID idA, EffectID idB);
-        public abstract bool IsCompatibleWith(EffectID id, IReadOnlyList<EffectInstance> effects, object actor);
+        public virtual bool IsCompatibleWith(EffectID idA, EffectID idB) => true;
+        public virtual bool IsCompatibleWith(EffectID id, object context) => true;
+        public virtual bool IsCompatibleWith(EffectID id, int context) => true;
+        public virtual bool IsCompatibleWith(EffectID id, ulong context) => true;
     }
 }

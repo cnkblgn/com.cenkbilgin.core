@@ -6,7 +6,7 @@ namespace Core.Race
     {
         public static readonly RaceAction[] NONE = new RaceAction[0];
 
-        public abstract void Apply(RaceID id, object actor);
-        public abstract void Remove(RaceID id, object actor);
+        public abstract void Apply(RaceID id, object context);
+        public abstract void Remove(RaceID id, object context);
     }
 }

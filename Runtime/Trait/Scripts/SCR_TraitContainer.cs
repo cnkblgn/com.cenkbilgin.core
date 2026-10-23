@@ -46,7 +46,7 @@ namespace Core.Trait
             return false;
         }
 
-        public bool TryAddTrait(TraitID id, object actor)
+        public bool TryAddTrait(TraitID id, object context)
         {
             if (!id.IsValid)
             {
@@ -59,7 +59,12 @@ namespace Core.Trait
                 return false;
             }
 
-            if (!id.IsCompatibleWith(GetTraits(), actor))
+            if (!id.IsCompatibleWith(GetTraits()))
+            {
+                return false;
+            }
+
+            if (!id.IsCompatibleWith(context))
             {
                 return false;
             }
@@ -70,13 +75,13 @@ namespace Core.Trait
 
             ref TraitInstance added = ref traits.GetRef(traits.Count - 1);
 
-            ApplyAction(ref added, actor);
+            ApplyAction(ref added, context);
 
             SetState(TraitState.ADDED, added);
 
             return true;
         }
-        public bool TryRemoveTrait(TraitID id, object actor)
+        public bool TryRemoveTrait(TraitID id, object context)
         {
             if (!id.IsValid)
             {
@@ -90,7 +95,7 @@ namespace Core.Trait
 
                 if (registered.ID == id)
                 {
-                    RemoveTrait(i, actor);
+                    RemoveTrait(i, context);
                     return true;
                 }
             }
@@ -98,29 +103,29 @@ namespace Core.Trait
             return false;
         }
 
-        private void ApplyAction(ref TraitInstance instance, object actor)
+        private void ApplyAction(ref TraitInstance instance, object context)
         {
             TraitAction[] actions = instance.ID.GetDefinition().Actions;
 
             for (int i = 0; i < actions.Length; i++)
             {
-                actions[i].Apply(ref instance, actor);
+                actions[i].Apply(ref instance, context);
             }
         }
-        private void RemoveAction(ref TraitInstance instance, object actor)
+        private void RemoveAction(ref TraitInstance instance, object context)
         {
             TraitAction[] actions = instance.ID.GetDefinition().Actions;
 
             for (int i = 0; i < actions.Length; i++)
             {
-                actions[i].Remove(ref instance, actor);
+                actions[i].Remove(ref instance, context);
             }
         }
-        private void RemoveTrait(int index, object actor)
+        private void RemoveTrait(int index, object context)
         {
             TraitInstance removed = traits[index];
 
-            RemoveAction(ref removed, actor);
+            RemoveAction(ref removed, context);
 
             traits.RemoveAt(index);
 

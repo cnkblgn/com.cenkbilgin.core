@@ -13,7 +13,7 @@ namespace Core.Scenario
         public ScenarioContainer(ScenarioID id) => this.id = !id.IsValid ? throw new ArgumentNullException(nameof(id)) : id;
 
         public ScenarioID GetScenario() => id;
-        public bool TrySetScenario(ScenarioID id, object actor)
+        public bool TrySetScenario(ScenarioID id, object context)
         {
             if (id == this.id)
             {
@@ -26,42 +26,42 @@ namespace Core.Scenario
                 return false;
             }
 
-            if (actor == null)
+            if (context == null)
             {
                 Debug.LogError("Scenario set failed! actor is null!?");
                 return false;
             }
 
-            if (!id.IsCompatibleWith(actor))
+            if (!id.IsCompatibleWith(context))
             {
                 return false;
             }
 
-            RemoveAction(id, actor);
+            RemoveAction(id, context);
 
             OnChanged?.Invoke(this.id = id);
 
-            ApplyAction(id, actor);
+            ApplyAction(id, context);
 
             return true;
         }
 
-        private void ApplyAction(ScenarioID id, object actor)
+        private void ApplyAction(ScenarioID id, object context)
         {
             ScenarioAction[] actions = id.GetDefinition().Actions;
 
             for (int i = 0; i < actions.Length; i++)
             {
-                actions[i].Apply(id, actor);
+                actions[i].Apply(id, context);
             }
         }
-        private void RemoveAction(ScenarioID id, object actor)
+        private void RemoveAction(ScenarioID id, object context)
         {
             ScenarioAction[] actions = id.GetDefinition().Actions;
 
             for (int i = 0; i < actions.Length; i++)
             {
-                actions[i].Remove(id, actor);
+                actions[i].Remove(id, context);
             }
         }
     }

@@ -33,7 +33,7 @@ namespace Core.Effect
 
         private void SetState(EffectState state, EffectInstance instance) => OnChanged?.Invoke(new(state, instance));
 
-        public void Tick(float deltaTime, object actor)
+        public void Tick(float deltaTime, object context)
         {
             for (int i = effects.Count - 1; i >= 0; i--)
             {
@@ -51,20 +51,25 @@ namespace Core.Effect
 
                         registered.TickCount++;
 
-                        TickAction(ref registered, actor);
+                        TickAction(ref registered, context);
                     }
                 }
 
                 if (registered.TimeRemaining <= 0 && registered.Duration > 0)
                 {
-                    RemoveEffect(i, actor);
+                    RemoveEffect(i, context);
                 }
             }
         }
 
-        public bool TryAddEffect(EffectInstance instance, object actor)
+        public bool TryAddEffect(EffectInstance instance, object context)
         {
-            if (!instance.ID.IsCompatibleWith(GetEffects(), actor))
+            if (!instance.ID.IsCompatibleWith(context))
+            {
+                return false;
+            }
+
+            if (!instance.ID.IsCompatibleWith(GetEffects()))
             {
                 return false;
             }
@@ -83,13 +88,13 @@ namespace Core.Effect
 
             ref EffectInstance added = ref effects.GetRef(effects.Count - 1);
 
-            ApplyAction(ref added, actor);
+            ApplyAction(ref added, context);
 
             SetState(EffectState.ADDED, added);
 
             return true;
         }
-        public bool TryRemoveEffect(EffectID id, object actor)
+        public bool TryRemoveEffect(EffectID id, object context)
         {
             if (!id.IsValid)
             {
@@ -103,7 +108,7 @@ namespace Core.Effect
 
                 if (registered.ID == id)
                 {
-                    RemoveEffect(i, actor);
+                    RemoveEffect(i, context);
                     return true;
                 }
             }
@@ -111,38 +116,38 @@ namespace Core.Effect
             return false;
         }
         
-        private void TickAction(ref EffectInstance instance, object actor)
+        private void TickAction(ref EffectInstance instance, object context)
         {
             EffectAction[] actions = instance.ID.GetDefinition().Actions;
 
             for (int i = 0; i < actions.Length; i++)
             {
-                actions[i].Tick(ref instance, actor);
+                actions[i].Tick(ref instance, context);
             }
         }
-        private void ApplyAction(ref EffectInstance instance, object actor)
+        private void ApplyAction(ref EffectInstance instance, object context)
         {
             EffectAction[] actions = instance.ID.GetDefinition().Actions;
 
             for (int i = 0; i < actions.Length; i++)
             {
-                actions[i].Apply(ref instance, actor);
+                actions[i].Apply(ref instance, context);
             }
         }
-        private void RemoveAction(ref EffectInstance instance, object actor)
+        private void RemoveAction(ref EffectInstance instance, object context)
         {
             EffectAction[] actions = instance.ID.GetDefinition().Actions;
 
             for (int i = 0; i < actions.Length; i++)
             {
-                actions[i].Removed(ref instance, actor);
+                actions[i].Removed(ref instance, context);
             }
         }
-        private void RemoveEffect(int index, object actor)
+        private void RemoveEffect(int index, object context)
         {
             EffectInstance removed = effects[index];
 
-            RemoveAction(ref removed, actor);
+            RemoveAction(ref removed, context);
             effects.RemoveAt(index);
 
             SetState(EffectState.REMOVED, removed);

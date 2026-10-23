@@ -6,6 +6,8 @@ namespace Core.Race
     {
         public static readonly RaceCompatibility[] NONE = new RaceCompatibility[] { };
 
-        public abstract bool IsCompatibleWith(RaceID id, object actor);
+        public virtual bool IsCompatibleWith(RaceID id, object context) => true;
+        public virtual bool IsCompatibleWith(RaceID id, int context) => true;
+        public virtual bool IsCompatibleWith(RaceID id, ulong context) => true;
     }
 }

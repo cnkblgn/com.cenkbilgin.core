@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.ParticleSystem;
 
 namespace Core.Trait
 {
@@ -43,7 +44,7 @@ namespace Core.Trait
 
         public readonly TraitDefinition GetDefinition() => TraitDatabase.GetDefinition(this);
         public readonly TraitInstance CreateInstance() => new(this);
-        public readonly bool IsCompatibleWith(IReadOnlyList<TraitInstance> traits, object actor)
+        internal readonly bool IsCompatibleWith(IReadOnlyList<TraitInstance> traits)
         {
             if (traits == null)
             {
@@ -51,17 +52,9 @@ namespace Core.Trait
                 return false;
             }
 
-            if (actor == null)
+            for (int i = 0; i < traits.Count; i++)
             {
-                Debug.LogError("Trait compatibility check failed! actor is null!?");
-                return false;
-            }
-
-            TraitCompatibility[] compatibilities = GetDefinition().Compatibilities;
-
-            for (int i = 0; i < compatibilities.Length; i++)
-            {
-                if (!compatibilities[i].IsCompatibleWith(this, traits, actor))
+                if (!IsCompatibleWith(traits[i]))
                 {
                     return false;
                 }
@@ -81,6 +74,54 @@ namespace Core.Trait
             for (int i = 0; i < compatibilities.Length; i++)
             {
                 if (!compatibilities[i].IsCompatibleWith(this, id))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        public readonly bool IsCompatibleWith(object context)
+        {
+            if (context == null)
+            {
+                Debug.LogError("Trait compatibility check failed! context is null!?");
+                return false;
+            }
+
+            TraitCompatibility[] compatibilities = GetDefinition().Compatibilities;
+
+            for (int i = 0; i < compatibilities.Length; i++)
+            {
+                if (!compatibilities[i].IsCompatibleWith(this, context))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        public readonly bool IsCompatibleWith(int context)
+        {
+            TraitCompatibility[] compatibilities = GetDefinition().Compatibilities;
+
+            for (int i = 0; i < compatibilities.Length; i++)
+            {
+                if (!compatibilities[i].IsCompatibleWith(this, context))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        public readonly bool IsCompatibleWith(ulong context)
+        {
+            TraitCompatibility[] compatibilities = GetDefinition().Compatibilities;
+
+            for (int i = 0; i < compatibilities.Length; i++)
+            {
+                if (!compatibilities[i].IsCompatibleWith(this, context))
                 {
                     return false;
                 }

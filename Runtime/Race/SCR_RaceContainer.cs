@@ -13,7 +13,7 @@ namespace Core.Race
         public RaceContainer(RaceID id) => this.id = !id.IsValid ? throw new ArgumentNullException(nameof(id)) : id;
 
         public RaceID GetRace() => id;
-        public bool TrySetRace(RaceID id, object actor)
+        public bool TrySetRace(RaceID id, object context)
         {
             if (id == this.id)
             {
@@ -26,42 +26,42 @@ namespace Core.Race
                 return false;
             }
 
-            if (actor == null)
+            if (context == null)
             {
                 Debug.LogError("Race set failed! actor is null!?");
                 return false;
             }
 
-            if (!id.IsCompatibleWith(actor))
+            if (!id.IsCompatibleWith(context))
             {
                 return false;
             }
 
-            RemoveAction(id, actor);
+            RemoveAction(id, context);
 
             OnChanged?.Invoke(this.id = id);
 
-            ApplyAction(id, actor);
+            ApplyAction(id, context);
 
             return true;
         }
 
-        private void ApplyAction(RaceID id, object actor)
+        private void ApplyAction(RaceID id, object context)
         {
             RaceAction[] actions = id.GetDefinition().Actions;
 
             for (int i = 0; i < actions.Length; i++)
             {
-                actions[i].Apply(id, actor);
+                actions[i].Apply(id, context);
             }
         }
-        private void RemoveAction(RaceID id, object actor)
+        private void RemoveAction(RaceID id, object context)
         {
             RaceAction[] actions = id.GetDefinition().Actions;
 
             for (int i = 0; i < actions.Length; i++)
             {
-                actions[i].Remove(id, actor);
+                actions[i].Remove(id, context);
             }
         }
     }

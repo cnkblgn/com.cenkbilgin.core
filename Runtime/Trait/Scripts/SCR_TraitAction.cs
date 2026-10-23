@@ -8,7 +8,7 @@ namespace Core.Trait
 
         public string Description { get; }
 
-        public abstract void Apply(ref TraitInstance instance, object actor);
-        public abstract void Remove(ref TraitInstance instance, object actor);
+        public abstract void Apply(ref TraitInstance instance, object context);
+        public abstract void Remove(ref TraitInstance instance, object context);
     }
 }

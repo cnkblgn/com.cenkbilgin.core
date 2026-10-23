@@ -6,6 +6,8 @@ namespace Core.Scenario
     {
         public static readonly ScenarioCompatibility[] NONE = new ScenarioCompatibility[] { };
 
-        public abstract bool IsCompatibleWith(ScenarioID id, object actor);
+        public virtual bool IsCompatibleWith(ScenarioID id, object context) => true;
+        public virtual bool IsCompatibleWith(ScenarioID id, int context) => true;
+        public virtual bool IsCompatibleWith(ScenarioID id, ulong context) => true;
     }
 }

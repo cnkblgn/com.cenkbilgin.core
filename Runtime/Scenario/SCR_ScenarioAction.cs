@@ -6,7 +6,7 @@ namespace Core.Scenario
     {
         public static readonly ScenarioAction[] NONE = new ScenarioAction[0];
 
-        public abstract void Apply(ScenarioID id, object actor);
-        public abstract void Remove(ScenarioID id, object actor);
+        public abstract void Apply(ScenarioID id, object context);
+        public abstract void Remove(ScenarioID id, object context);
     }
 }
