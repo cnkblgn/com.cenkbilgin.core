@@ -15,8 +15,8 @@ namespace Core.Race
         {
             ID = id;
             IconID = $"Race{ID.Key}";
-            NameID = $"race.{ID.Key}.name";
-            DescID = $"race.{ID.Key}.desc";
+            NameID = $"race.{ID.Key}Name";
+            DescID = $"race.{ID.Key}Desc";
 
             Visual = visual != null ? visual : RaceVisual.NONE;
             Actions = actions ?? RaceAction.NONE;

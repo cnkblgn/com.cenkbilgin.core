@@ -19,8 +19,8 @@ namespace Core.Trait
             Cost = cost;
 
             IconID = $"Trait{ID.Key}";
-            NameID = $"trait.{ID.Key}.name";
-            DescID = $"trait.{ID.Key}.desc";
+            NameID = $"trait.{ID.Key}Name";
+            DescID = $"trait.{ID.Key}Desc";
         }
         internal TraitDefinition(TraitEntry entry) : this(entry.ID, entry.Cost, entry.Compatibilities, entry.Actions) { }
     }

@@ -22,8 +22,8 @@ namespace Core.Quest
             Actions = actions ?? QuestAction.NONE;
 
             IconID = $"Quest{ID.Key}";
-            NameID = $"quest.{ID.Key}.name";
-            DescID = $"quest.{ID.Key}.desc";
+            NameID = $"quest.{ID.Key}Name";
+            DescID = $"quest.{ID.Key}Desc";
         }
         internal QuestDefinition(QuestID id, QuestID nextID) : this(id, nextID, default, default, default) { }
         internal QuestDefinition(QuestEntry entry) : this (entry.ID, entry.NextID, entry.Requirements, entry.Conditions, entry.Actions) { }

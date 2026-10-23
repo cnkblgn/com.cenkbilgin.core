@@ -26,8 +26,8 @@ namespace Core.Faction
         {
             ID = id;
             IconID = $"Faction{ID.Key}";
-            NameID = $"faction.{ID.Key}.name";
-            DescID = $"faction.{ID.Key}.desc";
+            NameID = $"faction.{ID.Key}Name";
+            DescID = $"faction.{ID.Key}Desc";
 
             Relations = relations ?? FactionRelation.NONE;
             Actions = actions ?? FactionAction.NONE;

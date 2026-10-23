@@ -17,8 +17,8 @@ namespace Core.Scenario
             Actions = actions ?? ScenarioAction.NONE;
 
             IconID = $"Scenario{ID.Key}";
-            NameID = $"scenario.{ID.Key}.name";
-            DescID = $"scenario.{ID.Key}.desc";
+            NameID = $"scenario.{ID.Key}Name";
+            DescID = $"scenario.{ID.Key}Desc";
         }
         internal ScenarioDefinition(ScenarioEntry entry) : this(entry.ID, entry.Compatibilities, entry.Actions) { }
     }

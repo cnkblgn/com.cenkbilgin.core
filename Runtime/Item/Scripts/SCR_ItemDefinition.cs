@@ -23,8 +23,8 @@ namespace Core.Item
             Tags = tags == null ? 0 : tags.CreateMask();
             PrefabID = $"Item{ID.Key}";
             IconID = $"Item{ID.Key}";
-            NameID = $"item.{ID.Key}.name";
-            DescID = $"item.{ID.Key}.desc";
+            NameID = $"item.{ID.Key}Name";
+            DescID = $"item.{ID.Key}Desc";
             Width = width;
             Height = height;
             Stack = stack;
