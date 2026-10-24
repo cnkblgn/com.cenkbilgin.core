@@ -8,8 +8,12 @@ namespace Core.Item
     {
 #if UNITY_EDITOR
         [HideInInspector] public string Name;
+        [SerializeField, ReadOnly] private string PrefabID;
+        [SerializeField, ReadOnly] private string IconID;
+        [SerializeField, ReadOnly] private string NameID;
+        [SerializeField, ReadOnly] private string DescID;
 #endif
-         
+
         public ItemID ID;
         public ItemTag[] Tags;
         [Min(1)] public int Stack;
@@ -32,6 +36,10 @@ namespace Core.Item
 
 #if UNITY_EDITOR
             Name = ID.Key;
+            PrefabID = $"Item{ID.Key}";
+            IconID = $"Item{ID.Key}";
+            NameID = $"item.{ID.Key}Name";
+            DescID = $"item.{ID.Key}Desc";
 #endif
         }
 
@@ -40,6 +48,10 @@ namespace Core.Item
         public void OnValidate()
         {
             Name = ID.Key;
+            PrefabID = $"Item{ID.Key}";
+            IconID = $"Item{ID.Key}";
+            NameID = $"item.{ID.Key}Name";
+            DescID = $"item.{ID.Key}Desc";
 
             if (Component != null)
             {

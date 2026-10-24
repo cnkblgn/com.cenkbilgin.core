@@ -8,7 +8,11 @@ namespace Core.Faction
     {
 #if UNITY_EDITOR
         [HideInInspector] public string Name;
+        [SerializeField, ReadOnly] private string IconID;
+        [SerializeField, ReadOnly] private string NameID;
+        [SerializeField, ReadOnly] private string DescID;
 #endif
+
         public FactionID ID;
         public FactionRelation[] Relations;
         [Expandable, Required] public FactionAction[] Actions;
@@ -23,6 +27,9 @@ namespace Core.Faction
 
 #if UNITY_EDITOR
             Name = ID.Key;
+            IconID = $"Faction{ID.Key}";
+            NameID = $"faction.{ID.Key}Name";
+            DescID = $"faction.{ID.Key}Desc";
 #endif
         }
 
@@ -30,6 +37,9 @@ namespace Core.Faction
         public void OnValidate()
         {
             Name = ID.Key;
+            IconID = $"Faction{ID.Key}";
+            NameID = $"faction.{ID.Key}Name";
+            DescID = $"faction.{ID.Key}Desc";
 
             Relations = FactionRelation.GetNormalized(Relations);
 

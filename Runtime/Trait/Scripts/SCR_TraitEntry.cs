@@ -8,6 +8,9 @@ namespace Core.Trait
     {
 #if UNITY_EDITOR
         [HideInInspector] public string Name;
+        [SerializeField, ReadOnly] private string IconID;
+        [SerializeField, ReadOnly] private string NameID;
+        [SerializeField, ReadOnly] private string DescID;
 #endif
 
         public TraitID ID;
@@ -24,6 +27,9 @@ namespace Core.Trait
 
 #if UNITY_EDITOR
             Name = ID.Key;
+            IconID = $"Trait{ID.Key}";
+            NameID = $"trait.{ID.Key}Name";
+            DescID = $"trait.{ID.Key}Desc";
 #endif
         }
 
@@ -31,6 +37,9 @@ namespace Core.Trait
         public void OnValidate()
         {
             Name = ID.Key;
+            IconID = $"Trait{ID.Key}";
+            NameID = $"trait.{ID.Key}Name";
+            DescID = $"trait.{ID.Key}Desc";
         }
 #endif
     }

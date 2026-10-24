@@ -25,13 +25,13 @@ namespace Core.Faction
         internal FactionDefinition(FactionID id, FactionRelation[] relations, FactionAction[] actions, FactionCompatibility[] compatibilities)
         {
             ID = id;
-            IconID = $"Faction{ID.Key}";
-            NameID = $"faction.{ID.Key}Name";
-            DescID = $"faction.{ID.Key}Desc";
-
             Relations = relations ?? FactionRelation.NONE;
             Actions = actions ?? FactionAction.NONE;
             Compatibilities = compatibilities ?? FactionCompatibility.NONE;
+
+            IconID = $"Faction{ID.Key}";
+            NameID = $"faction.{ID.Key}Name";
+            DescID = $"faction.{ID.Key}Desc";
         }
         internal FactionDefinition(FactionEntry entry) : this(entry.ID, entry.Relations, entry.Actions, entry.Compatibilities) { }
     }

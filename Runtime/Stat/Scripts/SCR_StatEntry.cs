@@ -8,6 +8,9 @@ namespace Core.Stat
     {
 #if UNITY_EDITOR
         [HideInInspector] public string Name;
+        [SerializeField, ReadOnly] private string IconID;
+        [SerializeField, ReadOnly] private string NameID;
+        [SerializeField, ReadOnly] private string DescID;
 #endif
 
         public StatID ID;
@@ -26,6 +29,9 @@ namespace Core.Stat
 
 #if UNITY_EDITOR
             Name = ID.Key;
+            IconID = $"Stat{ID.Key}";
+            NameID = $"stat.{ID.Key}Name";
+            DescID = $"stat.{ID.Key}Desc";
 #endif
         }
 
@@ -33,6 +39,9 @@ namespace Core.Stat
         public void OnValidate()
         {
             Name = ID.Key;
+            IconID = $"Stat{ID.Key}";
+            NameID = $"stat.{ID.Key}Name";
+            DescID = $"stat.{ID.Key}Desc";
         }
 #endif
     }

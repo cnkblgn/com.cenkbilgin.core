@@ -8,6 +8,9 @@ namespace Core.Effect
     {
 #if UNITY_EDITOR
         [HideInInspector] public string Name;
+        [SerializeField, ReadOnly] private string IconID;
+        [SerializeField, ReadOnly] private string NameID;
+        [SerializeField, ReadOnly] private string DescID;
 #endif
 
         public EffectID ID;
@@ -24,13 +27,21 @@ namespace Core.Effect
             Compatibilities = compatibilities;
             Actions = actions;
 
+#if UNITY_EDITOR
             Name = ID.Key;
+            IconID = $"Effect{ID.Key}";
+            NameID = $"effect.{ID.Key}Name";
+            DescID = $"effect.{ID.Key}Desc";
+#endif
         }
 
 #if UNITY_EDITOR
         public void OnValidate()
         {
             Name = ID.Key;
+            IconID = $"Effect{ID.Key}";
+            NameID = $"effect.{ID.Key}Name";
+            DescID = $"effect.{ID.Key}Desc";
         }
 #endif
     }

@@ -8,6 +8,9 @@ namespace Core.Race
     {
 #if UNITY_EDITOR
         [HideInInspector] public string Name;
+        [SerializeField, ReadOnly] private string IconID;
+        [SerializeField, ReadOnly] private string NameID;
+        [SerializeField, ReadOnly] private string DescID;
 #endif
 
         public RaceID ID;
@@ -26,6 +29,9 @@ namespace Core.Race
 
 #if UNITY_EDITOR
             Name = ID.Key;
+            IconID = $"Race{ID.Key}";
+            NameID = $"race.{ID.Key}Name";
+            DescID = $"race.{ID.Key}Desc";
 #endif
         }
 
@@ -33,6 +39,9 @@ namespace Core.Race
         public void OnValidate()
         {
             Name = ID.Key;
+            IconID = $"Race{ID.Key}";
+            NameID = $"race.{ID.Key}Name";
+            DescID = $"race.{ID.Key}Desc";
         }
 #endif
     }

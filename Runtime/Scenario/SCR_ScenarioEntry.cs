@@ -8,6 +8,9 @@ namespace Core.Scenario
     {
 #if UNITY_EDITOR
         [HideInInspector] public string Name;
+        [SerializeField, ReadOnly] private string IconID;
+        [SerializeField, ReadOnly] private string NameID;
+        [SerializeField, ReadOnly] private string DescID;
 #endif
 
         public ScenarioID ID;
@@ -22,6 +25,9 @@ namespace Core.Scenario
 
 #if UNITY_EDITOR
             Name = ID.Key;
+            IconID = $"Scenario{ID.Key}";
+            NameID = $"scenario.{ID.Key}Name";
+            DescID = $"scenario.{ID.Key}Desc";
 #endif
         }
 
@@ -29,6 +35,9 @@ namespace Core.Scenario
         public void OnValidate()
         {
             Name = ID.Key;
+            IconID = $"Scenario{ID.Key}";
+            NameID = $"scenario.{ID.Key}Name";
+            DescID = $"scenario.{ID.Key}Desc";
         }
 #endif
     }
