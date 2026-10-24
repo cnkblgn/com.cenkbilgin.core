@@ -14,6 +14,8 @@ namespace Core
 #if UNITY_EDITOR
         private static bool TryCacheEditor()
         {
+            registries = System.Array.Empty<Registry>();
+
             string folder = "Assets";
             string filter = "t:" + typeof(Registry).Name;
             UnityEditor.GUID[] guids = UnityEditor.AssetDatabase.FindAssetGUIDs(filter, new[] { folder });
@@ -40,19 +42,6 @@ namespace Core
 
             registries = registries.OfType<Registry>().OrderBy(x => x.Priority).ToArray();
             return found;
-        }
-
-        [UnityEditor.MenuItem("Tools/Reload Registries", priority = -5)]
-        private static void TryReloadEditor()
-        {
-            TryCacheEditor();
-
-            for (int i = 0; i < registries.Length; i++)
-            {
-                registries[i].OnAfterScriptLoad();
-            }
-
-            Debug.Log("Registries reloaded!");
         }
 
         [UnityEditor.Callbacks.DidReloadScripts(1)]
