@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Core.Trait
 {
     [Serializable]
-    public struct TraitID : IEquatable<TraitID>
+    public struct TraitID : IEquatable<TraitID>, ISerializationCallbackReceiver
     {
         public readonly string Key => key;
         public bool IsValid => !string.IsNullOrEmpty(key) && Index >= 0;
@@ -39,6 +39,8 @@ namespace Core.Trait
         public readonly bool Equals(TraitID other) => string.Equals(key, other.key, StringComparison.Ordinal);
         public static bool operator ==(TraitID left, TraitID right) => left.Equals(right);
         public static bool operator !=(TraitID left, TraitID right) => !left.Equals(right);
+        readonly void ISerializationCallbackReceiver.OnBeforeSerialize() { }
+        void ISerializationCallbackReceiver.OnAfterDeserialize() => resolved = false;
 
         public readonly TraitDefinition GetDefinition() => TraitDatabase.GetDefinition(this);
         public readonly TraitInstance CreateInstance() => new(this);

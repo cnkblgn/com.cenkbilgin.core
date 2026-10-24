@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Core.Item
 {
     [Serializable]
-    public struct ItemTag : IEquatable<ItemTag>
+    public struct ItemTag : IEquatable<ItemTag>, ISerializationCallbackReceiver
     {
         public static readonly ItemTag GENERIC = new("GENERIC", 0);
 
@@ -49,6 +49,8 @@ namespace Core.Item
         public readonly override bool Equals(object obj) => obj is ItemTag other && Equals(other);
         public static bool operator ==(ItemTag left, ItemTag right) => left.Equals(right);
         public static bool operator !=(ItemTag left, ItemTag right) => !left.Equals(right);
+        readonly void ISerializationCallbackReceiver.OnBeforeSerialize() { }
+        void ISerializationCallbackReceiver.OnAfterDeserialize() => resolved = false;
 
         public static ulong CreateMask(ItemTag[] tags)
         {

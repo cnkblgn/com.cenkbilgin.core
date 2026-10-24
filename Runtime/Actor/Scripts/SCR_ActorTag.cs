@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Core.Actors
 {
     [Serializable]
-    public struct ActorTag : IEquatable<ActorTag>
+    public struct ActorTag : IEquatable<ActorTag>, ISerializationCallbackReceiver
     {
         public static readonly ActorTag GENERIC = new("GENERIC", 0);
 
@@ -54,6 +54,8 @@ namespace Core.Actors
         public readonly override bool Equals(object obj) => obj is ActorTag other && Equals(other);
         public static bool operator ==(ActorTag left, ActorTag right) => left.Equals(right);
         public static bool operator !=(ActorTag left, ActorTag right) => !left.Equals(right);
+        readonly void ISerializationCallbackReceiver.OnBeforeSerialize() { }
+        void ISerializationCallbackReceiver.OnAfterDeserialize() => resolved = false;
 
         public static ulong CreateMask(ActorTag[] tags)
         {

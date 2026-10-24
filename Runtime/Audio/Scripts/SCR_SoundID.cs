@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Core.Audio
 {
     [Serializable]
-    public struct SoundID : IEquatable<SoundID> 
+    public struct SoundID : IEquatable<SoundID>, ISerializationCallbackReceiver
     {
         public readonly string Key => key;
         public bool IsValid => !string.IsNullOrEmpty(key) && Index >= 0;
@@ -39,6 +39,8 @@ namespace Core.Audio
         public readonly bool Equals(SoundID other) => string.Equals(key, other.key, StringComparison.Ordinal);
         public static bool operator ==(SoundID left, SoundID right) => left.Equals(right);
         public static bool operator !=(SoundID left, SoundID right) => !left.Equals(right);
+        readonly void ISerializationCallbackReceiver.OnBeforeSerialize() { }
+        void ISerializationCallbackReceiver.OnAfterDeserialize() => resolved = false;
 
         public readonly AudioClip GetClip() => SoundDatabase.GetClip(this);
         public readonly void Play(AudioGroup group) => ManagerAudio.Instance.PlaySound(GetClip(), group, Vector3.zero, 0, 1, 1, 1, 10, 0, false);

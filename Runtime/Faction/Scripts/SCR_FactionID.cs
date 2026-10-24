@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Core.Faction
 {
     [Serializable]
-    public struct FactionID : IEquatable<FactionID>
+    public struct FactionID : IEquatable<FactionID>, ISerializationCallbackReceiver
     {
         public readonly string Key => key;
         public bool IsValid => !string.IsNullOrEmpty(key) && Index >= 0;
@@ -39,6 +39,8 @@ namespace Core.Faction
         public readonly bool Equals(FactionID other) => string.Equals(key, other.key, StringComparison.Ordinal);
         public static bool operator ==(FactionID left, FactionID right) => left.Equals(right);
         public static bool operator !=(FactionID left, FactionID right) => !left.Equals(right);
+        readonly void ISerializationCallbackReceiver.OnBeforeSerialize() { }
+        void ISerializationCallbackReceiver.OnAfterDeserialize() => resolved = false;
 
         public readonly FactionDefinition GetDefinition() => FactionDatabase.GetDefinition(this);
         public readonly bool IsCompatibleWith<TContext>(TContext context)

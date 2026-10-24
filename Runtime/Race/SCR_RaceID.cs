@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Core.Race
 {
     [Serializable]
-    public struct RaceID : IEquatable<RaceID>
+    public struct RaceID : IEquatable<RaceID>, ISerializationCallbackReceiver
     {
         public readonly string Key => key;
         public bool IsValid => !string.IsNullOrEmpty(key) && Index >= 0;
@@ -39,6 +39,8 @@ namespace Core.Race
         public readonly bool Equals(RaceID other) => string.Equals(key, other.key, StringComparison.Ordinal);
         public static bool operator ==(RaceID left, RaceID right) => left.Equals(right);
         public static bool operator !=(RaceID left, RaceID right) => !left.Equals(right);
+        readonly void ISerializationCallbackReceiver.OnBeforeSerialize() { }
+        void ISerializationCallbackReceiver.OnAfterDeserialize() => resolved = false;
 
         public readonly RaceDefinition GetDefinition() => RaceDatabase.GetDefinition(this);
         public readonly bool IsCompatibleWith<TContext>(TContext context)

@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Core.Effect
 {
     [Serializable]
-    public struct EffectID : IEquatable<EffectID>
+    public struct EffectID : IEquatable<EffectID>, ISerializationCallbackReceiver
     {
         public readonly string Key => key;
         public bool IsValid => !string.IsNullOrEmpty(key) && Index >= 0;
@@ -39,6 +39,8 @@ namespace Core.Effect
         public readonly bool Equals(EffectID other) => string.Equals(key, other.key, StringComparison.Ordinal);
         public static bool operator ==(EffectID left, EffectID right) => left.Equals(right);
         public static bool operator !=(EffectID left, EffectID right) => !left.Equals(right);
+        readonly void ISerializationCallbackReceiver.OnBeforeSerialize() { }
+        void ISerializationCallbackReceiver.OnAfterDeserialize() => resolved = false;
 
         public readonly EffectDefinition GetDefinition() => EffectDatabase.GetDefinition(this);
         public readonly EffectInstance CreateInstance(float duration) => new(this, duration);

@@ -30,6 +30,5 @@ namespace Core.Localization
         public readonly string GetInterpolated(string arg0) => LocalizationDatabase.GetStringInterpolated(key, arg0);
         public readonly string GetInterpolated(string arg0, string arg1) => LocalizationDatabase.GetStringInterpolated(key, arg0, arg1);
         public readonly string GetInterpolated(params object[] args) => LocalizationDatabase.GetStringInterpolated(key, args);
-
     }
 }

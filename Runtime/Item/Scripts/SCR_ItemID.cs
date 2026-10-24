@@ -5,7 +5,7 @@ using UnityEngine.UIElements;
 namespace Core.Item
 {
     [Serializable]
-    public struct ItemID : IEquatable<ItemID>
+    public struct ItemID : IEquatable<ItemID>, ISerializationCallbackReceiver
     {
         public readonly string Key => key;
         public bool IsValid => !string.IsNullOrEmpty(key) && Index >= 0;
@@ -40,9 +40,12 @@ namespace Core.Item
         public readonly bool Equals(ItemID other) => string.Equals(key, other.key, StringComparison.Ordinal);
         public static bool operator ==(ItemID left, ItemID right) => left.Equals(right);
         public static bool operator !=(ItemID left, ItemID right) => !left.Equals(right);
+        readonly void ISerializationCallbackReceiver.OnBeforeSerialize() { }
+        void ISerializationCallbackReceiver.OnAfterDeserialize() => resolved = false;
 
         public readonly ItemDefinition GetDefinition() => ItemDatabase.GetDefinition(this);
         public readonly ItemEntity CreateEntity(Vector3 position, Quaternion rotation, Transform parent = null) => ItemDatabase.CreateEntity(CreateData(), position, rotation, parent);
         public readonly ItemData CreateData() => new(this);
+
     }
 }

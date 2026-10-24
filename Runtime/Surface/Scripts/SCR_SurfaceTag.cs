@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Core.Surface
 {
     [Serializable]
-    public struct SurfaceTag : IEquatable<SurfaceTag>
+    public struct SurfaceTag : IEquatable<SurfaceTag>, ISerializationCallbackReceiver
     {
         public static readonly SurfaceTag GENERIC = new("GENERIC", 0);
 
@@ -49,6 +49,8 @@ namespace Core.Surface
         public readonly override bool Equals(object obj) => obj is SurfaceTag other && Equals(other);
         public static bool operator ==(SurfaceTag left, SurfaceTag right) => left.Equals(right);
         public static bool operator !=(SurfaceTag left, SurfaceTag right) => !left.Equals(right);
+        readonly void ISerializationCallbackReceiver.OnBeforeSerialize() { }
+        void ISerializationCallbackReceiver.OnAfterDeserialize() => resolved = false;
 
         public static ulong CreateMask(SurfaceTag[] tags)
         {

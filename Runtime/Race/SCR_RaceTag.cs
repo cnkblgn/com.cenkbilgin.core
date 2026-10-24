@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Core.Race
 {
     [Serializable]
-    public struct RaceTag : IEquatable<RaceTag>
+    public struct RaceTag : IEquatable<RaceTag>, ISerializationCallbackReceiver
     {
         public readonly string Key => key;
         public int Index
@@ -47,6 +47,8 @@ namespace Core.Race
         public readonly override bool Equals(object obj) => obj is RaceTag other && Equals(other);
         public static bool operator ==(RaceTag left, RaceTag right) => left.Equals(right);
         public static bool operator !=(RaceTag left, RaceTag right) => !left.Equals(right);
+        readonly void ISerializationCallbackReceiver.OnBeforeSerialize() { }
+        void ISerializationCallbackReceiver.OnAfterDeserialize() => resolved = false;
 
         public static ulong CreateMask(RaceTag[] tags)
         {

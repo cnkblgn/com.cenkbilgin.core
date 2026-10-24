@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Core.Quest
 {
     [Serializable]
-    public struct QuestID : IEquatable<QuestID>
+    public struct QuestID : IEquatable<QuestID>, ISerializationCallbackReceiver
     {
         public readonly string Key => key;
         public bool IsValid => !string.IsNullOrEmpty(key) && Index >= 0;
@@ -39,6 +39,8 @@ namespace Core.Quest
         public readonly bool Equals(QuestID other) => string.Equals(key, other.key, StringComparison.Ordinal);
         public static bool operator ==(QuestID left, QuestID right) => left.Equals(right);
         public static bool operator !=(QuestID left, QuestID right) => !left.Equals(right);
+        readonly void ISerializationCallbackReceiver.OnBeforeSerialize() { }
+        void ISerializationCallbackReceiver.OnAfterDeserialize() => resolved = false;
 
         public readonly QuestDefinition GetDefinition() => QuestDatabase.GetDefinition(this);
         public readonly QuestInstance CreateInstance() => new(this);

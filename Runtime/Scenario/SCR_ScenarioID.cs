@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Core.Scenario
 {
     [Serializable]
-    public struct ScenarioID : IEquatable<ScenarioID>
+    public struct ScenarioID : IEquatable<ScenarioID>, ISerializationCallbackReceiver
     {
         public readonly string Key => key;
         public bool IsValid => !string.IsNullOrEmpty(key) && Index >= 0;
@@ -39,6 +39,8 @@ namespace Core.Scenario
         public readonly bool Equals(ScenarioID other) => string.Equals(key, other.key, StringComparison.Ordinal);
         public static bool operator ==(ScenarioID left, ScenarioID right) => left.Equals(right);
         public static bool operator !=(ScenarioID left, ScenarioID right) => !left.Equals(right);
+        readonly void ISerializationCallbackReceiver.OnBeforeSerialize() { }
+        void ISerializationCallbackReceiver.OnAfterDeserialize() => resolved = false;
 
         public readonly ScenarioDefinition GetDefinition() => ScenarioDatabase.GetDefinition(this);
         public readonly bool IsCompatibleWith<TContext>(TContext context)

@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Core.Prefab
 {
     [Serializable]
-    public struct PrefabID : IEquatable<PrefabID>
+    public struct PrefabID : IEquatable<PrefabID>, ISerializationCallbackReceiver
     {
         public readonly string Key => key;
         public bool IsValid => !string.IsNullOrEmpty(key) && Index >= 0;
@@ -39,6 +39,8 @@ namespace Core.Prefab
         public readonly bool Equals(PrefabID other) => string.Equals(key, other.key, StringComparison.Ordinal);
         public static bool operator ==(PrefabID left, PrefabID right) => left.Equals(right);
         public static bool operator !=(PrefabID left, PrefabID right) => !left.Equals(right);
+        readonly void ISerializationCallbackReceiver.OnBeforeSerialize() { }
+        void ISerializationCallbackReceiver.OnAfterDeserialize() => resolved = false;
 
         public readonly GameObject Get() => PrefabDatabase.GetPrefab(this);
         public readonly GameObject Spawn(Vector3 position, Quaternion rotation, Transform parent) => PrefabDatabase.SpawnPrefab(this, position, rotation, parent);

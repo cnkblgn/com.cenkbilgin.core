@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Core.Damage
 {
     [Serializable]
-    public struct DamageTag : IEquatable<DamageTag>
+    public struct DamageTag : IEquatable<DamageTag>, ISerializationCallbackReceiver
     {
         public static readonly DamageTag GENERIC = new("GENERIC", 0);
 
@@ -49,6 +49,8 @@ namespace Core.Damage
         public readonly override bool Equals(object obj) => obj is DamageTag other && Equals(other);
         public static bool operator ==(DamageTag left, DamageTag right) => left.Equals(right);
         public static bool operator !=(DamageTag left, DamageTag right) => !left.Equals(right);
+        readonly void ISerializationCallbackReceiver.OnBeforeSerialize() { }
+        void ISerializationCallbackReceiver.OnAfterDeserialize() => resolved = false;
 
         public static ulong CreateMask(DamageTag[] tags)
         {

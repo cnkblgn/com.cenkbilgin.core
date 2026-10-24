@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Core.Graphics
 {
     [Serializable]
-    public struct IconID : IEquatable<IconID>
+    public struct IconID : IEquatable<IconID>, ISerializationCallbackReceiver
     {
         public readonly string Key => key;
         public bool IsValid => !string.IsNullOrEmpty(key) && Index >= 0;
@@ -39,6 +39,8 @@ namespace Core.Graphics
         public readonly bool Equals(IconID other) => string.Equals(key, other.key, StringComparison.Ordinal);
         public static bool operator ==(IconID left, IconID right) => left.Equals(right);
         public static bool operator !=(IconID left, IconID right) => !left.Equals(right);
+        readonly void ISerializationCallbackReceiver.OnBeforeSerialize() { }
+        void ISerializationCallbackReceiver.OnAfterDeserialize() => resolved = false;
 
         public readonly Sprite GetSprite() => IconDatabase.GetSprite(this);
     }

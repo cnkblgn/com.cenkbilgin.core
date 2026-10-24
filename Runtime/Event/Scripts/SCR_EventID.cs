@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Core.Event
 {
     [Serializable]
-    public struct EventID : IEquatable<EventID>
+    public struct EventID : IEquatable<EventID>, ISerializationCallbackReceiver
     {
         public readonly string Key => key;
         public bool IsValid => !string.IsNullOrEmpty(key) && Index >= 0;
@@ -39,5 +39,7 @@ namespace Core.Event
         public readonly bool Equals(EventID other) => string.Equals(key, other.key, StringComparison.Ordinal);
         public static bool operator ==(EventID left, EventID right) => left.Equals(right);
         public static bool operator !=(EventID left, EventID right) => !left.Equals(right);
+        readonly void ISerializationCallbackReceiver.OnBeforeSerialize() { }
+        void ISerializationCallbackReceiver.OnAfterDeserialize() => resolved = false;
     }
 }

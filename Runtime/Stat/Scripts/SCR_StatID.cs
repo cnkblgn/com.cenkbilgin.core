@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Core.Stat
 {
     [Serializable]
-    public struct StatID : IEquatable<StatID>
+    public struct StatID : IEquatable<StatID>, ISerializationCallbackReceiver
     {
         public readonly string Key => key;
         public bool IsValid => !string.IsNullOrEmpty(key) && Index >= 0;
@@ -39,6 +39,8 @@ namespace Core.Stat
         public readonly bool Equals(StatID other) => string.Equals(key, other.key, StringComparison.Ordinal);
         public static bool operator ==(StatID left, StatID right) => left.Equals(right);
         public static bool operator !=(StatID left, StatID right) => !left.Equals(right);
+        readonly void ISerializationCallbackReceiver.OnBeforeSerialize() { }
+        void ISerializationCallbackReceiver.OnAfterDeserialize() => resolved = false;
 
         public readonly StatDefinition GetDefinition() => StatDatabase.GetDefinition(this);
     }
