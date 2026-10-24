@@ -38,7 +38,7 @@ namespace Core.Item
         }
         private void Start() => Initialize();
 
-        public void HandleStateChanged(InventoryContext ctx)
+        public void HandleInventoryChanged(InventoryContext ctx)
         {
             OnStateChanged?.Invoke(ctx);
 
@@ -66,7 +66,7 @@ namespace Core.Item
         private void Initialize()
         {
             thisInventory.User = this;
-            HandleStateChanged(new(InventoryState.INITIALIZED, InventoryResult.SUCCESS, null));
+            HandleInventoryChanged(new(InventoryState.INITIALIZED, InventoryResult.SUCCESS, null));
         }
         public void Clear() => thisInventory.Clear();
         public void ImportFrom(InventoryData inventory) { thisInventory = new(inventory); Initialize(); }

@@ -4,6 +4,6 @@ namespace Core.Interaction
 {
     public interface IInteractionUser
     {
-        public void HandleStateChanged(in InteractionContext ctx);
+        public void HandleInteractionChanged(in InteractionContext ctx);
     }
 }

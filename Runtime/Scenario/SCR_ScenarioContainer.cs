@@ -33,7 +33,7 @@ namespace Core.Scenario
             }
 
             ScenarioContext ctx = new(this.id = id);
-            user?.HandleScenarioStateChanged(ctx);
+            user?.HandleScenarioChanged(ctx);
             OnChanged?.Invoke(ctx);
             return true;
         }

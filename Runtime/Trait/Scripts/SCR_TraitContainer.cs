@@ -34,7 +34,7 @@ namespace Core.Trait
         private void SetState(TraitState state, TraitInstance instance)
         {
             TraitContext ctx = new(state, instance);
-            user?.HandleTraitStateChanged(ctx);
+            user?.HandleTraitChanged(ctx);
             OnChanged?.Invoke(ctx);
         }
 

@@ -42,7 +42,7 @@ namespace Core.Faction
         private void SetState()
         {
             FactionContext ctx = new(id, relations);
-            user?.HandleFactionStateChanged(ctx);
+            user?.HandleFactionChanged(ctx);
             OnChanged?.Invoke(ctx);
         }
 

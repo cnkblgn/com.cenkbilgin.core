@@ -57,7 +57,7 @@ namespace Core.Item
         public InventoryData(int width, int height, int maxWeight, ItemTag[] masks) : this(new(), width, height, maxWeight, masks) { }
         public InventoryData(int width, int height, int maxWeight, ulong mask) : this(new(), width, height, maxWeight, mask) { }
 
-        private void Notify(InventoryState state, InventoryResult result, ItemData item = null) => User?.HandleStateChanged(new(state, result, item));
+        private void Notify(InventoryState state, InventoryResult result, ItemData item = null) => User?.HandleInventoryChanged(new(state, result, item));
 
         public void Clear()
         {

@@ -60,7 +60,7 @@ namespace Core
         private void SetState(ResourceState state)
         {
             ResourceContext ctx = new(state, current, maximum);
-            user?.HandleResourceStateChanged(ctx);
+            user?.HandleResourceChanged(ctx);
             OnChanged?.Invoke(ctx);
         }
 

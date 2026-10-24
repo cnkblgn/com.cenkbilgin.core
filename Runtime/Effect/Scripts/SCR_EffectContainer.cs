@@ -36,7 +36,7 @@ namespace Core.Effect
         private void SetState(EffectState state, EffectInstance instance)
         {
             EffectContext ctx = new(state, instance);
-            user?.HandleEffectStateChanged(ctx);
+            user?.HandleEffectChanged(ctx);
             OnChanged?.Invoke(ctx);
         }
 

@@ -39,7 +39,7 @@ namespace Core.Stat
 
             StatContext ctx = new(this.state, modifier);
 
-            user?.HandleStatStateChanged(ctx);
+            user?.HandleStatChanged(ctx);
             OnChanged?.Invoke(ctx);
         }
         private void SetState(StatState state) => SetState(state, StatModifier.Empty);

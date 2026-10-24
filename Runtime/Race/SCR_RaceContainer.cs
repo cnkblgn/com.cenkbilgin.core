@@ -35,7 +35,7 @@ namespace Core.Race
             RemoveAction(this.id, context);
 
             RaceContext ctx = new(this.id = id);
-            user?.HandleRaceStateChanged(ctx);
+            user?.HandleRaceChanged(ctx);
             OnChanged?.Invoke(ctx);
 
             ApplyAction(id, context);

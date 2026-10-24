@@ -54,7 +54,7 @@ namespace Core.Interaction
         private void SetState(InteractionContext ctx)
         {
             OnStateChanged?.Invoke(ctx);
-            thisUser?.HandleStateChanged(in ctx);
+            thisUser?.HandleInteractionChanged(in ctx);
         }
 
         public bool TryInteract()
