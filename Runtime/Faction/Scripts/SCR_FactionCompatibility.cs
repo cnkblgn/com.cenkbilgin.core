@@ -8,6 +8,6 @@ namespace Core.Faction
     }
     public abstract class FactionCompatibility<TContext> : ScriptableObject
     {
-        public abstract bool IsCompatibleWith(FactionID id, TContext context);
+        public abstract bool IsCompatibleWith(TContext ctx);
     }
 }

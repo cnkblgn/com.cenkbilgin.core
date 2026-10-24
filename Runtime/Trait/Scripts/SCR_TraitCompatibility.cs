@@ -8,6 +8,6 @@ namespace Core.Trait
     }
     public abstract class TraitCompatibility<TContext> : TraitCompatibility
     {
-        public abstract bool IsCompatibleWith(TraitID id, TContext context);
+        public abstract bool IsCompatibleWith(TContext ctx);
     }
 }

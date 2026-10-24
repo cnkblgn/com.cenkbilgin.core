@@ -49,7 +49,7 @@ namespace Core.Race
 
             for (int i = 0; i < compatibilities.Length; i++)
             {
-                if (compatibilities[i] is RaceCompatibility<TContext> compatibility && !compatibility.IsCompatibleWith(this, context))
+                if (compatibilities[i] is RaceCompatibility<TContext> compatibility && !compatibility.IsCompatibleWith(context))
                 {
                     return false;
                 }

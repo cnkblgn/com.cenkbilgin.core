@@ -8,6 +8,6 @@ namespace Core.Race
     }
     public abstract class RaceCompatibility<TContext> : RaceCompatibility
     {
-        public abstract bool IsCompatibleWith(RaceID id, TContext context);
+        public abstract bool IsCompatibleWith(TContext ctx);
     }
 }

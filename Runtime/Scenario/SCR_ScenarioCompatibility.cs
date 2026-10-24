@@ -6,9 +6,8 @@ namespace Core.Scenario
     {
         public static readonly ScenarioCompatibility[] NONE = new ScenarioCompatibility[] { };
     }
-
     public abstract class ScenarioCompatibility<TContext> : ScenarioCompatibility
     {
-        public abstract bool IsCompatibleWith(ScenarioID id, TContext context);
+        public abstract bool IsCompatibleWith(TContext ctx);
     }
 }

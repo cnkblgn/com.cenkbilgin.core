@@ -49,7 +49,7 @@ namespace Core.Faction
 
             for (int i = 0; i < compatibilities.Length; i++)
             {
-                if (compatibilities[i] is FactionCompatibility<TContext> compatibility && !compatibility.IsCompatibleWith(this, context))
+                if (compatibilities[i] is FactionCompatibility<TContext> compatibility && !compatibility.IsCompatibleWith(context))
                 {
                     return false;
                 }

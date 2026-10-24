@@ -50,7 +50,7 @@ namespace Core.Trait
 
             for (int i = 0; i < compatibilities.Length; i++)
             {
-                if (compatibilities[i] is TraitCompatibility<TContext> compatibility && !compatibility.IsCompatibleWith(this, context))
+                if (compatibilities[i] is TraitCompatibility<TContext> compatibility && !compatibility.IsCompatibleWith(context))
                 {
                     return false;
                 }

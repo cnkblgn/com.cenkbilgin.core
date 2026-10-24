@@ -8,6 +8,6 @@ namespace Core.Effect
     }
     public abstract class EffectCompatibility<TContext> : EffectCompatibility
     {
-        public abstract bool IsCompatibleWith(EffectID id, TContext context);
+        public abstract bool IsCompatibleWith(TContext ctx);
     }
 }
