@@ -42,8 +42,8 @@ namespace Core.Audio
         readonly void ISerializationCallbackReceiver.OnBeforeSerialize() { }
         void ISerializationCallbackReceiver.OnAfterDeserialize() => resolved = false;
 
-        public readonly AudioClip GetClip() => SoundDatabase.GetClip(this);
-        public readonly void Play(AudioGroup group) => ManagerAudio.Instance.PlaySound(GetClip(), group, Vector3.zero, 0, 1, 1, 1, 10, 0, false);
-        public readonly void Play(AudioGroup group, Vector3 position, float blend = 0, float volume = 1, float pitch = 1, float minDistance = 1, float maxDistance = 10, float spread = 0f, bool occulusion = false) => ManagerAudio.Instance.PlaySound(GetClip(), group, position, blend, volume, pitch, minDistance, maxDistance, spread, occulusion);
+        public readonly AudioClip Get() => SoundDatabase.GetClip(this);
+        public readonly void Play(AudioGroup group) => ManagerAudio.Instance.PlaySound(Get(), group, Vector3.zero, 0, 1, 1, 1, 10, 0, false);
+        public readonly void Play(AudioGroup group, Vector3 position, float blend = 0, float volume = 1, float pitch = 1, float minDistance = 1, float maxDistance = 10, float spread = 0f, bool occulusion = false) => ManagerAudio.Instance.PlaySound(Get(), group, position, blend, volume, pitch, minDistance, maxDistance, spread, occulusion);
     }
 }

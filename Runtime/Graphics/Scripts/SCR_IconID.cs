@@ -42,6 +42,6 @@ namespace Core.Graphics
         readonly void ISerializationCallbackReceiver.OnBeforeSerialize() { }
         void ISerializationCallbackReceiver.OnAfterDeserialize() => resolved = false;
 
-        public readonly Sprite GetSprite() => IconDatabase.GetSprite(this);
+        public readonly Sprite Get() => IconDatabase.GetSprite(this);
     }
 }
