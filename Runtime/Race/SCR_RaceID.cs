@@ -41,47 +41,13 @@ namespace Core.Race
         public static bool operator !=(RaceID left, RaceID right) => !left.Equals(right);
 
         public readonly RaceDefinition GetDefinition() => RaceDatabase.GetDefinition(this);
-        public readonly bool IsCompatibleWith(object context)
-        {
-            if (context == null)
-            {
-                Debug.LogError("Race compatibility check failed! context is null!?");
-                return false;
-            }
-
-            RaceCompatibility[] compatibilities = GetDefinition().Compatibilities;
-
-            for (int i = 0; i < compatibilities.Length; i++)
-            {
-                if (!compatibilities[i].IsCompatibleWith(this, context))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-        public readonly bool IsCompatibleWith(int context)
+        public readonly bool IsCompatibleWith<TContext>(TContext context)
         {
             RaceCompatibility[] compatibilities = GetDefinition().Compatibilities;
 
             for (int i = 0; i < compatibilities.Length; i++)
             {
-                if (!compatibilities[i].IsCompatibleWith(this, context))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-        public readonly bool IsCompatibleWith(ulong context)
-        {
-            RaceCompatibility[] compatibilities = GetDefinition().Compatibilities;
-
-            for (int i = 0; i < compatibilities.Length; i++)
-            {
-                if (!compatibilities[i].IsCompatibleWith(this, context))
+                if (compatibilities[i] is RaceCompatibility<TContext> compatibility && !compatibility.IsCompatibleWith(this, context))
                 {
                     return false;
                 }

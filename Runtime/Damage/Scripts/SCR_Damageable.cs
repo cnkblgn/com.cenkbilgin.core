@@ -9,12 +9,12 @@ namespace Core.Damage
     {
         public event Action<DamageContext> OnHit = null;
 
-        public Resource Health => health;
+        public ResourceContainer Health => health;
         public Vector3 Position => origin.position;
         public Quaternion Rotation => origin.rotation;
 
         [Header("_")]
-        [SerializeField] private Resource health = new(100, 100);
+        [SerializeField] private ResourceContainer health = new(100, 100);
 
         [Header("_")]
         [SerializeField, Required] private Transform origin;
@@ -23,7 +23,7 @@ namespace Core.Damage
         [SerializeField] private DamageTag[] ignoredTags;
         [SerializeField] private List<DamageProtection> protections;
 
-        private IDamageableHandler thisHandler;
+        private IDamageableHandler[] thisHandlers;
         private DamageContext lastContext;
         private ulong ignoredTagMask;
 
@@ -31,11 +31,11 @@ namespace Core.Damage
         {
             if (origin == null) throw new NullReferenceException(nameof(origin));
 
-            thisHandler = GetComponent<IDamageableHandler>();
+            thisHandlers = GetComponents<IDamageableHandler>();
             ignoredTagMask = ignoredTags.CreateMask();
         }
 
-        public void Bind(Resource health) => this.health = health ?? throw new ArgumentNullException(nameof(health), "You are trying to bind null health resource!? please assign valid resource!");
+        public void Bind(ResourceContainer health) => this.health = health ?? throw new ArgumentNullException(nameof(health), "You are trying to bind null health resource!? please assign valid resource!");
 
         public void Damage(in DamageData data, out DamageContext ctx)
         {
@@ -58,7 +58,11 @@ namespace Core.Damage
 
             ctx = lastContext;
 
-            thisHandler?.HandleHit(in lastContext);
+            for (int i = 0; i < thisHandlers.Length; i++)
+            {
+                thisHandlers[i]?.HandleHit(in lastContext);
+            }
+
             OnHit?.Invoke(lastContext);
         }
         private float ResolveDamage(in DamageData data)
@@ -72,9 +76,9 @@ namespace Core.Damage
 
             value = ResolveProtection(value, data.Tags);
 
-            if (thisHandler != null)
+            for (int i = 0; i < thisHandlers.Length; i++)
             {
-                value = thisHandler.HandleDamaged(data);
+                thisHandlers[i]?.HandleDamaged(data);
             }
 
             return value;

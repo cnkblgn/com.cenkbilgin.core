@@ -41,19 +41,13 @@ namespace Core.Faction
         public static bool operator !=(FactionID left, FactionID right) => !left.Equals(right);
 
         public readonly FactionDefinition GetDefinition() => FactionDatabase.GetDefinition(this);
-        public readonly bool IsCompatibleWith(object actor)
+        public readonly bool IsCompatibleWith<TContext>(TContext context)
         {
-            if (actor == null)
-            {
-                Debug.LogError("Faction compatibility check failed! actor is null!?");
-                return false;
-            }
-
             FactionCompatibility[] compatibilities = GetDefinition().Compatibilities;
 
             for (int i = 0; i < compatibilities.Length; i++)
             {
-                if (!compatibilities[i].IsCompatibleWith(this, actor))
+                if (compatibilities[i] is FactionCompatibility<TContext> compatibility && !compatibility.IsCompatibleWith(this, context))
                 {
                     return false;
                 }

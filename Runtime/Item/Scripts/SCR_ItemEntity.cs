@@ -15,11 +15,11 @@ namespace Core.Item
         [SerializeField, Min(0)] private int overrideStack;
 
         private ItemData thisData;
-        private IItemHandler thisHandler;
+        private IItemEntityHandler[] thisHandlers;
 
         private void Awake()
         {
-            thisHandler = GetComponent<IItemHandler>();
+            thisHandlers = GetComponents<IItemEntityHandler>();
             thisData = id.CreateData();
 
             if (overrideStack != 0)
@@ -29,19 +29,28 @@ namespace Core.Item
 
             if (!overrideData)
             {
-                thisHandler?.HandleImport(id, thisData.Data);
+                for (int i = 0; i < thisHandlers.Length; i++)
+                {
+                    thisHandlers[i]?.HandleImport(id, thisData.Data);
+                }
             }
         }
 
         public void ExportTo(out ItemData data)
         {
-            thisHandler?.HandleExport(id, this.thisData.Data);
+            for (int i = 0; i < thisHandlers.Length; i++)
+            {
+                thisHandlers[i]?.HandleExport(id, thisData.Data);
+            }
             data = new(this.thisData);
         }
         public void ImportFrom(ItemData data)
         {
             this.thisData = new(data);
-            thisHandler?.HandleImport(id, this.thisData.Data);
+            for (int i = 0; i < thisHandlers.Length; i++)
+            {
+                thisHandlers[i]?.HandleImport(id, thisData.Data);
+            }
         }
     }
 }

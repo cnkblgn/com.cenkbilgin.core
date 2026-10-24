@@ -1,6 +1,6 @@
 namespace Core.Item
 {
-    public interface IInventoryHandler
+    public interface IInventoryEntityHandler
     {
         public void HandleStateChanged(in InventoryContext ctx);
     }

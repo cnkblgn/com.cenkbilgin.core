@@ -41,47 +41,13 @@ namespace Core.Scenario
         public static bool operator !=(ScenarioID left, ScenarioID right) => !left.Equals(right);
 
         public readonly ScenarioDefinition GetDefinition() => ScenarioDatabase.GetDefinition(this);
-        public readonly bool IsCompatibleWith(object context)
-        {
-            if (context == null)
-            {
-                Debug.LogError("Scenario compatibility check failed! context is null!?");
-                return false;
-            }
-
-            ScenarioCompatibility[] compatibilities = GetDefinition().Compatibilities;
-
-            for (int i = 0; i < compatibilities.Length; i++)
-            {
-                if (!compatibilities[i].IsCompatibleWith(this, context))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-        public readonly bool IsCompatibleWith(int context)
+        public readonly bool IsCompatibleWith<TContext>(TContext context)
         {
             ScenarioCompatibility[] compatibilities = GetDefinition().Compatibilities;
 
             for (int i = 0; i < compatibilities.Length; i++)
             {
-                if (!compatibilities[i].IsCompatibleWith(this, context))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-        public readonly bool IsCompatibleWith(ulong context)
-        {
-            ScenarioCompatibility[] compatibilities = GetDefinition().Compatibilities;
-
-            for (int i = 0; i < compatibilities.Length; i++)
-            {
-                if (!compatibilities[i].IsCompatibleWith(this, context))
+                if (compatibilities[i] is ScenarioCompatibility<TContext> compatibility && !compatibility.IsCompatibleWith(this, context))
                 {
                     return false;
                 }

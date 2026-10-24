@@ -5,15 +5,21 @@ namespace Core.Scenario
 {
     public class ScenarioContainer
     {
-        public event Action<ScenarioID> OnChanged;
+        public event Action<ScenarioContext> OnChanged;
 
+        private readonly IScenarioUser user;
         private ScenarioID id;
 
-        public ScenarioContainer(ScenarioContainer container) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.id) { }
-        public ScenarioContainer(ScenarioID id) => this.id = !id.IsValid ? throw new ArgumentNullException(nameof(id)) : id;
+        public ScenarioContainer(IScenarioUser user = null) : this(default, user) { }
+        public ScenarioContainer(ScenarioContainer container) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.id, container.user) { }
+        public ScenarioContainer(ScenarioID id, IScenarioUser user = null)
+        {
+            this.id = id;
+            this.user = user;
+        }
 
         public ScenarioID GetScenario() => id;
-        public bool TrySetScenario(ScenarioID id, object context)
+        public bool TrySetScenario(ScenarioID id)
         {
             if (id == this.id)
             {
@@ -26,43 +32,10 @@ namespace Core.Scenario
                 return false;
             }
 
-            if (context == null)
-            {
-                Debug.LogError("Scenario set failed! actor is null!?");
-                return false;
-            }
-
-            if (!id.IsCompatibleWith(context))
-            {
-                return false;
-            }
-
-            RemoveAction(id, context);
-
-            OnChanged?.Invoke(this.id = id);
-
-            ApplyAction(id, context);
-
+            ScenarioContext ctx = new(this.id = id);
+            user?.HandleScenarioStateChanged(ctx);
+            OnChanged?.Invoke(ctx);
             return true;
-        }
-
-        private void ApplyAction(ScenarioID id, object context)
-        {
-            ScenarioAction[] actions = id.GetDefinition().Actions;
-
-            for (int i = 0; i < actions.Length; i++)
-            {
-                actions[i].Apply(id, context);
-            }
-        }
-        private void RemoveAction(ScenarioID id, object context)
-        {
-            ScenarioAction[] actions = id.GetDefinition().Actions;
-
-            for (int i = 0; i < actions.Length; i++)
-            {
-                actions[i].Remove(id, context);
-            }
         }
     }
 }

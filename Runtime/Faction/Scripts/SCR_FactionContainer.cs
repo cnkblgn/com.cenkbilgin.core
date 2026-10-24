@@ -9,9 +9,10 @@ namespace Core.Faction
         public event Action<FactionContext> OnChanged;
 
         private FactionID id;
+        private readonly IFactionUser user;
         private readonly FactionRelation[] relations;
 
-        public FactionContainer() : this((FactionID)default) { }
+        public FactionContainer(IFactionUser user = null) : this(default, user) { }
         public FactionContainer(FactionContainer container)
         {
             if (container == null)
@@ -20,12 +21,14 @@ namespace Core.Faction
             }
 
             id = container.id;
+            user = container.user;
             relations = (FactionRelation[])container.relations.Clone();
         }
-        public FactionContainer(FactionID id) : this(id, id.IsValid ? id.GetDefinition().Relations : new FactionRelation[0]) { }
-        public FactionContainer(FactionID id, FactionRelation[] relations)
+        public FactionContainer(FactionID id, IFactionUser user = null) : this(id, id.IsValid ? id.GetDefinition().Relations : new FactionRelation[0], user) { }
+        public FactionContainer(FactionID id, FactionRelation[] relations, IFactionUser user = null)
         {
             this.id = id;
+            this.user = user;
             this.relations = new FactionRelation[FactionDatabase.GetDefinitions().Count];
 
             if (relations == null)
@@ -36,10 +39,15 @@ namespace Core.Faction
             TrySetRelations(relations);
         }
 
-        private void SetState() => OnChanged?.Invoke(new(id, relations));
+        private void SetState()
+        {
+            FactionContext ctx = new(id, relations);
+            user?.HandleFactionStateChanged(ctx);
+            OnChanged?.Invoke(ctx);
+        }
 
         public FactionID GetFaction() => id;
-        public bool TrySetFaction(FactionID id, object actor)
+        public bool TrySetFaction<TContext>(FactionID id, TContext context)
         {
             if (id == this.id)
             {
@@ -52,18 +60,7 @@ namespace Core.Faction
                 return false;
             }
 
-            if (actor == null)
-            {
-                Debug.LogError("Faction set failed! actor is null!?");
-                return false;
-            }
-
-            if (!id.IsCompatibleWith(actor))
-            {
-                return false;
-            }
-
-            RemoveAction(this.id, actor);
+            RemoveAction(this.id, context);
 
             this.id = id;
 
@@ -71,27 +68,33 @@ namespace Core.Faction
 
             SetState();
 
-            ApplyAction(id, actor);
+            ApplyAction(id, context);
 
             return true;
         }
 
-        private void ApplyAction(FactionID id, object actor)
+        private void ApplyAction<TContext>(FactionID id, TContext context)
         {
             FactionAction[] actions = id.GetDefinition().Actions;
 
             for (int i = 0; i < actions.Length; i++)
             {
-                actions[i].Apply(id, actor);
+                if (actions[i] is FactionAction<TContext> action)
+                {
+                    action.Apply(id, context);
+                }
             }
         }
-        private void RemoveAction(FactionID id, object actor)
+        private void RemoveAction<TContext>(FactionID id, TContext context)
         {
             FactionAction[] actions = id.GetDefinition().Actions;
 
             for (int i = 0; i < actions.Length; i++)
             {
-                actions[i].Remove(id, actor);
+                if (actions[i] is FactionAction<TContext> action)
+                {
+                    action.Remove(id, context);
+                }
             }
         }
 

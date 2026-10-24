@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
-using static UnityEngine.ParticleSystem;
 
 namespace Core.Trait
 {
@@ -44,84 +42,13 @@ namespace Core.Trait
 
         public readonly TraitDefinition GetDefinition() => TraitDatabase.GetDefinition(this);
         public readonly TraitInstance CreateInstance() => new(this);
-        internal readonly bool IsCompatibleWith(IReadOnlyList<TraitInstance> traits)
-        {
-            if (traits == null)
-            {
-                Debug.LogError("Trait compatibility check failed! traits is null!?");
-                return false;
-            }
-
-            for (int i = 0; i < traits.Count; i++)
-            {
-                if (!IsCompatibleWith(traits[i]))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-        public readonly bool IsCompatibleWith(TraitID id)
-        {
-            if (!id.IsValid)
-            {
-                return false;
-            }
-
-            TraitCompatibility[] compatibilities = GetDefinition().Compatibilities;
-
-            for (int i = 0; i < compatibilities.Length; i++)
-            {
-                if (!compatibilities[i].IsCompatibleWith(this, id))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-        public readonly bool IsCompatibleWith(object context)
-        {
-            if (context == null)
-            {
-                Debug.LogError("Trait compatibility check failed! context is null!?");
-                return false;
-            }
-
-            TraitCompatibility[] compatibilities = GetDefinition().Compatibilities;
-
-            for (int i = 0; i < compatibilities.Length; i++)
-            {
-                if (!compatibilities[i].IsCompatibleWith(this, context))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-        public readonly bool IsCompatibleWith(int context)
+        public readonly bool IsCompatibleWith<TContext>(TContext context)
         {
             TraitCompatibility[] compatibilities = GetDefinition().Compatibilities;
 
             for (int i = 0; i < compatibilities.Length; i++)
             {
-                if (!compatibilities[i].IsCompatibleWith(this, context))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-        public readonly bool IsCompatibleWith(ulong context)
-        {
-            TraitCompatibility[] compatibilities = GetDefinition().Compatibilities;
-
-            for (int i = 0; i < compatibilities.Length; i++)
-            {
-                if (!compatibilities[i].IsCompatibleWith(this, context))
+                if (compatibilities[i] is TraitCompatibility<TContext> compatibility && !compatibility.IsCompatibleWith(this, context))
                 {
                     return false;
                 }

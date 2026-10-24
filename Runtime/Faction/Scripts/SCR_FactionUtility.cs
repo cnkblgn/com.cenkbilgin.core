@@ -22,7 +22,7 @@ namespace Core.Faction
 
             data.SetData(RELATIONS, relationTable);
         }
-        public static void ImportFrom(this FactionContainer obj, Dictionary<string, DataNode> data, object actor)
+        public static void ImportFrom<TContext>(this FactionContainer obj, Dictionary<string, DataNode> data, TContext context)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
 
@@ -30,7 +30,7 @@ namespace Core.Faction
             int index = FactionDatabase.GetIDIndex(key);
             FactionRelation[] relations = CreateFactionRelationsFrom(data.GetData(RELATIONS));
 
-            obj.TrySetFaction(new(key, index), actor);
+            obj.TrySetFaction(new(key, index), context);
 
             for (int i = 0; i < relations.Length; i++)
             {

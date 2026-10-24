@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Core.Effect
@@ -43,84 +42,13 @@ namespace Core.Effect
 
         public readonly EffectDefinition GetDefinition() => EffectDatabase.GetDefinition(this);
         public readonly EffectInstance CreateInstance(float duration) => new(this, duration);
-        internal readonly bool IsCompatibleWith(IReadOnlyList<EffectInstance> effects)
+        public readonly bool IsCompatibleWith<TContext>(TContext context)
         {
-            if (effects == null)
+            EffectCompatibility[] compatibilities = GetDefinition().Compatibilities;
+
+            for (int i = 0; i < compatibilities.Length; i++)
             {
-                Debug.LogError("Effect compatibility check failed! effect is null!?");
-                return false;
-            }
-
-            for (int i = 0; i < effects.Count; i++)
-            {
-                if (!IsCompatibleWith(effects[i]))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-        public readonly bool IsCompatibleWith(EffectID id)
-        {
-            if (id.IsValid)
-            {
-                return false;
-            }
-
-            EffectCompatibility[] validators = GetDefinition().Compatibilities;
-
-            for (int i = 0; i < validators.Length; i++)
-            {
-                if (!validators[i].IsCompatibleWith(this, id))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-        public readonly bool IsCompatibleWith(object context)
-        {
-            if (context == null)
-            {
-                Debug.LogError("Trait compatibility check failed! context is null!?");
-                return false;
-            }
-
-            EffectCompatibility[] validators = GetDefinition().Compatibilities;
-
-            for (int i = 0; i < validators.Length; i++)
-            {
-                if (!validators[i].IsCompatibleWith(this, context))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-        public readonly bool IsCompatibleWith(int context)
-        {
-            EffectCompatibility[] validators = GetDefinition().Compatibilities;
-
-            for (int i = 0; i < validators.Length; i++)
-            {
-                if (!validators[i].IsCompatibleWith(this, context))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-        public readonly bool IsCompatibleWith(ulong context)
-        {
-            EffectCompatibility[] validators = GetDefinition().Compatibilities;
-
-            for (int i = 0; i < validators.Length; i++)
-            {
-                if (!validators[i].IsCompatibleWith(this, context))
+                if (compatibilities[i] is EffectCompatibility<TContext> compatibility && !compatibility.IsCompatibleWith(this, context))
                 {
                     return false;
                 }

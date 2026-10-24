@@ -21,11 +21,9 @@ namespace Core.Trait
 
             data.SetData(TRAITS, traitTable);
         }
-        public static void ImportFrom(this TraitContainer obj, Dictionary<string, DataNode> data, object actor)
+        public static void ImportFrom<TContext>(this TraitContainer obj, Dictionary<string, DataNode> data, TContext context)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
-
-            if (actor == null) throw new ArgumentNullException(nameof(actor));
 
             Dictionary<string, DataNode> traitTable = data.GetData(TRAITS);
 
@@ -33,7 +31,7 @@ namespace Core.Trait
             {
                 string key = traitTable.GetString(i.ToString());
                 int index = TraitDatabase.GetIDIndex(key);
-                obj.TryAddTrait(new(key, index), actor);
+                obj.TryAddTrait(new(key, index), context);
             }
         }
     }

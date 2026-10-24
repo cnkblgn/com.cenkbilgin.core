@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Core
 {
     [Serializable]
-    public class Resource
+    public class ResourceContainer
     {
         public event Action<ResourceContext> OnChanged;
 
@@ -12,11 +12,14 @@ namespace Core
         [SerializeField, Min(0)] private float current;
         [SerializeField, Min(0)] private float maximum;
 
+        private readonly IResourceUser user;
         private bool isDepleted;
 
-        public Resource() : this(0, 0) { }
-        public Resource(float current, float maximum)
+        public ResourceContainer() : this(0, 0, null) { }
+        public ResourceContainer(IResourceUser user) : this(0, 0, user) { }
+        public ResourceContainer(float current, float maximum, IResourceUser user = null)
         {
+            this.user = user;
             this.current = current;
             this.maximum = maximum;
 
@@ -54,7 +57,12 @@ namespace Core
             return amount - consumed;
         }
 
-        private void SetState(ResourceState state) => OnChanged?.Invoke(new(state, current, maximum));
+        private void SetState(ResourceState state)
+        {
+            ResourceContext ctx = new(state, current, maximum);
+            user?.HandleResourceStateChanged(ctx);
+            OnChanged?.Invoke(ctx);
+        }
 
         public bool IsDepleted() => isDepleted;
 

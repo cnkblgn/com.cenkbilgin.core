@@ -11,16 +11,18 @@ namespace Core.Trait
         public event Action<TraitContext> OnChanged = null;
 
         private readonly SwapBackArray<TraitInstance> traits;
+        private readonly ITraitUser user;
 
-        public TraitContainer(uint capacity = 16) : this(new SwapBackArray<TraitInstance>(capacity)) { }
-        public TraitContainer(TraitContainer container) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.traits) { }
-        public TraitContainer(SwapBackArray<TraitInstance> traits)
+        public TraitContainer(uint capacity = 16, ITraitUser user = null) : this(new SwapBackArray<TraitInstance>(capacity), user) { }
+        public TraitContainer(TraitContainer container) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.traits, container.user) { }
+        public TraitContainer(SwapBackArray<TraitInstance> traits, ITraitUser user = null)
         {
             if (traits == null)
             {
                 throw new ArgumentNullException(nameof(traits));
             }
 
+            this.user = user;
             this.traits = new((uint)traits.Capacity);
 
             for (int i = 0; i < traits.Count; i++)
@@ -29,7 +31,12 @@ namespace Core.Trait
             }
         }
 
-        private void SetState(TraitState state, TraitInstance instance) => OnChanged?.Invoke(new(state, instance));
+        private void SetState(TraitState state, TraitInstance instance)
+        {
+            TraitContext ctx = new(state, instance);
+            user?.HandleTraitStateChanged(ctx);
+            OnChanged?.Invoke(ctx);
+        }
 
         public IReadOnlyList<TraitInstance> GetTraits() => traits;
 
@@ -46,7 +53,7 @@ namespace Core.Trait
             return false;
         }
 
-        public bool TryAddTrait(TraitID id, object context)
+        public bool TryAddTrait<TContext>(TraitID id, TContext context)
         {
             if (!id.IsValid)
             {
@@ -59,16 +66,11 @@ namespace Core.Trait
                 return false;
             }
 
-            if (!id.IsCompatibleWith(GetTraits()))
-            {
-                return false;
-            }
-
-            if (!id.IsCompatibleWith(context))
-            {
-                return false;
-            }
-
+            AddTrait(id, context);
+            return true;
+        }
+        private void AddTrait<TContext>(TraitID id, TContext context)
+        {
             TraitInstance instance = id.CreateInstance();
 
             traits.Add(instance);
@@ -78,10 +80,8 @@ namespace Core.Trait
             ApplyAction(ref added, context);
 
             SetState(TraitState.ADDED, added);
-
-            return true;
         }
-        public bool TryRemoveTrait(TraitID id, object context)
+        public bool TryRemoveTrait<TContext>(TraitID id, TContext context)
         {
             if (!id.IsValid)
             {
@@ -102,34 +102,39 @@ namespace Core.Trait
 
             return false;
         }
-
-        private void ApplyAction(ref TraitInstance instance, object context)
+        private void RemoveTrait<TContext>(int index, TContext context)
         {
-            TraitAction[] actions = instance.ID.GetDefinition().Actions;
-
-            for (int i = 0; i < actions.Length; i++)
-            {
-                actions[i].Apply(ref instance, context);
-            }
-        }
-        private void RemoveAction(ref TraitInstance instance, object context)
-        {
-            TraitAction[] actions = instance.ID.GetDefinition().Actions;
-
-            for (int i = 0; i < actions.Length; i++)
-            {
-                actions[i].Remove(ref instance, context);
-            }
-        }
-        private void RemoveTrait(int index, object context)
-        {
-            TraitInstance removed = traits[index];
+            ref TraitInstance removed = ref traits.GetRef(index);
 
             RemoveAction(ref removed, context);
 
             traits.RemoveAt(index);
 
             SetState(TraitState.REMOVED, removed);
+        }
+        private void ApplyAction<TContext>(ref TraitInstance instance, TContext context)
+        {
+            TraitAction[] actions = instance.ID.GetDefinition().Actions;
+
+            for (int i = 0; i < actions.Length; i++)
+            {
+                if (actions[i] is TraitAction<TContext> action)
+                {
+                    action.Apply(ref instance, context);
+                }
+            }
+        }
+        private void RemoveAction<TContext>(ref TraitInstance instance, TContext context)
+        {
+            TraitAction[] actions = instance.ID.GetDefinition().Actions;
+
+            for (int i = 0; i < actions.Length; i++)
+            {
+                if (actions[i] is TraitAction<TContext> action)
+                {
+                    action.Remove(ref instance, context);
+                }
+            }
         }
     }
 }

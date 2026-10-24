@@ -5,7 +5,9 @@ namespace Core.Faction
     public abstract class FactionCompatibility : ScriptableObject
     {
         public static readonly FactionCompatibility[] NONE = new FactionCompatibility[0];
-
-        public abstract bool IsCompatibleWith(FactionID id, object actor);
+    }
+    public abstract class FactionCompatibility<TContext> : ScriptableObject
+    {
+        public abstract bool IsCompatibleWith(FactionID id, TContext context);
     }
 }

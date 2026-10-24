@@ -5,15 +5,21 @@ namespace Core.Race
 {
     public class RaceContainer
     {
-        public event Action<RaceID> OnChanged;
+        public event Action<RaceContext> OnChanged;
 
+        private readonly IRaceUser user;
         private RaceID id;
 
+        public RaceContainer(IRaceUser user = null) : this(default, user) { }
         public RaceContainer(RaceContainer container) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.id) { }
-        public RaceContainer(RaceID id) => this.id = !id.IsValid ? throw new ArgumentNullException(nameof(id)) : id;
+        public RaceContainer(RaceID id, IRaceUser user = null)
+        {
+            this.id = id;
+            this.user = user;
+        }
 
         public RaceID GetRace() => id;
-        public bool TrySetRace(RaceID id, object context)
+        public bool TrySetRace<TContext>(RaceID id, TContext context)
         {
             if (id == this.id)
             {
@@ -26,42 +32,39 @@ namespace Core.Race
                 return false;
             }
 
-            if (context == null)
-            {
-                Debug.LogError("Race set failed! actor is null!?");
-                return false;
-            }
+            RemoveAction(this.id, context);
 
-            if (!id.IsCompatibleWith(context))
-            {
-                return false;
-            }
-
-            RemoveAction(id, context);
-
-            OnChanged?.Invoke(this.id = id);
+            RaceContext ctx = new(this.id = id);
+            user?.HandleRaceStateChanged(ctx);
+            OnChanged?.Invoke(ctx);
 
             ApplyAction(id, context);
 
             return true;
         }
 
-        private void ApplyAction(RaceID id, object context)
+        private void ApplyAction<TContext>(RaceID id, TContext context)
         {
             RaceAction[] actions = id.GetDefinition().Actions;
 
             for (int i = 0; i < actions.Length; i++)
             {
-                actions[i].Apply(id, context);
+                if (actions[i] is RaceAction<TContext> action)
+                {
+                    action.Apply(id, context);
+                }
             }
         }
-        private void RemoveAction(RaceID id, object context)
+        private void RemoveAction<TContext>(RaceID id, TContext context)
         {
             RaceAction[] actions = id.GetDefinition().Actions;
 
             for (int i = 0; i < actions.Length; i++)
             {
-                actions[i].Remove(id, context);
+                if (actions[i] is RaceAction<TContext> action)
+                {
+                    action.Remove(id, context);
+                }
             }
         }
     }

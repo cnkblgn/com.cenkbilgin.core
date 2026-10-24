@@ -5,22 +5,24 @@ using UnityEngine;
 namespace Core.Effect
 {
     using static CoreUtility;
-        
+
     public sealed class EffectContainer
     {
         public event Action<EffectContext> OnChanged;
 
+        private readonly IEffectUser user;
         private readonly SwapBackArray<EffectInstance> effects;
 
-        public EffectContainer(uint capacity = 16) : this(new SwapBackArray<EffectInstance>(capacity)) { }
-        public EffectContainer(EffectContainer container) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.effects) { }
-        public EffectContainer(SwapBackArray<EffectInstance> effects)
+        public EffectContainer(uint capacity = 16, IEffectUser user = null) : this(new SwapBackArray<EffectInstance>(capacity), user) { }
+        public EffectContainer(EffectContainer container) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.effects, container.user) { }
+        public EffectContainer(SwapBackArray<EffectInstance> effects, IEffectUser user = null)
         {
             if (effects == null)
             {
                 throw new ArgumentNullException(nameof(effects));
             }
 
+            this.user = user;
             this.effects = new((uint)effects.Capacity);
 
             for (int i = 0; i < effects.Count; i++)
@@ -31,14 +33,34 @@ namespace Core.Effect
 
         public IReadOnlyList<EffectInstance> GetEffects() => effects;
 
-        private void SetState(EffectState state, EffectInstance instance) => OnChanged?.Invoke(new(state, instance));
+        private void SetState(EffectState state, EffectInstance instance)
+        {
+            EffectContext ctx = new(state, instance);
+            user?.HandleEffectStateChanged(ctx);
+            OnChanged?.Invoke(ctx);
+        }
 
-        public void Tick(float deltaTime, object context)
+        public bool HasEffect(EffectID id)
+        {
+            for (int i = 0; i < effects.Count; i++)
+            {
+                ref EffectInstance registered = ref effects.GetRef(i);
+
+                if (registered.ID == id)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public void Tick<TContext>(float deltaTime, TContext context)
         {
             for (int i = effects.Count - 1; i >= 0; i--)
             {
                 ref EffectInstance registered = ref effects.GetRef(i);
-    
+
                 registered.TimeRemaining -= deltaTime;
 
                 if (registered.TickInterval > 0)
@@ -61,29 +83,18 @@ namespace Core.Effect
                 }
             }
         }
-
-        public bool TryAddEffect(EffectInstance instance, object context)
+        public bool TryAddEffect<TContext>(EffectInstance instance, TContext context)
         {
-            if (!instance.ID.IsCompatibleWith(context))
+            if (HasEffect(instance.ID))
             {
                 return false;
             }
 
-            if (!instance.ID.IsCompatibleWith(GetEffects()))
-            {
-                return false;
-            }
-
-            for (int i = 0; i < effects.Count; i++)
-            {
-                ref EffectInstance registered = ref effects.GetRef(i);
-
-                if (registered.ID == instance.ID)
-                {
-                    return false;
-                }
-            }
-
+            AddEffect(instance, context);
+            return true;
+        }
+        private void AddEffect<TContext>(EffectInstance instance, TContext context)
+        {
             effects.Add(instance);
 
             ref EffectInstance added = ref effects.GetRef(effects.Count - 1);
@@ -91,10 +102,8 @@ namespace Core.Effect
             ApplyAction(ref added, context);
 
             SetState(EffectState.ADDED, added);
-
-            return true;
         }
-        public bool TryRemoveEffect(EffectID id, object context)
+        public bool TryRemoveEffect<TContext>(EffectID id, TContext context)
         {
             if (!id.IsValid)
             {
@@ -115,42 +124,51 @@ namespace Core.Effect
 
             return false;
         }
-        
-        private void TickAction(ref EffectInstance instance, object context)
+        private void RemoveEffect<TContext>(int index, TContext context)
         {
-            EffectAction[] actions = instance.ID.GetDefinition().Actions;
-
-            for (int i = 0; i < actions.Length; i++)
-            {
-                actions[i].Tick(ref instance, context);
-            }
-        }
-        private void ApplyAction(ref EffectInstance instance, object context)
-        {
-            EffectAction[] actions = instance.ID.GetDefinition().Actions;
-
-            for (int i = 0; i < actions.Length; i++)
-            {
-                actions[i].Apply(ref instance, context);
-            }
-        }
-        private void RemoveAction(ref EffectInstance instance, object context)
-        {
-            EffectAction[] actions = instance.ID.GetDefinition().Actions;
-
-            for (int i = 0; i < actions.Length; i++)
-            {
-                actions[i].Removed(ref instance, context);
-            }
-        }
-        private void RemoveEffect(int index, object context)
-        {
-            EffectInstance removed = effects[index];
+            ref EffectInstance removed = ref effects.GetRef(index);
 
             RemoveAction(ref removed, context);
+
             effects.RemoveAt(index);
 
             SetState(EffectState.REMOVED, removed);
+        }
+        private void TickAction<TContext>(ref EffectInstance instance, TContext context)
+        {
+            EffectAction[] actions = instance.ID.GetDefinition().Actions;
+
+            for (int i = 0; i < actions.Length; i++)
+            {
+                if (actions[i] is EffectAction<TContext> action)
+                {
+                    action.Tick(ref instance, context);
+                }
+            }
+        }
+        private void ApplyAction<TContext>(ref EffectInstance instance, TContext context)
+        {
+            EffectAction[] actions = instance.ID.GetDefinition().Actions;
+
+            for (int i = 0; i < actions.Length; i++)
+            {
+                if (actions[i] is EffectAction<TContext> action)
+                {
+                    action.Apply(ref instance, context);
+                }
+            }
+        }
+        private void RemoveAction<TContext>(ref EffectInstance instance, TContext context)
+        {
+            EffectAction[] actions = instance.ID.GetDefinition().Actions;
+
+            for (int i = 0; i < actions.Length; i++)
+            {
+                if (actions[i] is EffectAction<TContext> action)
+                {
+                    action.Remove(ref instance, context);
+                }
+            }
         }
     }
 }

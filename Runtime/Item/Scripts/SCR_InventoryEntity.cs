@@ -24,11 +24,11 @@ namespace Core.Item
         [SerializeField] private float dropForce = 5;
 
         private InventoryData thisInventory = null;
-        private IInventoryHandler thisHandler = null;
+        private IInventoryEntityHandler[] thisHandlers = null;
 
         private void Awake()
         {
-            thisHandler = GetComponent<IInventoryHandler>();
+            thisHandlers = GetComponents<IInventoryEntityHandler>();
             thisInventory = new(width, height, weight, whitelistedItems);
 
             foreach (ItemID item in startingItems)
@@ -41,7 +41,11 @@ namespace Core.Item
         public void HandleStateChanged(InventoryContext ctx)
         {
             OnStateChanged?.Invoke(ctx);
-            thisHandler?.HandleStateChanged(in ctx);
+
+            for (int i = 0; i < thisHandlers.Length; i++)
+            {
+                thisHandlers[i]?.HandleStateChanged(in ctx);
+            }
         }
 
         public static InventoryEntity Create(int width, int height, int weight)

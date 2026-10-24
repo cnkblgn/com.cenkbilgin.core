@@ -8,11 +8,12 @@ namespace Core.Stat
     {
         public event Action<StatContext> OnChanged;
 
+        private readonly IStatUser user;
         private readonly Dictionary<StatID, float> stats;
         private readonly List<StatModifier> modifiers;
         private StatState state;
 
-        public StatContainer() : this(new(), new()) 
+        public StatContainer(IStatUser user = null) : this(new(), new(), user) 
         {
             stats = new Dictionary<StatID, float>();
 
@@ -21,12 +22,13 @@ namespace Core.Stat
                 stats[definition.ID] = definition.Default;
             }
         }
-        public StatContainer(StatContainer container) : this(container == null ? throw new ArgumentNullException() : container.stats, container.modifiers) { }
-        public StatContainer(Dictionary<StatID, float> stats, List<StatModifier> modifiers)
+        public StatContainer(StatContainer container) : this(container == null ? throw new ArgumentNullException() : container.stats, container.modifiers, container.user) { }
+        public StatContainer(Dictionary<StatID, float> stats, List<StatModifier> modifiers, IStatUser user = null)
         {
             if (stats == null) throw new ArgumentNullException();
             if (modifiers == null) throw new ArgumentNullException();
 
+            this.user = user;
             this.stats = new(stats);
             this.modifiers = new(modifiers);
         }
@@ -34,7 +36,11 @@ namespace Core.Stat
         private void SetState(StatState state, StatModifier modifier)
         {
             this.state = state;
-            OnChanged?.Invoke(new(this.state, modifier));
+
+            StatContext ctx = new(this.state, modifier);
+
+            user?.HandleStatStateChanged(ctx);
+            OnChanged?.Invoke(ctx);
         }
         private void SetState(StatState state) => SetState(state, StatModifier.Empty);
 
