@@ -50,7 +50,7 @@ namespace Core.Item
         {
             for (int i = 0; i < priority.Count; i++)
             {
-                if (item.Tags.HasAny(priority[i].Mask))
+                if (item.Mask.HasAny(priority[i].Mask))
                 {
                     return i;
                 }

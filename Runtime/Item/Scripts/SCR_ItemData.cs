@@ -9,7 +9,7 @@ namespace Core.Item
         public readonly Dictionary<string, DataNode> Data;
         public readonly ItemID BaseID;
         public readonly Guid InstanceID;
-        public readonly ulong Tags;
+        public readonly ItemMask Mask;
 
         private Vector2Int position;
         private int stack;
@@ -23,7 +23,7 @@ namespace Core.Item
             this.position = position;
             this.stack = stack;
             this.isRotated = isRotated;
-            this.Tags = BaseID.GetDefinition().Tags;
+            this.Mask = BaseID.GetDefinition().Mask;
         }
         public ItemData(ItemID id) : this(id, Guid.NewGuid(), null, Vector2Int.zero, 1, false)
         {

@@ -20,6 +20,11 @@ namespace Core.Item
                 return;
             }
 
+            if (_tags.Length > 63)
+            {
+                throw new InvalidOperationException("Item database supports a maximum of 63 non-generic tags.");
+            }
+
             tagLookup.Clear();
             idLookup.Clear();
 
@@ -118,7 +123,7 @@ namespace Core.Item
         }
 
         public static void GetItemsByTag(ref List<ItemID> items, params ItemTag[] tags) => GetItemsByTag(ref items, tags.CreateMask());
-        public static void GetItemsByTag(ref List<ItemID> items, ulong tags)
+        public static void GetItemsByTag(ref List<ItemID> items, ItemMask mask)
         {
             if (items == null)
             {
@@ -129,7 +134,7 @@ namespace Core.Item
 
             foreach (ItemDefinition definition in definitions)
             {
-                if (definition.Tags.HasAny(tags))
+                if (definition.Mask.HasAny(mask))
                 {
                     items.Add(definition.ID);
                 }

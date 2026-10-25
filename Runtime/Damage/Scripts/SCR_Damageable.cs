@@ -25,14 +25,14 @@ namespace Core.Damage
 
         private IDamageableHandler[] thisHandlers;
         private DamageContext lastContext;
-        private ulong ignoredTagMask;
+        private DamageMask ignoredMask;
 
         private void Awake()
         {
             if (origin == null) throw new NullReferenceException(nameof(origin));
 
             thisHandlers = GetComponents<IDamageableHandler>();
-            ignoredTagMask = ignoredTags.CreateMask();
+            ignoredMask = ignoredTags.CreateMask();
         }
 
         public void Bind(ResourceContainer health) => this.health = health ?? throw new ArgumentNullException(nameof(health), "You are trying to bind null health resource!? please assign valid resource!");
@@ -69,12 +69,12 @@ namespace Core.Damage
         {
             float value = data.Damage;
 
-            if (ignoredTagMask.HasAny(data.Tags))
+            if (ignoredMask.HasAny(new DamageMask(data.Mask)))
             {
                 return 0;
             }
 
-            value = ResolveProtection(value, data.Tags);
+            value = ResolveProtection(value, data.Mask);
 
             for (int i = 0; i < thisHandlers.Length; i++)
             {
@@ -89,7 +89,7 @@ namespace Core.Damage
             {
                 DamageProtection protection = protections[i];
 
-                if (tags.HasAny(protection.Tag.Mask))
+                if (tags.HasAny(protection.Tag.Mask.Value))
                 {
                     value -= value * protection.Percent;
                 }
@@ -131,7 +131,7 @@ namespace Core.Damage
         {
             ignoredTags = tags;
 
-            ignoredTagMask = ignoredTags.CreateMask();
+            ignoredMask = ignoredTags.CreateMask();
         }
     }
 }

@@ -22,12 +22,12 @@ namespace Core.Item
         public readonly int GridWidth;
         public readonly int GridHeight;
         public readonly int MaximumWeight;
-        public readonly ulong ItemMask;
+        public readonly ItemMask ItemMask;
 
         private ItemData[] itemGrid;
         private readonly Dictionary<Guid, ItemData> itemTable;
 
-        public InventoryData(List<ItemData> items, int width, int height, int maxWeight, ulong mask)
+        public InventoryData(List<ItemData> items, int width, int height, int maxWeight, ItemMask mask)
         {
             GridWidth = Mathf.Clamp(width, MIN_WIDTH, MAX_WIDTH);
             GridHeight = Mathf.Clamp(height, MIN_HEIGHT, MAX_HEIGHT);
@@ -52,10 +52,10 @@ namespace Core.Item
                 }
             }
         }
-        public InventoryData(List<ItemData> items, int width, int height, int maxWeight, ItemTag[] masks) : this(items, width, height, maxWeight, (masks != null ? masks.ToArray() : ItemDatabase.GetTags().ToArray()).CreateMask()) { }
+        public InventoryData(List<ItemData> items, int width, int height, int maxWeight, ItemTag[] tags) : this(items, width, height, maxWeight, (tags != null ? tags.ToArray() : ItemDatabase.GetTags().ToArray()).CreateMask()) { }
         public InventoryData(InventoryData data) : this(data?.itemTable.Values.ToList() ?? throw new ArgumentNullException(nameof(data)), data.GridWidth, data.GridHeight, data.MaximumWeight, data.ItemMask) { }
-        public InventoryData(int width, int height, int maxWeight, ItemTag[] masks) : this(new(), width, height, maxWeight, masks) { }
-        public InventoryData(int width, int height, int maxWeight, ulong mask) : this(new(), width, height, maxWeight, mask) { }
+        public InventoryData(int width, int height, int maxWeight, ItemTag[] tags) : this(new(), width, height, maxWeight, tags) { }
+        public InventoryData(int width, int height, int maxWeight, ItemMask mask) : this(new(), width, height, maxWeight, mask) { }
 
         private void Notify(InventoryState state, InventoryResult result, ItemData item = null) => User?.HandleInventoryChanged(new(state, result, item));
 
@@ -254,9 +254,9 @@ namespace Core.Item
             return false;
         }
         /// <summary> Finds the first item that matches any of the given tags. </summary>
-        public bool TryGetItemByTag(ulong tags, out ItemData registered, out InventoryResult result) => TryGetItemByFilter(static (item, tags) => item.Tags.HasAny(tags), tags, out registered, out result);
+        public bool TryGetItemByTag(ItemMask mask, out ItemData registered, out InventoryResult result) => TryGetItemByFilter(static (item, tags) => item.Mask.HasAny(tags), mask, out registered, out result);
         /// <summary> Finds all items that match any of the given tags. </summary>
-        public bool TryGetItemsByTag(ulong tags, List<ItemData> registered, out InventoryResult result) => TryGetItemsByFilter(static (item, tags) => item.Tags.HasAny(tags), tags, registered, out result);
+        public bool TryGetItemsByTag(ItemMask mask, List<ItemData> registered, out InventoryResult result) => TryGetItemsByFilter(static (item, tags) => item.Mask.HasAny(tags), mask, registered, out result);
         /// <summary> Finds the first item with the given base ID. </summary>
         public bool TryGetItemByBaseID(ItemID baseID, out ItemData registered, out InventoryResult result) => TryGetItemByFilter(static (item, baseID) => item.BaseID == baseID, baseID, out registered, out result);
         /// <summary> Finds all items with the given base ID to the provided list. </summary>
@@ -1066,7 +1066,7 @@ namespace Core.Item
                 throw new ArgumentNullException(nameof(item), "Add item failed item missing!?");
             }
 
-            if (!item.Tags.HasAny(ItemMask))
+            if (!item.Mask.HasAny(ItemMask))
             {
                 result = InventoryResult.NOT_SUPPORTED;
                 return false;

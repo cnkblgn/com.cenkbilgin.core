@@ -25,13 +25,13 @@ namespace Core.Damage
                 return index;
             }
         }
-        public ulong Mask
+        public DamageMask Mask
         {
             get
             {
                 int value = Index;
 
-                return value >= 0 && value < 64 ? 1UL << value : 0;
+                return new(value >= 0 && value < 64 ? 1UL << value : 0);
             }
         }
 
@@ -52,21 +52,21 @@ namespace Core.Damage
         readonly void ISerializationCallbackReceiver.OnBeforeSerialize() { }
         void ISerializationCallbackReceiver.OnAfterDeserialize() => resolved = false;
 
-        public static ulong CreateMask(DamageTag[] tags)
+        public static DamageMask CreateMask(DamageTag[] tags)
         {
             ulong mask = 0;
 
             if (tags == null)
             {
-                return mask;
+                return default;
             }
 
             for (int i = 0; i < tags.Length; i++)
             {
-                mask |= tags[i].Mask;
+                mask |= tags[i].Mask.Value;
             }
 
-            return mask;
+            return new(mask);
         }
     }
 }

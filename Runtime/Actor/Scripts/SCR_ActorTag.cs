@@ -26,13 +26,13 @@ namespace Core.Actors
                 return index;
             }
         }
-        public ulong Mask
+        public ActorMask Mask
         {
             get
             {
                 int value = Index;
 
-                return value >= 0 && value < 64 ? 1UL << value : 0;
+                return new(value >= 0 && value < 64 ? 1UL << value : 0);
             }
         }
 
@@ -56,22 +56,21 @@ namespace Core.Actors
         public static bool operator !=(ActorTag left, ActorTag right) => !left.Equals(right);
         readonly void ISerializationCallbackReceiver.OnBeforeSerialize() { }
         void ISerializationCallbackReceiver.OnAfterDeserialize() => resolved = false;
-
-        public static ulong CreateMask(ActorTag[] tags)
+        public static ActorMask CreateMask(ActorTag[] tags)
         {
             ulong mask = 0;
 
             if (tags == null)
             {
-                return mask;
+                return default;
             }
 
             for (int i = 0; i < tags.Length; i++)
             {
-                mask |= tags[i].Mask;
+                mask |= tags[i].Mask.Value;
             }
 
-            return mask;
+            return new(mask);
         }
         public readonly bool TryGetAnyActor(out Actor actor) => ActorDatabase.TryGetAnyActor(this, out actor);
         public readonly bool TryGetAllActors(out List<Actor> actors) => ActorDatabase.TryGetAllActors(this, out actors);

@@ -18,6 +18,11 @@ namespace Core.Race
                 return;
             }
 
+            if (_tags.Length > 63)
+            {
+                throw new InvalidOperationException("Race database supports a maximum of 63 non-generic tags.");
+            }
+
             idLookup.Clear();
             tagLookup.Clear();
 

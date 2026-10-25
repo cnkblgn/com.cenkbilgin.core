@@ -27,6 +27,11 @@ namespace Core.Actors
                 return;
             }
 
+            if (_tags.Length > 63)
+            {
+                throw new InvalidOperationException("Actor database supports a maximum of 63 non-generic tags.");
+            }
+
             idLookup.Clear();
             tagLookup.Clear();
             tags = new ActorTag[_tags.Length + 1];
@@ -96,7 +101,7 @@ namespace Core.Actors
 
             return groups[index].ID;
         }
-        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : 1;
+        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
         public static ActorTag GetTag(int index)
         {
             if (index >= tags.Length || index < 0)
@@ -132,11 +137,11 @@ namespace Core.Actors
         }
         public static bool TryGetAnyActor(ActorTag tag, out Actor actor) => TryGetAnyActor(tag.Mask, out actor);
         public static bool TryGetAnyActor(ActorTag[] tags, out Actor actor) => TryGetAnyActor(tags.CreateMask(), out actor);
-        public static bool TryGetAnyActor(ulong tags, out Actor actor)
+        public static bool TryGetAnyActor(ActorMask mask, out Actor actor)
         {
             actor = null;
 
-            if (tags == 0)
+            if (!mask.IsValid)
             {
                 return false;
             }
@@ -149,7 +154,7 @@ namespace Core.Actors
                 {
                     Actor tempActor = entries[j].Actor;
 
-                    if (tempActor.HasAny(tags))
+                    if (tempActor.Mask.HasAny(mask))
                     {
                         actor = tempActor;
                         return true;
@@ -175,11 +180,11 @@ namespace Core.Actors
         }
         public static bool TryGetAllActors(ActorTag tag, out List<Actor> actors) => TryGetAllActors(tag.Mask, out actors);
         public static bool TryGetAllActors(ActorTag[] tags, out List<Actor> actors) => TryGetAllActors(tags.CreateMask(), out actors);
-        public static bool TryGetAllActors(ulong tags, out List<Actor> actors)
+        public static bool TryGetAllActors(ActorMask mask, out List<Actor> actors)
         {
             actors = new();
 
-            if (tags == 0)
+            if (!mask.IsValid)
             {
                 return false;
             }
@@ -192,9 +197,9 @@ namespace Core.Actors
 
                 for (int j = 0; j < entries.Count; j++)
                 {
-                    Actor tempActor = entries[i].Actor;
+                    Actor tempActor = entries[j].Actor;
 
-                    if (tempActor.HasAny(tags))
+                    if (tempActor.Mask.HasAny(mask))
                     {
                         actors.Add(tempActor);
                         found = true;

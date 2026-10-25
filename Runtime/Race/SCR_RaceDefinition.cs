@@ -3,7 +3,7 @@ namespace Core.Race
     public sealed class RaceDefinition
     {
         public readonly RaceID ID;
-        public readonly ulong Tags;
+        public readonly RaceMask Mask;
         public readonly RaceVisual Visual;
         internal readonly RaceAction[] Actions;
         internal readonly RaceCompatibility[] Compatibilities;
@@ -12,10 +12,10 @@ namespace Core.Race
         public readonly string NameID;
         public readonly string DescID;
 
-        internal RaceDefinition(RaceID id, ulong tags, RaceVisual visual, RaceAction[] actions, RaceCompatibility[] compatibilities)
+        internal RaceDefinition(RaceID id, RaceMask mask, RaceVisual visual, RaceAction[] actions, RaceCompatibility[] compatibilities)
         {
             ID = id;
-            Tags = tags;
+            Mask = mask;
             Visual = visual != null ? visual : RaceVisual.NONE;
             Actions = actions ?? RaceAction.NONE;
             Compatibilities = compatibilities ?? RaceCompatibility.NONE;

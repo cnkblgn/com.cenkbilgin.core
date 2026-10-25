@@ -1,11 +1,9 @@
-using System;
-
 namespace Core.Item
 {
     public sealed class ItemDefinition
     {
         public readonly ItemID ID;
-        public readonly ulong Tags;
+        public readonly ItemMask Mask;
         public readonly string PrefabID;
         public readonly string IconID;
         public readonly string NameID;
@@ -20,7 +18,7 @@ namespace Core.Item
         internal ItemDefinition(ItemID id, ItemTag[] tags, int width, int height, int stack, float weight, ItemComponent component, ItemAction[] actions)
         {
             ID = id;
-            Tags = tags == null ? 0 : tags.CreateMask();
+            Mask = tags == null ? default : tags.CreateMask();
             PrefabID = $"Item{ID.Key}";
             IconID = $"Item{ID.Key}";
             NameID = $"item.{ID.Key}Name";

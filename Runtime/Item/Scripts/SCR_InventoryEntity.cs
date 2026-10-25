@@ -98,11 +98,11 @@ namespace Core.Item
         /// <summary> Finds the first item that matches any of the given tags. </summary>
         public bool TryGetItemByTag(ItemTag tag, out ItemData registered, out InventoryResult result) => thisInventory.TryGetItemByTag(tag.Mask, out registered, out result);
         /// <summary> Finds the first item that matches any of the given tags. </summary>
-        public bool TryGetItemByTag(ulong tags, out ItemData registered, out InventoryResult result) => thisInventory.TryGetItemByTag(tags, out registered, out result);
+        public bool TryGetItemByTag(ItemMask mask, out ItemData registered, out InventoryResult result) => thisInventory.TryGetItemByTag(mask, out registered, out result);
         /// <summary> Finds all items that match any of the given tags. </summary>
         public bool TryGetItemsByTag(ItemTag[] tags, List<ItemData> registered, out InventoryResult result) => thisInventory.TryGetItemsByTag(tags.CreateMask(), registered, out result);
         /// <summary> Finds all items that match any of the given tags. </summary>
-        public bool TryGetItemsByTag(ulong tags, List<ItemData> registered, out InventoryResult result) => thisInventory.TryGetItemsByTag(tags, registered, out result);
+        public bool TryGetItemsByTag(ItemMask mask, List<ItemData> registered, out InventoryResult result) => thisInventory.TryGetItemsByTag(mask, registered, out result);
         /// <summary> Finds the first item with the given base ID. </summary>
         public bool TryGetItemByBaseID(ItemID baseID, out ItemData registered, out InventoryResult result) => thisInventory.TryGetItemByBaseID(baseID, out registered, out result);
         /// <summary> Finds all items with the given base ID to the provided list. </summary>

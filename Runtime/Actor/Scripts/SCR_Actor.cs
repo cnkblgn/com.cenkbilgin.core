@@ -19,7 +19,7 @@ namespace Core.Actors
             }
         } 
         public ActorID ID => id;
-        public ulong Tags { get; private set; }
+        public ActorMask Mask { get; private set; }
 
         [Header("_")]
         [SerializeField] private ActorID id;
@@ -29,7 +29,7 @@ namespace Core.Actors
 
         private void Awake()
         {
-            Tags = ActorTag.CreateMask(tags);
+            Mask = ActorTag.CreateMask(tags);
 
             ActorDatabase.RegisterActor(id, this);
         }

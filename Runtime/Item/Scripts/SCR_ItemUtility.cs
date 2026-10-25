@@ -6,13 +6,9 @@ namespace Core.Item
 {
     public static class ItemUtility
     {
-        public static ulong CreateMask(this ItemTag[] tags) => ItemTag.CreateMask(tags);
-
-        public static bool HasAll(this ulong @base, ItemTag target) => @base.HasAll(target.Mask);
-        public static bool HasAny(this ulong @base, ItemTag target) => @base.HasAny(target.Mask);
-
-        public static bool HasAll(this ItemTag[] @base, ItemTag[] target) => CreateMask(@base).HasAll(CreateMask(target));
-        public static bool HasAny(this ItemTag[] @base, ItemTag[] target) => CreateMask(@base).HasAny(CreateMask(target));
+        public static ItemMask CreateMask(this ItemTag[] tags) => ItemTag.CreateMask(tags);
+        public static bool HasAll(this ItemTag[] @base, ItemTag[] target) => CreateMask(@base).HasAll(target);
+        public static bool HasAny(this ItemTag[] @base, ItemTag[] target) => CreateMask(@base).HasAny(target);
 
 
         #region IMPORT / EXPORT
@@ -69,7 +65,7 @@ namespace Core.Item
             data.SetInt(WIDTH, obj.GridWidth);
             data.SetInt(HEIGHT, obj.GridHeight);
             data.SetInt(WEIGHT, obj.MaximumWeight);
-            data.SetMask(MASK, obj.ItemMask);
+            data.SetMask(MASK, obj.ItemMask.Value);
             data.SetData(ITEMS, itemTable);
         }
         public static InventoryData CreateInventoryFrom(Dictionary<string, DataNode> data)
@@ -79,7 +75,7 @@ namespace Core.Item
             int width = data.GetInt(WIDTH);
             int height = data.GetInt(HEIGHT);
             int weight = data.GetInt(WEIGHT);
-            ulong mask = data.GetMask(MASK);
+            ItemMask mask = new(data.GetMask(MASK));
             Dictionary<string, DataNode> itemTable = data.GetData(ITEMS);
 
             InventoryData inventory = new(width, height, weight, mask);

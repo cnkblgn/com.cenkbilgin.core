@@ -10,7 +10,7 @@ namespace Core.Damage
         public readonly Vector3 Normal;
         public readonly Vector3 Direction;
         public readonly DamageMode Mode;
-        public readonly ulong Tags;
+        public readonly ulong Mask;
         public readonly uint Context;
         public readonly float Radius;
         public readonly float Damage;
@@ -24,13 +24,13 @@ namespace Core.Damage
             Normal = normal;
             Direction = direction;
             Mode = mode;
-            Tags = tags;
+            Mask = tags;
             Context = context;
             Radius = radius;
             Damage = damage;
             Force = force;
         }
-        public DamageData(Transform owner, Collider collider, Vector3 position, Vector3 normal, Vector3 direction, DamageMode mode, DamageTag tag, uint context, float radius, float damage, float force) : this(owner, collider, position, normal, direction, mode, tag.Mask, context, radius, damage, force) { }
-        public DamageData(Transform owner, Collider collider, Vector3 position, Vector3 normal, Vector3 direction, DamageMode mode, DamageTag[] tags, uint context, float radius, float damage, float force) : this(owner, collider, position, normal, direction, mode, tags.CreateMask(), context, radius, damage, force) { }
+        public DamageData(Transform owner, Collider collider, Vector3 position, Vector3 normal, Vector3 direction, DamageMode mode, DamageTag tag, uint context, float radius, float damage, float force) : this(owner, collider, position, normal, direction, mode, tag.Mask.Value, context, radius, damage, force) { }
+        public DamageData(Transform owner, Collider collider, Vector3 position, Vector3 normal, Vector3 direction, DamageMode mode, DamageTag[] tags, uint context, float radius, float damage, float force) : this(owner, collider, position, normal, direction, mode, tags.CreateMask().Value, context, radius, damage, force) { }
     }
 }

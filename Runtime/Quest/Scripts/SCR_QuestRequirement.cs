@@ -37,9 +37,9 @@ namespace Core.Quest
                 return false;
             }
 
-            ulong requiredTags = Tags.CreateMask();
+            ActorMask mask = Tags.CreateMask();
 
-            if (!context.Tags.HasAll(requiredTags))
+            if (!context.Tags.HasAll(mask.Value))
             {
                 return false;
             }

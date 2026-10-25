@@ -5,7 +5,7 @@ namespace Core.Surface
 {
     public sealed class SurfaceStatic : Surface
     {
-        public ulong Tags { get; private set; }
+        public SurfaceMask Mask { get; private set; }
 
         [Header("_")]
         [SerializeField] private SurfaceTag[] tags;
@@ -22,13 +22,12 @@ namespace Core.Surface
                 this.tags[i] = tags[i];
             }
 
-            Tags = SurfaceTag.CreateMask(tags);
+            Mask = SurfaceTag.CreateMask(tags);
         }
 
-        public override bool TryGetSurface(in SurfaceContext ctx, out ulong tag)
+        public override bool TryGetSurface(in SurfaceContext ctx, out SurfaceMask mask)
         {
-            tag = Tags;
-
+            mask = Mask;
             return true;
         }
     }

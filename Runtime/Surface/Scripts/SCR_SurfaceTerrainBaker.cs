@@ -49,7 +49,7 @@ namespace Core.Surface
 
             foreach (var mapping in mappings)
             {
-                lookup[mapping.Layer] = SurfaceTag.CreateMask(mapping.Tags);
+                lookup[mapping.Layer] = SurfaceTag.CreateMask(mapping.Tags).Value;
             }
 
             ulong[] tags = new ulong[resolution * resolution];

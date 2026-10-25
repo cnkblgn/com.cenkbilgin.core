@@ -3,8 +3,6 @@ using UnityEngine;
 
 namespace Core.Surface
 {
-    using static CoreUtility;
-
     public sealed class SurfaceTerrain : Surface
     {
         [Header("_")]
@@ -14,14 +12,13 @@ namespace Core.Surface
         {
             if (map == null)
             {
-                throw new NullReferenceException($"terrain surface map is missing! {nameof(map)}");
+                throw new NullReferenceException($"Terrain surface map is missing! {nameof(map)}");
             }
         }
 
-        public override bool TryGetSurface(in SurfaceContext ctx, out ulong tag)
+        public override bool TryGetSurface(in SurfaceContext ctx, out SurfaceMask mask)
         {
-            tag = map.GetTag(ctx.Position);
-
+            mask = new(map.GetTag(ctx.Position));
             return true;
         }
     }

@@ -16,6 +16,11 @@ namespace Core.Surface
                 return;
             }
 
+            if (_tags.Length > 63)
+            {
+                throw new InvalidOperationException("Surface database supports a maximum of 63 non-generic tags.");
+            }
+
             tagLookup.Clear();
             tags = new SurfaceTag[_tags.Length + 1];
             tags[0] = SurfaceTag.GENERIC;

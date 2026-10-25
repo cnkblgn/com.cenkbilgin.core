@@ -226,7 +226,7 @@ namespace Core.Quest
                         sb.Append(requirement.Source.Key);
                     }
 
-                    ulong tagMask = requirement.Tags.CreateMask();
+                    ulong tagMask = requirement.Tags.CreateMask().Value;
 
                     if (tagMask != 0)
                     {
