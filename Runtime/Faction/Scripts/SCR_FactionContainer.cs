@@ -38,6 +38,11 @@ namespace Core.Faction
         }
         public void AddHandler(IFactionHandler handler)
         {
+            if (handler == null)
+            {
+                throw new ArgumentNullException(nameof(handler));
+            }
+
             if (handlers.Contains(handler))
             {
                 return;
@@ -47,6 +52,11 @@ namespace Core.Faction
         }
         public void RemoveHandler(IFactionHandler handler)
         {
+            if (handler == null)
+            {
+                throw new ArgumentNullException(nameof(handler));
+            }
+
             if (!handlers.Contains(handler))
             {
                 return;

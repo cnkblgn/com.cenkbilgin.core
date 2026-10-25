@@ -22,8 +22,8 @@ namespace Core.Effect
                 throw new ArgumentNullException(nameof(effects));
             }
 
-            this.handlers = handlers == null ? new() : new(handlers);
             this.effects = new((uint)effects.Capacity);
+            this.handlers = handlers == null ? new() : new(handlers);
 
             for (int i = 0; i < effects.Count; i++)
             {
@@ -42,6 +42,11 @@ namespace Core.Effect
         }
         public void AddHandler(IEffectHandler handler)
         {
+            if (handler == null)
+            {
+                throw new ArgumentNullException(nameof(handler));
+            }
+
             if (handlers.Contains(handler))
             {
                 return;
@@ -51,6 +56,11 @@ namespace Core.Effect
         }
         public void RemoveHandler(IEffectHandler handler)
         {
+            if (handler == null)
+            {
+                throw new ArgumentNullException(nameof(handler));
+            }
+
             if (!handlers.Contains(handler))
             {
                 return;

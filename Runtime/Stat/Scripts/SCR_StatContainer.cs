@@ -42,6 +42,11 @@ namespace Core.Stat
         }
         public void AddHandler(IStatHandler handler)
         {
+            if (handler == null)
+            {
+                throw new ArgumentNullException(nameof(handler));
+            }
+
             if (handlers.Contains(handler))
             {
                 return;
@@ -51,6 +56,11 @@ namespace Core.Stat
         }
         public void RemoveHandler(IStatHandler handler)
         {
+            if (handler == null)
+            {
+                throw new ArgumentNullException(nameof(handler));
+            }
+
             if (!handlers.Contains(handler))
             {
                 return;

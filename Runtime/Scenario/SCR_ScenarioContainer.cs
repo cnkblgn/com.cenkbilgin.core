@@ -28,6 +28,11 @@ namespace Core.Scenario
         }
         public void AddHandler(IScenarioHandler handler)
         {
+            if (handler == null)
+            {
+                throw new ArgumentNullException(nameof(handler));
+            }
+
             if (handlers.Contains(handler))
             {
                 return;
@@ -37,6 +42,11 @@ namespace Core.Scenario
         }
         public void RemoveHandler(IScenarioHandler handler)
         {
+            if (handler == null)
+            {
+                throw new ArgumentNullException(nameof(handler));
+            }
+
             if (!handlers.Contains(handler))
             {
                 return;

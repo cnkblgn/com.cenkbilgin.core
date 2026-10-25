@@ -28,6 +28,11 @@ namespace Core.Race
         }
         public void AddHandler(IRaceHandler handler)
         {
+            if (handler == null)
+            {
+                throw new ArgumentNullException(nameof(handler));
+            }
+
             if (handlers.Contains(handler))
             {
                 return;
@@ -37,6 +42,11 @@ namespace Core.Race
         }
         public void RemoveHandler(IRaceHandler handler)
         {
+            if (handler == null)
+            {
+                throw new ArgumentNullException(nameof(handler));
+            }
+
             if (!handlers.Contains(handler))
             {
                 return;

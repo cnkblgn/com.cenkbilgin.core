@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Core
@@ -12,19 +13,63 @@ namespace Core
         [SerializeField, Min(0)] private float current;
         [SerializeField, Min(0)] private float maximum;
 
-        private readonly IResourceHandler user;
+        private readonly List<IResourceHandler> handlers;
         private bool isDepleted;
 
         public ResourceContainer() : this(0, 0, null) { }
-        public ResourceContainer(IResourceHandler user) : this(0, 0, user) { }
-        public ResourceContainer(float current, float maximum, IResourceHandler user = null)
+        public ResourceContainer(List<IResourceHandler> handlers) : this(0, 0, handlers) { }
+        public ResourceContainer(float current, float maximum, List<IResourceHandler> handlers = null)
         {
-            this.user = user;
             this.current = current;
             this.maximum = maximum;
+            this.handlers = handlers == null ? new() : new(handlers);
 
             isDepleted = false;
         }
+
+        private void NotifyHandlers(in ResourceContext ctx)
+        {
+            for (int i = 0; i < handlers.Count; i++)
+            {
+                handlers[i]?.HandleResourceChanged(in ctx);
+            }
+        }
+        public void AddHandler(IResourceHandler handler)
+        {
+            if (handler == null)
+            {
+                throw new ArgumentNullException(nameof(handler));
+            }
+
+            if (handlers.Contains(handler))
+            {
+                return;
+            }
+
+            handlers.Add(handler);
+        }
+        public void RemoveHandler(IResourceHandler handler)
+        {
+            if (handler == null)
+            {
+                throw new ArgumentNullException(nameof(handler));
+            }
+
+            if (!handlers.Contains(handler))
+            {
+                return;
+            }
+
+            handlers.Remove(handler);
+        }
+        private void SetState(ResourceState state)
+        {
+            ResourceContext ctx = new(state, current, maximum);
+            NotifyHandlers(in ctx);
+            OnChanged?.Invoke(ctx);
+        }
+
+        public bool IsDepleted() => isDepleted;
 
         public float Add(float amount)
         {
@@ -56,15 +101,6 @@ namespace Core
 
             return amount - consumed;
         }
-
-        private void SetState(ResourceState state)
-        {
-            ResourceContext ctx = new(state, current, maximum);
-            user?.HandleResourceChanged(ctx);
-            OnChanged?.Invoke(ctx);
-        }
-
-        public bool IsDepleted() => isDepleted;
 
         public float GetCurrent() => current;
         public void SetCurrent(float value)

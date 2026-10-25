@@ -40,6 +40,11 @@ namespace Core.Trait
         }
         public void AddHandler(ITraitHandler handler)
         {
+            if (handler == null)
+            {
+                throw new ArgumentNullException(nameof(handler));
+            }
+
             if (handlers.Contains(handler))
             {
                 return;
@@ -49,6 +54,11 @@ namespace Core.Trait
         }
         public void RemoveHandler(ITraitHandler handler)
         {
+            if (handler == null)
+            {
+                throw new ArgumentNullException(nameof(handler));
+            }
+
             if (!handlers.Contains(handler))
             {
                 return;
