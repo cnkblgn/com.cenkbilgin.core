@@ -16,9 +16,9 @@ namespace Core.Faction
         public FactionID ID;
         public FactionRelation[] Relations;
         [Expandable, Required] public FactionAction[] Actions;
-        [Expandable, Required] public FactionCompatibility[] Compatibilities;
+        [Expandable, Required] public Compatibility[] Compatibilities;
 
-        public FactionEntry(FactionID id, FactionRelation[] relations, FactionAction[] actions, FactionCompatibility[] compatibilities)
+        public FactionEntry(FactionID id, FactionRelation[] relations, FactionAction[] actions, Compatibility[] compatibilities)
         {
             ID = id;
             Relations = relations;

@@ -15,10 +15,10 @@ namespace Core.Trait
 
         public TraitID ID;
         [Min(0)] public int Cost;
-        [Expandable, Required] public TraitCompatibility[] Compatibilities;
+        [Expandable, Required] public Compatibility[] Compatibilities;
         [Expandable, Required] public TraitAction[] Actions;
 
-        public TraitEntry(TraitID id, int cost, TraitCompatibility[] compatibilities, TraitAction[] actions)
+        public TraitEntry(TraitID id, int cost, Compatibility[] compatibilities, TraitAction[] actions)
         {
             ID = id;
             Compatibilities = compatibilities;

@@ -45,11 +45,11 @@ namespace Core.Faction
         public readonly FactionDefinition GetDefinition() => FactionDatabase.GetDefinition(this);
         public readonly bool IsCompatibleWith<TContext>(TContext context)
         {
-            FactionCompatibility[] compatibilities = GetDefinition().Compatibilities;
+            Compatibility[] compatibilities = GetDefinition().Compatibilities;
 
             for (int i = 0; i < compatibilities.Length; i++)
             {
-                if (compatibilities[i] is FactionCompatibility<TContext> compatibility && !compatibility.IsCompatibleWith(context))
+                if (compatibilities[i] is Compatibility<TContext> compatibility && !compatibility.IsCompatibleWith(context))
                 {
                     return false;
                 }

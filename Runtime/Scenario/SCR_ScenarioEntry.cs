@@ -14,10 +14,10 @@ namespace Core.Scenario
 #endif
 
         public ScenarioID ID;
-        [Expandable, Required] public ScenarioCompatibility[] Compatibilities;
+        [Expandable, Required] public Compatibility[] Compatibilities;
         [Expandable, Required] public ScenarioAction[] Actions;
 
-        public ScenarioEntry(ScenarioID id, ScenarioCompatibility[] compatibilities, ScenarioAction[] actions)
+        public ScenarioEntry(ScenarioID id, Compatibility[] compatibilities, ScenarioAction[] actions)
         {
             ID = id;
             Compatibilities = compatibilities;

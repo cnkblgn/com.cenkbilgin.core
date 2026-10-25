@@ -5,7 +5,7 @@ namespace Core.Faction
         public readonly FactionID ID;
         internal readonly FactionRelation[] Relations;
         internal readonly FactionAction[] Actions;
-        internal readonly FactionCompatibility[] Compatibilities;
+        internal readonly Compatibility[] Compatibilities;
 
         public readonly string IconID;
         public readonly string NameID;
@@ -22,12 +22,12 @@ namespace Core.Faction
             return Relations[target.Index].Relation;
         }
 
-        internal FactionDefinition(FactionID id, FactionRelation[] relations, FactionAction[] actions, FactionCompatibility[] compatibilities)
+        internal FactionDefinition(FactionID id, FactionRelation[] relations, FactionAction[] actions, Compatibility[] compatibilities)
         {
             ID = id;
             Relations = relations ?? FactionRelation.NONE;
             Actions = actions ?? FactionAction.NONE;
-            Compatibilities = compatibilities ?? FactionCompatibility.NONE;
+            Compatibilities = compatibilities ?? Compatibility.NONE;
 
             IconID = $"Faction{ID.Key}";
             NameID = $"faction.{ID.Key}Name";

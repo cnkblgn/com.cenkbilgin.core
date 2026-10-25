@@ -46,11 +46,11 @@ namespace Core.Effect
         public readonly EffectInstance CreateInstance(float duration) => new(this, duration);
         public readonly bool IsCompatibleWith<TContext>(TContext context)
         {
-            EffectCompatibility[] compatibilities = GetDefinition().Compatibilities;
+            Compatibility[] compatibilities = GetDefinition().Compatibilities;
 
             for (int i = 0; i < compatibilities.Length; i++)
             {
-                if (compatibilities[i] is EffectCompatibility<TContext> compatibility && !compatibility.IsCompatibleWith(context))
+                if (compatibilities[i] is Compatibility<TContext> compatibility && !compatibility.IsCompatibleWith(context))
                 {
                     return false;
                 }

@@ -45,11 +45,11 @@ namespace Core.Scenario
         public readonly ScenarioDefinition GetDefinition() => ScenarioDatabase.GetDefinition(this);
         public readonly bool IsCompatibleWith<TContext>(TContext context)
         {
-            ScenarioCompatibility[] compatibilities = GetDefinition().Compatibilities;
+            Compatibility[] compatibilities = GetDefinition().Compatibilities;
 
             for (int i = 0; i < compatibilities.Length; i++)
             {
-                if (compatibilities[i] is ScenarioCompatibility<TContext> compatibility && !compatibility.IsCompatibleWith(context))
+                if (compatibilities[i] is Compatibility<TContext> compatibility && !compatibility.IsCompatibleWith(context))
                 {
                     return false;
                 }

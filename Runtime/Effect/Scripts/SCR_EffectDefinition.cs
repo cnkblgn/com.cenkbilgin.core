@@ -7,18 +7,18 @@ namespace Core.Effect
         public readonly EffectID ID;
         public readonly EffectTag Tag;
         internal readonly int Interval;
-        internal readonly EffectCompatibility[] Compatibilities;
+        internal readonly Compatibility[] Compatibilities;
         internal readonly EffectAction[] Actions;
 
         public readonly string IconID;
         public readonly string NameID;
         public readonly string DescID;
 
-        internal EffectDefinition(EffectID id, EffectTag tag, int interval, EffectCompatibility[] compatibilities, EffectAction[] actions)
+        internal EffectDefinition(EffectID id, EffectTag tag, int interval, Compatibility[] compatibilities, EffectAction[] actions)
         {
             ID = !id.IsValid ? throw new NullReferenceException("Effect id is null or empty! please assign new id!") : id;
             Tag = tag;
-            Compatibilities = compatibilities ?? EffectCompatibility.NONE;
+            Compatibilities = compatibilities ?? Compatibility.NONE;
             Actions = actions ?? EffectAction.NONE;
             Interval = interval;
 

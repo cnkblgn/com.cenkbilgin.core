@@ -4,17 +4,17 @@ namespace Core.Trait
     {
         public readonly TraitID ID;
         public readonly int Cost;
-        internal readonly TraitCompatibility[] Compatibilities;
         internal readonly TraitAction[] Actions;
+        internal readonly Compatibility[] Compatibilities;
 
         public readonly string IconID;
         public readonly string NameID;
         public readonly string DescID;
 
-        internal TraitDefinition(TraitID id, int cost, TraitCompatibility[] compatibilities, TraitAction[] actions)
+        internal TraitDefinition(TraitID id, int cost, Compatibility[] compatibilities, TraitAction[] actions)
         {
             ID = id;
-            Compatibilities = compatibilities ?? TraitCompatibility.NONE;
+            Compatibilities = compatibilities ?? Compatibility.NONE;
             Actions = actions ?? TraitAction.NONE;
             Cost = cost;
 
