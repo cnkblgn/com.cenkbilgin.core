@@ -9,27 +9,17 @@ namespace Core.Faction
         public event Action<FactionContext> OnChanged;
 
         private FactionID id;
-        private readonly IFactionHandler user;
+        private readonly List<IFactionHandler> handlers;
         private readonly FactionRelation[] relations;
 
-        public FactionContainer(IFactionHandler user = null) : this(default, user) { }
-        public FactionContainer(FactionContainer container)
-        {
-            if (container == null)
-            {
-                throw new ArgumentNullException(nameof(container));
-            }
-
-            id = container.id;
-            user = container.user;
-            relations = (FactionRelation[])container.relations.Clone();
-        }
-        public FactionContainer(FactionID id, IFactionHandler user = null) : this(id, id.IsValid ? id.GetDefinition().Relations : new FactionRelation[0], user) { }
-        public FactionContainer(FactionID id, FactionRelation[] relations, IFactionHandler user = null)
+        public FactionContainer(List<IFactionHandler> handlers = null) : this(default, handlers) { }
+        public FactionContainer(FactionContainer container) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.id, (FactionRelation[])container.relations.Clone(), container.handlers) { }
+        public FactionContainer(FactionID id, List<IFactionHandler> handlers = null) : this(id, id.IsValid ? id.GetDefinition().Relations : new FactionRelation[0], handlers) { }
+        public FactionContainer(FactionID id, FactionRelation[] relations, List<IFactionHandler> handlers = null)
         {
             this.id = id;
-            this.user = user;
             this.relations = new FactionRelation[FactionDatabase.GetDefinitions().Count];
+            this.handlers = handlers == null ? new() : new(handlers);
 
             if (relations == null)
             {
@@ -39,10 +29,35 @@ namespace Core.Faction
             TrySetRelations(relations);
         }
 
+        private void NotifyHandlers(in FactionContext ctx)
+        {
+            for (int i = 0; i < handlers.Count; i++)
+            {
+                handlers[i]?.HandleFactionChanged(in ctx);
+            }
+        }
+        public void AddHandler(IFactionHandler handler)
+        {
+            if (handlers.Contains(handler))
+            {
+                return;
+            }
+
+            handlers.Add(handler);
+        }
+        public void RemoveHandler(IFactionHandler handler)
+        {
+            if (!handlers.Contains(handler))
+            {
+                return;
+            }
+
+            handlers.Remove(handler);
+        }
         private void SetState()
         {
             FactionContext ctx = new(id, relations);
-            user?.HandleFactionChanged(ctx);
+            NotifyHandlers(in ctx);
             OnChanged?.Invoke(ctx);
         }
 

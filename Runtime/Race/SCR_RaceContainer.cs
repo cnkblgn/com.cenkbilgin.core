@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Core.Race
@@ -7,15 +8,41 @@ namespace Core.Race
     {
         public event Action<RaceContext> OnChanged;
 
-        private readonly IRaceHandler user;
+        private readonly List<IRaceHandler> handlers;
         private RaceID id;
 
-        public RaceContainer(IRaceHandler user = null) : this(default, user) { }
+        public RaceContainer(List<IRaceHandler> handlers = null) : this(default, handlers) { }
         public RaceContainer(RaceContainer container) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.id) { }
-        public RaceContainer(RaceID id, IRaceHandler user = null)
+        public RaceContainer(RaceID id, List<IRaceHandler> handlers = null)
         {
             this.id = id;
-            this.user = user;
+            this.handlers = handlers == null ? new() : new(handlers);
+        }
+
+        private void NotifyHandlers(in RaceContext ctx)
+        {
+            for (int i = 0; i < handlers.Count; i++)
+            {
+                handlers[i]?.HandleRaceChanged(in ctx);
+            }
+        }
+        public void AddHandler(IRaceHandler handler)
+        {
+            if (handlers.Contains(handler))
+            {
+                return;
+            }
+
+            handlers.Add(handler);
+        }
+        public void RemoveHandler(IRaceHandler handler)
+        {
+            if (!handlers.Contains(handler))
+            {
+                return;
+            }
+
+            handlers.Remove(handler);
         }
 
         public RaceID GetRace() => id;
@@ -35,7 +62,7 @@ namespace Core.Race
             RemoveAction(this.id, context);
 
             RaceContext ctx = new(this.id = id);
-            user?.HandleRaceChanged(ctx);
+            NotifyHandlers(in ctx);
             OnChanged?.Invoke(ctx);
 
             ApplyAction(id, context);

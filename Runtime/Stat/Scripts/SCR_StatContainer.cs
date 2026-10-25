@@ -8,12 +8,12 @@ namespace Core.Stat
     {
         public event Action<StatContext> OnChanged;
 
-        private readonly IStatHandler user;
         private readonly Dictionary<StatID, float> stats;
         private readonly List<StatModifier> modifiers;
+        private readonly List<IStatHandler> handlers;
         private StatState state;
 
-        public StatContainer(IStatHandler user = null) : this(new(), new(), user) 
+        public StatContainer(List<IStatHandler> handlers = null) : this(new(), new(), handlers) 
         {
             stats = new Dictionary<StatID, float>();
 
@@ -22,15 +22,41 @@ namespace Core.Stat
                 stats[definition.ID] = definition.Default;
             }
         }
-        public StatContainer(StatContainer container) : this(container == null ? throw new ArgumentNullException() : container.stats, container.modifiers, container.user) { }
-        public StatContainer(Dictionary<StatID, float> stats, List<StatModifier> modifiers, IStatHandler user = null)
+        public StatContainer(StatContainer container) : this(container == null ? throw new ArgumentNullException() : container.stats, container.modifiers, container.handlers) { }
+        public StatContainer(Dictionary<StatID, float> stats, List<StatModifier> modifiers, List<IStatHandler> handlers = null)
         {
             if (stats == null) throw new ArgumentNullException();
             if (modifiers == null) throw new ArgumentNullException();
 
-            this.user = user;
+            this.handlers = handlers == null ? new() : new(handlers);
             this.stats = new(stats);
             this.modifiers = new(modifiers);
+        }
+
+        private void NotifyHandlers(in StatContext ctx)
+        {
+            for (int i = 0; i < handlers.Count; i++)
+            {
+                handlers[i]?.HandleStatChanged(in ctx);
+            }
+        }
+        public void AddHandler(IStatHandler handler)
+        {
+            if (handlers.Contains(handler))
+            {
+                return;
+            }
+
+            handlers.Add(handler);
+        }
+        public void RemoveHandler(IStatHandler handler)
+        {
+            if (!handlers.Contains(handler))
+            {
+                return;
+            }
+
+            handlers.Remove(handler);
         }
 
         private void SetState(StatState state, StatModifier modifier)
@@ -39,7 +65,7 @@ namespace Core.Stat
 
             StatContext ctx = new(this.state, modifier);
 
-            user?.HandleStatChanged(ctx);
+            NotifyHandlers(in ctx);
             OnChanged?.Invoke(ctx);
         }
         private void SetState(StatState state) => SetState(state, StatModifier.Empty);

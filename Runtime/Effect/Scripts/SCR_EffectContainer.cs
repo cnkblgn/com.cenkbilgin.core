@@ -10,19 +10,19 @@ namespace Core.Effect
     {
         public event Action<EffectContext> OnChanged;
 
-        private readonly IEffectHandler user;
+        private readonly List<IEffectHandler> handlers;
         private readonly SwapBackArray<EffectInstance> effects;
 
-        public EffectContainer(uint capacity = 16, IEffectHandler user = null) : this(new SwapBackArray<EffectInstance>(capacity), user) { }
-        public EffectContainer(EffectContainer container) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.effects, container.user) { }
-        public EffectContainer(SwapBackArray<EffectInstance> effects, IEffectHandler user = null)
+        public EffectContainer(uint capacity = 16, List<IEffectHandler> handlers = null) : this(new SwapBackArray<EffectInstance>(capacity), handlers) { }
+        public EffectContainer(EffectContainer container) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.effects, container.handlers) { }
+        public EffectContainer(SwapBackArray<EffectInstance> effects, List<IEffectHandler> handlers = null)
         {
             if (effects == null)
             {
                 throw new ArgumentNullException(nameof(effects));
             }
 
-            this.user = user;
+            this.handlers = handlers == null ? new() : new(handlers);
             this.effects = new((uint)effects.Capacity);
 
             for (int i = 0; i < effects.Count; i++)
@@ -33,10 +33,36 @@ namespace Core.Effect
 
         public IReadOnlyList<EffectInstance> GetEffects() => effects;
 
+        private void NotifyHandlers(in EffectContext ctx)
+        {
+            for (int i = 0; i < handlers.Count; i++)
+            {
+                handlers[i]?.HandleEffectChanged(in ctx);
+            }
+        }
+        public void AddHandler(IEffectHandler handler)
+        {
+            if (handlers.Contains(handler))
+            {
+                return;
+            }
+
+            handlers.Add(handler);
+        }
+        public void RemoveHandler(IEffectHandler handler)
+        {
+            if (!handlers.Contains(handler))
+            {
+                return;
+            }
+
+            handlers.Remove(handler);
+        }
+
         private void SetState(EffectState state, EffectInstance instance)
         {
             EffectContext ctx = new(state, instance);
-            user?.HandleEffectChanged(ctx);
+            NotifyHandlers(in ctx);
             OnChanged?.Invoke(ctx);
         }
 

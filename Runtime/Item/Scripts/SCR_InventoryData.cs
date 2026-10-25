@@ -880,7 +880,7 @@ namespace Core.Item
             int remaining = current - value;
 
             TrySetItemStack(item.InstanceID, remaining, out result);
-    
+
             copy = ItemData.Clone(item);
             copy.SetStack(value);
 

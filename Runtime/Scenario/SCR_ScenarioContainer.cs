@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Core.Scenario
@@ -7,15 +8,41 @@ namespace Core.Scenario
     {
         public event Action<ScenarioContext> OnChanged;
 
-        private readonly IScenarioHandler user;
         private ScenarioID id;
+        private readonly List<IScenarioHandler> handlers;
 
-        public ScenarioContainer(IScenarioHandler user = null) : this(default, user) { }
-        public ScenarioContainer(ScenarioContainer container) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.id, container.user) { }
-        public ScenarioContainer(ScenarioID id, IScenarioHandler user = null)
+        public ScenarioContainer(List<IScenarioHandler> handlers = null) : this(default, handlers) { }
+        public ScenarioContainer(ScenarioContainer container) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.id, container.handlers) { }
+        public ScenarioContainer(ScenarioID id, List<IScenarioHandler> handlers = null)
         {
             this.id = id;
-            this.user = user;
+            this.handlers = handlers == null ? new() : new(handlers);
+        }
+
+        private void NotifyHandlers(in ScenarioContext ctx)
+        {
+            for (int i = 0; i < handlers.Count; i++)
+            {
+                handlers[i]?.HandleScenarioChanged(in ctx);
+            }
+        }
+        public void AddHandler(IScenarioHandler handler)
+        {
+            if (handlers.Contains(handler))
+            {
+                return;
+            }
+
+            handlers.Add(handler);
+        }
+        public void RemoveHandler(IScenarioHandler handler)
+        {
+            if (!handlers.Contains(handler))
+            {
+                return;
+            }
+
+            handlers.Remove(handler);
         }
 
         public ScenarioID GetScenario() => id;
@@ -35,7 +62,7 @@ namespace Core.Scenario
             RemoveAction(this.id, context);
 
             ScenarioContext ctx = new(this.id = id);
-            user?.HandleScenarioChanged(ctx);
+            NotifyHandlers(in ctx);
             OnChanged?.Invoke(ctx);
 
             ApplyAction(id, context);

@@ -11,18 +11,18 @@ namespace Core.Trait
         public event Action<TraitContext> OnChanged = null;
 
         private readonly SwapBackArray<TraitInstance> traits;
-        private readonly ITraitHandler user;
+        private readonly List<ITraitHandler> handlers;
 
-        public TraitContainer(uint capacity = 16, ITraitHandler user = null) : this(new SwapBackArray<TraitInstance>(capacity), user) { }
-        public TraitContainer(TraitContainer container) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.traits, container.user) { }
-        public TraitContainer(SwapBackArray<TraitInstance> traits, ITraitHandler user = null)
+        public TraitContainer(uint capacity = 16, List<ITraitHandler> handlers = null) : this(new SwapBackArray<TraitInstance>(capacity), handlers) { }
+        public TraitContainer(TraitContainer container) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.traits, container.handlers) { }
+        public TraitContainer(SwapBackArray<TraitInstance> traits, List<ITraitHandler> handlers = null)
         {
             if (traits == null)
             {
                 throw new ArgumentNullException(nameof(traits));
             }
 
-            this.user = user;
+            this.handlers = handlers == null ? new() : new(handlers);
             this.traits = new((uint)traits.Capacity);
 
             for (int i = 0; i < traits.Count; i++)
@@ -31,10 +31,36 @@ namespace Core.Trait
             }
         }
 
+        private void NotifyHandlers(in TraitContext ctx)
+        {
+            for (int i = 0; i < handlers.Count; i++)
+            {
+                handlers[i]?.HandleTraitChanged(in ctx);
+            }
+        }
+        public void AddHandler(ITraitHandler handler)
+        {
+            if (handlers.Contains(handler))
+            {
+                return;
+            }
+
+            handlers.Add(handler);
+        }
+        public void RemoveHandler(ITraitHandler handler)
+        {
+            if (!handlers.Contains(handler))
+            {
+                return;
+            }
+
+            handlers.Remove(handler);
+        }
+
         private void SetState(TraitState state, TraitInstance instance)
         {
             TraitContext ctx = new(state, instance);
-            user?.HandleTraitChanged(ctx);
+            NotifyHandlers(in ctx);
             OnChanged?.Invoke(ctx);
         }
 
