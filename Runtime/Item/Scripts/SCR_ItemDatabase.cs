@@ -86,7 +86,7 @@ namespace Core.Item
         {
             if (!id.IsValid)
             {
-                throw new ArgumentException($"Item id [{nameof(id)}] is not valid!");
+                throw new ArgumentNullException(nameof(id), $"Item id [{id}] is not valid!");
             }
 
             return GetDefinition(id.Index);

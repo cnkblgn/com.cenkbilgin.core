@@ -46,7 +46,7 @@ namespace Core.Scenario
         {
             if (!id.IsValid)
             {
-                throw new ArgumentNullException(nameof(id), $"Scenario id [{nameof(id)}] is not valid!");
+                throw new ArgumentNullException(nameof(id), $"Scenario id [{id}] is not valid!");
             }
 
             return GetDefinition(id.Index);

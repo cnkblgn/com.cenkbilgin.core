@@ -46,7 +46,7 @@ namespace Core.Trait
         {
             if (!id.IsValid)
             {
-                throw new ArgumentNullException(nameof(id), $"Trait id [{nameof(id)}] is not valid!");
+                throw new ArgumentNullException(nameof(id), $"Trait id [{id}] is not valid!");
             }
 
             return GetDefinition(id.Index);

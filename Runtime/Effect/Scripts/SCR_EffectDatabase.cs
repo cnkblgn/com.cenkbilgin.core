@@ -46,7 +46,7 @@ namespace Core.Effect
         {
             if (!id.IsValid)
             {
-                throw new ArgumentNullException($"Effect id [{nameof(id)}] is not valid!");
+                throw new ArgumentNullException(nameof(id), $"Effect id [{id}] is not valid!");
             }
 
             return GetDefinition(id.Index);

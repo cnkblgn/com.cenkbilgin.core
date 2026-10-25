@@ -65,7 +65,7 @@ namespace Core.Prefab
         {
             if (!id.IsValid)
             {
-                throw new ArgumentNullException($"[{nameof(id)}] prefabID is not valid!");
+                throw new ArgumentNullException(nameof(id), $"Prefab id [{id}] is not valid!");
             }
 
             return GetPrefab(id.Index);

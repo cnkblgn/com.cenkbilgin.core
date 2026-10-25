@@ -67,7 +67,7 @@ namespace Core.Race
         {
             if (!id.IsValid)
             {
-                throw new ArgumentNullException(nameof(id), $"Race id [{nameof(id)}] is not valid!");
+                throw new ArgumentNullException(nameof(id), $"Race id [{id}] is not valid!");
             }
 
             return GetDefinition(id.Index);

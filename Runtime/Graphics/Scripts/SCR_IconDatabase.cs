@@ -65,7 +65,12 @@ namespace Core.Graphics
         {
             if (!id.IsValid)
             {
-                Debug.Log($"[{nameof(id)}] iconID is not valid!");
+                throw new ArgumentNullException(nameof(id), $"Trait id [{id}] is not valid!");
+            }
+
+            if (!id.IsValid)
+            {
+                Debug.Log($"[{nameof(id)}] Icon id [{id}] is not valid!");
                 return defaultSprite;
             }
 

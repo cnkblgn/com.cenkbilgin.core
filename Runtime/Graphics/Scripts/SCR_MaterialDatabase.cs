@@ -64,7 +64,7 @@ namespace Core.Graphics
         {
             if (!id.IsValid)
             {
-                throw new ArgumentNullException($"[{nameof(id)}] MaterialID is not valid!");
+                throw new ArgumentNullException(nameof(id), $"Material id [{id}] is not valid!");
             }
 
             return GetMaterial(id.Index);

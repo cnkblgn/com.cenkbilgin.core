@@ -62,7 +62,7 @@ namespace Core.Graphics
         {
             if (!id.IsValid)
             {
-                throw new ArgumentNullException($"[{nameof(id)}] MeshID is not valid!");
+                throw new ArgumentNullException(nameof(id), $"Mesh id [{id}] is not valid!");
             }
 
             return GetMesh(id.Index);

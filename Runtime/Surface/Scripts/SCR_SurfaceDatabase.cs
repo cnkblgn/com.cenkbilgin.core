@@ -49,7 +49,7 @@ namespace Core.Surface
         {
             if (index >= tags.Length || index < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(index), index, $"Surface  tag not found index out of range");
+                throw new ArgumentOutOfRangeException(nameof(index), index, $"Surface tag not found index out of range");
             }
 
             return tags[index];

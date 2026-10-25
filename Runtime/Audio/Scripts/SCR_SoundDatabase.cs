@@ -65,7 +65,7 @@ namespace Core.Audio
         {
             if (!id.IsValid)
             {
-                throw new ArgumentNullException($"[{nameof(id)}] SoundID is not valid!");
+                throw new ArgumentNullException(nameof(id), $"Sound id [{id}] is not valid!");
             }
 
             return GetClip(id.Index);

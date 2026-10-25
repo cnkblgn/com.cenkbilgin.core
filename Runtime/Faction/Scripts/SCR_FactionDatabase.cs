@@ -88,7 +88,7 @@ namespace Core.Faction
         {
             if (!id.IsValid)
             {
-                throw new ArgumentNullException($"Faction id [{nameof(id)}] is not valid!");
+                throw new ArgumentNullException(nameof(id), $"Faction id [{id}] is not valid!");
             }
 
             return GetDefinition(id.Index);

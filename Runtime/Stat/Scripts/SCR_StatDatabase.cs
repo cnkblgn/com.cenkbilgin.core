@@ -46,7 +46,7 @@ namespace Core.Stat
         {
             if (!id.IsValid)
             {
-                throw new ArgumentNullException($"Stat id [{nameof(id)}] is not valid!");
+                throw new ArgumentNullException(nameof(id), $"Stat id [{id}] is not valid!");
             }
 
             return GetDefinition(id.Index);

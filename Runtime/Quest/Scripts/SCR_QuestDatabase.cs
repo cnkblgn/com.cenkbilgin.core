@@ -161,7 +161,7 @@ namespace Core.Quest
         {
             if (!id.IsValid)
             {
-                throw new ArgumentNullException($"Quest id [{nameof(id)}] is not valid!");
+                throw new ArgumentNullException(nameof(id), $"Quest id [{id}] is not valid!");
             }
 
             return GetDefinition(id.Index);

@@ -122,7 +122,7 @@ namespace Core.Actors
             if (entries == null)
             {
 #if UNITY_EDITOR
-                Debug.LogError($"id not found in database: [{id.Key}]");
+                Debug.LogError($"Actor id not found in database: [{id.Key}]");
 #endif
                 return false;
             }
@@ -167,14 +167,6 @@ namespace Core.Actors
         public static bool TryGetAllActors(ActorID id, out IReadOnlyList<ActorEntry> actors)
         {
             actors = GetEntries(id);
-
-            if (actors == null)
-            {
-#if UNITY_EDITOR
-                Debug.LogError($"id not found in database: [{id.Key}]");
-#endif
-                return false;
-            }
 
             return actors.Count > 0;
         }
