@@ -22,14 +22,12 @@ namespace Core.Damage
             }
 
             tagLookup.Clear();
-            tags = new DamageTag[_tags.Length + 1];
-            tags[0] = DamageTag.GENERIC;
-            tagLookup[DamageTag.GENERIC.Key] = 0;
+            tags = new DamageTag[_tags.Length];
 
             for (int i = 0; i < _tags.Length; i++)
             {
                 string key = _tags[i];
-                int index = i + 1;
+                int index = i;
 
                 if (string.IsNullOrEmpty(key))
                 {

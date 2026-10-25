@@ -19,7 +19,7 @@ namespace Core.Item
         {
             ID = id;
             Mask = tags == null ? default : tags.CreateMask();
-            PrefabID = $"Item{ID.Key}";
+            PrefabID = $"PFB_Item{ID.Key}";
             IconID = $"Item{ID.Key}";
             NameID = $"item.{ID.Key}Name";
             DescID = $"item.{ID.Key}Desc";

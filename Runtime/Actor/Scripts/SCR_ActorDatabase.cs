@@ -34,15 +34,13 @@ namespace Core.Actors
 
             idLookup.Clear();
             tagLookup.Clear();
-            tags = new ActorTag[_tags.Length + 1];
-            tags[0] = ActorTag.GENERIC;
-            tagLookup[ActorTag.GENERIC.Key] = 0;
+            tags = new ActorTag[_tags.Length];
             groups = new ActorGroup[ids.Length];
 
             for (int i = 0; i < _tags.Length; i++)
             {
                 string key = _tags[i];
-                int index = i + 1;
+                int index = i;
 
                 if (string.IsNullOrEmpty(key))
                 {

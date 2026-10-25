@@ -7,8 +7,6 @@ namespace Core.Actors
     [Serializable]
     public struct ActorTag : IEquatable<ActorTag>, ISerializationCallbackReceiver
     {
-        public static readonly ActorTag GENERIC = new("GENERIC", 0);
-
         public readonly string Key => key;
         public int Index
         {
