@@ -7,12 +7,12 @@ namespace Core.Race
     {
         public event Action<RaceContext> OnChanged;
 
-        private readonly IRaceUser user;
+        private readonly IRaceHandler user;
         private RaceID id;
 
-        public RaceContainer(IRaceUser user = null) : this(default, user) { }
+        public RaceContainer(IRaceHandler user = null) : this(default, user) { }
         public RaceContainer(RaceContainer container) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.id) { }
-        public RaceContainer(RaceID id, IRaceUser user = null)
+        public RaceContainer(RaceID id, IRaceHandler user = null)
         {
             this.id = id;
             this.user = user;

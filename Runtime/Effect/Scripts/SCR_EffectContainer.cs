@@ -10,12 +10,12 @@ namespace Core.Effect
     {
         public event Action<EffectContext> OnChanged;
 
-        private readonly IEffectUser user;
+        private readonly IEffectHandler user;
         private readonly SwapBackArray<EffectInstance> effects;
 
-        public EffectContainer(uint capacity = 16, IEffectUser user = null) : this(new SwapBackArray<EffectInstance>(capacity), user) { }
+        public EffectContainer(uint capacity = 16, IEffectHandler user = null) : this(new SwapBackArray<EffectInstance>(capacity), user) { }
         public EffectContainer(EffectContainer container) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.effects, container.user) { }
-        public EffectContainer(SwapBackArray<EffectInstance> effects, IEffectUser user = null)
+        public EffectContainer(SwapBackArray<EffectInstance> effects, IEffectHandler user = null)
         {
             if (effects == null)
             {

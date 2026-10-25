@@ -1,6 +1,6 @@
 namespace Core.Faction
 {
-    public interface IFactionUser
+    public interface IFactionHandler
     {
         public void HandleFactionChanged(in FactionContext ctx);
     }

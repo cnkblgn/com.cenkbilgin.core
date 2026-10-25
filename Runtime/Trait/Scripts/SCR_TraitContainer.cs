@@ -11,11 +11,11 @@ namespace Core.Trait
         public event Action<TraitContext> OnChanged = null;
 
         private readonly SwapBackArray<TraitInstance> traits;
-        private readonly ITraitUser user;
+        private readonly ITraitHandler user;
 
-        public TraitContainer(uint capacity = 16, ITraitUser user = null) : this(new SwapBackArray<TraitInstance>(capacity), user) { }
+        public TraitContainer(uint capacity = 16, ITraitHandler user = null) : this(new SwapBackArray<TraitInstance>(capacity), user) { }
         public TraitContainer(TraitContainer container) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.traits, container.user) { }
-        public TraitContainer(SwapBackArray<TraitInstance> traits, ITraitUser user = null)
+        public TraitContainer(SwapBackArray<TraitInstance> traits, ITraitHandler user = null)
         {
             if (traits == null)
             {

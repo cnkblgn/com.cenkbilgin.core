@@ -6,7 +6,7 @@ namespace Core.UI
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Canvas))]
     [RequireComponent(typeof(GraphicRaycaster))]
-    internal sealed class UIPromptView : MonoBehaviour, IUICursorStateHandler, IGameStateHandler, IUIPromptUser
+    internal sealed class UIPromptView : MonoBehaviour, IUICursorStateHandler, IGameStateHandler, IUIPromptController
     {
         [Header("_")]
         [SerializeField, Required] private UIPromptItem[] views = null;

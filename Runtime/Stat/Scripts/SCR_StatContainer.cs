@@ -8,12 +8,12 @@ namespace Core.Stat
     {
         public event Action<StatContext> OnChanged;
 
-        private readonly IStatUser user;
+        private readonly IStatHandler user;
         private readonly Dictionary<StatID, float> stats;
         private readonly List<StatModifier> modifiers;
         private StatState state;
 
-        public StatContainer(IStatUser user = null) : this(new(), new(), user) 
+        public StatContainer(IStatHandler user = null) : this(new(), new(), user) 
         {
             stats = new Dictionary<StatID, float>();
 
@@ -23,7 +23,7 @@ namespace Core.Stat
             }
         }
         public StatContainer(StatContainer container) : this(container == null ? throw new ArgumentNullException() : container.stats, container.modifiers, container.user) { }
-        public StatContainer(Dictionary<StatID, float> stats, List<StatModifier> modifiers, IStatUser user = null)
+        public StatContainer(Dictionary<StatID, float> stats, List<StatModifier> modifiers, IStatHandler user = null)
         {
             if (stats == null) throw new ArgumentNullException();
             if (modifiers == null) throw new ArgumentNullException();

@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Core.Interaction
 {
-    public interface IInteractionUser
+    public interface IInteractionHandler
     {
         public void HandleInteractionChanged(in InteractionContext ctx);
     }

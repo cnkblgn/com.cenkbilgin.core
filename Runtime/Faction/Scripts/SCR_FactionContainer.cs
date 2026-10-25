@@ -9,10 +9,10 @@ namespace Core.Faction
         public event Action<FactionContext> OnChanged;
 
         private FactionID id;
-        private readonly IFactionUser user;
+        private readonly IFactionHandler user;
         private readonly FactionRelation[] relations;
 
-        public FactionContainer(IFactionUser user = null) : this(default, user) { }
+        public FactionContainer(IFactionHandler user = null) : this(default, user) { }
         public FactionContainer(FactionContainer container)
         {
             if (container == null)
@@ -24,8 +24,8 @@ namespace Core.Faction
             user = container.user;
             relations = (FactionRelation[])container.relations.Clone();
         }
-        public FactionContainer(FactionID id, IFactionUser user = null) : this(id, id.IsValid ? id.GetDefinition().Relations : new FactionRelation[0], user) { }
-        public FactionContainer(FactionID id, FactionRelation[] relations, IFactionUser user = null)
+        public FactionContainer(FactionID id, IFactionHandler user = null) : this(id, id.IsValid ? id.GetDefinition().Relations : new FactionRelation[0], user) { }
+        public FactionContainer(FactionID id, FactionRelation[] relations, IFactionHandler user = null)
         {
             this.id = id;
             this.user = user;

@@ -1,6 +1,6 @@
 namespace Core.Trait
 {
-    public interface ITraitUser
+    public interface ITraitHandler
     {
         public void HandleTraitChanged(in TraitContext ctx);
     }

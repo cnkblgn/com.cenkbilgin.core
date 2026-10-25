@@ -1,6 +1,6 @@
 namespace Core.Scenario
 {
-    public interface IScenarioUser
+    public interface IScenarioHandler
     {
         public void HandleScenarioChanged(in ScenarioContext ctx);
     }

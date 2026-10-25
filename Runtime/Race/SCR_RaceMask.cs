@@ -4,6 +4,9 @@ namespace Core.Race
 {
     public readonly struct RaceMask : IEquatable<RaceMask>
     {
+        public static readonly RaceMask ALL = new(ulong.MaxValue);
+        public static readonly RaceMask NONE = new(0UL);
+
         public bool IsValid => Value != 0;
 
         public readonly ulong Value;

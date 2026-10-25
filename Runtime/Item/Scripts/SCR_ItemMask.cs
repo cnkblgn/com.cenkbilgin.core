@@ -4,6 +4,9 @@ namespace Core.Item
 {
     public readonly struct ItemMask : IEquatable<ItemMask>
     {
+        public static readonly ItemMask ALL = new(ulong.MaxValue);
+        public static readonly ItemMask NONE = new(0UL);
+
         public bool IsValid => Value != 0;
 
         public readonly ulong Value;

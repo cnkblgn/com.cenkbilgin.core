@@ -4,6 +4,9 @@ namespace Core.Actors
 {
     public readonly struct ActorMask : IEquatable<ActorMask>
     {
+        public static readonly ActorMask ALL = new(ulong.MaxValue);
+        public static readonly ActorMask NONE = new(0UL);
+
         public bool IsValid => Value != 0;
 
         public readonly ulong Value;

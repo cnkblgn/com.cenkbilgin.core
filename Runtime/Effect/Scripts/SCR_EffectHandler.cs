@@ -1,6 +1,6 @@
 namespace Core.Effect
 {
-    public interface IEffectUser
+    public interface IEffectHandler
     {
         public void HandleEffectChanged(in EffectContext ctx);
     }

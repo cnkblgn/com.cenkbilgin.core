@@ -1,6 +1,6 @@
 namespace Core
 {
-    public interface IResourceUser
+    public interface IResourceHandler
     {
         public void HandleResourceChanged(in ResourceContext ctx);
     }

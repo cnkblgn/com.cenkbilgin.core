@@ -12,12 +12,12 @@ namespace Core
         [SerializeField, Min(0)] private float current;
         [SerializeField, Min(0)] private float maximum;
 
-        private readonly IResourceUser user;
+        private readonly IResourceHandler user;
         private bool isDepleted;
 
         public ResourceContainer() : this(0, 0, null) { }
-        public ResourceContainer(IResourceUser user) : this(0, 0, user) { }
-        public ResourceContainer(float current, float maximum, IResourceUser user = null)
+        public ResourceContainer(IResourceHandler user) : this(0, 0, user) { }
+        public ResourceContainer(float current, float maximum, IResourceHandler user = null)
         {
             this.user = user;
             this.current = current;

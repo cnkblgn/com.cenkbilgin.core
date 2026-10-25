@@ -27,7 +27,7 @@ namespace Core.Item
         private readonly Dictionary<Guid, ItemData> itemTable;
         private readonly List<IInventoryHandler> handlers;
 
-        public InventoryData(List<ItemData> items, int width, int height, int maxWeight, ItemMask mask)
+        public InventoryData(List<ItemData> items, int width, int height, int maxWeight, ItemMask mask, List<IInventoryHandler> handlers = null)
         {
             GridWidth = Mathf.Clamp(width, MIN_WIDTH, MAX_WIDTH);
             GridHeight = Mathf.Clamp(height, MIN_HEIGHT, MAX_HEIGHT);
@@ -36,7 +36,7 @@ namespace Core.Item
             itemGrid = new ItemData[GridWidth * GridHeight];
             itemTable = new();
             ItemMask = mask;
-            handlers = new();
+            this.handlers = handlers == null ? new() : new(handlers);
 
             if (items == null)
             {
@@ -54,7 +54,7 @@ namespace Core.Item
             }
         }
         public InventoryData(List<ItemData> items, int width, int height, int maxWeight, ItemTag[] tags) : this(items, width, height, maxWeight, (tags != null ? tags.ToArray() : ItemDatabase.GetTags().ToArray()).CreateMask()) { }
-        public InventoryData(InventoryData data) : this(data?.itemTable.Values.ToList() ?? throw new ArgumentNullException(nameof(data)), data.GridWidth, data.GridHeight, data.MaximumWeight, data.ItemMask) { }
+        public InventoryData(InventoryData data) : this(data?.itemTable.Values.ToList() ?? throw new ArgumentNullException(nameof(data)), data.GridWidth, data.GridHeight, data.MaximumWeight, data.ItemMask, data.handlers) { }
         public InventoryData(int width, int height, int maxWeight, ItemTag[] tags) : this(new(), width, height, maxWeight, tags) { }
         public InventoryData(int width, int height, int maxWeight, ItemMask mask) : this(new(), width, height, maxWeight, mask) { }
 

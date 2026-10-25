@@ -4,6 +4,9 @@ namespace Core.Damage
 {
     public readonly struct DamageMask : IEquatable<DamageMask>
     {
+        public static readonly DamageMask ALL = new(ulong.MaxValue);
+        public static readonly DamageMask NONE = new(0UL);
+
         public bool IsValid => Value != 0;
 
         public readonly ulong Value;

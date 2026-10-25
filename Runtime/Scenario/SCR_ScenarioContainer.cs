@@ -7,12 +7,12 @@ namespace Core.Scenario
     {
         public event Action<ScenarioContext> OnChanged;
 
-        private readonly IScenarioUser user;
+        private readonly IScenarioHandler user;
         private ScenarioID id;
 
-        public ScenarioContainer(IScenarioUser user = null) : this(default, user) { }
+        public ScenarioContainer(IScenarioHandler user = null) : this(default, user) { }
         public ScenarioContainer(ScenarioContainer container) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.id, container.user) { }
-        public ScenarioContainer(ScenarioID id, IScenarioUser user = null)
+        public ScenarioContainer(ScenarioID id, IScenarioHandler user = null)
         {
             this.id = id;
             this.user = user;

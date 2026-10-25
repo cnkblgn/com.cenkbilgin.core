@@ -1,6 +1,6 @@
 namespace Core.UI
 {
-    internal interface IUIPromptUser
+    internal interface IUIPromptController
     {
         public void HandlePromptHide();
     }

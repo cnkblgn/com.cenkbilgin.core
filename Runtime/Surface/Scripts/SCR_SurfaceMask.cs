@@ -4,6 +4,9 @@ namespace Core.Surface
 {
     public readonly struct SurfaceMask : IEquatable<SurfaceMask>
     {
+        public static readonly SurfaceMask ALL = new(ulong.MaxValue);
+        public static readonly SurfaceMask NONE = new(0UL);
+
         public bool IsValid => Value != 0;
 
         public readonly ulong Value;

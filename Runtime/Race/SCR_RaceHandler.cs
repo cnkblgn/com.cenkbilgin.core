@@ -1,6 +1,6 @@
 namespace Core.Race
 {
-    public interface IRaceUser
+    public interface IRaceHandler
     {
         public void HandleRaceChanged(in RaceContext ctx);
     }

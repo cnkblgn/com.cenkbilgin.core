@@ -18,7 +18,7 @@ namespace Core.UI
 
         private CanvasGroup thisCanvas = null;
         private IUIPromptHandler thisHandler = null;
-        private IUIPromptUser thisUser = null;
+        private IUIPromptController thisController = null;
         private UIPromptHandle thisHandle = default;
 
         private void Awake()
@@ -49,7 +49,7 @@ namespace Core.UI
             Hide();
         }
 
-        public UIPromptHandle Show<TContext>(string description, in TContext context, IUIPromptUser user) where TContext : struct
+        public UIPromptHandle Show<TContext>(string description, in TContext context, IUIPromptController user) where TContext : struct
         {
             if (IsActive)
             {
@@ -67,7 +67,7 @@ namespace Core.UI
             }
 
             thisCanvas.Show();
-            thisUser = user;
+            thisController = user;
             thisHandle = new(Guid.NewGuid(), this);
             handler.HandleShow(context);
             return thisHandle;
@@ -93,8 +93,8 @@ namespace Core.UI
             thisCanvas.Hide();
             thisHandler?.HandleCancel();
             thisHandler?.HandleHide();
-            thisUser?.HandlePromptHide();
-            thisUser = null;
+            thisController?.HandlePromptHide();
+            thisController = null;
         }
     }
 }

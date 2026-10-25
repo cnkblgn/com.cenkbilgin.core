@@ -1,6 +1,6 @@
 namespace Core.Stat
 {
-    public interface IStatUser
+    public interface IStatHandler
     {
         public void HandleStatChanged(in StatContext ctx);
     }
