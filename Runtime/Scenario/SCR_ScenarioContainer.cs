@@ -19,7 +19,7 @@ namespace Core.Scenario
         }
 
         public ScenarioID GetScenario() => id;
-        public bool TrySetScenario(ScenarioID id)
+        public bool TrySetScenario<TContext>(ScenarioID id, TContext context)
         {
             if (id == this.id)
             {
@@ -32,10 +32,40 @@ namespace Core.Scenario
                 return false;
             }
 
+            RemoveAction(this.id, context);
+
             ScenarioContext ctx = new(this.id = id);
             user?.HandleScenarioChanged(ctx);
             OnChanged?.Invoke(ctx);
+
+            ApplyAction(id, context);
+
             return true;
+        }
+
+        private void ApplyAction<TContext>(ScenarioID id, TContext context)
+        {
+            ScenarioAction[] actions = id.GetDefinition().Actions;
+
+            for (int i = 0; i < actions.Length; i++)
+            {
+                if (actions[i] is ScenarioAction<TContext> action)
+                {
+                    action.Apply(id, context);
+                }
+            }
+        }
+        private void RemoveAction<TContext>(ScenarioID id, TContext context)
+        {
+            ScenarioAction[] actions = id.GetDefinition().Actions;
+
+            for (int i = 0; i < actions.Length; i++)
+            {
+                if (actions[i] is ScenarioAction<TContext> action)
+                {
+                    action.Remove(id, context);
+                }
+            }
         }
     }
 }
