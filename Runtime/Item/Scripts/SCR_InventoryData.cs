@@ -14,7 +14,6 @@ namespace Core.Item
         public const int MIN_WEIGHT = 0;
         public const int MAX_WEIGHT = 1000;
 
-        internal IInventoryUser User { get; set; }
         public float CurrentWeight { get; private set; }
         public int CurrentCapacity => itemTable.Count;
         public int MaximumCapacity => itemGrid.Length;
@@ -26,6 +25,7 @@ namespace Core.Item
 
         private ItemData[] itemGrid;
         private readonly Dictionary<Guid, ItemData> itemTable;
+        private readonly List<IInventoryHandler> handlers;
 
         public InventoryData(List<ItemData> items, int width, int height, int maxWeight, ItemMask mask)
         {
@@ -36,6 +36,7 @@ namespace Core.Item
             itemGrid = new ItemData[GridWidth * GridHeight];
             itemTable = new();
             ItemMask = mask;
+            handlers = new();
 
             if (items == null)
             {
@@ -57,7 +58,33 @@ namespace Core.Item
         public InventoryData(int width, int height, int maxWeight, ItemTag[] tags) : this(new(), width, height, maxWeight, tags) { }
         public InventoryData(int width, int height, int maxWeight, ItemMask mask) : this(new(), width, height, maxWeight, mask) { }
 
-        private void Notify(InventoryState state, InventoryResult result, ItemData item = null) => User?.HandleInventoryChanged(new(state, result, item));
+        private void NotifyHandlers(InventoryState state, InventoryResult result, ItemData item = null)
+        {
+            InventoryContext ctx = new(state, result, item);
+
+            for (int i = 0; i < handlers.Count; i++)
+            {
+                handlers[i]?.HandleInventoryChanged(in ctx);
+            }
+        }
+        public void AddHandler(IInventoryHandler handler)
+        {
+            if (handlers.Contains(handler))
+            {
+                return;
+            }
+
+            handlers.Add(handler);
+        }
+        public void RemoveHandler(IInventoryHandler handler)
+        {
+            if (!handlers.Contains(handler))
+            {
+                return;
+            }
+
+            handlers.Remove(handler);
+        }
 
         public void Clear()
         {
@@ -66,7 +93,7 @@ namespace Core.Item
 
             CurrentWeight = 0;
 
-            Notify(InventoryState.INITIALIZED, InventoryResult.SUCCESS);
+            NotifyHandlers(InventoryState.INITIALIZED, InventoryResult.SUCCESS);
         }
         public IReadOnlyCollection<Guid> GetItems() => itemTable.Keys;
         public int GetItemCount(ItemID baseID) => GetItemCount(static (item, baseID) => item.BaseID == baseID, baseID);
@@ -937,11 +964,11 @@ namespace Core.Item
             {
                 item.SetRotation(rotated);
                 item.SetPosition(position);
-                Notify(InventoryState.ITEM_CHANGED, InventoryResult.SUCCESS, item);
+                NotifyHandlers(InventoryState.ITEM_CHANGED, InventoryResult.SUCCESS, item);
             }
 
             itemGrid = tempGrid;
-            Notify(InventoryState.SORTED, result = InventoryResult.SUCCESS, null);
+            NotifyHandlers(InventoryState.SORTED, result = InventoryResult.SUCCESS, null);
             return true;
         }
         public bool TrySetItemStack(Guid instanceID, int stack, out InventoryResult result)
@@ -973,7 +1000,7 @@ namespace Core.Item
                 return TryRemoveItem(item.InstanceID, out _, out result);
             }
 
-            Notify(InventoryState.ITEM_CHANGED, result = InventoryResult.SUCCESS, item);
+            NotifyHandlers(InventoryState.ITEM_CHANGED, result = InventoryResult.SUCCESS, item);
             return true;
         }
         /// <summary> Transfers all items that can fit into the target inventory. </summary>
@@ -1042,7 +1069,7 @@ namespace Core.Item
             {
                 if (TryRemoveItem(instanceID, out _, out result))
                 {
-                    Notify(InventoryState.ITEM_TRANSFERED, result, transfered);
+                    NotifyHandlers(InventoryState.ITEM_TRANSFERED, result, transfered);
                     return true;
                 }
 
@@ -1101,7 +1128,7 @@ namespace Core.Item
             itemTable[registered.InstanceID] = registered;
             CurrentWeight += registered.GetWeight();
 
-            Notify(InventoryState.ITEM_ADDED, result = InventoryResult.SUCCESS, registered);
+            NotifyHandlers(InventoryState.ITEM_ADDED, result = InventoryResult.SUCCESS, registered);
             return true;
         }
         /// <summary> Removes an item and creates its world entity with the given drop force. </summary>
@@ -1120,7 +1147,7 @@ namespace Core.Item
                 return false;
             }
 
-            Notify(InventoryState.ITEM_DROPPED, result, registered);
+            NotifyHandlers(InventoryState.ITEM_DROPPED, result, registered);
 
             if (entity.TryGetComponent(out Rigidbody body))
             {
@@ -1145,7 +1172,7 @@ namespace Core.Item
                 CurrentWeight = Mathf.Max(0, CurrentWeight - registered.GetWeight());
                 itemTable.Remove(registered.InstanceID);
 
-                Notify(InventoryState.ITEM_REMOVED, result, registered);
+                NotifyHandlers(InventoryState.ITEM_REMOVED, result, registered);
                 return true;
             }
 
@@ -1193,7 +1220,7 @@ namespace Core.Item
             registered.SetPosition(position);
             registered.SetRotation(isRotated);
             SetTileItem(registered, position, newScale);
-            Notify(InventoryState.ITEM_CHANGED, result = InventoryResult.SUCCESS, registered);
+            NotifyHandlers(InventoryState.ITEM_CHANGED, result = InventoryResult.SUCCESS, registered);
             return true;
         }
         /// <summary> Swaps two items between the same or different inventories. </summary>

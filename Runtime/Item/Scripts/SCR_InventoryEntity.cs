@@ -6,9 +6,9 @@ using UnityEngine;
 namespace Core.Item
 {
     [DisallowMultipleComponent]
-    public sealed class InventoryEntity : MonoBehaviour, IInventoryUser
+    public sealed class InventoryEntity : MonoBehaviour, IInventoryHandler
     {
-        public event Action<InventoryContext> OnStateChanged = null;
+        public event Action<InventoryContext> OnChanged = null;
 
         [Header("_")]
         [SerializeField] private ItemID[] startingItems = new ItemID[] { };
@@ -24,11 +24,11 @@ namespace Core.Item
         [SerializeField] private float dropForce = 5;
 
         private InventoryData thisInventory = null;
-        private IInventoryEntityHandler[] thisHandlers = null;
+        private IInventoryHandler[] thisHandlers = null;
 
         private void Awake()
         {
-            thisHandlers = GetComponents<IInventoryEntityHandler>();
+            thisHandlers = GetComponents<IInventoryHandler>();
             thisInventory = new(width, height, weight, whitelistedItems);
 
             foreach (ItemID item in startingItems)
@@ -37,14 +37,21 @@ namespace Core.Item
             }
         }
         private void Start() => Initialize();
-
-        public void HandleInventoryChanged(InventoryContext ctx)
+        private void OnDestroy()
         {
-            OnStateChanged?.Invoke(ctx);
+            for (int i = 0; i < thisHandlers.Length; i++)
+            {
+                thisInventory.RemoveHandler(thisHandlers[i]);
+            }
+        }
+
+        public void HandleInventoryChanged(in InventoryContext ctx)
+        {
+            OnChanged?.Invoke(ctx);
 
             for (int i = 0; i < thisHandlers.Length; i++)
             {
-                thisHandlers[i]?.HandleStateChanged(in ctx);
+                thisHandlers[i]?.HandleInventoryChanged(in ctx);
             }
         }
 
@@ -65,7 +72,11 @@ namespace Core.Item
         }
         private void Initialize()
         {
-            thisInventory.User = this;
+            for (int i = 0; i < thisHandlers.Length; i++)
+            {
+                thisInventory.AddHandler(thisHandlers[i]);
+            }
+
             HandleInventoryChanged(new(InventoryState.INITIALIZED, InventoryResult.SUCCESS, null));
         }
         public void Clear() => thisInventory.Clear();
