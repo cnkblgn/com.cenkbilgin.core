@@ -10,17 +10,17 @@ namespace Core.Damage
         public readonly ResourceContainer Health;
         private readonly List<DamageProtection> protections;
         private readonly List<IDamageableHandler> handlers;
-        private readonly DamageMask ignoredMask;
+        private readonly DamageMask ignoreMask;
         private DamageContext lastContext;
 
-        public Damageable(ResourceContainer health, List<DamageProtection> protections = null, DamageMask ignoredMask = default, List<IDamageableHandler> handlers = null)
+        public Damageable(ResourceContainer health, List<DamageProtection> protections = null, DamageMask ignoreMask = default, List<IDamageableHandler> handlers = null)
         {
             this.Health = health ?? throw new ArgumentNullException(nameof(health), "Damageable health cannot be null!");
             this.protections = protections == null ? new() : new(protections);
-            this.ignoredMask = ignoredMask;
+            this.ignoreMask = ignoreMask;
             this.handlers = handlers == null ? new() : new(handlers);
         }
-        public Damageable(Damageable damageable) : this(damageable == null ? throw new ArgumentNullException(nameof(damageable)) : damageable.Health, damageable.protections, damageable.ignoredMask, damageable.handlers) { }
+        public Damageable(Damageable damageable) : this(damageable == null ? throw new ArgumentNullException(nameof(damageable)) : damageable.Health, damageable.protections, damageable.ignoreMask, damageable.handlers) { }
 
         public void AddHandler(IDamageableHandler handler)
         {
@@ -109,7 +109,7 @@ namespace Core.Damage
         {
             float value = data.Damage;
 
-            if (ignoredMask.HasAny(new DamageMask(data.Mask)))
+            if (ignoreMask.HasAny(new DamageMask(data.Mask)))
             {
                 return 0;
             }
