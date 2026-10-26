@@ -1,104 +1,54 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Core.Damage
 {
-    [DisallowMultipleComponent]
-    public sealed class Damageable : MonoBehaviour
+    public sealed class Damageable
     {
-        public event Action<DamageContext> OnHit = null;
+        public event Action<DamageContext> OnHit;
 
-        public ResourceContainer Health => health;
-        public Vector3 Position => origin.position;
-        public Quaternion Rotation => origin.rotation;
-
-        [Header("_")]
-        [SerializeField] private ResourceContainer health = new(100, 100);
-
-        [Header("_")]
-        [SerializeField, Required] private Transform origin;
-
-        [Header("_")]
-        [SerializeField] private DamageTag[] ignoredTags;
-        [SerializeField] private List<DamageProtection> protections;
-
-        private IDamageableHandler[] thisHandlers;
+        public readonly ResourceContainer Health;
+        private readonly List<DamageProtection> protections;
+        private readonly List<IDamageableHandler> handlers;
+        private readonly DamageMask ignoredMask;
         private DamageContext lastContext;
-        private DamageMask ignoredMask;
 
-        private void Awake()
+        public Damageable(ResourceContainer health, List<DamageProtection> protections = null, DamageMask ignoredMask = default, IDamageableHandler[] handlers = null)
         {
-            if (origin == null) throw new NullReferenceException(nameof(origin));
-
-            thisHandlers = GetComponents<IDamageableHandler>();
-            ignoredMask = ignoredTags.CreateMask();
+            this.Health = health ?? throw new ArgumentNullException(nameof(health), "Damageable health cannot be null!");
+            this.protections = protections == null ? new() : new(protections);
+            this.ignoredMask = ignoredMask;
+            this.handlers = handlers == null ? new() : new(handlers);
         }
 
-        public void Bind(ResourceContainer health) => this.health = health ?? throw new ArgumentNullException(nameof(health), "You are trying to bind null health resource!? please assign valid resource!");
-
-        public void Damage(in DamageData data, out DamageContext ctx)
+        public void AddHandler(IDamageableHandler handler)
         {
-            lastContext = new(data);
-
-            float damage = ResolveDamage(in data);
-
-            lastContext.Damage = damage;
-
-            health.SetCurrent(health.GetCurrent() - damage);
-
-            if (!health.IsDepleted())
+            if (handler == null)
             {
-                lastContext.State = DamageState.HIT;
-            }
-            else
-            {
-                lastContext.State = DamageState.DEATH;
+                throw new ArgumentNullException(nameof(handler));
             }
 
-            ctx = lastContext;
-
-            for (int i = 0; i < thisHandlers.Length; i++)
+            if (handlers.Contains(handler))
             {
-                thisHandlers[i]?.HandleHit(in lastContext);
+                return;
             }
 
-            OnHit?.Invoke(lastContext);
+            handlers.Add(handler);
         }
-        private float ResolveDamage(in DamageData data)
+        public void RemoveHandler(IDamageableHandler handler)
         {
-            float value = data.Damage;
-
-            if (ignoredMask.HasAny(new DamageMask(data.Mask)))
+            if (handler == null)
             {
-                return 0;
+                throw new ArgumentNullException(nameof(handler));
             }
 
-            value = ResolveProtection(value, data.Mask);
-
-            for (int i = 0; i < thisHandlers.Length; i++)
+            if (!handlers.Contains(handler))
             {
-                thisHandlers[i]?.HandleDamaged(data);
+                return;
             }
 
-            return value;
+            handlers.Remove(handler);
         }
-        private float ResolveProtection(float value, ulong tags)
-        {
-            for (int i = 0; i < protections.Count; i++)
-            {
-                DamageProtection protection = protections[i];
-
-                if (tags.HasAny(protection.Tag.Mask.Value))
-                {
-                    value -= value * protection.Percent;
-                }
-            }
-
-            return value;
-        }
-
-        public DamageContext GetLastContext() => lastContext;
 
         public IReadOnlyList<DamageProtection> GetProtections() => protections;
         public void AddProtection(DamageProtection protection)
@@ -126,12 +76,72 @@ namespace Core.Damage
             }
         }
 
-        public DamageTag[] GetIgnoredTags() => ignoredTags;
-        public void SetIgnoredTags(DamageTag[] tags)
+        public void Damage(in DamageData data, out DamageContext ctx)
         {
-            ignoredTags = tags;
+            lastContext = new(data);
 
-            ignoredMask = ignoredTags.CreateMask();
+            float damage = ResolveDamage(in data);
+
+            lastContext.Damage = damage;
+
+            Health.SetCurrent(Health.GetCurrent() - damage);
+
+            if (!Health.IsDepleted())
+            {
+                lastContext.State = DamageState.HIT;
+            }
+            else
+            {
+                lastContext.State = DamageState.DEATH;
+            }
+
+            ctx = lastContext;
+
+            for (int i = 0; i < handlers.Count; i++)
+            {
+                handlers[i]?.HandleHit(in lastContext);
+            }
+
+            OnHit?.Invoke(lastContext);
         }
+        private float ResolveDamage(in DamageData data)
+        {
+            float value = data.Damage;
+
+            if (ignoredMask.HasAny(new DamageMask(data.Mask)))
+            {
+                return 0;
+            }
+
+            value = ResolveProtection(value, data.Mask);
+
+            for (int i = 0; i < handlers.Count; i++)
+            {
+                IDamageableHandler handler = handlers[i];
+
+                if (handler != null)
+                {
+                    value = handler.HandleDamaged(data, value);
+                }
+            }
+
+            return value;
+        }
+        private float ResolveProtection(float value, ulong tags)
+        {
+            for (int i = 0; i < protections.Count; i++)
+            {
+                DamageProtection protection = protections[i];
+
+                if (tags.HasAny(protection.Tag.Mask.Value))
+                {
+                    value -= value * protection.Percent;
+                }
+            }
+
+            return value;
+        }
+
+        public DamageContext GetLastContext() => lastContext;
     }
 }

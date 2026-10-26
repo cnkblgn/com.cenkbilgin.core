@@ -21,7 +21,7 @@ namespace Core.Damage
                 return false;
             }
 
-            Damageable entity = collider.GetComponentInParent<Damageable>();
+            DamageableEntity entity = collider.GetComponentInParent<DamageableEntity>();
 
             if (entity == null)
             {
@@ -60,7 +60,7 @@ namespace Core.Damage
                 return false;
             }
 
-            HashSet<Damageable> entities = new(32);
+            HashSet<DamageableEntity> entities = new(32);
             float radiusSqr = radius * radius;
             bool hasHit = false;
 
@@ -73,7 +73,7 @@ namespace Core.Damage
                     continue;
                 }
 
-                Damageable entity = collider.GetComponentInParent<Damageable>();
+                DamageableEntity entity = collider.GetComponentInParent<DamageableEntity>();
 
                 if (entity == null || entity.Health.IsDepleted())
                 {
@@ -121,7 +121,7 @@ namespace Core.Damage
                 return false;
             }
 
-            HashSet<Damageable> entities = new(32);
+            HashSet<DamageableEntity> entities = new(32);
             float radiusSqr = radius * radius;
             bool hasHit = false;
 
@@ -134,7 +134,7 @@ namespace Core.Damage
                     continue;
                 }
 
-                Damageable entity = result.Collider.GetComponentInParent<Damageable>();
+                DamageableEntity entity = result.Collider.GetComponentInParent<DamageableEntity>();
 
                 if (entity == null || entity.Health.IsDepleted())
                 {

@@ -3,7 +3,7 @@ namespace Core.Damage
     public interface IDamageableHandler
     {
         /// <summary> Called once when resolving damage. Use this for handling incoming damage. </summary>
-        public float HandleDamaged(in DamageData data);
+        public float HandleDamaged(in DamageData data, float damage);
         /// <summary> Called every time entity get hit. </summary>
         public void HandleHit(in DamageContext ctx);
     }
