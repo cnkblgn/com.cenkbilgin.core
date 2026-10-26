@@ -21,6 +21,7 @@ namespace Core.Surface
         public bool Equals(SurfaceMask other) => Value == other.Value;
         public override bool Equals(object obj) => obj is SurfaceMask other && Equals(other);
         public override int GetHashCode() => Value.GetHashCode();
+        public static SurfaceMask operator ~(SurfaceMask mask) => new(~mask.Value);
         public static bool operator ==(SurfaceMask left, SurfaceMask right) => left.Equals(right);
         public static bool operator !=(SurfaceMask left, SurfaceMask right) => !left.Equals(right);
     }

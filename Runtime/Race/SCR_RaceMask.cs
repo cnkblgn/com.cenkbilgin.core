@@ -21,6 +21,7 @@ namespace Core.Race
         public bool Equals(RaceMask other) => Value == other.Value;
         public override bool Equals(object obj) => obj is RaceMask other && Equals(other);
         public override int GetHashCode() => Value.GetHashCode();
+        public static RaceMask operator ~(RaceMask mask) => new(~mask.Value);
         public static bool operator ==(RaceMask left, RaceMask right) => left.Equals(right);
         public static bool operator !=(RaceMask left, RaceMask right) => !left.Equals(right);
     }

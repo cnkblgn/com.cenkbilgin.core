@@ -21,6 +21,7 @@ namespace Core.Actors
         public bool Equals(ActorMask other) => Value == other.Value;
         public override bool Equals(object obj) => obj is ActorMask other && Equals(other);
         public override int GetHashCode() => Value.GetHashCode();
+        public static ActorMask operator ~(ActorMask mask) => new(~mask.Value);
         public static bool operator ==(ActorMask left, ActorMask right) => left.Equals(right);
         public static bool operator !=(ActorMask left, ActorMask right) => !left.Equals(right);
     }

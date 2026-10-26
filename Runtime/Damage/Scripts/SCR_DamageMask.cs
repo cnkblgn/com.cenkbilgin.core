@@ -21,6 +21,7 @@ namespace Core.Damage
         public bool Equals(DamageMask other) => Value == other.Value;
         public override bool Equals(object obj) => obj is DamageMask other && Equals(other);
         public override int GetHashCode() => Value.GetHashCode();
+        public static DamageMask operator ~(DamageMask mask) => new(~mask.Value);
         public static bool operator ==(DamageMask left, DamageMask right) => left.Equals(right);
         public static bool operator !=(DamageMask left, DamageMask right) => !left.Equals(right);
     }

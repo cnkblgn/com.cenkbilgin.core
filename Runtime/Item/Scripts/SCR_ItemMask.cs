@@ -21,6 +21,7 @@ namespace Core.Item
         public bool Equals(ItemMask other) => Value == other.Value;
         public override bool Equals(object obj) => obj is ItemMask other && Equals(other);
         public override int GetHashCode() => Value.GetHashCode();
+        public static ItemMask operator ~(ItemMask mask) => new(~mask.Value);
         public static bool operator ==(ItemMask left, ItemMask right) => left.Equals(right);
         public static bool operator !=(ItemMask left, ItemMask right) => !left.Equals(right);
     }
