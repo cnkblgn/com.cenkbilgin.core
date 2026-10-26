@@ -1,12 +1,10 @@
 using System;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace Core.UI
 {
-    using static CoreUtility;
-
     public sealed class UIOptionButton : UIOption<int>
     {
         [Header("_")]
@@ -20,6 +18,7 @@ namespace Core.UI
         private string[] valueTexts = null;
         private int maximumIndex = 0;
         private bool wrapAround = false;
+        private bool showMax = false;
 
         private void Awake()
         {
@@ -32,13 +31,14 @@ namespace Core.UI
             previousButton.onClick.RemoveListener(SetPrevious);
         }
 
-        public UIOptionButton Initialize(int initial, int @default, string description, int maximumIndex, Action<int> onApply, Action<int> onChanged, bool wrapAround = false)
+        public UIOptionButton Initialize(int initial, int @default, string description, int maximumIndex, Action<int> onApply, Action<int> onChanged, bool wrapAround = false, bool showMax = false)
         {
             if (descriptionText != null)
             {
                 descriptionText.text = description;
             }
 
+            this.showMax = showMax;
             this.maximumIndex = maximumIndex;
             this.wrapAround = wrapAround;
 
@@ -79,13 +79,11 @@ namespace Core.UI
                 return;
             }
 
-            if (valueTexts != null && value < valueTexts.Length)
+            string text = valueTexts != null && (int)value < valueTexts.Length ? valueTexts[(int)value] : value.ToString();
+
+            if (showMax)
             {
-                valueText.text = valueTexts[value];
-            }
-            else
-            {
-                valueText.text = value.ToString();
+                valueText.text = $"{text} / {maximumIndex:0}";
             }
         }
     }

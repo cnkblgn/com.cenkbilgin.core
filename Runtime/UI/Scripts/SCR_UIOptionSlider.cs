@@ -1,12 +1,10 @@
 using System;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace Core.UI
 {
-    using static CoreUtility;
-
     public sealed class UIOptionSlider : UIOption<float>
     {
         [Header("_")]
@@ -16,17 +14,20 @@ namespace Core.UI
         [SerializeField] private TextMeshProUGUI descriptionText = null;
         [SerializeField] private TextMeshProUGUI valueText = null;
 
-        private string[] valueTexts = null;
+        private string[] valueTexts;
+        private bool showMax;
 
         private void Awake() => sliderObject.onValueChanged.AddListener(Set);
         private void OnDisable() => sliderObject.onValueChanged.RemoveListener(Set);
 
-        public UIOptionSlider Initialize(float initial, float @default, string description, float minValue, float maxValue, bool isInt, Action<float> onApply, Action<float> onChanged)
+        public UIOptionSlider Initialize(float initial, float @default, string description, float minValue, float maxValue, bool isInt, Action<float> onApply, Action<float> onChanged, bool showMax = false)
         {
             if (descriptionText != null)
             {
                 descriptionText.text = description;
             }
+
+            this.showMax = showMax;
 
             sliderObject.minValue = minValue;
             sliderObject.maxValue = maxValue;
@@ -50,13 +51,11 @@ namespace Core.UI
                 return;
             }
 
-            if (valueTexts != null && (int)value < valueTexts.Length)
+            string text = valueTexts != null && (int)value < valueTexts.Length ? valueTexts[(int)value] : value.ToString("0.00");
+
+            if (showMax)
             {
-                valueText.text = valueTexts[(int)value];
-            }
-            else
-            {
-                valueText.text = value.ToString("0.00");
+                valueText.text = $"{text} / {sliderObject.maxValue:0}";
             }
         }
     }
