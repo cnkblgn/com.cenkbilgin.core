@@ -59,7 +59,7 @@ namespace Core.UI
                 UpdateBounds(textContainer.anchoredPosition);
             }
         } 
-        public void UpdateBounds(Vector2 desiredPosition, Camera camera = null)
+        public void UpdateBounds(Vector2 desiredPosition, Camera camera = null, Vector2? anchor = null)
         {
             if (canvasBounds == null)
             {
@@ -67,7 +67,7 @@ namespace Core.UI
                 return;
             }
 
-            textContainer.ClampToView(canvasBounds, desiredPosition, camera);
+            textContainer.ClampToView(canvasBounds, desiredPosition, camera, anchor);
         }
     }
 }

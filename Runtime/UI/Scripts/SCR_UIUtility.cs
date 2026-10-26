@@ -31,11 +31,11 @@ namespace Core.UI
                 content.anchoredPosition = new Vector2(content.anchoredPosition.x, Mathf.Abs(thisTransform.anchoredPosition.y + thisTransform.sizeDelta.y / 2));
             }
         }
-        public static void ClampToView(this RectTransform thisTransform, RectTransform rootCanvas, Camera camera = null)
+        public static void ClampToView(this RectTransform thisTransform, RectTransform rootCanvas, Camera camera = null, Vector2? anchor = null)
         {
-            ClampToView(thisTransform, rootCanvas, thisTransform.anchoredPosition, camera);
+            ClampToView(thisTransform, rootCanvas, thisTransform.anchoredPosition, camera, anchor);
         }
-        public static void ClampToView(this RectTransform thisTransform, RectTransform rootCanvas, Vector2 screenPosition, Camera camera = null)
+        public static void ClampToView(this RectTransform thisTransform, RectTransform rootCanvas, Vector2 screenPosition, Camera camera = null, Vector2? anchor = null)
         {
             if (rootCanvas == null)
             {
@@ -48,11 +48,12 @@ namespace Core.UI
             Rect rootRect = rootCanvas.rect;
             Rect thisRect = thisTransform.rect;
 
-            Vector2 position = localPoint;
-            if (position.x < rootRect.xMin) position.x = rootRect.xMin;
-            if (position.y < rootRect.yMin) position.y = rootRect.yMin;
-            if (position.x + thisRect.width > rootRect.xMax) position.x = rootRect.xMax - thisRect.width;
-            if (position.y + thisRect.height > rootRect.yMax) position.y = rootRect.yMax - thisRect.height;
+            // anchor (0,1) = sol üst köþe fareye gelir, (0,0) = sol alt (eski davranýþ)
+            Vector2 a = anchor ?? Vector2.zero;
+            Vector2 position = localPoint - new Vector2(thisRect.width * a.x, thisRect.height * a.y);
+
+            position.x = Mathf.Clamp(position.x, rootRect.xMin, rootRect.xMax - thisRect.width);
+            position.y = Mathf.Clamp(position.y, rootRect.yMin, rootRect.yMax - thisRect.height);
 
             thisTransform.anchoredPosition = position;
         }
