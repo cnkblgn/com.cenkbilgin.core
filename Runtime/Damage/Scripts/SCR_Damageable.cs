@@ -13,13 +13,14 @@ namespace Core.Damage
         private readonly DamageMask ignoredMask;
         private DamageContext lastContext;
 
-        public Damageable(ResourceContainer health, List<DamageProtection> protections = null, DamageMask ignoredMask = default, IDamageableHandler[] handlers = null)
+        public Damageable(ResourceContainer health, List<DamageProtection> protections = null, DamageMask ignoredMask = default, List<IDamageableHandler> handlers = null)
         {
             this.Health = health ?? throw new ArgumentNullException(nameof(health), "Damageable health cannot be null!");
             this.protections = protections == null ? new() : new(protections);
             this.ignoredMask = ignoredMask;
             this.handlers = handlers == null ? new() : new(handlers);
         }
+        public Damageable(Damageable damageable) : this(damageable == null ? throw new ArgumentNullException(nameof(damageable)) : damageable.Health, damageable.protections, damageable.ignoredMask, damageable.handlers) { }
 
         public void AddHandler(IDamageableHandler handler)
         {

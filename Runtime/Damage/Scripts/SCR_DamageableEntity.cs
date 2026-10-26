@@ -29,7 +29,14 @@ namespace Core.Damage
         {
             if (origin == null) throw new NullReferenceException(nameof(origin));
 
-            Bind(new Damageable(health, protections, ignoredTags.CreateMask(), GetComponents<IDamageableHandler>()));
+            Bind(new Damageable(health, protections, ignoredTags.CreateMask()));
+
+            IDamageableHandler[] handlers = GetComponents<IDamageableHandler>();
+
+            for (int i = 0; i < handlers.Length; i++)
+            {
+                damageable.AddHandler(handlers[i]);
+            }
         }
         private void OnDestroy() => Unbind();
 
