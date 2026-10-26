@@ -71,7 +71,7 @@ namespace Core
 
         public bool IsDepleted() => isDepleted;
 
-        public float Add(float amount)
+        public float Recover(float amount)
         {
             if (amount <= 0f)
             {
