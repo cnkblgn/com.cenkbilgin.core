@@ -6,6 +6,8 @@ namespace Core.Stat
 {
     public static class StatDatabase
     {
+        public static int Version => version; private static int version;
+
         private static readonly Dictionary<string, int> idLookup = new();
         private static StatDefinition[] definitions = Array.Empty<StatDefinition>();
 
@@ -28,6 +30,7 @@ namespace Core.Stat
                 definitions[i] = new(entry);
             }
 
+            version++;
             Debug.Log($"Stat database build successfull!");
         }
 

@@ -6,6 +6,8 @@ namespace Core.Prefab
 {
     public static class PrefabDatabase
     {
+        public static int Version => version; private static int version;
+
         private static readonly Dictionary<string, int> idLookup = new();
         private static GameObject[] prefabs = Array.Empty<GameObject>();
 
@@ -16,28 +18,31 @@ namespace Core.Prefab
                 return;
             }
 
+            List<GameObject> validPrefabs = new(_prefabs.Length);
             idLookup.Clear();
-            prefabs = new GameObject[_prefabs.Length];
 
             for (int i = 0; i < _prefabs.Length; i++)
             {
-                GameObject gameObject = _prefabs[i];
+                GameObject prefab = _prefabs[i];
 
-#if UNITY_EDITOR
-                if (gameObject == null)
+                if (prefab == null)
                 {
-                    Debug.LogError("Prefab database gameObject is invalid!");
+#if UNITY_EDITOR
+                    Debug.LogError($"Prefab database prefab is invalid at index {i}!");
+#endif
                     continue;
                 }
-#endif
 
-                string key = gameObject.name;
+                string key = prefab.name;
 
-                idLookup[key] = i;
-                prefabs[i] = gameObject;
+                idLookup[key] = validPrefabs.Count;
+                validPrefabs.Add(prefab);
             }
 
-            Debug.Log($"Prefab build successfull!");
+            prefabs = validPrefabs.ToArray();
+            version++;
+
+            Debug.Log($"Prefab database build successful! Prefab count: {prefabs.Length}");
         }
         internal static void Build(List<GameObject> gameObjectCollection) => Build(gameObjectCollection.ToArray());
 

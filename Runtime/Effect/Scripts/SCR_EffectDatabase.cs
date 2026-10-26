@@ -6,6 +6,8 @@ namespace Core.Effect
 {
     public static class EffectDatabase
     {
+        public static int Version => version; private static int version;
+
         private static readonly Dictionary<string, int> idLookup = new();
         private static EffectDefinition[] definitions = Array.Empty<EffectDefinition>();
 
@@ -28,6 +30,7 @@ namespace Core.Effect
                 definitions[i] = new(entries[i]);
             }
 
+            version++;
             Debug.Log($"Effect database build successfull!");
         }
 

@@ -1,6 +1,6 @@
-using Core.Editor;
 using System.Collections.Generic;
 using UnityEditor;
+using Core.Editor;
 
 namespace Core.Trait.Editor
 {
@@ -10,6 +10,7 @@ namespace Core.Trait.Editor
     internal sealed class EditorDrawSearchableTraitID : EditorDrawSearchable<string>
     {
         private static SearchCollection<string> search;
+        private static int searchVersion = -1;
 
         private static void Rebuild()
         {
@@ -21,12 +22,14 @@ namespace Core.Trait.Editor
                 string key = definitions[i].ID.Key;
                 search.Entries[i] = new(key, key);
             }
+
+            searchVersion = TraitDatabase.Version;
         }
         protected override string GetEmpty() => STRING_EMPTY;
         protected override string GetKey() => "key";
         protected override SearchCollection<string> GetKeys()
         {
-            if (search == null)
+            if (search == null || searchVersion != TraitDatabase.Version)
             {
                 Rebuild();
             }

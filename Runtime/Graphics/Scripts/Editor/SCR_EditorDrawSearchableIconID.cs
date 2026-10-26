@@ -10,6 +10,7 @@ namespace Core.Graphics.Editor
     public sealed class EditorDrawSearchableIconID : EditorDrawSearchable<string>
     {
         private static SearchCollection<string> search;
+        private static int searchVersion = -1;
 
         private static void Rebuild()
         {
@@ -21,12 +22,14 @@ namespace Core.Graphics.Editor
                 string key = IconDatabase.GetID(i).Key;
                 search.Entries[i] = new(key, key);
             }
+
+            searchVersion = IconDatabase.Version;
         }
         protected override string GetEmpty() => STRING_EMPTY;
         protected override string GetKey() => "key";
         protected override SearchCollection<string> GetKeys()
         {
-            if (search == null)
+            if (search == null || searchVersion != IconDatabase.Version)
             {
                 Rebuild();
             }

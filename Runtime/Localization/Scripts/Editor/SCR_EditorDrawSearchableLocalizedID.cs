@@ -10,7 +10,7 @@ namespace Core.Localization.Editor
     public sealed class EditorDrawSearchableLocalizedID : EditorDrawSearchable<string>
     {
         private static SearchCollection<string> search;
-        private static int searchRevision = -1;
+        private static int searchVersion = -1;
 
         private static void Rebuild()
         {
@@ -24,13 +24,13 @@ namespace Core.Localization.Editor
                 search.Entries[i++] = new(key, key);
             }
 
-            searchRevision = LocalizationDatabase.Revision;
+            searchVersion = LocalizationDatabase.Version;
         }
         protected override string GetEmpty() => STRING_EMPTY;
         protected override string GetKey() => "key";
         protected override SearchCollection<string> GetKeys()
         {
-            if (search == null || searchRevision != LocalizationDatabase.Revision)
+            if (search == null || searchVersion != LocalizationDatabase.Version)
             {
                 Rebuild();
             }

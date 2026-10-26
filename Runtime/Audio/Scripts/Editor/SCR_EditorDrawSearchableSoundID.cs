@@ -1,6 +1,5 @@
-using Core.Editor;
-using System.Collections.Generic;
 using UnityEditor;
+using Core.Editor;
 
 namespace Core.Audio.Editor
 {
@@ -10,6 +9,7 @@ namespace Core.Audio.Editor
     internal sealed class EditorDrawSearchableSoundID : EditorDrawSearchable<string>
     {
         private static SearchCollection<string> search;
+        private static int searchVersion = -1;
 
         private static void Rebuild()
         {
@@ -21,12 +21,14 @@ namespace Core.Audio.Editor
                 string key = SoundDatabase.GetID(i).Key;
                 search.Entries[i] = new(key, key);
             }
+
+            searchVersion = SoundDatabase.Version;
         }
         protected override string GetEmpty() => STRING_EMPTY;
         protected override string GetKey() => "key";
         protected override SearchCollection<string> GetKeys()
         {
-            if (search == null)
+            if (search == null || searchVersion != SoundDatabase.Version)
             {
                 Rebuild();
             }

@@ -6,6 +6,8 @@ namespace Core.Race
 {
     public static class RaceDatabase
     {
+        public static int Version => version; private static int version;
+
         private static readonly Dictionary<string, int> idLookup = new();
         private static readonly Dictionary<string, int> tagLookup = new();
         private static RaceDefinition[] definitions = Array.Empty<RaceDefinition>();
@@ -47,6 +49,7 @@ namespace Core.Race
                 definitions[i] = new(entry);
             }
 
+            version++;
             Debug.Log($"Race database build successfull!");
         }
 

@@ -12,7 +12,7 @@ namespace Core.Localization
     {
         public static event Action<int> OnLocalizationChanged = null;
 
-        public static int Revision => revision;
+        public static int Version => version; private static int version;
         internal static bool IsParsed => database != null;
 
         private static string[] languages = Array.Empty<string>();
@@ -21,7 +21,6 @@ namespace Core.Localization
 
         private static Dictionary<string, string> currentLanguageData = null;
         private static int currentLanguageIndex = 0;
-        private static int revision;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void OnRuntimeInitialize() => OnLocalizationChanged = null;
@@ -140,7 +139,7 @@ namespace Core.Localization
                 }
             }
 
-            revision++;
+            version++;
         }
         internal static void Build(TextAsset file, IEnumerable<LocalizationInterpolator> values)
         {
@@ -172,7 +171,7 @@ namespace Core.Localization
                 currentLanguageIndex = 0;
                 currentLanguageData = GetLanguage(currentLanguageIndex);
 
-                revision++;
+                version++;
 
                 Debug.Log($"Localization parse successfull!");
             }

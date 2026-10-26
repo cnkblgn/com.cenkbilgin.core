@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting.YamlDotNet.Core;
 using UnityEngine;
 
 namespace Core.Actors
 {
     public static class ActorDatabase
     {
+        public static int Version => version; private static int version;
+
         private static readonly Dictionary<string, int> idLookup = new();
         private static readonly Dictionary<string, int> tagLookup = new();
         private static ActorTag[] tags = Array.Empty<ActorTag>();
@@ -67,6 +70,7 @@ namespace Core.Actors
                 groups[i] = new(new(key, index));
             }
 
+            version++;
             Debug.Log($"Actor database build successfull!");
         }
 

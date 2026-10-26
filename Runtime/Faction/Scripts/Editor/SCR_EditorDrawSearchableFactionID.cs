@@ -10,6 +10,7 @@ namespace Core.Faction.Editor
     internal sealed class EditorDrawSearchableFactionID : EditorDrawSearchable<string>
     {
         private static SearchCollection<string> search;
+        private static int searchVersion = -1;
 
         private static void Rebuild()
         {
@@ -21,12 +22,14 @@ namespace Core.Faction.Editor
                 string key = definitions[i].ID.Key;
                 search.Entries[i] = new(key, key);
             }
+
+            searchVersion = FactionDatabase.Version;
         }
         protected override string GetEmpty() => STRING_EMPTY;
         protected override string GetKey() => "key";
         protected override SearchCollection<string> GetKeys()
         {
-            if (search == null)
+            if (search == null || searchVersion != FactionDatabase.Version)
             {
                 Rebuild();
             }

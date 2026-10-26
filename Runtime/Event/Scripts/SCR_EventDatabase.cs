@@ -6,6 +6,8 @@ namespace Core.Event
 {
     public static class EventDatabase
     {
+        public static int Version => version; private static int version;
+
         private static readonly Dictionary<string, int> idLookup = new();
         private static EventID[] ids = Array.Empty<EventID>();
         private static List<Action<EventContext>>[] listeners = Array.Empty<List<Action<EventContext>>>();
@@ -39,6 +41,7 @@ namespace Core.Event
                 listeners[i] = new();
             }
 
+            version++;
             Debug.Log($"Event database build successfull!");
         }
         public static void Clear()

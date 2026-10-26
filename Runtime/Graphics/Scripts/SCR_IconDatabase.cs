@@ -6,6 +6,8 @@ namespace Core.Graphics
 {
     public static class IconDatabase
     {
+        public static int Version => version; private static int version;
+
         private static readonly Dictionary<string, int> idLookup = new();
         private static Sprite[] sprites = Array.Empty<Sprite>();
 
@@ -18,27 +20,31 @@ namespace Core.Graphics
                 return;
             }
 
-            sprites = new Sprite[_sprites.Length];
+            List<Sprite> validSprites = new(_sprites.Length);
             idLookup.Clear();
 
             for (int i = 0; i < _sprites.Length; i++)
             {
-                Sprite clip = _sprites[i];
-#if UNITY_EDITOR
-                if (clip == null)
+                Sprite sprite = _sprites[i];
+
+                if (sprite == null)
                 {
-                    Debug.LogError("Icon database sprite is invalid!");
+#if UNITY_EDITOR
+                    Debug.LogError($"Icon database sprite is invalid at index {i}!");
+#endif
                     continue;
                 }
-#endif
-                string key = _sprites[i].name;
-                IconID id = new(key, i);
 
-                idLookup[key] = i;
-                sprites[i] = _sprites[i];
+                string key = sprite.name;
+
+                idLookup[key] = validSprites.Count;
+                validSprites.Add(sprite);
             }
 
-            Debug.Log($"Icon database build successfull!");
+            sprites = validSprites.ToArray();
+            version++;
+
+            Debug.Log($"Icon database build successful! Sprite count: {sprites.Length}");
         }
 
         public static int GetSprites() => sprites.Length;

@@ -10,6 +10,7 @@ namespace Core.Graphics.Editor
     public sealed class EditorDrawSearchableMeshID : EditorDrawSearchable<string>
     {
         private static SearchCollection<string> search;
+        private static int searchVersion = -1;
 
         private static void Rebuild()
         {
@@ -21,12 +22,14 @@ namespace Core.Graphics.Editor
                 string key = MeshDatabase.GetID(i).Key;
                 search.Entries[i] = new(key, key);
             }
+
+            searchVersion = MeshDatabase.Version;
         }
         protected override string GetEmpty() => STRING_EMPTY;
         protected override string GetKey() => "key";
         protected override SearchCollection<string> GetKeys()
         {
-            if (search == null)
+            if (search == null || searchVersion != MeshDatabase.Version)
             {
                 Rebuild();
             }

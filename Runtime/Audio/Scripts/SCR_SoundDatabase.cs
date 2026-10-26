@@ -6,6 +6,8 @@ namespace Core.Audio
 {
     public static class SoundDatabase
     {
+        public static int Version => version; private static int version;
+
         private static readonly Dictionary<string, int> idLookup = new();
         private static AudioClip[] clips = Array.Empty<AudioClip>();
 
@@ -16,31 +18,33 @@ namespace Core.Audio
                 return;
             }
 
-            clips = new AudioClip[_clips.Length];
+            List<AudioClip> validClips = new(_clips.Length);
             idLookup.Clear();
 
             for (int i = 0; i < _clips.Length; i++)
             {
                 AudioClip clip = _clips[i];
 
-#if UNITY_EDITOR
                 if (clip == null)
                 {
-                    Debug.LogError("Sound database clip is invalid!");
+#if UNITY_EDITOR
+                    Debug.LogError($"Sound database clip is invalid at index {i}!");
+#endif
                     continue;
                 }
-#endif
 
-                string key = _clips[i].name;
-                SoundID id = new(key, i);
+                string key = clip.name;
 
-                idLookup[key] = i;
-                clips[i] = clip;
+                idLookup[key] = validClips.Count;
+                validClips.Add(clip);
             }
 
-            Debug.Log($"Sound database build successfull!");
+            clips = validClips.ToArray();
+
+            version++;
+            Debug.Log($"Sound database build successful! Clip count: {clips.Length}");
         }
- 
+
         public static int GetClips() => clips.Length;
         public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
         public static SoundID GetID(int index)

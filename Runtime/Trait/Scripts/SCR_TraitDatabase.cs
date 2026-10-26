@@ -6,6 +6,8 @@ namespace Core.Trait
 {
     public static class TraitDatabase
     {
+        public static int Version => version; private static int version;
+
         private static readonly Dictionary<string, int> idLookup = new();
         private static TraitDefinition[] definitions = Array.Empty<TraitDefinition>();
 
@@ -28,6 +30,7 @@ namespace Core.Trait
                 definitions[i] = new(entry);
             }
 
+            version++;
             Debug.Log($"Trait database build successfull!");
         }
 

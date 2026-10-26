@@ -6,6 +6,8 @@ namespace Core.Graphics
 {
     public static class MeshDatabase
     {
+        public static int Version => version; private static int version;
+
         private static readonly Dictionary<string, int> idLookup = new();
         private static Mesh[] meshes = Array.Empty<Mesh>();
 
@@ -16,26 +18,31 @@ namespace Core.Graphics
                 return;
             }
 
+            List<Mesh> validMeshes = new(_meshes.Length);
             idLookup.Clear();
-            meshes = new Mesh[_meshes.Length];
 
             for (int i = 0; i < _meshes.Length; i++)
             {
                 Mesh mesh = _meshes[i];
-#if UNITY_EDITOR
+
                 if (mesh == null)
                 {
-                    Debug.LogError("Mesh database mesh is invalid!");
+#if UNITY_EDITOR
+                    Debug.LogError($"Mesh database mesh is invalid at index {i}!");
+#endif
                     continue;
                 }
-#endif
+
                 string key = mesh.name;
 
-                idLookup[key] = i;
-                meshes[i] = mesh;
+                idLookup[key] = validMeshes.Count;
+                validMeshes.Add(mesh);
             }
 
-            Debug.Log($"Mesh database build successfull!");
+            meshes = validMeshes.ToArray();
+            version++;
+
+            Debug.Log($"Mesh database build successful! Mesh count: {meshes.Length}");
         }
 
         public static int GetMeshes() => meshes.Length;

@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Text;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using Core.Actors;
 
@@ -11,6 +11,8 @@ namespace Core.Quest
         public static event Action<QuestID> OnQuestProgress;
         public static event Action<QuestID> OnQuestStarted;
         public static event Action<QuestID> OnQuestCompleted;
+
+        public static int Version => version; private static int version;
 
         private static readonly Dictionary<string, int> idLookup = new();
         private static QuestDefinition[] definitions = Array.Empty<QuestDefinition>();
@@ -40,6 +42,7 @@ namespace Core.Quest
                 definitions[i] = new(entry);
             }
 
+            version++;
             Debug.Log($"Quest database build successfull!");
         }
 

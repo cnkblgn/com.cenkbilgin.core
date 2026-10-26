@@ -6,6 +6,8 @@ namespace Core.Faction
 {
     public static class FactionDatabase
     {
+        public static int Version => version; private static int version;
+
         private static readonly Dictionary<string, int> idLookup = new();
         private static FactionDefinition[] definitions = Array.Empty<FactionDefinition>();
         private static FactionInstance[] instances = Array.Empty<FactionInstance>();
@@ -35,6 +37,7 @@ namespace Core.Faction
                 instances[i] = new(definitions[i].ID, definitions[i].Relations, definitions.Length);
             }
 
+            version++;
             Debug.Log($"Faction database build successfull!");
         }
 

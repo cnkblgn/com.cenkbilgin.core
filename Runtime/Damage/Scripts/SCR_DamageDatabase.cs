@@ -6,6 +6,8 @@ namespace Core.Damage
 {
     public static class DamageDatabase
     {
+        public static int Version => version; private static int version;
+
         private static readonly Dictionary<string, int> tagLookup = new();
         private static DamageTag[] tags = Array.Empty<DamageTag>();
 
@@ -39,6 +41,7 @@ namespace Core.Damage
                 tags[index] = new(key, index);
             }
 
+            version++;
             Debug.Log($"Damage database build successfull!");
         }
 

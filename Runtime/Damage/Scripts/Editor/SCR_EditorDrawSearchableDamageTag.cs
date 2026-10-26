@@ -1,6 +1,6 @@
-using Core.Editor;
 using System.Collections.Generic;
 using UnityEditor;
+using Core.Editor;
 
 namespace Core.Damage.Editor
 {
@@ -10,6 +10,7 @@ namespace Core.Damage.Editor
     internal sealed class EditorDrawSearchableDamageTag : EditorDrawSearchable<string>
     {
         private static SearchCollection<string> search;
+        private static int searchVersion = -1;
 
         private static void Rebuild()
         {
@@ -21,12 +22,14 @@ namespace Core.Damage.Editor
                 string key = tags[i].Key;
                 search.Entries[i] = new(key, key);
             }
+
+            searchVersion = DamageDatabase.Version;
         }
         protected override string GetEmpty() => STRING_EMPTY;
         protected override string GetKey() => "key";
         protected override SearchCollection<string> GetKeys()
         {
-            if (search == null)
+            if (search == null || searchVersion != DamageDatabase.Version)
             {
                 Rebuild();
             }

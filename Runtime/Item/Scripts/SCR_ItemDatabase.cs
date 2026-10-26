@@ -6,6 +6,8 @@ namespace Core.Item
 {
     public static class ItemDatabase
     {
+        public static int Version => version; private static int version;
+
         private static InventoryEntity orphanInventory = null;
         private static readonly Dictionary<string, int> idLookup = new();
         private static readonly Dictionary<string, int> tagLookup = new();
@@ -55,6 +57,7 @@ namespace Core.Item
                 definitions[i] = new(entry);
             }
 
+            version++;
             Debug.Log($"Item database build successfull!");
         }
 

@@ -6,6 +6,8 @@ namespace Core.Surface
 {
     public static class SurfaceDatabase
     {
+        public static int Version => version; private static int version;
+
         private static readonly Dictionary<string, int> tagLookup = new();
         private static SurfaceTag[] tags = Array.Empty<SurfaceTag>();
 
@@ -39,6 +41,7 @@ namespace Core.Surface
                 tags[index] = new(key, index);
             }
 
+            version++;
             Debug.Log($"Surface database build successfull!");
         }
 

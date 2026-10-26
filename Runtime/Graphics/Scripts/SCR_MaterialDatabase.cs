@@ -6,6 +6,8 @@ namespace Core.Graphics
 {
     public static class MaterialDatabase
     {
+        public static int Version => version; private static int version;
+
         private static readonly Dictionary<string, int> idLookup = new();
         private static Material[] materials = Array.Empty<Material>();
 
@@ -16,28 +18,31 @@ namespace Core.Graphics
                 return;
             }
 
+            List<Material> validMaterials = new(_materials.Length);
             idLookup.Clear();
-            materials = new Material[_materials.Length];
 
             for (int i = 0; i < _materials.Length; i++)
             {
                 Material material = _materials[i];
 
-#if UNITY_EDITOR
                 if (material == null)
                 {
-                    Debug.LogError("Material database material is invalid!");
+#if UNITY_EDITOR
+                    Debug.LogError($"Material database material is invalid at index {i}!");
+#endif
                     continue;
                 }
-#endif
 
                 string key = material.name;
 
-                idLookup[key] = i;
-                materials[i] = material;
+                idLookup[key] = validMaterials.Count;
+                validMaterials.Add(material);
             }
 
-            Debug.Log($"Material database build successfull!");
+            materials = validMaterials.ToArray();
+            version++;
+
+            Debug.Log($"Material database build successful! Material count: {materials.Length}");
         }
 
         public static int GetMaterials() => materials.Length;

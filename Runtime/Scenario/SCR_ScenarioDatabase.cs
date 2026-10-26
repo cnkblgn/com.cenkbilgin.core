@@ -6,6 +6,8 @@ namespace Core.Scenario
 {
     public static class ScenarioDatabase
     {
+        public static int Version => version; private static int version;
+
         private static readonly Dictionary<string, int> idLookup = new();
         private static ScenarioDefinition[] definitions = Array.Empty<ScenarioDefinition>();
 
@@ -28,6 +30,7 @@ namespace Core.Scenario
                 definitions[i] = new(entry);
             }
 
+            version++;
             Debug.Log($"Scenario database build successfull!");
         }
 
