@@ -22,7 +22,7 @@ namespace Core.Stat
                 stats[definition.ID] = definition.Default;
             }
         }
-        public StatContainer(StatContainer container) : this(container == null ? throw new ArgumentNullException() : container.stats, container.modifiers, container.handlers) { }
+        public StatContainer(StatContainer container, List<IStatHandler> handlers = null) : this(container == null ? throw new ArgumentNullException() : container.stats, container.modifiers, handlers) { }
         public StatContainer(Dictionary<StatID, float> stats, List<StatModifier> modifiers, List<IStatHandler> handlers = null)
         {
             if (stats == null) throw new ArgumentNullException();

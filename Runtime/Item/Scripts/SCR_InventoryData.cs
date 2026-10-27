@@ -54,7 +54,7 @@ namespace Core.Item
             }
         }
         public InventoryData(List<ItemData> items, int width, int height, int maxWeight, ItemTag[] tags) : this(items, width, height, maxWeight, (tags != null ? tags.ToArray() : ItemDatabase.GetTags().ToArray()).CreateMask()) { }
-        public InventoryData(InventoryData data) : this(data?.itemTable.Values.ToList() ?? throw new ArgumentNullException(nameof(data)), data.GridWidth, data.GridHeight, data.MaximumWeight, data.ItemMask, data.handlers) { }
+        public InventoryData(InventoryData data, List<IInventoryHandler> handlers = null) : this(data?.itemTable.Values.ToList() ?? throw new ArgumentNullException(nameof(data)), data.GridWidth, data.GridHeight, data.MaximumWeight, data.ItemMask, handlers) { }
         public InventoryData(int width, int height, int maxWeight, ItemTag[] tags) : this(new(), width, height, maxWeight, tags) { }
         public InventoryData(int width, int height, int maxWeight, ItemMask mask) : this(new(), width, height, maxWeight, mask) { }
 

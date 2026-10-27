@@ -12,8 +12,7 @@ namespace Core.Faction
         private readonly List<IFactionHandler> handlers;
         private readonly FactionRelation[] relations;
 
-        public FactionContainer(List<IFactionHandler> handlers = null) : this(default, handlers) { }
-        public FactionContainer(FactionContainer container) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.id, (FactionRelation[])container.relations.Clone(), container.handlers) { }
+        public FactionContainer(FactionContainer container, List<IFactionHandler> handlers = null) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.id, (FactionRelation[])container.relations.Clone(), handlers) { }
         public FactionContainer(FactionID id, List<IFactionHandler> handlers = null) : this(id, id.IsValid ? id.GetDefinition().Relations : new FactionRelation[0], handlers) { }
         public FactionContainer(FactionID id, FactionRelation[] relations, List<IFactionHandler> handlers = null)
         {

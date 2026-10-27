@@ -20,7 +20,7 @@ namespace Core.Damage
             this.ignoreMask = ignoreMask;
             this.handlers = handlers == null ? new() : new(handlers);
         }
-        public Damageable(Damageable damageable) : this(damageable == null ? throw new ArgumentNullException(nameof(damageable)) : damageable.Health, damageable.protections, damageable.ignoreMask, damageable.handlers) { }
+        public Damageable(Damageable damageable, List<IDamageableHandler> handlers = null) : this(damageable == null ? throw new ArgumentNullException(nameof(damageable)) : damageable.Health, damageable.protections, damageable.ignoreMask, handlers) { }
 
         public void AddHandler(IDamageableHandler handler)
         {
@@ -143,6 +143,7 @@ namespace Core.Damage
             return value;
         }
 
+        public DamageMask GetIgnoreMask() => ignoreMask;
         public DamageContext GetLastContext() => lastContext;
     }
 }

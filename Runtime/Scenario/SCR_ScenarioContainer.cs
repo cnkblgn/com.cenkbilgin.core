@@ -11,8 +11,7 @@ namespace Core.Scenario
         private ScenarioID id;
         private readonly List<IScenarioHandler> handlers;
 
-        public ScenarioContainer(List<IScenarioHandler> handlers = null) : this(default, handlers) { }
-        public ScenarioContainer(ScenarioContainer container) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.id, container.handlers) { }
+        public ScenarioContainer(ScenarioContainer container, List<IScenarioHandler> handlers = null) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.id, handlers) { }
         public ScenarioContainer(ScenarioID id, List<IScenarioHandler> handlers = null)
         {
             this.id = id;

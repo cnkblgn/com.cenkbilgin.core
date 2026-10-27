@@ -14,7 +14,7 @@ namespace Core.Trait
         private readonly List<ITraitHandler> handlers;
 
         public TraitContainer(uint capacity = 16, List<ITraitHandler> handlers = null) : this(new SwapBackArray<TraitInstance>(capacity), handlers) { }
-        public TraitContainer(TraitContainer container) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.traits, container.handlers) { }
+        public TraitContainer(TraitContainer container, List<ITraitHandler> handlers = null) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.traits, handlers) { }
         public TraitContainer(SwapBackArray<TraitInstance> traits, List<ITraitHandler> handlers = null)
         {
             if (traits == null)

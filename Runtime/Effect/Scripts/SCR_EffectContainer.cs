@@ -14,7 +14,7 @@ namespace Core.Effect
         private readonly SwapBackArray<EffectInstance> effects;
 
         public EffectContainer(uint capacity = 16, List<IEffectHandler> handlers = null) : this(new SwapBackArray<EffectInstance>(capacity), handlers) { }
-        public EffectContainer(EffectContainer container) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.effects, container.handlers) { }
+        public EffectContainer(EffectContainer container, List<IEffectHandler> handlers = null) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.effects, handlers) { }
         public EffectContainer(SwapBackArray<EffectInstance> effects, List<IEffectHandler> handlers = null)
         {
             if (effects == null)

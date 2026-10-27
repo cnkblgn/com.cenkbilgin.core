@@ -110,5 +110,10 @@ namespace Core.Damage
             EnsureBind();
             return damageable.GetLastContext();
         }
+        public DamageMask GetIgnoreMask()
+        {
+            EnsureBind();
+            return damageable.GetIgnoreMask();
+        }
     }
 }

@@ -11,8 +11,7 @@ namespace Core.Race
         private readonly List<IRaceHandler> handlers;
         private RaceID id;
 
-        public RaceContainer(List<IRaceHandler> handlers = null) : this(default, handlers) { }
-        public RaceContainer(RaceContainer container) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.id) { }
+        public RaceContainer(RaceContainer container, List<IRaceHandler> handlers = null) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.id, handlers) { }
         public RaceContainer(RaceID id, List<IRaceHandler> handlers = null)
         {
             this.id = id;
