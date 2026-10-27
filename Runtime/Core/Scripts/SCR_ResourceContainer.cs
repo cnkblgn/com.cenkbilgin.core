@@ -17,7 +17,7 @@ namespace Core
         private bool isDepleted;
 
         public ResourceContainer() : this(0, 0, null) { }
-        public ResourceContainer(ResourceContainer container, List<IResourceHandler> handlers = null) : this(container.maximum, container.current, handlers) { }
+        public ResourceContainer(ResourceContainer container, List<IResourceHandler> handlers = null) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.maximum, container.current, handlers) { }
         public ResourceContainer(float current, float maximum, List<IResourceHandler> handlers = null)
         {
             this.current = current;
