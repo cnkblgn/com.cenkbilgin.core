@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Core
 {
     [Serializable]
-    public class ResourceContainer
+    public sealed class ResourceContainer
     {
         public event Action<ResourceContext> OnChanged;
 

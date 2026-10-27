@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Core.Race
 {
-    public class RaceContainer
+    public sealed class RaceContainer
     {
         public event Action<RaceContext> OnChanged;
 

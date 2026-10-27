@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Core.Scenario
 {
-    public class ScenarioContainer
+    public sealed class ScenarioContainer
     {
         public event Action<ScenarioContext> OnChanged;
 
