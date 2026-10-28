@@ -80,14 +80,14 @@ namespace Core.Item
             HandleInventoryChanged(new(InventoryState.INITIALIZED, InventoryResult.SUCCESS, null));
         }
         public void Clear() => thisInventory.Clear();
-        public void ImportFrom(InventoryData inventory) { thisInventory = new(inventory); Initialize(); }
+        public void ImportFrom(InventoryData inventory) => thisInventory.ImportFrom(inventory);
         public void ExportTo(out InventoryData inventory) => inventory = new(thisInventory);
 
         public int GetCurrentCapacity() => thisInventory.CurrentCapacity;
         public int GetMaximumCapacity() => thisInventory.MaximumCapacity;
         public float GetCurrentWeight() => thisInventory.CurrentWeight;
         public int GetMaximumWeight() => thisInventory.MaximumWeight;
-        public Vector2Int GetDimensions() => new(thisInventory.GridWidth, thisInventory.GridHeight);
+        public Vector2Int GetDimensions() => new(thisInventory.GridHeight, thisInventory.GridHeight);
         public IReadOnlyCollection<Guid> GetItems() => thisInventory.GetItems();
         public int GetItemCount() => GetItems().Count;
         public int GetItemCount(ItemID baseID) => thisInventory.GetItemCount(baseID);

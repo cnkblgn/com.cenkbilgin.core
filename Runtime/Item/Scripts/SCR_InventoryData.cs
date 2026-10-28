@@ -17,25 +17,29 @@ namespace Core.Item
         public float CurrentWeight { get; private set; }
         public int CurrentCapacity => itemTable.Count;
         public int MaximumCapacity => itemGrid.Length;
+        public int MaximumWeight => maximumWeight;
+        public int GridWidth => gridWidth;
+        public int GridHeight => gridHeight;
+        public ItemMask ItemMask => itemMask;
 
-        public readonly int GridWidth;
-        public readonly int GridHeight;
-        public readonly int MaximumWeight;
-        public readonly ItemMask ItemMask;
 
         private ItemData[] itemGrid;
         private readonly Dictionary<Guid, ItemData> itemTable;
         private readonly List<IInventoryHandler> handlers;
+        private int gridWidth;
+        private int gridHeight;
+        private int maximumWeight;
+        private ItemMask itemMask;
 
         public InventoryData(List<ItemData> items, int width, int height, int maxWeight, ItemMask mask, List<IInventoryHandler> handlers = null)
         {
-            GridWidth = Mathf.Clamp(width, MIN_WIDTH, MAX_WIDTH);
-            GridHeight = Mathf.Clamp(height, MIN_HEIGHT, MAX_HEIGHT);
-            MaximumWeight = Mathf.Clamp(maxWeight, MIN_WEIGHT, MAX_WEIGHT);
+            gridWidth = Mathf.Clamp(width, MIN_WIDTH, MAX_WIDTH);
+            gridHeight = Mathf.Clamp(height, MIN_HEIGHT, MAX_HEIGHT);
+            maximumWeight = Mathf.Clamp(maxWeight, MIN_WEIGHT, MAX_WEIGHT);
             CurrentWeight = 0;
-            itemGrid = new ItemData[GridWidth * GridHeight];
+            itemGrid = new ItemData[gridWidth * gridHeight];
             itemTable = new();
-            ItemMask = mask;
+            itemMask = mask;
             this.handlers = handlers == null ? new() : new(handlers);
 
             if (items == null)
@@ -54,7 +58,7 @@ namespace Core.Item
             }
         }
         public InventoryData(List<ItemData> items, int width, int height, int maxWeight, ItemTag[] tags) : this(items, width, height, maxWeight, (tags != null ? tags.ToArray() : ItemDatabase.GetTags().ToArray()).CreateMask()) { }
-        public InventoryData(InventoryData data, List<IInventoryHandler> handlers = null) : this(data?.itemTable.Values.ToList() ?? throw new ArgumentNullException(nameof(data)), data.GridWidth, data.GridHeight, data.MaximumWeight, data.ItemMask, handlers) { }
+        public InventoryData(InventoryData data, List<IInventoryHandler> handlers = null) : this(data?.itemTable.Values.ToList() ?? throw new ArgumentNullException(nameof(data)), data.gridWidth, data.gridHeight, data.maximumWeight, data.itemMask, handlers) { }
         public InventoryData(int width, int height, int maxWeight, ItemTag[] tags) : this(new(), width, height, maxWeight, tags) { }
         public InventoryData(int width, int height, int maxWeight, ItemMask mask) : this(new(), width, height, maxWeight, mask) { }
 
@@ -89,7 +93,7 @@ namespace Core.Item
         public void Clear()
         {
             itemTable.Clear();
-            itemGrid = new ItemData[GridWidth * GridHeight];
+            itemGrid = new ItemData[gridWidth * gridHeight];
 
             CurrentWeight = 0;
 
@@ -118,15 +122,39 @@ namespace Core.Item
             return count;
         }
 
+        public void ImportFrom(InventoryData data)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data), "Inventory import failed! data is null!?");
+            }
+
+            gridWidth = data.gridWidth;
+            gridHeight = data.gridHeight;
+            maximumWeight = data.maximumWeight;
+            itemMask = data.itemMask;
+            itemGrid = new ItemData[gridWidth * gridHeight];
+            itemTable.Clear();
+
+            IReadOnlyCollection<Guid> items = data.GetItems();
+
+            foreach (Guid id in items)
+            {
+                data.TryGetItemByInstanceID(id, out ItemData registered, out _);
+
+                TryAddItem(registered, registered.GetPosition(), registered.GetRotation(), out _, out _);
+            }
+        }
+
         public ItemData[,] GetSnapshot()
         {
-            ItemData[,] snapshot = new ItemData[GridWidth, GridHeight];
+            ItemData[,] snapshot = new ItemData[gridWidth, gridHeight];
 
-            for (int y = 0; y < GridHeight; y++)
+            for (int y = 0; y < gridHeight; y++)
             {
-                for (int x = 0; x < GridWidth; x++)
+                for (int x = 0; x < gridWidth; x++)
                 {
-                    snapshot[x, y] = itemGrid[(y * GridWidth) + x];
+                    snapshot[x, y] = itemGrid[(y * gridWidth) + x];
                 }
             }
 
@@ -144,8 +172,8 @@ namespace Core.Item
                 return false;
             }
 
-            int maxX = GridWidth - scale.x;
-            int maxY = GridHeight - scale.y;
+            int maxX = gridWidth - scale.x;
+            int maxY = gridHeight - scale.y;
 
             if (maxX < 0 || maxY < 0)
             {
@@ -229,14 +257,14 @@ namespace Core.Item
                 return false;
             }
 
-            if (scale.x > GridWidth || scale.y > GridHeight)
+            if (scale.x > gridWidth || scale.y > gridHeight)
             {
                 result = InventoryResult.NO_VALID_SPACE;
                 return false;
             }
 
-            int cx = Mathf.Clamp(position.x, 0, GridWidth - scale.x);
-            int cy = Mathf.Clamp(position.y, 0, GridHeight - scale.y);
+            int cx = Mathf.Clamp(position.x, 0, gridWidth - scale.x);
+            int cy = Mathf.Clamp(position.y, 0, gridHeight - scale.y);
 
             position = new(cx, cy);
 
@@ -255,8 +283,8 @@ namespace Core.Item
                 return false;
             }
 
-            int maxY = GridHeight - scale.y;
-            int maxX = GridWidth - scale.x;
+            int maxY = gridHeight - scale.y;
+            int maxX = gridWidth - scale.x;
 
             if (maxY < 0 || maxX < 0)
             {
@@ -357,7 +385,7 @@ namespace Core.Item
                 return false;
             }
 
-            registered = itemGrid[(position.y * GridWidth) + (position.x)];
+            registered = itemGrid[(position.y * gridWidth) + (position.x)];
 
             bool foundItem = registered != null;
 
@@ -407,7 +435,7 @@ namespace Core.Item
                             continue;
                         }
 
-                        ItemData found = itemGrid[(y * GridWidth) + x];
+                        ItemData found = itemGrid[(y * gridWidth) + x];
 
                         if (found != null && visited.Add(found.InstanceID))
                         {
@@ -457,7 +485,7 @@ namespace Core.Item
                 return false;
             }
 
-            if (CurrentWeight + item.GetWeight() > MaximumWeight)
+            if (CurrentWeight + item.GetWeight() > maximumWeight)
             {
                 result = InventoryResult.WEIGHT_LIMIT_EXCEEDED;
                 return false;
@@ -595,7 +623,7 @@ namespace Core.Item
             {
                 for (int x = 0; x < tileWidth; x++)
                 {
-                    ItemData registered = grid[((tilePositionY + y) * GridWidth) + (tilePositionX + x)];
+                    ItemData registered = grid[((tilePositionY + y) * gridWidth) + (tilePositionX + x)];
 
                     if (registered == null)
                     {
@@ -642,7 +670,7 @@ namespace Core.Item
                 return false;
             }
 
-            if (tilePositionX >= GridWidth || tilePositionY >= GridHeight)
+            if (tilePositionX >= gridWidth || tilePositionY >= gridHeight)
             {
                 return false;
             }
@@ -663,7 +691,7 @@ namespace Core.Item
             {
                 for (int x = 0; x < scale.x; x++)
                 {
-                    grid[((position.y + y) * GridWidth) + (position.x + x)] = item;
+                    grid[((position.y + y) * gridWidth) + (position.x + x)] = item;
                 }
             }
         }
@@ -831,7 +859,7 @@ namespace Core.Item
 
                 if (unitWeight > 0f)
                 {
-                    int maxByWeight = Mathf.FloorToInt((MaximumWeight - CurrentWeight) / unitWeight);
+                    int maxByWeight = Mathf.FloorToInt((maximumWeight - CurrentWeight) / unitWeight);
                     amount = Mathf.Min(amount, Mathf.Max(0, maxByWeight));
                 }
 
@@ -1093,7 +1121,7 @@ namespace Core.Item
                 throw new ArgumentNullException(nameof(item), "Add item failed item missing!?");
             }
 
-            if (!item.Mask.HasAny(ItemMask))
+            if (!item.Mask.HasAny(itemMask))
             {
                 result = InventoryResult.NOT_SUPPORTED;
                 return false;
