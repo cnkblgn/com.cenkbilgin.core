@@ -161,6 +161,8 @@ namespace Core.Faction
         {
             if (!id.IsValid)
             {
+                Debug.Log("not vlaid!!'^1!: " + id);
+
                 Debug.LogError($"Faction set relation failed! {id} is not valid!");
                 return false;
             }
