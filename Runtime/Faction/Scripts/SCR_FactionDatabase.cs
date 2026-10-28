@@ -71,6 +71,11 @@ namespace Core.Faction
         {
             Debug.Log("idLookup != null: " + (idLookup != null));
             Debug.Log("key != null: " + (key != null) + " << key: " + key);
+            if (key == null)
+            {
+                return -1;
+            }
+
 
             return idLookup.TryGetValue(key, out int index) ? index : -1;
         }

@@ -22,7 +22,7 @@ namespace Core.Faction
             this.relations = new FactionRelation[FactionDatabase.GetDefinitions().Count];
             this.handlers = handlers == null ? new() : new(handlers);
 
-            if (relations == null || relations.Length == 0)
+            if (relations == null)
             {
                 return;
             }
