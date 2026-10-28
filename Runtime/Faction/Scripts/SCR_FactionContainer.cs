@@ -16,11 +16,13 @@ namespace Core.Faction
         public FactionContainer(FactionID id, List<IFactionHandler> handlers = null) : this(id, id.IsValid ? id.GetDefinition().Relations : new FactionRelation[0], handlers) { }
         public FactionContainer(FactionID id, FactionRelation[] relations, List<IFactionHandler> handlers = null)
         {
+            Debug.Log("FACTION CTOR: " + id);
+
             this.id = id;
             this.relations = new FactionRelation[FactionDatabase.GetDefinitions().Count];
             this.handlers = handlers == null ? new() : new(handlers);
 
-            if (relations == null)
+            if (relations == null || relations.Length == 0)
             {
                 return;
             }
