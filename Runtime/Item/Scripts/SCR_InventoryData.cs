@@ -118,6 +118,7 @@ namespace Core.Item
 
             return count;
         }
+        public InventoryContext GetContext() => ctx;
 
         public ItemData[,] GetSnapshot()
         {
