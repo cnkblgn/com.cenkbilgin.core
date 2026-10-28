@@ -69,6 +69,16 @@ namespace Core.Stat
             handlers.Remove(handler);
         }
 
+        public void Copy(out StatContainer data) => data = new(this);
+        public void ExportTo(StatContainer data)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data), "Stat export failed! data is null!?");
+            }
+
+            data.ImportFrom(this);
+        }
         public void ImportFrom(StatContainer data)
         {
             if (data == null)
@@ -76,8 +86,8 @@ namespace Core.Stat
                 throw new ArgumentNullException(nameof(data), "Stat import failed! data is null!?");
             }
 
+            ClearModifiers();
             stats.Clear();
-            modifiers.Clear();
 
             foreach (KeyValuePair<StatID, float> pair in data.stats)
             {

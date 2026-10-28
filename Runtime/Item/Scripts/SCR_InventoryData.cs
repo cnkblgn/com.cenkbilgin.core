@@ -90,13 +90,59 @@ namespace Core.Item
             handlers.Remove(handler);
         }
 
+        public void ExportTo(InventoryData data)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data), "Inventory export failed! data is null!?");
+            }
+
+            data.ImportFrom(this);
+        }
+        public void ImportFrom(InventoryData data)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data), "Inventory import failed! data is null!?");
+            }
+
+            gridWidth = data.gridWidth;
+            gridHeight = data.gridHeight;
+            maximumWeight = data.maximumWeight;
+            itemMask = data.itemMask;
+
+            Clear();
+
+            IReadOnlyCollection<Guid> items = data.GetItems();
+
+            foreach (Guid id in items)
+            {
+                data.TryGetItemByInstanceID(id, out ItemData registered, out _);
+
+                TryAddItem(registered, registered.GetPosition(), registered.GetRotation(), out _, out _);
+            }
+        }
+        public ItemData[,] GetSnapshot()
+        {
+            ItemData[,] snapshot = new ItemData[gridWidth, gridHeight];
+
+            for (int y = 0; y < gridHeight; y++)
+            {
+                for (int x = 0; x < gridWidth; x++)
+                {
+                    snapshot[x, y] = itemGrid[(y * gridWidth) + x];
+                }
+            }
+
+            return snapshot;
+        }
+
         public void Clear()
         {
             itemTable.Clear();
             itemGrid = new ItemData[gridWidth * gridHeight];
 
             CurrentWeight = 0;
-
             NotifyHandlers(InventoryState.INITIALIZED, InventoryResult.SUCCESS);
         }
         public IReadOnlyCollection<Guid> GetItems() => itemTable.Keys;
@@ -120,45 +166,6 @@ namespace Core.Item
             }
 
             return count;
-        }
-
-        public void ImportFrom(InventoryData data)
-        {
-            if (data == null)
-            {
-                throw new ArgumentNullException(nameof(data), "Inventory import failed! data is null!?");
-            }
-
-            gridWidth = data.gridWidth;
-            gridHeight = data.gridHeight;
-            maximumWeight = data.maximumWeight;
-            itemMask = data.itemMask;
-            itemGrid = new ItemData[gridWidth * gridHeight];
-            itemTable.Clear();
-
-            IReadOnlyCollection<Guid> items = data.GetItems();
-
-            foreach (Guid id in items)
-            {
-                data.TryGetItemByInstanceID(id, out ItemData registered, out _);
-
-                TryAddItem(registered, registered.GetPosition(), registered.GetRotation(), out _, out _);
-            }
-        }
-
-        public ItemData[,] GetSnapshot()
-        {
-            ItemData[,] snapshot = new ItemData[gridWidth, gridHeight];
-
-            for (int y = 0; y < gridHeight; y++)
-            {
-                for (int x = 0; x < gridWidth; x++)
-                {
-                    snapshot[x, y] = itemGrid[(y * gridWidth) + x];
-                }
-            }
-
-            return snapshot;
         }
 
         /// <summary> Finds the closest valid position to the desired position. Optional ignore id </summary>

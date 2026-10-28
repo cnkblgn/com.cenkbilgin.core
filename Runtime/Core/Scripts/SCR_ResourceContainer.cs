@@ -63,6 +63,16 @@ namespace Core
             handlers.Remove(handler);
         }
 
+        public void Copy(out ResourceContainer data) => data = new(this);
+        public void ExportTo(ResourceContainer data)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data), "Resource export failed! data is null!?");
+            }
+
+            data.ImportFrom(this);
+        }
         public void ImportFrom(ResourceContainer data)
         {
             if (data == null)

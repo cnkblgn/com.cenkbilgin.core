@@ -80,8 +80,9 @@ namespace Core.Item
             HandleInventoryChanged(new(InventoryState.INITIALIZED, InventoryResult.SUCCESS, null));
         }
         public void Clear() => thisInventory.Clear();
+        public void Copy(out InventoryData inventory) => inventory = new(thisInventory);
         public void ImportFrom(InventoryData inventory) => thisInventory.ImportFrom(inventory);
-        public void ExportTo(out InventoryData inventory) => inventory = new(thisInventory);
+        public void ExportTo(InventoryData inventory) => inventory.ImportFrom(thisInventory);
 
         public int GetCurrentCapacity() => thisInventory.CurrentCapacity;
         public int GetMaximumCapacity() => thisInventory.MaximumCapacity;

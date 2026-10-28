@@ -29,7 +29,7 @@ namespace Core.Item
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
 
-            obj.ExportTo(out InventoryData inventoryData);
+            obj.Copy(out InventoryData inventoryData);
 
             inventoryData.ExportTo(data);
         }

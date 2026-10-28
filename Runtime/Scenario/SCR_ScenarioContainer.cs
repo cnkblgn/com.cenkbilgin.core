@@ -54,6 +54,16 @@ namespace Core.Scenario
             handlers.Remove(handler);
         }
 
+        public void Copy(out ScenarioContainer data) => data = new(this);
+        public void ExportTo<TContext>(ScenarioContainer data, TContext context)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data), "Scenario export failed! data is null!?");
+            }
+
+            data.ImportFrom(this, context);
+        }
         public void ImportFrom<TContext>(ScenarioContainer data, TContext context)
         {
             if (data == null)
@@ -63,6 +73,7 @@ namespace Core.Scenario
 
             TrySetScenario(data.id, context);
         }
+
         private void SetState()
         {
             ScenarioContext ctx = new(this.id);

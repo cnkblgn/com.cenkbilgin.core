@@ -53,7 +53,17 @@ namespace Core.Race
 
             handlers.Remove(handler);
         }
-        
+
+        public void Copy(out RaceContainer data) => data = new(this);
+        public void ExportTo<TContext>(RaceContainer data, TContext context)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data), "Race export failed! data is null!?");
+            }
+
+            data.ImportFrom(this, context);
+        }
         public void ImportFrom<TContext>(RaceContainer data, TContext context)
         {
             if (data == null)

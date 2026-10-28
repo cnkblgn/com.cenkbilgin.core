@@ -64,6 +64,16 @@ namespace Core.Faction
             handlers.Remove(handler);
         }
 
+        public void Copy(out FactionContainer data) => data = new(this);
+        public void ExportTo<TContext>(FactionContainer data, TContext context)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data), "Faction export failed! data is null!?");
+            }
+
+            data.ImportFrom(this, context);
+        }
         public void ImportFrom<TContext>(FactionContainer data, TContext context)
         {
             if (data == null)
@@ -73,6 +83,7 @@ namespace Core.Faction
 
             TrySetFaction(data.id, context);
         }
+
         private void SetState()
         {
             FactionContext ctx = new(id, relations);

@@ -69,6 +69,16 @@ namespace Core.Effect
             handlers.Remove(handler);
         }
 
+        public void Copy(out EffectContainer data) => data = new(this);
+        public void ExportTo<TContext>(EffectContainer data, TContext context)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data), "Effect export failed! data is null!?");
+            }
+
+            data.ImportFrom(this, context);
+        }
         public void ImportFrom<TContext>(EffectContainer data, TContext context)
         {
             if (data == null)
@@ -83,6 +93,7 @@ namespace Core.Effect
                 TryAddEffect(data.effects[i], context);
             }
         }
+
         private void SetState(EffectState state, EffectInstance instance)
         {
             EffectContext ctx = new(state, instance);

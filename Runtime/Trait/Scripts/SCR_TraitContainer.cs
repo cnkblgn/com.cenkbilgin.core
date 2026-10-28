@@ -67,6 +67,16 @@ namespace Core.Trait
             handlers.Remove(handler);
         }
 
+        public void Copy(out TraitContainer data) => data = new(this);
+        public void ExportTo<TContext>(TraitContainer data, TContext context)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data), "Trait export failed! data is null!?");
+            }
+
+            data.ImportFrom(this, context);
+        }
         public void ImportFrom<TContext>(TraitContainer data, TContext context)
         {
             if (data == null)
