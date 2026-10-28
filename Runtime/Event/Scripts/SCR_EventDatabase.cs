@@ -172,7 +172,7 @@ namespace Core.Event
         public static bool HasListener(EventID id) => IsValid(id) && listeners[id.Index].Count > 0;
         private static bool IsValid(EventID id) => id.IsValid && (uint)id.Index < (uint)listeners.Length;
 
-        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
+        public static int GetIDIndex(string key) => key != null && idLookup.TryGetValue(key, out int index) ? index : -1;
         public static EventID GetID(int index)
         {
             if (index >= ids.Length || index < 0)

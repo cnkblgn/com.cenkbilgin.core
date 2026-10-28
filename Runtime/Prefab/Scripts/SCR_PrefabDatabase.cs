@@ -47,7 +47,7 @@ namespace Core.Prefab
         internal static void Build(List<GameObject> gameObjectCollection) => Build(gameObjectCollection.ToArray());
 
         public static int GetPrefabs() => prefabs.Length;
-        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
+        public static int GetIDIndex(string key) => key != null && idLookup.TryGetValue(key, out int index) ? index : -1;
         public static PrefabID GetID(int index)
         {
             if (index >= prefabs.Length || index < 0)

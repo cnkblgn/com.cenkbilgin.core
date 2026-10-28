@@ -46,7 +46,7 @@ namespace Core.Graphics
         }
 
         public static int GetMeshes() => meshes.Length;
-        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
+        public static int GetIDIndex(string key) => key != null && idLookup.TryGetValue(key, out int index) ? index : -1;
         public static MeshID GetID(int index)
         {
             if (index >= meshes.Length || index < 0)

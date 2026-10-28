@@ -149,7 +149,7 @@ namespace Core.Quest
             }
         }
 
-        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
+        public static int GetIDIndex(string key) => key != null && idLookup.TryGetValue(key, out int index) ? index : -1;
         public static IReadOnlyList<QuestDefinition> GetDefinitions() => definitions;
         public static QuestDefinition GetDefinition(int index)
         {

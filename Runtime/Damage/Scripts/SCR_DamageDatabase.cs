@@ -55,6 +55,6 @@ namespace Core.Damage
 
             return tags[index];
         }
-        public static int GetTagIndex(string key) => tagLookup.TryGetValue(key, out int index) ? index : -1;
+        public static int GetTagIndex(string key) => key != null && tagLookup.TryGetValue(key, out int index) ? index : -1;
     }
 }

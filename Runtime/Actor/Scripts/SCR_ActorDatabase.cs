@@ -102,7 +102,7 @@ namespace Core.Actors
 
             return groups[index].ID;
         }
-        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
+        public static int GetIDIndex(string key) => key != null && idLookup.TryGetValue(key, out int index) ? index : -1;
         public static ActorTag GetTag(int index)
         {
             if (index >= tags.Length || index < 0)
@@ -112,7 +112,7 @@ namespace Core.Actors
 
             return tags[index];
         }
-        public static int GetTagIndex(string key) => tagLookup.TryGetValue(key, out int index) ? index : -1;
+        public static int GetTagIndex(string key) => key != null && tagLookup.TryGetValue(key, out int index) ? index : -1;
 
         public static bool TryGetAnyActor(ActorID id, out Actor actor)
         {

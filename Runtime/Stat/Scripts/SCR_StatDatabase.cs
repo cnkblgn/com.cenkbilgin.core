@@ -34,7 +34,7 @@ namespace Core.Stat
             Debug.Log($"Stat database build successfull!");
         }
 
-        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
+        public static int GetIDIndex(string key) => key != null && idLookup.TryGetValue(key, out int index) ? index : -1;
         public static IReadOnlyList<StatDefinition> GetDefinitions() => definitions;
         public static StatDefinition GetDefinition(int index)
         {

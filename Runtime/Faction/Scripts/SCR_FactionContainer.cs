@@ -16,8 +16,6 @@ namespace Core.Faction
         public FactionContainer(FactionID id, List<IFactionHandler> handlers = null) : this(id, id.IsValid ? id.GetDefinition().Relations : new FactionRelation[0], handlers) { }
         public FactionContainer(FactionID id, FactionRelation[] relations, List<IFactionHandler> handlers = null)
         {
-            Debug.Log("FACTION CTOR: " + id);
-
             this.id = id;
             this.relations = new FactionRelation[FactionDatabase.GetDefinitions().Count];
             this.handlers = handlers == null ? new() : new(handlers);
@@ -130,7 +128,6 @@ namespace Core.Faction
         {
             if (!id.IsValid)
             {
-                Debug.LogError($"Faction get relation failed! {id} is not valid!");
                 return 0;
             }
 
@@ -161,9 +158,6 @@ namespace Core.Faction
         {
             if (!id.IsValid)
             {
-                Debug.Log("not vlaid!!'^1!: " + id);
-
-                Debug.LogError($"Faction set relation failed! {id} is not valid!");
                 return false;
             }
 

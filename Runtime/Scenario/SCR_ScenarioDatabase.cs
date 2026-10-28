@@ -34,7 +34,7 @@ namespace Core.Scenario
             Debug.Log($"Scenario database build successfull!");
         }
 
-        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
+        public static int GetIDIndex(string key) => key != null && idLookup.TryGetValue(key, out int index) ? index : -1;
         public static IReadOnlyList<ScenarioDefinition> GetDefinitions() => definitions;
         public static ScenarioDefinition GetDefinition(int index)
         {

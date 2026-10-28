@@ -34,7 +34,7 @@ namespace Core.Trait
             Debug.Log($"Trait database build successfull!");
         }
 
-        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
+        public static int GetIDIndex(string key) => key != null && idLookup.TryGetValue(key, out int index) ? index : -1;
         public static IReadOnlyList<TraitDefinition> GetDefinitions() => definitions;
         public static TraitDefinition GetDefinition(int index)
         {

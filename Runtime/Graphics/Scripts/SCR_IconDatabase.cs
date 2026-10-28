@@ -48,7 +48,7 @@ namespace Core.Graphics
         }
 
         public static int GetSprites() => sprites.Length;
-        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
+        public static int GetIDIndex(string key) => key != null && idLookup.TryGetValue(key, out int index) ? index : -1;
         public static IconID GetID(int index)
         {
             if (index >= sprites.Length || index < 0)

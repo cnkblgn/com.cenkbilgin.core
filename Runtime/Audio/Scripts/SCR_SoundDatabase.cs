@@ -46,7 +46,7 @@ namespace Core.Audio
         }
 
         public static int GetClips() => clips.Length;
-        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
+        public static int GetIDIndex(string key) => key != null && idLookup.TryGetValue(key, out int index) ? index : -1;
         public static SoundID GetID(int index)
         {
             if (index >= clips.Length || index < 0)

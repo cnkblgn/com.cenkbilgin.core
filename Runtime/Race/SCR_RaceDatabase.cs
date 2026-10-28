@@ -53,8 +53,8 @@ namespace Core.Race
             Debug.Log($"Race database build successfull!");
         }
 
-        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
-        public static int GetTagIndex(string key) => tagLookup.TryGetValue(key, out int index) ? index : -1;
+        public static int GetIDIndex(string key) => key != null && idLookup.TryGetValue(key, out int index) ? index : -1;
+        public static int GetTagIndex(string key) => key != null && tagLookup.TryGetValue(key, out int index) ? index : -1;
         public static IReadOnlyList<RaceTag> GetTags() => tags;
         public static IReadOnlyList<RaceDefinition> GetDefinitions() => definitions;
         public static RaceDefinition GetDefinition(int index)
