@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
@@ -8,6 +9,7 @@ namespace Core.Environment
 {
     internal sealed class RendererPassEnvironment : ScriptableRenderPass
     {
+        public const int MAX_ENVIRONMENT_LIGHTS = 16;
         private const string FOG_SAMPLE_PASS_NAME = "_FogSamplePass";
         private const string FOG_SAMPLE_TEXTURE_NAME = "_FogSampleTexture";
         private const string FOG_BLUR_H_PASS_NAME = "_FogBlurHorizontalPass";
@@ -17,6 +19,10 @@ namespace Core.Environment
         private const string FOG_COMPOSITE_PASS_NAME = "_FogCompositePass";
         private const string FOG_COMPOSITE_TEXTURE_NAME = "_FogCompositeTexture";
 
+        private static readonly int environmentTimeID = Shader.PropertyToID("_ENVIRONMENT_TIME");
+        private static readonly int environmentLightCountID = Shader.PropertyToID("_ENVIRONMENT_LIGHT_COUNT");
+        private static readonly int environmentLightPositionID = Shader.PropertyToID("_ENVIRONMENT_LIGHT_POSITION");
+        private static readonly int environmenLightColorID = Shader.PropertyToID("_ENVIRONMENT_LIGHT_COLOR");
         private static readonly int fogSampleTexID = Shader.PropertyToID(FOG_SAMPLE_TEXTURE_NAME);
         private static readonly int fogColorID = Shader.PropertyToID("_FOG_COLOR");
         private static readonly int fogDensityID = Shader.PropertyToID("_FOG_DENSITY");
@@ -25,16 +31,15 @@ namespace Core.Environment
         private static readonly int fogDistanceFalloffID = Shader.PropertyToID("_FOG_DISTANCE_FALLOFF");
         private static readonly int fogHeightStartID = Shader.PropertyToID("_FOG_HEIGHT_START");
         private static readonly int fogHeightFalloffID = Shader.PropertyToID("_FOG_HEIGHT_FALLOFF");
-        private static readonly int fogScatteringID = Shader.PropertyToID("_FOG_SCATTERING");
+        private static readonly int fogSunInfluenceID = Shader.PropertyToID("_FOG_SUN_INFLUENCE");
+        private static readonly int fogSunScatteringID = Shader.PropertyToID("_FOG_SUN_SCATTERING");
         private static readonly int fogRampTexID = Shader.PropertyToID("_FOG_RAMP_TEX");
         private static readonly int fogRampOpacityID = Shader.PropertyToID("_FOG_RAMP_OPACITY");
         private static readonly int fogRampScaleID = Shader.PropertyToID("_FOG_RAMP_SCALE");
         private static readonly int fogNoiseTexID = Shader.PropertyToID("_FOG_NOISE_TEX");
         private static readonly int fogNoiseOpacityID = Shader.PropertyToID("_FOG_NOISE_OPACITY");
-        private static readonly int fogNoiseModulationID = Shader.PropertyToID("_FOG_NOISE_MODULATION");
-        private static readonly int fogNoiseOffsetID = Shader.PropertyToID("_FOG_NOISE_OFFSET");
+        private static readonly int fogNoiseFadeID = Shader.PropertyToID("_FOG_NOISE_FADE");
         private static readonly int fogNoiseScaleID = Shader.PropertyToID("_FOG_NOISE_SCALE");
-        private static readonly int fogNoiseSpeedID = Shader.PropertyToID("_FOG_NOISE_SPEED");
         private static readonly int fogBlurStrengthID = Shader.PropertyToID("_FOG_BLUR_STRENGTH");
         private static readonly int fogBlurDirectionID = Shader.PropertyToID("_FOG_BLUR_DIRECTION");
         private static readonly int fogBlurRadiusID = Shader.PropertyToID("_FOG_BLUR_RADIUS");
@@ -62,7 +67,6 @@ namespace Core.Environment
         private static readonly int cloudHeightID = Shader.PropertyToID("_CLOUD_HEIGHT");
         private static readonly int cloudCurveID = Shader.PropertyToID("_CLOUD_CURVE");
         private static readonly int cloudScaleID = Shader.PropertyToID("_CLOUD_SCALE");
-        private static readonly int cloudSpeedID = Shader.PropertyToID("_CLOUD_SPEED");
         private static readonly int cloudTurbulenceID = Shader.PropertyToID("_CLOUD_TURBULENCE");
         private static readonly int cloudTransmittanceID = Shader.PropertyToID("_CLOUD_TRANSMITTANCE");
         private static readonly int cloudDarknessID = Shader.PropertyToID("_CLOUD_DARKNESS");
@@ -73,13 +77,20 @@ namespace Core.Environment
         private static readonly int starDensityID = Shader.PropertyToID("_STAR_DENSITY");
         private static readonly int starSizeID = Shader.PropertyToID("_STAR_SIZE");
         private static readonly int starBrightnessID = Shader.PropertyToID("_STAR_BRIGHTNESS");
-        private static readonly int starAnimationStrengthID = Shader.PropertyToID("_STAR_ANIMATION_STRENGTH");
-        private static readonly int starAnimationSpeedID = Shader.PropertyToID("_STAR_ANIMATION_SPEED");
+        private static readonly int starAnimationID = Shader.PropertyToID("_STAR_ANIMATION");
 
+        private readonly EnvironmentLight[] selectedLights = new EnvironmentLight[MAX_ENVIRONMENT_LIGHTS];
+        private readonly Plane[] frustumPlanes = new Plane[6];
+        private readonly Vector4[] lightPositions = new Vector4[MAX_ENVIRONMENT_LIGHTS];
+        private readonly Vector4[] lightColors = new Vector4[MAX_ENVIRONMENT_LIGHTS];
+        private readonly float[] lightScores = new float[MAX_ENVIRONMENT_LIGHTS];
+        private GraphicsFormat compositeColorFormat;
         private Material fogSampleMaterial;
         private Material fogBlurMaterial;
         private Material fogCompositeMaterial;
         private Material skyMaterial;
+        private Vector4 time;
+        private int lastFrame = -1;
 
         public RendererPassEnvironment()
         {
@@ -98,18 +109,56 @@ namespace Core.Environment
             public Vector4 Direction;
         }
 
-        public void Setup(Material fogSampleMaterial, Material fogBlurMaterial, Material fogCompositeMaterial, Material skyMaterial, RenderPassEvent renderPassEvent)
+        public void Setup(Material fogSampleMaterial, Material fogBlurMaterial, Material fogCompositeMaterial, Material skyMaterial, RenderPassEvent renderPassEvent, GraphicsFormat colorFormat)
         {
             this.fogSampleMaterial = fogSampleMaterial;
             this.fogBlurMaterial = fogBlurMaterial;
             this.fogCompositeMaterial = fogCompositeMaterial;
             this.skyMaterial = skyMaterial;
             this.renderPassEvent = renderPassEvent;
+            this.compositeColorFormat = colorFormat;
 
             RenderSettings.skybox = this.skyMaterial;
             RenderSettings.fog = false;
         }
 
+        private void ApplyTime(Environment environment)
+        {
+            if (Time.frameCount != lastFrame)
+            {
+                lastFrame = Time.frameCount;
+
+                float delta = Time.deltaTime;
+
+                time.x = (time.x + delta * environment.FogNoiseSpeed.value) % 100f;
+                time.y = (time.y + delta * environment.CloudSpeed.value) % 100f;
+                time.z = (time.z + delta * environment.StarAnimationSpeed.value) % 100f;
+            }
+
+            Shader.SetGlobalVector(environmentTimeID, time);
+        }
+        private void ApplyLight(Environment environment, UniversalCameraData cameraData)
+        {
+            int lights = GetLights(cameraData.camera, cameraData.worldSpaceCameraPos, Mathf.Clamp((int)environment.EnvironmentLights.value, 0, MAX_ENVIRONMENT_LIGHTS));
+
+            for (int i = 0; i < lights; i++)
+            {
+                EnvironmentLight light = selectedLights[i];
+                Vector3 position = light.Position;
+                Color color = light.Color.linear * light.Intensity;
+
+                lightPositions[i] = new Vector4(position.x, position.y, position.z, light.Range);
+                lightColors[i] = new Vector4(color.r, color.g, color.b, 0f);
+            }
+
+            Shader.SetGlobalFloat(environmentLightCountID, lights);
+
+            if (lights > 0)
+            {
+                Shader.SetGlobalVectorArray(environmentLightPositionID, lightPositions);
+                Shader.SetGlobalVectorArray(environmenLightColorID, lightColors);
+            }
+        }
         private void ApplyAmbient(Environment environment)
         {
             RenderSettings.ambientMode = AmbientMode.Trilight;
@@ -148,7 +197,6 @@ namespace Core.Environment
             Shader.SetGlobalFloat(cloudHeightID, environment.CloudHeight.value);
             Shader.SetGlobalFloat(cloudCurveID, environment.CloudCurve.value);
             Shader.SetGlobalFloat(cloudScaleID, environment.CloudScale.value);
-            Shader.SetGlobalFloat(cloudSpeedID, environment.CloudSpeed.value);
             Shader.SetGlobalFloat(cloudTurbulenceID, environment.CloudTurbulance.value);
             Shader.SetGlobalFloat(cloudTransmittanceID, environment.CloudTransmittance.value);
             Shader.SetGlobalFloat(cloudDarknessID, environment.CloudDarkness.value);
@@ -160,8 +208,7 @@ namespace Core.Environment
             Shader.SetGlobalFloat(starDensityID, environment.StarDensity.value);
             Shader.SetGlobalFloat(starSizeID, environment.StarSize.value);
             Shader.SetGlobalFloat(starBrightnessID, environment.StarBrightness.value);
-            Shader.SetGlobalFloat(starAnimationStrengthID, environment.StarAnimationStrength.value);
-            Shader.SetGlobalFloat(starAnimationSpeedID, environment.StarAnimationSpeed.value);
+            Shader.SetGlobalFloat(starAnimationID, environment.StarAnimationStrength.value);
         }
         private void ApplyFog(Environment environment)
         {
@@ -172,18 +219,88 @@ namespace Core.Environment
             Shader.SetGlobalFloat(fogDistanceFalloffID, environment.FogDistanceFalloff.value);
             Shader.SetGlobalFloat(fogHeightStartID, environment.FogHeightStart.value);
             Shader.SetGlobalFloat(fogHeightFalloffID, environment.FogHeightFalloff.value);
-            Shader.SetGlobalFloat(fogScatteringID, environment.FogScattering.value);
+            Shader.SetGlobalFloat(fogSunInfluenceID, environment.FogSunInfluence.value);
+            Shader.SetGlobalFloat(fogSunScatteringID, environment.FogSunScattering.value);
             Shader.SetGlobalTexture(fogRampTexID, environment.FogRampTexture.value);
             Shader.SetGlobalFloat(fogRampOpacityID, environment.FogRampOpacity.value);
             Shader.SetGlobalFloat(fogRampScaleID, environment.FogRampScale.value);
             Shader.SetGlobalTexture(fogNoiseTexID, environment.FogNoiseTexture.value);
             Shader.SetGlobalFloat(fogNoiseOpacityID, environment.FogNoiseOpacity.value);
-            Shader.SetGlobalFloat(fogNoiseModulationID, environment.FogNoiseModulation.value);
-            Shader.SetGlobalFloat(fogNoiseOffsetID, environment.FogNoiseOffset.value);
-            Shader.SetGlobalFloat(fogNoiseSpeedID, environment.FogNoiseSpeed.value);
+            Shader.SetGlobalFloat(fogNoiseFadeID, environment.FogNoiseFade.value);
             Shader.SetGlobalFloat(fogNoiseScaleID, environment.FogNoiseScale.value);
             fogBlurMaterial.SetFloat(fogBlurStrengthID, environment.FogBlurStrength.value);
             fogBlurMaterial.SetFloat(fogBlurRadiusID, environment.FogBlurRadius.value);
+        }
+
+        private int GetLights(Camera camera, Vector3 cameraPosition, int max)
+        {
+            IReadOnlyList<EnvironmentLight> lights = EnvironmentLightDatabase.Lights;
+
+            if (max <= 0 || lights.Count == 0)
+            {
+                return 0;
+            }
+
+            GeometryUtility.CalculateFrustumPlanes(camera.projectionMatrix * camera.worldToCameraMatrix, frustumPlanes);
+
+            int count = 0;
+
+            for (int i = 0; i < lights.Count; i++)
+            {
+                EnvironmentLight light = lights[i];
+
+                if (light.Intensity <= 0f)
+                {
+                    continue;
+                }
+
+                Vector3 position = light.Position;
+                float range = light.Range;
+
+                if (!IsLightVisible(position, range))
+                {
+                    continue;
+                }
+
+                float distanceSq = (position - cameraPosition).sqrMagnitude;
+                float score = light.Intensity * range * range / (distanceSq + 1f);
+
+                int index = count < max ? count : max - 1;
+
+                if (count >= max && score <= lightScores[index])
+                {
+                    continue;
+                }
+
+                if (count < max)
+                {
+                    count++;
+                }
+
+                while (index > 0 && lightScores[index - 1] < score)
+                {
+                    lightScores[index] = lightScores[index - 1];
+                    selectedLights[index] = selectedLights[index - 1];
+                    index--;
+                }
+
+                lightScores[index] = score;
+                selectedLights[index] = light;
+            }
+
+            return count;
+        }
+        private bool IsLightVisible(Vector3 center, float radius)
+        {
+            for (int i = 0; i < 6; i++)
+            {
+                if (frustumPlanes[i].GetDistanceToPoint(center) < -radius)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private static void ExecuteDefaultPass(DefaultPassData data, RasterGraphContext context) => Blitter.BlitTexture(context.cmd, data.Source, new Vector4(1, 1, 0, 0), data.Material, 0);
@@ -195,9 +312,9 @@ namespace Core.Environment
 
         public override void RecordRenderGraph(RenderGraph renderGraph, ContextContainer frameData)
         {
-#if UNITY_EDITOR
             UniversalCameraData cameraData = frameData.Get<UniversalCameraData>();
 
+#if UNITY_EDITOR
             if (cameraData.cameraType == CameraType.Preview)
             {
                 return;
@@ -237,8 +354,10 @@ namespace Core.Environment
                 return;
             }
 
+            ApplyTime(environment);
             ApplyAmbient(environment);
             ApplySky(environment);
+            ApplyLight(environment, cameraData);
 
             if (environment.FogDensity.value <= 0.0001f)
             {
@@ -273,7 +392,7 @@ namespace Core.Environment
             fogDescription.msaaSamples = MSAASamples.None;
             fogDescription.filterMode = FilterMode.Bilinear;
             fogDescription.clearBuffer = false;
-            fogDescription.colorFormat = GraphicsFormat.R8G8B8A8_UNorm;
+            fogDescription.colorFormat = compositeColorFormat;
             fogDescription.autoGenerateMips = false;
             fogDescription.useMipMap = false;
             TextureHandle fogTexture = renderGraph.CreateTexture(fogDescription);

@@ -10,13 +10,12 @@ struct StarSettings
     float density;
     float size;
     float brightness;
-    float animationStrength;
-    float animationSpeed;
+    float animation;
 };
 
-float3 DrawStars(float3 _viewDirection, StarSettings settings)
+float3 DrawStars(float3 _viewDirection, float _time, StarSettings settings)
 {
-    float t = _Time.y;
+    float t = _time;
     float3 p = _viewDirection * settings.density;
     float3 c = floor(p);
     float3 f = frac(p);
@@ -31,7 +30,7 @@ float3 DrawStars(float3 _viewDirection, StarSettings settings)
     float star = smoothstep(settings.size, 0.0, distance);
     star *= star;
 
-    float animation = 1.0 - settings.animationStrength * (0.5 + 0.5 * sin(t * settings.animationSpeed + random * 6.2831));
+    float animation = 1.0 - settings.animation * (0.5 + 0.5 * sin(t + random * 6.2831));
     float magnitude = lerp(0.3, 1.0, Hash31(c + 5.7));
 
     return settings.color * settings.brightness * star * visible * animation * magnitude * fade;

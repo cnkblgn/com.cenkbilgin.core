@@ -5,7 +5,7 @@ namespace Core.Audio
 {
     internal sealed class AudioPool : IPoolHandler<AudioEmitter>
     {
-        public readonly PoolSystem<AudioEmitter> Pool;
+        public readonly Pool<AudioEmitter> Pool;
 
         private AudioClip lastEmitterClip = null;
         private int lastEmitterFrame = -1;

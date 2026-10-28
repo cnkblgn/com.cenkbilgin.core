@@ -4,9 +4,7 @@ using UnityEngine;
 
 namespace Core
 {
-    using static CoreUtility;
-
-    public sealed class PoolSystem<T> where T : Component
+    public sealed class Pool<T> where T : Component
     {
         public string ID { get; }
         public PoolType Type { get; }
@@ -22,7 +20,7 @@ namespace Core
         private int currentIndex = 0;
         private int currentDirection = 1;
 
-        public PoolSystem(string id, PoolType type, T prefab, Transform container, int count, IPoolHandler<T> handler)
+        public Pool(string id, PoolType type, T prefab, Transform container, int count, IPoolHandler<T> handler)
         {
             Type = type;
             ID = id;

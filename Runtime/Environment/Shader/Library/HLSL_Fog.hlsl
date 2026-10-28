@@ -21,6 +21,10 @@ struct FogDensity
     float value;
 };
 
+float3 GetFogLights(float3 _worldPosition, float3 _cameraPosition)
+{
+    return GetEnvironmentLight(_worldPosition, _cameraPosition);
+}
 
 float3 GetFogScatter(float3 _worldPosition, float3 _cameraPosition, float3 _lightDirection, float3 _lightColor, float _scattering)
 {
@@ -30,22 +34,22 @@ float3 GetFogScatter(float3 _worldPosition, float3 _cameraPosition, float3 _ligh
     return _lightColor * scatter * _scattering;
 }
 
-float3 GetFogAmbient(float3 _worldPosition, float3 _cameraPosition, float3 _lightDirection, float3 _lightColor, float3 _ambientColor)
+float3 GetFogAmbient(float3 _worldPosition, float3 _cameraPosition, float3 _lightDirection, float3 _lightColor, float _lightInfluence, float3 _ambientColor)
 {
     float3 direction = normalize(_worldPosition - _cameraPosition);
 
     float sunDot = saturate(dot(direction, -_lightDirection));
-    sunDot = smoothstep(0.0, 1.0, sunDot); 
+    sunDot = smoothstep(0.0, 2.0, sunDot); 
     
     float backDot = saturate(dot(direction, _lightDirection));
     backDot = pow(backDot, 4.0);
-    
+
     float3 sunsetColor = _lightColor * 1.5;
     float3 baseColor = _ambientColor * 0.7;
     float3 backColor = _lightColor * 0.8;
     
-    float3 result = lerp(baseColor, sunsetColor, sunDot);
-    result = lerp(result, backColor, backDot * 0.5);
+    float3 result = lerp(baseColor, sunsetColor, saturate(sunDot * _lightInfluence));
+    result = lerp(result, backColor, backDot * 0.5 * _lightInfluence);
     
     return result;
 }
@@ -65,10 +69,10 @@ float3 GetFogRamp(float3 _worldPosition, float3 _cameraPosition, sampler2D _tex2
     return tex2Dlod(_tex2D, float4(uv, 0, 0)).rgb;;
 }
 
-float GetFogNoise(float3 _worldPosition, sampler2D _tex2D, float _scale, float _speed)
+float GetFogNoise(float3 _worldPosition, sampler2D _tex2D, float _scale, float _time)
 {
-    float2 uv1 = _worldPosition.xz * (_scale * 0.01) + float2(_Time.y * _speed * 0.25, 0);
-    float2 uv2 = _worldPosition.xz * (_scale * 0.01) * 2.3 + float2(0, _Time.y * _speed * 0.15);
+    float2 uv1 = _worldPosition.xz * (_scale * 0.01) + float2(_time * 0.25, 0);
+    float2 uv2 = _worldPosition.xz * (_scale * 0.01) * 2.3 + float2(0, _time * 0.15);
 
     float n1 = tex2D(_tex2D, uv1).r;
     float n2 = tex2D(_tex2D, uv2).r;
@@ -99,19 +103,18 @@ float GetFogFactor(float3 _worldPosition, float3 _cameraPosition, FogSettings se
     return saturate(GetFogDensity(_worldPosition, _cameraPosition, settings).value);
 }
 
-float GetFogFactor(float3 _worldPosition, float3 _worldNormal, float3 _cameraPosition, sampler2D _noiseTex, float noiseOpacity, float _noiseScale, float _noiseSpeed, float _noiseModulation, float _noiseOffset, FogSettings settings)
+float GetFogFactor(float3 _worldPosition, float3 _worldNormal, float3 _cameraPosition, sampler2D _noiseTex, float _noiseOpacity,  float _noiseFade, float _noiseScale, float _noiseTime, FogSettings settings)
 {    
     FogDensity density = GetFogDensity(_worldPosition, _cameraPosition, settings);
     
     float factor = density.value;
 
-    float noiseMask = smoothstep(0.2, 0.6, abs(_worldNormal.y));
-    float noiseFade = (1 - saturate(density.distance / settings.distanceStart)) * noiseMask;
-    float noiseFog = GetFogNoise(_worldPosition, _noiseTex, _noiseScale, _noiseSpeed);
-    float noiseModulation = (noiseFog * 2.0 - 1.0) * _noiseModulation;
+    float noiseSurfaceFade = smoothstep(0.2, 0.6, abs(_worldNormal.y));
+    float noiseDistanceFade = lerp(1.0, 1 - saturate(density.distance / settings.distanceStart), _noiseFade);
+    float noiseFog = GetFogNoise(_worldPosition, _noiseTex, _noiseScale, _noiseTime) * _noiseOpacity;
+    float noiseMod = (noiseFog * 2.0 - 1.0);
     
-    factor *= max(0.0, 1.0 + noiseModulation * noiseFade * noiseOpacity);
-    factor += noiseFog * noiseFade * _noiseOffset * noiseOpacity;
+    factor *= max(0.0, 1.0 + noiseMod * noiseDistanceFade * noiseSurfaceFade);
     
     return saturate(factor);
 }
@@ -124,13 +127,14 @@ void GetFogDefault_float(float3 _worldPosition, float3 _worldNormal, float3 _cam
     settings.distanceFalloff = _FOG_DISTANCE_FALLOFF;
     settings.heightStart = _FOG_HEIGHT_START;
     settings.heightFalloff = _FOG_HEIGHT_FALLOFF;
-        
-    float fogFactor = GetFogFactor(_worldPosition, _worldNormal, _cameraPosition, _FOG_NOISE_TEX, _FOG_NOISE_OPACITY,  _FOG_NOISE_SCALE, _FOG_NOISE_SPEED, _FOG_NOISE_MODULATION, _FOG_NOISE_OFFSET, settings);
-    float3 fogAmbient = GetFogAmbient(_worldPosition, _cameraPosition, _SUN_DIRECTION, _SUN_COLOR, _FOG_COLOR);
-    float3 fogScatter = GetFogScatter(_worldPosition, _cameraPosition, _SUN_DIRECTION, _SUN_COLOR, _FOG_SCATTERING);
-    float3 fogRamp = GetFogRamp(_worldPosition, _cameraPosition, _FOG_RAMP_TEX, _FOG_RAMP_SCALE, _FOG_DISTANCE_START, _FOG_HEIGHT_START);
     
-    color = lerp(fogAmbient, fogRamp, saturate(_FOG_RAMP_OPACITY)) + fogScatter;
+    float fogFactor = GetFogFactor(_worldPosition, _worldNormal, _cameraPosition, _FOG_NOISE_TEX, _FOG_NOISE_OPACITY, _FOG_NOISE_FADE, _FOG_NOISE_SCALE, _ENVIRONMENT_TIME_FOG, settings);
+    float3 fogAmbient = GetFogAmbient(_worldPosition, _cameraPosition, _SUN_DIRECTION, _SUN_COLOR, _FOG_SUN_INFLUENCE, _FOG_COLOR);
+    float3 fogScatter = GetFogScatter(_worldPosition, _cameraPosition, _SUN_DIRECTION, _SUN_COLOR, _FOG_SUN_SCATTERING);
+    float3 fogRamp = GetFogRamp(_worldPosition, _cameraPosition, _FOG_RAMP_TEX, _FOG_RAMP_SCALE, _FOG_DISTANCE_START, _FOG_HEIGHT_START);  
+    float3 fogLights = GetFogLights(_worldPosition, _cameraPosition);
+
+    color = lerp(fogAmbient, fogRamp, saturate(_FOG_RAMP_OPACITY)) + fogScatter + fogLights;
     factor = fogFactor;    
 }
 
@@ -149,7 +153,7 @@ void GetFogSimple_float(float3 _worldPosition, float3 _cameraPosition, out float
     settings.heightFalloff = _FOG_HEIGHT_FALLOFF;
     
     float fogFactor = GetFogFactor(_worldPosition, _cameraPosition, settings);
-    float3 fogAmbient = GetFogAmbient(_worldPosition, _cameraPosition, _SUN_DIRECTION, _SUN_COLOR, _FOG_COLOR);
+    float3 fogAmbient = GetFogAmbient(_worldPosition, _cameraPosition, _SUN_DIRECTION, _SUN_COLOR, _FOG_SUN_INFLUENCE, _FOG_COLOR);
     float3 fogRamp = GetFogRamp(_worldPosition, _cameraPosition, _FOG_RAMP_TEX, _FOG_RAMP_SCALE, _FOG_DISTANCE_START, _FOG_HEIGHT_START);
     
     color = lerp(fogAmbient, fogRamp, saturate(_FOG_RAMP_OPACITY));

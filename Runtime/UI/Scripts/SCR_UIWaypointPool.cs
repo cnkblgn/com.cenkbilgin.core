@@ -5,7 +5,7 @@ namespace Core.UI
 {
     internal sealed class UIWaypointPool : IPoolHandler<UIWaypointItem>
     {
-        public readonly PoolSystem<UIWaypointItem> Pool;
+        public readonly Pool<UIWaypointItem> Pool;
 
         public UIWaypointPool(PoolType type, UIWaypointItem prefab, Transform container, int count) => Pool = new("UI_WAYPOINT_POOL", type, prefab, container, count, this);
          

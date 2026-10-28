@@ -13,7 +13,6 @@ struct CloudSettings
     float height;
     float curve;
     float scale;
-    float speed;
     float turbulence;
     float transmittance;
     float darkness;
@@ -65,18 +64,18 @@ float4 GetCloudSample(sampler2D _texA, sampler2D _texB, float _blend, float2 _uv
     return sampleA;
 }
 
-CloudDensity GetCloudDensity(float3 _viewDirection, sampler2D _texA, sampler2D _texB, CloudSettings _settings)
+CloudDensity GetCloudDensity(float3 _viewDirection, sampler2D _texA, sampler2D _texB, float _time, CloudSettings _settings)
 {
-    float time = _Time.y;
     float3 viewDirection = normalize(-_viewDirection);
 
     float2 baseUV = GetCloudUV(viewDirection, _settings.curve, _settings.height, _settings.scale);
-    float2 distortionUV = float2(frac(baseUV.x + time * _settings.speed * 0.01), frac(baseUV.y + time * -_settings.speed * 0.01));
+    float2 flowUV = baseUV + float2(_time * 0.01, _time * 0.004);
+    float2 distortionUV = flowUV * 2.0 + float2(-_time * 0.02, _time * 0.015);
     float2 distortionSample = GetCloudSample(_texA, _texB, _settings.blend, distortionUV).gb;
 
     float2 warpUV = (distortionSample * 2.0 - 1.0) * _settings.turbulence;
-    float baseSample = GetCloudSample(_texA, _texB, _settings.blend, baseUV + warpUV).r;
-
+    float baseSample = GetCloudSample(_texA, _texB, _settings.blend, flowUV + warpUV).r;
+    
     float mask = smoothstep(0, _settings.fade, viewDirection.y);
     float shape = saturate(baseSample - (1.0 - _settings.coverage));
     float density = shape * mask * _settings.opacity;

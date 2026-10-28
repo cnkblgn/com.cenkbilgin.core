@@ -67,7 +67,13 @@ namespace Core.Faction
             }
         }
 
-        public static int GetIDIndex(string key) => idLookup.TryGetValue(key, out int index) ? index : -1;
+        public static int GetIDIndex(string key)
+        {
+            Debug.Log("idLookup != null: " + (idLookup != null));
+            Debug.Log("key != null: " + (key != null) + " << key: " + key);
+
+            return idLookup.TryGetValue(key, out int index) ? index : -1;
+        }
         private static FactionInstance GetInstance(FactionID id)
         {
             if (!id.IsValid || id.Index >= instances.Length)

@@ -65,14 +65,13 @@ void GetSky_float(float3 _worldPosition, float3 _viewDirection, out float3 color
     cloudSettings.height = _CLOUD_HEIGHT;
     cloudSettings.curve = _CLOUD_CURVE;
     cloudSettings.scale = _CLOUD_SCALE;
-    cloudSettings.speed = _CLOUD_SPEED;
     cloudSettings.turbulence = _CLOUD_TURBULENCE;
     cloudSettings.transmittance = _CLOUD_TRANSMITTANCE;
     cloudSettings.darkness = _CLOUD_DARKNESS;
     cloudSettings.rimWidth = _CLOUD_RIM_WIDTH;
     cloudSettings.rimStrength = _CLOUD_RIM_STRENGTH;
 
-    CloudDensity cloudDensity = GetCloudDensity(_viewDirection, _CLOUD_BASE_TEX, _CLOUD_TARGET_TEX, cloudSettings);
+    CloudDensity cloudDensity = GetCloudDensity(_viewDirection, _CLOUD_BASE_TEX, _CLOUD_TARGET_TEX, _ENVIRONMENT_TIME_CLOUD, cloudSettings);
     
     float4 cloudSun = DrawCloud(_viewDirection, -_SUN_DIRECTION, _SUN_COLOR, skyColor, cloudDensity, cloudSettings);
     float4 cloudMoon = DrawCloud(_viewDirection, -_MOON_DIRECTION, _MOON_COLOR, skyColor, cloudDensity, cloudSettings);
@@ -86,9 +85,8 @@ void GetSky_float(float3 _worldPosition, float3 _viewDirection, out float3 color
     starSettings.size = _STAR_SIZE;
     starSettings.brightness = _STAR_BRIGHTNESS;
     starSettings.amount = _STAR_AMOUNT;
-    starSettings.animationStrength = _STAR_ANIMATION_STRENGTH;
-    starSettings.animationSpeed = _STAR_ANIMATION_SPEED;
-    float3 starColor = DrawStars(_viewDirection, starSettings);   
+    starSettings.animation = _STAR_ANIMATION;
+    float3 starColor = DrawStars(_viewDirection, _ENVIRONMENT_TIME_STAR, starSettings);
     starColor *= (1.0 - cloudDensity.value);
     starColor *= (1.0 - saturate(dot(moonColor, 1.0)));
     

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
@@ -14,6 +15,7 @@ namespace Core.Environment
         [Info("Use environment system to update global constants!\nRequires depth texture and injection point 'AfterOpaques'\nAlso this feature disables unity fog!")]
         [ReadOnly] public bool hasInitialized;
         public RenderPassEvent renderPassEvent = RenderPassEvent.BeforeRenderingTransparents;
+        public bool hdr = true;
 
         private Material fogSampleMaterial;
         private Material fogBlurMaterial;
@@ -99,7 +101,7 @@ namespace Core.Environment
                 return;
             }
 
-            pass.Setup(fogSampleMaterial, fogBlurMaterial, fogCompositeMaterial, skyMaterial, renderPassEvent);
+            pass.Setup(fogSampleMaterial, fogBlurMaterial, fogCompositeMaterial, skyMaterial, renderPassEvent, hdr ? GraphicsFormat.R16G16B16A16_SFloat : GraphicsFormat.R16G16B16A16_UNorm);
             renderer.EnqueuePass(pass);
         }
     }

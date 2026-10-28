@@ -4,7 +4,7 @@ namespace Core.Graphics
 {
     internal sealed class ParticlePool : IPoolHandler<ParticleEmitter>
     {
-        public readonly PoolSystem<ParticleEmitter> Pool;
+        public readonly Pool<ParticleEmitter> Pool;
 
         public ParticlePool(PoolType type, ParticleEmitter prefab, Transform container, int count) => Pool = new("PARTICLE_POOL", type, prefab, container, count, this);
 

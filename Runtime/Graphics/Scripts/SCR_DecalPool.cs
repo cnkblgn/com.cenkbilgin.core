@@ -4,7 +4,7 @@ namespace Core.Graphics
 {
     internal sealed class DecalPool : IPoolHandler<DecalEmitter>
     {
-        public readonly PoolSystem<DecalEmitter> Pool;
+        public readonly Pool<DecalEmitter> Pool;
   
         public DecalPool(PoolType type, DecalEmitter prefab, Transform container, int count) => Pool = new("DECAL_POOL", type, prefab, container, count, this);
 

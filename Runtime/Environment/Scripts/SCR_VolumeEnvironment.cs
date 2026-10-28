@@ -4,19 +4,14 @@ using UnityEngine.Rendering;
 
 namespace Core.Environment
 {
-    public enum FogResolution : int
-    {
-        FULL,
-        HALF,
-        QUARTER,
-        EIGHT,
-    }
-
     [Serializable]
     [VolumeComponentMenu("Environment")]
     public sealed class Environment : VolumeComponent
     {
         public BoolParameter Enabled = new(false, true);
+
+        [Header("Lights")]
+        public EnumParameter<EnvironmentLightCount> EnvironmentLights = new(EnvironmentLightCount._4);
 
         [Header("Ambient")]
         public ColorParameter AmbientSkyColor = new(Color.aliceBlue, true, false, true);
@@ -83,11 +78,11 @@ namespace Core.Environment
         public MinFloatParameter FogDistanceFalloff = new(1.0f, 0);
         public MinFloatParameter FogHeightStart = new(512f, 0);
         public MinFloatParameter FogHeightFalloff = new(1.0f, 0);
-        public ClampedFloatParameter FogScattering = new(1.0f, 0, 2);
+        public ClampedFloatParameter FogSunInfluence = new(1.0f, 0, 2);
+        public ClampedFloatParameter FogSunScattering = new(1.0f, 0, 2);
         public TextureParameter FogNoiseTexture = new(default);
         public ClampedFloatParameter FogNoiseOpacity = new(1.0f, 0, 1);
-        public ClampedFloatParameter FogNoiseModulation = new(1.0f, 0, 1);
-        public ClampedFloatParameter FogNoiseOffset = new(0, 0, 1);
+        public ClampedFloatParameter FogNoiseFade = new(1.0f, 0, 1);
         public ClampedFloatParameter FogNoiseSpeed = new(0.20f, 0, 1);
         public ClampedFloatParameter FogNoiseScale = new(0.25f, 0, 1);
         public TextureParameter FogRampTexture = new(default);
