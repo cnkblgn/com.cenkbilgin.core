@@ -14,7 +14,7 @@ namespace Core.Actors
         private static ActorGroup[] groups = Array.Empty<ActorGroup>();
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void OnRuntimeInitialize()
+        private static void OnSubsystemRegistration()
         {
             for (int i = 0; i < groups.Length; i++)
             {

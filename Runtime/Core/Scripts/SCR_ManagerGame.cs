@@ -71,7 +71,7 @@ namespace Core
 #endif
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void OnRuntimeInitialize()
+        private static void OnSubsystemRegistration()
         {
             OnGameStateChanged = null;
             OnCurrentSceneLoading = null;

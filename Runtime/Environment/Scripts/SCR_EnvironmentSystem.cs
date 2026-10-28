@@ -18,7 +18,7 @@ namespace Core.Environment
         private static bool hasInitialized;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void OnRuntimeInitialize()
+        private static void OnSubsystemRegistration()
         {
             cachedSunLight = null;
             cachedMoonLight = null;
@@ -41,8 +41,8 @@ namespace Core.Environment
 
             Refresh();
         }
-        private void Reset() => OnRuntimeInitialize();
-        private void OnDisable() => OnRuntimeInitialize();
+        private void Reset() => OnSubsystemRegistration();
+        private void OnDisable() => OnSubsystemRegistration();
 
         public static bool TryGetSettings(out Environment environment)
         {

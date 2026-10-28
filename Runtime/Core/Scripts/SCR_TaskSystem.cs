@@ -13,7 +13,7 @@ namespace Core
         private static bool isShuttingDown = false;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void Initialize()
+        private static void OnSubsystemRegistration()
         {
             isShuttingDown = false;
 

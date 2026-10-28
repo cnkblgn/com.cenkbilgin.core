@@ -21,7 +21,7 @@ namespace Core.Persistence
         private bool isMarkedForDestroy = false;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void OnRuntimeInitialize() => OnMarkedForDestroy = null;
+        private static void OnSubsystemRegistration() => OnMarkedForDestroy = null;
 
         protected virtual void Start()
         {

@@ -40,7 +40,7 @@ namespace Core
         private static int selectedCategory;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void Reset()
+        private static void OnSubsystemRegistration()
         {
             if (updater != null)
             {
@@ -56,7 +56,7 @@ namespace Core
             selectedCategory = 0;
         }
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void Install()
+        private static void OnBeforeSceneLoad()
         {
             if (CommandMenu.updater != null)
             {
@@ -69,7 +69,7 @@ namespace Core
             UnityEngine.Object.DontDestroyOnLoad(updater);
         }
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        private static void Initialize()
+        private static void OnAfterSceneLoad()
         {
             if (isInitialized)
             {

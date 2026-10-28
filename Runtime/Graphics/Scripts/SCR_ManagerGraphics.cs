@@ -28,7 +28,7 @@ namespace Core.Graphics
         private Camera mainCamera = null;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void OnRuntimeInitialize() => OnResolutionChanged = null;
+        private static void OnSubsystemRegistration() => OnResolutionChanged = null;
 
         protected override void Awake()
         {

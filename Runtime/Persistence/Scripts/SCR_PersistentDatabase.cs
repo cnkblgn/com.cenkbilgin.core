@@ -13,16 +13,21 @@ namespace Core.Persistence
         private static PersistentEntitySpawner spawner;
         private static bool isLoading = false;
 
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void OnSubsystemRegistration()
+        {
+            availableEntities.Clear();
+            deletedEntities.Clear();
+            spawner = null;
+        }
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void OnBeforeSceneLoad()
         {
             PersistentEntity.OnMarkedForDestroy += OnEntityMarkedForDestroy;
-
-            availableEntities.Clear();
-            deletedEntities.Clear();
-
-            spawner = null;
         }
+
         private static void OnEntityMarkedForDestroy(PersistentEntity entity)
         {
             if (isLoading)

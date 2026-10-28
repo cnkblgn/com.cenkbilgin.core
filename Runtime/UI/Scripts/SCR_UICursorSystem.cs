@@ -8,7 +8,7 @@ namespace Core.UI
         internal static readonly List<IUICursorStateHandler> Handlers = new();
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void OnRuntimeInitialize() => Handlers.Clear();
+        private static void OnSubsystemRegistration() => Handlers.Clear();
 
         public static void BindHandler(IUICursorStateHandler value)
         {

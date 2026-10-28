@@ -15,6 +15,12 @@ namespace Core.Item
         private static ItemTag[] tags = Array.Empty<ItemTag>();
         private static ItemEntitySpawner spawner;
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void OnSubsystemRegistration()
+        {
+            spawner = null;
+        }
+
         internal static void Build(ItemEntry[] entries, string[] _tags)
         {
             if (entries == null || _tags == null)

@@ -61,21 +61,6 @@ namespace Core.Sector
         private static int sectorCount;
         private static bool isInitialized = false;
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void OnRuntimeInitialize()
-        {
-            OnOriginShift = null;
-            OriginOffset = Vector3.zero;
-
-            target = null;
-            root = null;
-
-            sectors = null;
-            neighbors = null;
-
-            isInitialized = false;
-        }
-
         private void Awake() => Initialize();
         private void LateUpdate()
         {
@@ -138,6 +123,22 @@ namespace Core.Sector
         }
         private void OnValidate() => Initialize();
 #endif
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void OnSubsystemRegistration()
+        {
+            OnOriginShift = null;
+            OriginOffset = Vector3.zero;
+
+            target = null;
+            root = null;
+
+            sectors = null;
+            neighbors = null;
+
+            isInitialized = false;
+        }
+
 
         [ContextMenu("Generate")]
         public void Initialize()

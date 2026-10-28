@@ -60,7 +60,7 @@ namespace Core
         private static readonly Color COLOR_MUTED = new(0.55f, 0.55f, 0.55f, 1f);
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void Reset()
+        private static void OnSubsystemRegistration()
         {
             if (updater != null)
             {
@@ -103,7 +103,7 @@ namespace Core
             OnClosed = null;
         }
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void Install()
+        private static void OnBeforeSceneLoad()
         {
             if (CommandConsole.updater != null)
             {
