@@ -10,6 +10,7 @@ namespace Core.Trait
     {
         public event Action<TraitContext> OnChanged = null;
 
+        private TraitContext ctx;
         private readonly SwapBackArray<TraitInstance> traits;
         private readonly List<ITraitHandler> handlers;
 
@@ -67,9 +68,10 @@ namespace Core.Trait
             handlers.Remove(handler);
         }
 
+        public TraitContext GetContext() => ctx;
         private void SetState(TraitState state, TraitInstance instance)
         {
-            TraitContext ctx = new(state, instance);
+            ctx = new(state, instance);
             NotifyHandlers(in ctx);
             OnChanged?.Invoke(ctx);
         }

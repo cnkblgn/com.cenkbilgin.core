@@ -9,6 +9,7 @@ namespace Core.Scenario
         public event Action<ScenarioContext> OnChanged;
 
         private ScenarioID id;
+        private ScenarioContext ctx;
         private readonly List<IScenarioHandler> handlers;
 
         public ScenarioContainer(ScenarioContainer container, List<IScenarioHandler> handlers = null) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.id, handlers) { }
@@ -54,6 +55,7 @@ namespace Core.Scenario
             handlers.Remove(handler);
         }
 
+        public ScenarioContext GetContext() => ctx;
         public ScenarioID GetScenario() => id;
         public bool TrySetScenario<TContext>(ScenarioID id, TContext context)
         {
@@ -70,7 +72,7 @@ namespace Core.Scenario
 
             RemoveAction(this.id, context);
 
-            ScenarioContext ctx = new(this.id = id);
+            ctx = new(this.id = id);
             NotifyHandlers(in ctx);
             OnChanged?.Invoke(ctx);
 

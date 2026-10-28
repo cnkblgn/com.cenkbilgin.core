@@ -9,6 +9,7 @@ namespace Core.Faction
         public event Action<FactionContext> OnChanged;
 
         private FactionID id;
+        private FactionContext ctx;
         private readonly List<IFactionHandler> handlers;
         private readonly FactionRelation[] relations;
 
@@ -65,7 +66,7 @@ namespace Core.Faction
         }
         private void SetState()
         {
-            FactionContext ctx = new(id, relations);
+            ctx = new(id, relations);
             NotifyHandlers(in ctx);
             OnChanged?.Invoke(ctx);
         }

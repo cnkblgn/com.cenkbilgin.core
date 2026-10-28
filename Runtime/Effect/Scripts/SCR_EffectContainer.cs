@@ -10,6 +10,7 @@ namespace Core.Effect
     {
         public event Action<EffectContext> OnChanged;
 
+        private EffectContext ctx;
         private readonly List<IEffectHandler> handlers;
         private readonly SwapBackArray<EffectInstance> effects;
 
@@ -69,9 +70,10 @@ namespace Core.Effect
             handlers.Remove(handler);
         }
 
+        public EffectContext GetContext() => ctx;
         private void SetState(EffectState state, EffectInstance instance)
         {
-            EffectContext ctx = new(state, instance);
+            ctx = new(state, instance);
             NotifyHandlers(in ctx);
             OnChanged?.Invoke(ctx);
         }

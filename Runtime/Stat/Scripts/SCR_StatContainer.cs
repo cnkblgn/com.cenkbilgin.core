@@ -8,10 +8,11 @@ namespace Core.Stat
     {
         public event Action<StatContext> OnChanged;
 
+        private StatContext ctx;
+        private StatState state;
         private readonly Dictionary<StatID, float> stats;
         private readonly List<StatModifier> modifiers;
         private readonly List<IStatHandler> handlers;
-        private StatState state;
 
         public StatContainer(List<IStatHandler> handlers = null) : this(new(), new(), handlers) 
         {
@@ -73,13 +74,13 @@ namespace Core.Stat
         {
             this.state = state;
 
-            StatContext ctx = new(this.state, modifier);
-
+            ctx = new(this.state, modifier);
             NotifyHandlers(in ctx);
             OnChanged?.Invoke(ctx);
         }
         private void SetState(StatState state) => SetState(state, StatModifier.Empty);
 
+        public StatContext GetContext() => ctx;
         public IReadOnlyCollection<StatID> GetStats() => stats.Keys;
         public float GetStat(StatID id)
         {
