@@ -71,6 +71,7 @@ namespace Core.Faction
             OnChanged?.Invoke(ctx);
         }
 
+        public FactionContext GetContext() => ctx;
         public FactionID GetFaction() => id;
         public bool TrySetFaction<TContext>(FactionID id, TContext context)
         {
