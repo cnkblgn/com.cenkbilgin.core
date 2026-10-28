@@ -7,8 +7,8 @@ namespace Core.Faction
     {
         public readonly FactionID ID;
         public readonly IReadOnlyList<FactionRelation> Relations;
-
-        internal FactionContext(FactionID id, IReadOnlyList<FactionRelation> relations)
+        
+        public FactionContext(FactionID id, IReadOnlyList<FactionRelation> relations)
         {
             ID = id;
             Relations = relations ?? throw new ArgumentNullException(nameof(relations), "Faction context ctor failed! relations cannot be null!");

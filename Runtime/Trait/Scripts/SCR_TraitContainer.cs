@@ -67,6 +67,20 @@ namespace Core.Trait
             handlers.Remove(handler);
         }
 
+        public void ImportFrom<TContext>(TraitContainer data, TContext context)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data), "Trait import failed! data is null!?");
+            }
+
+            traits.Clear();
+
+            for (int i = 0; i < data.traits.Count; i++)
+            {
+                TryAddTrait(data.traits[i].ID, context);
+            }
+        }
         private void SetState(TraitState state, TraitInstance instance)
         {
             TraitContext ctx = new(state, instance);

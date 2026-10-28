@@ -69,6 +69,26 @@ namespace Core.Stat
             handlers.Remove(handler);
         }
 
+        public void ImportFrom(StatContainer data)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data), "Stat import failed! data is null!?");
+            }
+
+            stats.Clear();
+            modifiers.Clear();
+
+            foreach (KeyValuePair<StatID, float> pair in data.stats)
+            {
+                stats[pair.Key] = pair.Value;
+            }
+
+            for (int i = 0; i < data.modifiers.Count; i++)
+            {
+                AddModifier(data.modifiers[i]);
+            }
+        }
         private void SetState(StatState state, StatModifier modifier)
         {
             this.state = state;

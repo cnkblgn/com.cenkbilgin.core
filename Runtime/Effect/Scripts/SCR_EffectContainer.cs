@@ -69,6 +69,20 @@ namespace Core.Effect
             handlers.Remove(handler);
         }
 
+        public void ImportFrom<TContext>(EffectContainer data, TContext context)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data), "Effect import failed! data is null!?");
+            }
+
+            effects.Clear();
+
+            for (int i = 0; i < data.effects.Count; i++)
+            {
+                TryAddEffect(data.effects[i], context);
+            }
+        }
         private void SetState(EffectState state, EffectInstance instance)
         {
             EffectContext ctx = new(state, instance);

@@ -63,6 +63,16 @@ namespace Core.Faction
 
             handlers.Remove(handler);
         }
+
+        public void ImportFrom<TContext>(FactionContainer data, TContext context)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data), "Faction import failed! data is null!?");
+            }
+
+            TrySetFaction(data.id, context);
+        }
         private void SetState()
         {
             FactionContext ctx = new(id, relations);

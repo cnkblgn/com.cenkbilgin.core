@@ -53,8 +53,24 @@ namespace Core.Race
 
             handlers.Remove(handler);
         }
+        
+        public void ImportFrom<TContext>(RaceContainer data, TContext context)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data), "Race import failed! data is null!?");
+            }
 
-        public RaceID GetRace() => id;
+            TrySetRace(data.id, context);
+        }
+        private void SetState()
+        {
+            RaceContext ctx = new(this.id);
+            NotifyHandlers(in ctx);
+            OnChanged?.Invoke(ctx);
+        }
+
+        public RaceID GetRace() => id;       
         public bool TrySetRace<TContext>(RaceID id, TContext context)
         {
             if (id == this.id)
@@ -70,9 +86,9 @@ namespace Core.Race
 
             RemoveAction(this.id, context);
 
-            RaceContext ctx = new(this.id = id);
-            NotifyHandlers(in ctx);
-            OnChanged?.Invoke(ctx);
+            this.id = id;
+
+            SetState();
 
             ApplyAction(id, context);
 

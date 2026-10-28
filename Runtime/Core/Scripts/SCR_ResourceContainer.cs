@@ -63,6 +63,16 @@ namespace Core
             handlers.Remove(handler);
         }
 
+        public void ImportFrom(ResourceContainer data)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data), "Resource import failed! data is null!?");
+            }
+
+            SetMaximum(data.maximum);
+            SetCurrent(data.current);
+        }
         private void SetState(ResourceState state)
         {
             ResourceContext ctx = new(state, current, maximum);

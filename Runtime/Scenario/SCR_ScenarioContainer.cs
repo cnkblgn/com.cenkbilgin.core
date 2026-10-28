@@ -54,6 +54,21 @@ namespace Core.Scenario
             handlers.Remove(handler);
         }
 
+        public void ImportFrom<TContext>(ScenarioContainer data, TContext context)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data), "Scenario import failed! data is null!?");
+            }
+
+            TrySetScenario(data.id, context);
+        }
+        private void SetState()
+        {
+            ScenarioContext ctx = new(this.id);
+            NotifyHandlers(in ctx);
+            OnChanged?.Invoke(ctx);
+        }
         public ScenarioID GetScenario() => id;
         public bool TrySetScenario<TContext>(ScenarioID id, TContext context)
         {
@@ -70,9 +85,9 @@ namespace Core.Scenario
 
             RemoveAction(this.id, context);
 
-            ScenarioContext ctx = new(this.id = id);
-            NotifyHandlers(in ctx);
-            OnChanged?.Invoke(ctx);
+            this.id = id;
+
+            SetState();
 
             ApplyAction(id, context);
 
