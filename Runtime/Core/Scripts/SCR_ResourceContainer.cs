@@ -13,7 +13,6 @@ namespace Core
         [SerializeField, Min(0)] private float current;
         [SerializeField, Min(0)] private float maximum;
 
-        private ResourceContext ctx;
         private readonly List<IResourceHandler> handlers;
         private bool isDepleted;
 
@@ -64,10 +63,9 @@ namespace Core
             handlers.Remove(handler);
         }
 
-        public ResourceContext GetContext() => ctx;
         private void SetState(ResourceState state)
         {
-            ctx = new(state, current, maximum);
+            ResourceContext ctx = new(state, current, maximum);
             NotifyHandlers(in ctx);
             OnChanged?.Invoke(ctx);
         }

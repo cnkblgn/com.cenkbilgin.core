@@ -9,7 +9,6 @@ namespace Core.Race
         public event Action<RaceContext> OnChanged;
 
         private RaceID id;
-        private RaceContext ctx;
         private readonly List<IRaceHandler> handlers;
 
         public RaceContainer(RaceContainer container, List<IRaceHandler> handlers = null) : this(container == null ? throw new ArgumentNullException(nameof(container)) : container.id, handlers) { }
@@ -55,7 +54,6 @@ namespace Core.Race
             handlers.Remove(handler);
         }
 
-        public RaceContext GetContext() => ctx;
         public RaceID GetRace() => id;
         public bool TrySetRace<TContext>(RaceID id, TContext context)
         {
@@ -72,7 +70,7 @@ namespace Core.Race
 
             RemoveAction(this.id, context);
 
-            ctx = new(this.id = id);
+            RaceContext ctx = new(this.id = id);
             NotifyHandlers(in ctx);
             OnChanged?.Invoke(ctx);
 

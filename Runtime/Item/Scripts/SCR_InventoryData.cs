@@ -23,7 +23,6 @@ namespace Core.Item
         public readonly int MaximumWeight;
         public readonly ItemMask ItemMask;
 
-        private InventoryContext ctx;
         private ItemData[] itemGrid;
         private readonly Dictionary<Guid, ItemData> itemTable;
         private readonly List<IInventoryHandler> handlers;
@@ -61,7 +60,7 @@ namespace Core.Item
 
         private void NotifyHandlers(InventoryState state, InventoryResult result, ItemData item = null)
         {
-            ctx = new(state, result, item);
+            InventoryContext ctx = new(state, result, item);
 
             for (int i = 0; i < handlers.Count; i++)
             {
@@ -118,7 +117,6 @@ namespace Core.Item
 
             return count;
         }
-        public InventoryContext GetContext() => ctx;
 
         public ItemData[,] GetSnapshot()
         {

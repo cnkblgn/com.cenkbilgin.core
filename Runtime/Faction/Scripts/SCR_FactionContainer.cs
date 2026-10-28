@@ -9,7 +9,6 @@ namespace Core.Faction
         public event Action<FactionContext> OnChanged;
 
         private FactionID id;
-        private FactionContext ctx;
         private readonly List<IFactionHandler> handlers;
         private readonly FactionRelation[] relations;
 
@@ -66,12 +65,11 @@ namespace Core.Faction
         }
         private void SetState()
         {
-            ctx = new(id, relations);
+            FactionContext ctx = new(id, relations);
             NotifyHandlers(in ctx);
             OnChanged?.Invoke(ctx);
         }
 
-        public FactionContext GetContext() => ctx;
         public FactionID GetFaction() => id;
         public bool TrySetFaction<TContext>(FactionID id, TContext context)
         {
