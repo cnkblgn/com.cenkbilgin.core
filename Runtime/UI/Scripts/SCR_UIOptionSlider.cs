@@ -52,11 +52,7 @@ namespace Core.UI
             }
 
             string text = valueTexts != null && (int)value < valueTexts.Length ? valueTexts[(int)value] : value.ToString("0.00");
-
-            if (showMax)
-            {
-                valueText.text = $"{text} / {sliderObject.maxValue:0}";
-            }
+            valueText.text = showMax ? $"{text} / {sliderObject.maxValue:0}" : text;
         }
     }
 }

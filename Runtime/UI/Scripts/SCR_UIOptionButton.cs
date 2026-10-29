@@ -81,10 +81,7 @@ namespace Core.UI
 
             string text = valueTexts != null && (int)value < valueTexts.Length ? valueTexts[(int)value] : value.ToString();
 
-            if (showMax)
-            {
-                valueText.text = $"{text} / {maximumIndex:0}";
-            }
+            valueText.text = showMax ? $"{text} / {maximumIndex:0}" : text;
         }
     }
 }
