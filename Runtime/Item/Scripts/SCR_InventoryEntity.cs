@@ -24,12 +24,13 @@ namespace Core.Item
         [SerializeField] private float dropForce = 5;
 
         private InventoryData thisInventory = null;
-        private IInventoryHandler[] thisHandlers = null;
+        private readonly List<IInventoryHandler> thisHandlers = new();
 
         private void Awake()
-        {
-            thisHandlers = GetComponents<IInventoryHandler>();
-            thisInventory = new(width, height, weight, whitelistedItems);
+        {            
+            GetComponents(thisHandlers);
+
+            thisInventory = new(width, height, weight, whitelistedItems.CreateMask());
 
             foreach (ItemID item in startingItems)
             {
@@ -39,7 +40,7 @@ namespace Core.Item
         private void Start() => Initialize();
         private void OnDestroy()
         {
-            for (int i = 0; i < thisHandlers.Length; i++)
+            for (int i = 0; i < thisHandlers.Count; i++)
             {
                 thisInventory.RemoveHandler(thisHandlers[i]);
             }
@@ -49,9 +50,16 @@ namespace Core.Item
         {
             OnChanged?.Invoke(ctx);
 
-            for (int i = 0; i < thisHandlers.Length; i++)
+            for (int i = 0; i < thisHandlers.Count; i++)
             {
-                thisHandlers[i]?.HandleInventoryChanged(in ctx);
+                IInventoryHandler handler = thisHandlers[i];
+
+                if (ReferenceEquals(handler, this))
+                {
+                    continue;
+                }
+
+                handler?.HandleInventoryChanged(in ctx);
             }
         }
 
@@ -72,7 +80,7 @@ namespace Core.Item
         }
         private void Initialize()
         {
-            for (int i = 0; i < thisHandlers.Length; i++)
+            for (int i = 0; i < thisHandlers.Count; i++)
             {
                 thisInventory.AddHandler(thisHandlers[i]);
             }
