@@ -15,11 +15,11 @@ namespace Core.Item
         [SerializeField, Min(0)] private int overrideStack;
 
         private ItemData thisData;
-        private IItemEntityHandler[] thisHandlers;
+        private IItemHandler[] thisHandlers;
 
         private void Awake()
         {
-            thisHandlers = GetComponents<IItemEntityHandler>();
+            thisHandlers = GetComponents<IItemHandler>();
             thisData = id.CreateData();
 
             if (overrideStack != 0)
