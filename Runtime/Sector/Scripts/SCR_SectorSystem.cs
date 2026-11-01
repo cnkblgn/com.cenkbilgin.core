@@ -425,7 +425,8 @@ namespace Core.Sector
             return Mathf.Min(Mathf.Min(distances.x, distances.y), Mathf.Min(distances.z, distances.w));
         }
 
-        
+
+        public static Transform GetTarget() => target;
         public static void SetTarget(Transform transform) => target = transform == null ? throw new ArgumentNullException(nameof(transform)) : transform;
 
         public static Transform GetRoot() => root;
