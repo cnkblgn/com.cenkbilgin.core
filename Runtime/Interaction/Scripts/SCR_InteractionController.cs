@@ -38,6 +38,7 @@ namespace Core.Interaction
         {
             if (!CanProcess())
             {
+                ClearTarget();
                 return;
             }
 
@@ -144,14 +145,23 @@ namespace Core.Interaction
         }
         private void ClearTarget()
         {
-            if (currentTarget == null)
+            if (ReferenceEquals(currentTarget, null))
             {
                 return;
             }
 
-            currentTarget.ExitFocus(gameObject, out InteractionContext ctx);
-            currentTarget = null;
+            InteractionContext ctx;
 
+            if (currentTarget != null) // hâlâ canlý
+            {
+                currentTarget.ExitFocus(gameObject, out ctx);
+            }
+            else // destroy edilmiþ
+            {
+                ctx = new(null, gameObject, null, InteractionState.FOCUS_EXIT);
+            }
+
+            currentTarget = null;
             SetState(ctx);
         }
 
