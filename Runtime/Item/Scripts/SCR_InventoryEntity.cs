@@ -12,7 +12,7 @@ namespace Core.Item
 
         [Header("_")]
         [SerializeField] private ItemID[] startingItems = new ItemID[] { };
-        [SerializeField] private ItemTag[] whitelistedItems = new ItemTag[] {};
+        [SerializeField] private ItemTag[] blacklistedItems = new ItemTag[] {};
 
         [Header("_")]
         [SerializeField, Range(InventoryData.MIN_WIDTH, InventoryData.MAX_WIDTH)] private int width = 5;
@@ -30,7 +30,7 @@ namespace Core.Item
         {            
             GetComponents(thisHandlers);
 
-            thisInventory = new(width, height, weight, whitelistedItems.CreateMask());
+            thisInventory = new(width, height, weight, ~blacklistedItems.CreateMask());
 
             foreach (ItemID item in startingItems)
             {
@@ -70,11 +70,11 @@ namespace Core.Item
 
             entity.name = new("ORPHAN_INVENTORY");
             entity.startingItems = Array.Empty<ItemID>();
-            entity.whitelistedItems = ItemDatabase.GetTags().ToArray();
+            entity.blacklistedItems = ItemDatabase.GetTags().ToArray();
             entity.width = width;
             entity.height = height;
             entity.weight = weight;
-            entity.thisInventory = new(width, height, weight, entity.whitelistedItems);
+            entity.thisInventory = new(width, height, weight, entity.blacklistedItems);
 
             return entity;
         }
