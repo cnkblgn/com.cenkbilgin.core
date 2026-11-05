@@ -40,13 +40,6 @@ namespace Core.Damage
         }
         private void OnDestroy() => Unbind();
 
-        private void EnsureBind()
-        {
-            if (damageable == null)
-            {
-                throw new InvalidOperationException($"{nameof(DamageableEntity)} is not bound to a Damageable.");
-            }
-        }
         public void Bind(Damageable damageable)
         {
             if (damageable == null)
@@ -71,51 +64,19 @@ namespace Core.Damage
             damageable = null;
         }
 
-        public void AddHandler(IDamageableHandler handler)
-        {
-            EnsureBind();
-            damageable.AddHandler(handler);
-        }
-        public void RemoveHandler(IDamageableHandler handler)
-        {
-            EnsureBind();
-            damageable.RemoveHandler(handler);
-        }
+        public void AddHandler(IDamageableHandler handler) => damageable.AddHandler(handler);
+        public void RemoveHandler(IDamageableHandler handler) => damageable.RemoveHandler(handler);
 
-        public IReadOnlyList<DamageProtection> GetProtections()
-        {
-            EnsureBind();
-            return damageable.GetProtections();
-        }
-        public void AddProtection(DamageProtection protection)
-        {
-            EnsureBind();
-            damageable.AddProtection(protection);
-        }
-        public void RemoveProtection(int id)
-        {
-            EnsureBind();
-            damageable.RemoveProtection(id);
-        }
+        public IReadOnlyList<DamageProtection> GetProtections() => damageable.GetProtections();
+        public void AddProtection(DamageProtection protection) => damageable.AddProtection(protection);
+        public void RemoveProtection(int id) => damageable.RemoveProtection(id);
 
-        public void Damage(in DamageData data, out DamageContext ctx)
-        {
-            EnsureBind();
-            damageable.Damage(in data, out ctx);
-        }
+        public void Damage(in DamageData data, out DamageContext ctx) => damageable.Damage(in data, out ctx);
 
         public float HandleDamaged(in DamageData data, float damage) => damage;
         public void HandleHit(in DamageContext ctx) => OnHit?.Invoke(ctx);
 
-        public DamageContext GetLastContext()
-        {
-            EnsureBind();
-            return damageable.GetLastContext();
-        }
-        public DamageMask GetIgnoreMask()
-        {
-            EnsureBind();
-            return damageable.GetIgnoreMask();
-        }
+        public DamageContext GetLastContext() => damageable.GetLastContext();
+        public DamageMask GetIgnoreMask() => damageable.GetIgnoreMask();
     }
 }

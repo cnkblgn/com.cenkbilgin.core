@@ -23,28 +23,21 @@ namespace Core.Item
         [SerializeField, Required] private Transform dropOrigin = null;
         [SerializeField] private float dropForce = 5;
 
-        private InventoryData thisInventory = null;
+        private InventoryData thisInventory;
         private readonly List<IInventoryHandler> thisHandlers = new();
 
         private void Awake()
-        {            
+        {
             GetComponents(thisHandlers);
-
-            thisInventory = new(width, height, weight, ~blacklistedItems.CreateMask());
+            Bind(new(new(), width, height, weight, ~blacklistedItems.CreateMask(), thisHandlers));
 
             foreach (ItemID item in startingItems)
             {
                 thisInventory.TryAddItem(item.CreateData(), null, null, out ItemData _, out InventoryResult _);
             }
         }
-        private void Start() => Initialize();
-        private void OnDestroy()
-        {
-            for (int i = 0; i < thisHandlers.Count; i++)
-            {
-                thisInventory.RemoveHandler(thisHandlers[i]);
-            }
-        }
+        private void Start() => HandleInventoryChanged(new(InventoryState.INITIALIZED, InventoryResult.SUCCESS, null));
+        private void OnDestroy() => Unbind();
 
         public void HandleInventoryChanged(in InventoryContext ctx)
         {
@@ -78,16 +71,38 @@ namespace Core.Item
 
             return entity;
         }
-        private void Initialize()
+        public void Clear() => thisInventory.Clear();
+        public void Bind(InventoryData inventory)
         {
+            if (inventory == null)
+            {
+                throw new ArgumentNullException(nameof(inventory), "Inventory bind failed! inventory is null!?");
+            }
+
+            Unbind();
+
+            thisInventory = inventory;
+
             for (int i = 0; i < thisHandlers.Count; i++)
             {
                 thisInventory.AddHandler(thisHandlers[i]);
             }
-
-            HandleInventoryChanged(new(InventoryState.INITIALIZED, InventoryResult.SUCCESS, null));
         }
-        public void Clear() => thisInventory.Clear();
+        private void Unbind()
+        {
+            if (thisInventory == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < thisHandlers.Count; i++)
+            {
+                thisInventory.RemoveHandler(thisHandlers[i]);
+            }
+
+            thisInventory = null;
+        }
+
         public void Copy(out InventoryData inventory) => inventory = new(thisInventory);
         public void ImportFrom(InventoryData inventory) => thisInventory.ImportFrom(inventory);
         public void ExportTo(InventoryData inventory) => inventory.ImportFrom(thisInventory);
