@@ -2,10 +2,10 @@ namespace Core.Item
 {
     public enum ItemActionResult
     {
-        Completed,
-        Failed,
-        RequiresAmount,
-        RequiresTarget,
-        RequiresSlot,
+        COMPLETED,
+        FAILED,
+        REQUIRES_AMOUNT,
+        REQUIRES_TARGET,
+        REQUIRES_SLOT,
     }
 }

@@ -7,8 +7,10 @@ namespace Core.Item
         public static readonly ItemAction[] NONE = new ItemAction[0];
 
         public abstract string Name { get; }
-
-        public abstract bool IsValid(in ItemActionContext context);
-        public abstract ItemActionResult Apply(in ItemActionContext context);
+    }
+    public abstract class ItemAction<TContext> : ItemAction
+    {
+        public abstract bool IsValid(in ItemActionContext<TContext> ctx);
+        public abstract ItemActionResult Apply(in ItemActionContext<TContext> ctx);
     }
 }
