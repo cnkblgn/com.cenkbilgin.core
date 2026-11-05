@@ -8,7 +8,7 @@ namespace Core.Item
     {
         public static int Version => version; private static int version;
 
-        private static InventoryEntity orphanInventory = null;
+        private static InventoryController orphanInventory = null;
         private static readonly Dictionary<string, int> idLookup = new();
         private static readonly Dictionary<string, int> tagLookup = new();
         private static ItemDefinition[] definitions = Array.Empty<ItemDefinition>();
@@ -150,7 +150,7 @@ namespace Core.Item
 
         public static void SetSpawner(ItemEntitySpawner value) => spawner = value;
 
-        public static InventoryEntity GetOrphanInventory()
+        public static InventoryController GetOrphanInventory()
         {
             if (orphanInventory == null)
             {
@@ -166,7 +166,7 @@ namespace Core.Item
                 return;
             }
 
-            orphanInventory = InventoryEntity.Create(10, 10, 1000);
+            orphanInventory = InventoryController.Create(10, 10, 1000);
         }
     }
 }

@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Core.Item
 {
     [DisallowMultipleComponent]
-    public sealed class InventoryEntity : MonoBehaviour, IInventoryHandler
+    public sealed class InventoryController : MonoBehaviour, IInventoryHandler
     {
         public event Action<InventoryContext> OnInventoryChanged = null;
 
@@ -56,20 +56,20 @@ namespace Core.Item
             }
         }
 
-        public static InventoryEntity Create(int width, int height, int weight)
+        public static InventoryController Create(int width, int height, int weight)
         {
-            GameObject @object = new("_DO_NOT_DELETE_ORPHAN_INVENTORY_!", typeof(InventoryEntity));
-            InventoryEntity entity = @object.GetComponent<InventoryEntity>();
+            GameObject @object = new("_DO_NOT_DELETE_ORPHAN_INVENTORY_!", typeof(InventoryController));
+            InventoryController controller = @object.GetComponent<InventoryController>();
 
-            entity.name = new("ORPHAN_INVENTORY");
-            entity.startingItems = Array.Empty<ItemID>();
-            entity.blacklistedItems = ItemDatabase.GetTags().ToArray();
-            entity.width = width;
-            entity.height = height;
-            entity.weight = weight;
-            entity.thisInventory = new(width, height, weight, entity.blacklistedItems);
+            controller.name = new("ORPHAN_INVENTORY");
+            controller.startingItems = Array.Empty<ItemID>();
+            controller.blacklistedItems = ItemDatabase.GetTags().ToArray();
+            controller.width = width;
+            controller.height = height;
+            controller.weight = weight;
+            controller.thisInventory = new(width, height, weight, controller.blacklistedItems);
 
-            return entity;
+            return controller;
         }
         public void Clear() => thisInventory.Clear();
         public void Bind(InventoryData inventory)
@@ -160,7 +160,7 @@ namespace Core.Item
         /// <summary> Checks whether the given item can be added at the specified position and rotation. </summary>
         public bool CanAddItem(ItemData item, Vector2Int position, bool isRotated, out InventoryResult result) => thisInventory.CanAddItem(item, position, isRotated, out result);
         /// <summary> Checks whether two items can be swapped and calculates their target positions. </summary>
-        public bool CanSwapItem(Guid instanceIDA, Guid instanceIDB, InventoryEntity inventoryB, bool rotationA, out Vector2Int targetPositionA, out Vector2Int targetPositionB, out InventoryResult result) => thisInventory.CanSwapItem(instanceIDA, instanceIDB, inventoryB.thisInventory, rotationA, out targetPositionA, out targetPositionB, out result);
+        public bool CanSwapItem(Guid instanceIDA, Guid instanceIDB, InventoryController inventoryB, bool rotationA, out Vector2Int targetPositionA, out Vector2Int targetPositionB, out InventoryResult result) => thisInventory.CanSwapItem(instanceIDA, instanceIDB, inventoryB.thisInventory, rotationA, out targetPositionA, out targetPositionB, out result);
         /// <summary> Checks whether two items can be swapped and calculates their target positions. </summary>
         public bool CanSwapItem(Guid instanceIDA, Guid instanceIDB, bool rotationA, out Vector2Int targetPositionA, out Vector2Int targetPositionB, out InventoryResult result) => CanSwapItem(instanceIDA, instanceIDB, this, rotationA, out targetPositionA, out targetPositionB, out result);
         /// <summary> Checks whether an item can be placed at the given position and scale. </summary>
@@ -177,9 +177,9 @@ namespace Core.Item
         /// <summary> Merges an item using an optional stacking rule. </summary>
         public bool TryMergeItem(Guid targetInstanceID, Guid sourceInstanceID, Func<ItemData, ItemData, bool> canStackPredicate, out InventoryResult result) => TryMergeItem(targetInstanceID, sourceInstanceID, this, canStackPredicate, out result);
         /// <summary> Merges an item without any rule. </summary>
-        public bool TryMergeItem(Guid targetInstanceID, Guid sourceInstanceID, InventoryEntity sourceInventory,  out InventoryResult result) => TryMergeItem(targetInstanceID, sourceInstanceID, sourceInventory, null, out result);
+        public bool TryMergeItem(Guid targetInstanceID, Guid sourceInstanceID, InventoryController sourceInventory,  out InventoryResult result) => TryMergeItem(targetInstanceID, sourceInstanceID, sourceInventory, null, out result);
         /// <summary> Merges an item using an optional stacking rule. </summary>
-        public bool TryMergeItem(Guid targetInstanceID, Guid sourceInstanceID, InventoryEntity sourceInventory, Func<ItemData, ItemData, bool> canStackPredicate, out InventoryResult result)
+        public bool TryMergeItem(Guid targetInstanceID, Guid sourceInstanceID, InventoryController sourceInventory, Func<ItemData, ItemData, bool> canStackPredicate, out InventoryResult result)
         {
             if (sourceInventory == null)
             {
@@ -203,7 +203,7 @@ namespace Core.Item
         public bool TryGetItemStack(Guid instanceID, out int stack, out InventoryResult result) => thisInventory.TryGetItemStack(instanceID, out stack, out result);
         public bool TrySetItemStack(Guid instanceID, int stack, out InventoryResult result) => thisInventory.TrySetItemStack(instanceID, stack, out result);
         /// <summary> Transfers all items that can fit into the target inventory. </summary>
-        public bool TryTransferItems(InventoryEntity inventory, out InventoryResult result)
+        public bool TryTransferItems(InventoryController inventory, out InventoryResult result)
         {
             if (inventory == null)
             {
@@ -213,7 +213,7 @@ namespace Core.Item
             return thisInventory.TryTransferItems(inventory.thisInventory, out result);
         }
         /// <summary> Transfers one item to the target inventory. </summary>
-        public bool TryTransferItem(Guid instanceID, Vector2Int? position, bool? isRotated, InventoryEntity inventory, out ItemData transfered, out InventoryResult result)
+        public bool TryTransferItem(Guid instanceID, Vector2Int? position, bool? isRotated, InventoryController inventory, out ItemData transfered, out InventoryResult result)
         {
             if (inventory == null)
             {
@@ -248,6 +248,6 @@ namespace Core.Item
         /// <summary> Swaps two items between the same or different inventories. </summary>
         public bool TrySwapItem(Guid instanceIDA, Guid instanceIDB, bool rotationA, out InventoryResult result) => TrySwapItem(instanceIDA, instanceIDB, this, rotationA, out result);
         /// <summary> Swaps two items between the same or different inventories. </summary>
-        public bool TrySwapItem(Guid instanceIDA, Guid instanceIDB, InventoryEntity inventoryB, bool rotationA, out InventoryResult result) => thisInventory.TrySwapItem(instanceIDA, instanceIDB, inventoryB.thisInventory, rotationA, out result);
+        public bool TrySwapItem(Guid instanceIDA, Guid instanceIDB, InventoryController inventoryB, bool rotationA, out InventoryResult result) => thisInventory.TrySwapItem(instanceIDA, instanceIDB, inventoryB.thisInventory, rotationA, out result);
     }
 }

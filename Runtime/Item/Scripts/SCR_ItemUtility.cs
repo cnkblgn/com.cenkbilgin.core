@@ -25,7 +25,7 @@ namespace Core.Item
         private const string MASK = "i_mask";
         private const string ITEMS = "i_items";
 
-        public static void ExportTo(this InventoryEntity obj, Dictionary<string, DataNode> data)
+        public static void ExportTo(this InventoryController obj, Dictionary<string, DataNode> data)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
 
@@ -33,7 +33,7 @@ namespace Core.Item
 
             inventoryData.ExportTo(data);
         }
-        public static void ImportFrom(this InventoryEntity obj, Dictionary<string, DataNode> data)
+        public static void ImportFrom(this InventoryController obj, Dictionary<string, DataNode> data)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
 
