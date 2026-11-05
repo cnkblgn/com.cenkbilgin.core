@@ -17,7 +17,7 @@ namespace Core.Interaction
         [SerializeField] private LayerMask mask = 0;
         [SerializeField, Min(0.1f)] private float distance = 2.5f;
 
-        private IInteractionHandler thisUser = null;
+        private IInteractionHandler thisHandler = null;
         private Interactable currentTarget = null;
         private readonly StackBool canInteract = new();
         private float nextInteractTime;
@@ -31,7 +31,7 @@ namespace Core.Interaction
                 Debug.LogWarning("Interaction origin is missing! assigning default transform to origin!", gameObject);
             }
 
-            thisUser = GetComponent<IInteractionHandler>();
+            thisHandler = GetComponent<IInteractionHandler>();
             nextInteractTime = Time.time + 0.01f;
         }
         private void Update()
@@ -55,7 +55,7 @@ namespace Core.Interaction
         private void SetState(InteractionContext ctx)
         {
             OnStateChanged?.Invoke(ctx);
-            thisUser?.HandleInteractionChanged(in ctx);
+            thisHandler?.HandleInteractionChanged(in ctx);
         }
 
         public bool TryInteract()
