@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace Core.Interaction
@@ -10,8 +9,6 @@ namespace Core.Interaction
     [RequireComponent(typeof(Collider))]
     public sealed class Interactable : MonoBehaviour
     {
-        public event Action<InteractionContext> OnStateChanged = null;
-
         public string Label => label; private string label = STRING_EMPTY;
 
         private Collider thisCollider;
@@ -31,8 +28,6 @@ namespace Core.Interaction
             {
                 thisHandlers[i].HandleStateChanged(ctx);
             }
-
-            OnStateChanged?.Invoke(ctx);
         }
 
         public void EnterFocus(GameObject interactor, out InteractionContext ctx)

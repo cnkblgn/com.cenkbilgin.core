@@ -6,7 +6,7 @@ namespace Core.Scenario
 {
     public sealed class ScenarioContainer
     {
-        public event Action<ScenarioContext> OnChanged;
+        public event Action<ScenarioContext> OnScenarioChanged;
 
         private ScenarioID id;
         private readonly List<IScenarioHandler> handlers;
@@ -78,7 +78,7 @@ namespace Core.Scenario
         {
             ScenarioContext ctx = new(this.id);
             NotifyHandlers(in ctx);
-            OnChanged?.Invoke(ctx);
+            OnScenarioChanged?.Invoke(ctx);
         }
         public ScenarioID GetScenario() => id;
         public bool TrySetScenario<TContext>(ScenarioID id, TContext context)

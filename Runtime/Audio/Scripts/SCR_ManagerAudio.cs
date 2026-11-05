@@ -147,7 +147,7 @@ namespace Core.Audio
             AudioEmitter.OnCreated += OnEmitterCreated;
             AudioEmitter.OnDestroyed += OnEmitterDestroyed;
 
-            ManagerGame.OnGameStateChanged += OnGameStateChanged;
+            ManagerGame.OnStateChanged += OnGameStateChanged;
             ManagerGame.OnBeforeSceneChanged += OnBeforeSceneChanged;
             ManagerGame.OnAfterSceneChanged += OnAfterSceneChanged;
             ManagerGame.OnTimeScaleChanged += OnTimeScaleChanged;
@@ -157,7 +157,7 @@ namespace Core.Audio
             AudioEmitter.OnCreated -= OnEmitterCreated;
             AudioEmitter.OnDestroyed -= OnEmitterDestroyed;
 
-            ManagerGame.OnGameStateChanged -= OnGameStateChanged;
+            ManagerGame.OnStateChanged -= OnGameStateChanged;
             ManagerGame.OnBeforeSceneChanged -= OnBeforeSceneChanged;
             ManagerGame.OnAfterSceneChanged -= OnAfterSceneChanged;
             ManagerGame.OnTimeScaleChanged -= OnTimeScaleChanged;

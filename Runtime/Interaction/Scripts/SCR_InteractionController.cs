@@ -8,7 +8,7 @@ namespace Core.Interaction
     [DisallowMultipleComponent]
     public sealed class InteractionController : MonoBehaviour
     {
-        public event Action<InteractionContext> OnStateChanged = null;
+        public event Action<InteractionContext> OnInteractionChanged = null;
 
         [Header("_")]
         [SerializeField, Required] private Transform origin = null;
@@ -54,7 +54,7 @@ namespace Core.Interaction
 
         private void SetState(InteractionContext ctx)
         {
-            OnStateChanged?.Invoke(ctx);
+            OnInteractionChanged?.Invoke(ctx);
             thisHandler?.HandleInteractionChanged(in ctx);
         }
 

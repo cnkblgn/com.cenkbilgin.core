@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Core.Damage
 {
     [DisallowMultipleComponent]
-    public sealed class DamageableEntity : MonoBehaviour
+    public sealed class DamageableEntity : MonoBehaviour, IDamageableHandler
     {
         public event Action<DamageContext> OnHit;
 
@@ -58,7 +58,7 @@ namespace Core.Damage
 
             health = damageable.Health;
             this.damageable = damageable;
-            this.damageable.OnHit += HandleHit;
+            this.damageable.AddHandler(this);
         }
         private void Unbind()
         {
@@ -67,7 +67,7 @@ namespace Core.Damage
                 return;
             }
 
-            damageable.OnHit -= HandleHit;
+            damageable.RemoveHandler(this);
             damageable = null;
         }
 
@@ -103,7 +103,9 @@ namespace Core.Damage
             EnsureBind();
             damageable.Damage(in data, out ctx);
         }
-        private void HandleHit(DamageContext context) => OnHit?.Invoke(context);
+
+        public float HandleDamaged(in DamageData data, float damage) => damage;
+        public void HandleHit(in DamageContext ctx) => OnHit?.Invoke(ctx);
 
         public DamageContext GetLastContext()
         {

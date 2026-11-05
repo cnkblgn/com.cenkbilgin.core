@@ -13,7 +13,7 @@ namespace Core
     [DisallowMultipleComponent]
     public sealed class ManagerGame : Manager<ManagerGame>
     {
-        public static event Action<GameState> OnGameStateChanged = null;
+        public static event Action<GameState> OnStateChanged = null;
         public static event Action<float> OnCurrentSceneLoading = null;
         public static event Action<string> OnBeforeSceneChanged = null;
         public static event Action<string> OnAfterSceneChanged = null;
@@ -73,7 +73,7 @@ namespace Core
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void OnSubsystemRegistration()
         {
-            OnGameStateChanged = null;
+            OnStateChanged = null;
             OnCurrentSceneLoading = null;
             OnBeforeSceneChanged = null;
             OnAfterSceneChanged = null;
@@ -184,7 +184,7 @@ namespace Core
             if (currentState != gameState || @override)
             {
                 currentState = gameState;
-                OnGameStateChanged?.Invoke(currentState);
+                OnStateChanged?.Invoke(currentState);
 
                 switch (gameState)
                 {

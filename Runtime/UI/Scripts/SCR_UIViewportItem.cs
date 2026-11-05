@@ -62,11 +62,11 @@ namespace Core.UI
 
         private void OnEnable()
         {
-            ManagerGame.OnGameStateChanged += OnGameStateChanged;
+            ManagerGame.OnStateChanged += OnGameStateChanged;
         }
         private void OnDisable()
         {
-            ManagerGame.OnGameStateChanged -= OnGameStateChanged;
+            ManagerGame.OnStateChanged -= OnGameStateChanged;
 
             OnDeinitialized();
         }

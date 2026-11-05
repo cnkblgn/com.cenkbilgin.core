@@ -8,7 +8,7 @@ namespace Core.Quest
 {
     public static class QuestDatabase
     {
-        public static event Action<QuestID> OnQuestProgress;
+        public static event Action<QuestID> OnQuestProgressed;
         public static event Action<QuestID> OnQuestStarted;
         public static event Action<QuestID> OnQuestCompleted;
 
@@ -20,7 +20,7 @@ namespace Core.Quest
 
         internal static void Build(QuestEntry[] entries)
         {
-            OnQuestProgress = null;
+            OnQuestProgressed = null;
             OnQuestStarted = null;
             OnQuestCompleted = null;
             instances = new();
@@ -104,7 +104,7 @@ namespace Core.Quest
         }
         internal static void NotifyProgress(QuestInstance instance)
         {
-            OnQuestProgress?.Invoke(instance.Definition.ID);
+            OnQuestProgressed?.Invoke(instance.Definition.ID);
             TryComplete(instance);
         }
 

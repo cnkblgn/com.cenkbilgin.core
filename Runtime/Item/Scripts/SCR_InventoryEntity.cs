@@ -8,7 +8,7 @@ namespace Core.Item
     [DisallowMultipleComponent]
     public sealed class InventoryEntity : MonoBehaviour, IInventoryHandler
     {
-        public event Action<InventoryContext> OnChanged = null;
+        public event Action<InventoryContext> OnInventoryChanged = null;
 
         [Header("_")]
         [SerializeField] private ItemID[] startingItems = new ItemID[] { };
@@ -48,7 +48,7 @@ namespace Core.Item
 
         public void HandleInventoryChanged(in InventoryContext ctx)
         {
-            OnChanged?.Invoke(ctx);
+            OnInventoryChanged?.Invoke(ctx);
 
             for (int i = 0; i < thisHandlers.Count; i++)
             {

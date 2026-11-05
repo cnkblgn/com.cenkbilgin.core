@@ -6,7 +6,7 @@ namespace Core.Stat
 {
     public sealed class StatContainer
     {
-        public event Action<StatContext> OnChanged;
+        public event Action<StatContext> OnStatChanged;
 
         private StatState state;
         private readonly Dictionary<StatID, float> stats;
@@ -105,7 +105,7 @@ namespace Core.Stat
 
             StatContext ctx = new(this.state, modifier);
             NotifyHandlers(in ctx);
-            OnChanged?.Invoke(ctx);
+            OnStatChanged?.Invoke(ctx);
         }
         private void SetState(StatState state) => SetState(state, StatModifier.Empty);
 

@@ -7,7 +7,7 @@ namespace Core
     [Serializable]
     public sealed class ResourceContainer
     {
-        public event Action<ResourceContext> OnChanged;
+        public event Action<ResourceContext> OnResourceChanged;
 
         [Header("_")]
         [SerializeField, Min(0)] private float current;
@@ -87,7 +87,7 @@ namespace Core
         {
             ResourceContext ctx = new(state, current, maximum);
             NotifyHandlers(in ctx);
-            OnChanged?.Invoke(ctx);
+            OnResourceChanged?.Invoke(ctx);
         }
 
         public bool IsDepleted() => isDepleted;

@@ -8,7 +8,7 @@ namespace Core.Trait
 
     public sealed class TraitContainer
     {
-        public event Action<TraitContext> OnChanged = null;
+        public event Action<TraitContext> OnTraitChanged = null;
 
         private readonly SwapBackArray<TraitInstance> traits;
         private readonly List<ITraitHandler> handlers;
@@ -95,7 +95,7 @@ namespace Core.Trait
         {
             TraitContext ctx = new(state, instance);
             NotifyHandlers(in ctx);
-            OnChanged?.Invoke(ctx);
+            OnTraitChanged?.Invoke(ctx);
         }
 
         public IReadOnlyList<TraitInstance> GetTraits() => traits;

@@ -8,7 +8,7 @@ namespace Core.Effect
 
     public sealed class EffectContainer
     {
-        public event Action<EffectContext> OnChanged;
+        public event Action<EffectContext> OnEffectChanged;
 
         private readonly List<IEffectHandler> handlers;
         private readonly SwapBackArray<EffectInstance> effects;
@@ -98,7 +98,7 @@ namespace Core.Effect
         {
             EffectContext ctx = new(state, instance);
             NotifyHandlers(in ctx);
-            OnChanged?.Invoke(ctx);
+            OnEffectChanged?.Invoke(ctx);
         }
 
         public bool HasEffect(EffectID id)

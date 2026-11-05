@@ -6,7 +6,7 @@ namespace Core.Faction
 {
     public sealed class FactionContainer
     {
-        public event Action<FactionContext> OnChanged;
+        public event Action<FactionContext> OnFactionChanged;
 
         private FactionID id;
         private readonly List<IFactionHandler> handlers;
@@ -88,7 +88,7 @@ namespace Core.Faction
         {
             FactionContext ctx = new(id, relations);
             NotifyHandlers(in ctx);
-            OnChanged?.Invoke(ctx);
+            OnFactionChanged?.Invoke(ctx);
         }
 
         public FactionID GetFaction() => id;

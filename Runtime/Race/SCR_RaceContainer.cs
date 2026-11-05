@@ -6,7 +6,7 @@ namespace Core.Race
 {
     public sealed class RaceContainer
     {
-        public event Action<RaceContext> OnChanged;
+        public event Action<RaceContext> OnRaceChanged;
 
         private RaceID id;
         private readonly List<IRaceHandler> handlers;
@@ -77,7 +77,7 @@ namespace Core.Race
         {
             RaceContext ctx = new(this.id);
             NotifyHandlers(in ctx);
-            OnChanged?.Invoke(ctx);
+            OnRaceChanged?.Invoke(ctx);
         }
 
         public RaceID GetRace() => id;       

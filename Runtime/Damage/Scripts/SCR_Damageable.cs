@@ -5,8 +5,6 @@ namespace Core.Damage
 {
     public sealed class Damageable
     {
-        public event Action<DamageContext> OnHit;
-
         public readonly ResourceContainer Health;
         private readonly List<DamageProtection> protections;
         private readonly List<IDamageableHandler> handlers;
@@ -102,8 +100,6 @@ namespace Core.Damage
             {
                 handlers[i]?.HandleHit(in lastContext);
             }
-
-            OnHit?.Invoke(lastContext);
         }
         private float ResolveDamage(in DamageData data)
         {
