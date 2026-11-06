@@ -4,7 +4,7 @@ namespace Core.Race
     {
         public readonly RaceID ID;
         public readonly RaceMask Mask;
-        public readonly RaceVisual Visual;
+        public readonly RaceComponent Component;
         internal readonly Compatibility[] Compatibilities;
         internal readonly RaceAction[] Actions;
 
@@ -12,11 +12,11 @@ namespace Core.Race
         public readonly string NameID;
         public readonly string DescID;
 
-        internal RaceDefinition(RaceID id, RaceMask mask, RaceVisual visual, Compatibility[] compatibilities, RaceAction[] actions)
+        internal RaceDefinition(RaceID id, RaceMask mask, RaceComponent component, Compatibility[] compatibilities, RaceAction[] actions)
         {
             ID = id;
             Mask = mask;
-            Visual = visual != null ? visual : RaceVisual.NONE;
+            Component = component != null ? component : RaceComponent.NONE;
             Actions = actions ?? RaceAction.NONE;
             Compatibilities = compatibilities ?? Compatibility.NONE;
 
@@ -24,6 +24,6 @@ namespace Core.Race
             NameID = $"race.{ID.Key}Name";
             DescID = $"race.{ID.Key}Desc";
         }
-        internal RaceDefinition(RaceEntry entry) : this(entry.ID, entry.Tags.CreateMask(), entry.Visual, entry.Compatibilities, entry.Actions) { }
+        internal RaceDefinition(RaceEntry entry) : this(entry.ID, entry.Tags.CreateMask(), entry.Component, entry.Compatibilities, entry.Actions) { }
     }
 }
