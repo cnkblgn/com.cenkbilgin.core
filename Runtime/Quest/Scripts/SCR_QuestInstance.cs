@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 using Core.Event;
 
 namespace Core.Quest
@@ -121,6 +122,8 @@ namespace Core.Quest
                 int previous = Progress[i];
 
                 Progress[i] = Math.Min(previous + context.Amount, requirement.Amount);
+
+                Debug.Log("IsMatch previous Progress: " + previous + " << context.Amount: " + context.Amount + " << requirement.Amount: " + requirement.Amount);
 
                 if (previous != Progress[i])
                 {

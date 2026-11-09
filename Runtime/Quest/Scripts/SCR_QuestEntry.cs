@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Core.Quest
 {
@@ -42,6 +43,14 @@ namespace Core.Quest
             IconID = $"Quest{ID.Key}";
             NameID = $"quest.{ID.Key}Name";
             DescID = $"quest.{ID.Key}Desc";
+
+            if (Requirements != null)
+            {
+                for (int i = 0; i < Requirements.Length; i++)
+                {
+                    Requirements[i].Validate();
+                }
+            }
         }
 #endif
     }

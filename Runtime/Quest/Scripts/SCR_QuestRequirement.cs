@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 using Core.Actors;
 using Core.Event;
 
@@ -9,6 +10,7 @@ namespace Core.Quest
     {
         public static readonly QuestRequirement[] NONE = new QuestRequirement[0];
 
+        [HideInInspector] public string Name;
         public EventID Event;
         public ActorID Source;
         public ActorTag[] Tags;
@@ -16,6 +18,7 @@ namespace Core.Quest
 
         public QuestRequirement(EventID @event, ActorID source, ActorTag[] tags, byte amount)
         {
+            Name = "";
             Event = @event;
             Tags = tags;
             Source = source;
@@ -25,24 +28,40 @@ namespace Core.Quest
         public QuestRequirement(EventID @event, ActorID source, byte amount) : this(@event, source, null, amount) { }
         public QuestRequirement(EventID @event, ActorID source) : this(@event, source, null, 1) { }
 
-        public readonly bool IsMatch(EventContext context)
+#if UNITY_EDITOR
+        internal void Validate()
         {
-            if (Event != context.ID)
+            Name = $"Event: {Event.Key} | Source: {Source.Key} | Tags: {Tags.CreateMask()} | Amount: {Amount}";
+        }
+#endif
+
+        public readonly bool IsMatch(EventContext ctx)
+        {
+            string req = $"Event: {Event} | Source: {Source} | Tags: {Tags.CreateMask()} | Amount: {Amount}";
+            string @event = $"Event: {ctx.ID.Key} | Source: {ctx.Source} | Tags: {ctx.Tags} | Amount: {ctx.Amount}";
+
+            UnityEngine.Debug.Log($"IsMatch? Req: {req} | Evnt: {@event}");
+
+            if (Event != ctx.ID)
             {
                 return false;
             }
 
-            if (Source.IsValid && Source.Index != context.Source)
+            if (Source.IsValid && Source.Index != ctx.Source)
             {
                 return false;
             }
 
             ActorMask mask = Tags.CreateMask();
 
-            if (!context.Tags.HasAll(mask.Value))
+            Debug.Log("IsMatch? Mask fail test");
+
+            if (!ctx.Tags.HasAll(mask.Value))
             {
                 return false;
             }
+
+            Debug.Log("IsMatched!! successfull");
 
             return true;
         }
