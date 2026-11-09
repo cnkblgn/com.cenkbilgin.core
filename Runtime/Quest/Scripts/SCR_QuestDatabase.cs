@@ -79,6 +79,19 @@ namespace Core.Quest
             TryComplete(instance);
             return true;
         }
+        public static void Complete(QuestID id) 
+        {
+            QuestInstance instance = GetInstance(id);
+
+            if (instance == null)
+            {
+                return;
+            }
+
+            instance.Complete();
+
+            HandleQuestCompleted(instance.Definition.ID);
+        }
         public static bool TryComplete(QuestID id)
         {
             QuestInstance instance = GetInstance(id);
