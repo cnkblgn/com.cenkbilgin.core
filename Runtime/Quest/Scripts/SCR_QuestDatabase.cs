@@ -92,11 +92,8 @@ namespace Core.Quest
         }
         private static bool TryComplete(QuestInstance quest)
         {
-            Debug.Log("TRY COMPLETE! quest.IsCompleted: " + quest.IsCompleted + " << quest.CanComplete(): " + !quest.CanComplete());
-
             if (quest.IsCompleted || !quest.CanComplete())
             {
-                Debug.LogError("FAIL!");
                 return false;
             }
 

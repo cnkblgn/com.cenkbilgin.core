@@ -31,17 +31,12 @@ namespace Core.Quest
 #if UNITY_EDITOR
         internal void Validate()
         {
-            Name = $"Event: {Event.Key} | Source: {Source.Key} | Tags: {Tags.CreateMask()} | Amount: {Amount}";
+            Name = $"Event: {Event.Key} | Source: {Source.Key} | Tags: {Tags.CreateMask().Value} | Amount: {Amount}";
         }
 #endif
 
         public readonly bool IsMatch(EventContext ctx)
         {
-            string req = $"Event: {Event} | Source: {Source} | Tags: {Tags.CreateMask()} | Amount: {Amount}";
-            string @event = $"Event: {ctx.ID.Key} | Source: {ctx.Source} | Tags: {ctx.Tags} | Amount: {ctx.Amount}";
-
-            UnityEngine.Debug.Log($"IsMatch? Req: {req} | Evnt: {@event}");
-
             if (Event != ctx.ID)
             {
                 return false;
@@ -54,14 +49,10 @@ namespace Core.Quest
 
             ActorMask mask = Tags.CreateMask();
 
-            Debug.Log("IsMatch? Mask fail test");
-
             if (!ctx.Tags.HasAll(mask.Value))
             {
                 return false;
             }
-
-            Debug.Log("IsMatched!! successfull");
 
             return true;
         }
