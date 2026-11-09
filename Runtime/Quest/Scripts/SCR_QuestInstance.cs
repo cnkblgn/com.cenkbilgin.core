@@ -123,7 +123,7 @@ namespace Core.Quest
 
                 Progress[i] = Math.Min(previous + context.Amount, requirement.Amount);
 
-                Debug.Log("IsMatch previous Progress: " + previous + " << context.Amount: " + context.Amount + " << requirement.Amount: " + requirement.Amount);
+                Debug.Log("IsMatch previous Progress: " + previous + " << context.Amount: " + context.Amount + " << requirement.Amount: " + requirement.Amount + " << Progress[i]: " + Progress[i] + " << previous != Progress[i]" +  (previous != Progress[i]));
 
                 if (previous != Progress[i])
                 {
