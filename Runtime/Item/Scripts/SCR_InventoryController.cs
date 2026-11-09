@@ -29,7 +29,7 @@ namespace Core.Item
         private void Awake()
         {
             GetComponents(thisHandlers);
-            Bind(new(new(), width, height, weight, ~blacklistedItems.CreateMask(), thisHandlers));
+            Bind(new(new(), width, height, weight, ~blacklistedItems.CreateMask()));
 
             foreach (ItemID item in startingItems)
             {
@@ -39,22 +39,7 @@ namespace Core.Item
         private void Start() => HandleInventoryChanged(new(InventoryState.INITIALIZED, InventoryResult.SUCCESS, null));
         private void OnDestroy() => Unbind();
 
-        public void HandleInventoryChanged(in InventoryContext ctx)
-        {
-            OnInventoryChanged?.Invoke(ctx);
-
-            for (int i = 0; i < thisHandlers.Count; i++)
-            {
-                IInventoryHandler handler = thisHandlers[i];
-
-                if (ReferenceEquals(handler, this))
-                {
-                    continue;
-                }
-
-                handler?.HandleInventoryChanged(in ctx);
-            }
-        }
+        public void HandleInventoryChanged(in InventoryContext ctx) => OnInventoryChanged?.Invoke(ctx);
 
         public static InventoryController Create(int width, int height, int weight)
         {

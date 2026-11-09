@@ -120,9 +120,8 @@ namespace Core.Quest
                 }
 
                 int previous = Progress[i];
-                int progress = previous + context.Amount;
 
-                Progress[i] = requirement.Amount > 0 ? Math.Min(progress, requirement.Amount) : progress;
+                Progress[i] = Math.Min(previous + context.Amount, requirement.Amount);
 
                 if (previous != Progress[i])
                 {

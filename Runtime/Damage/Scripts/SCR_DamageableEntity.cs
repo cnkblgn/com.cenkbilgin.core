@@ -29,9 +29,9 @@ namespace Core.Damage
         {
             if (origin == null) throw new NullReferenceException(nameof(origin));
 
-            Bind(new Damageable(health, protections, ignoredTags.CreateMask()));
-
             IDamageableHandler[] handlers = GetComponents<IDamageableHandler>();
+
+            damageable = new Damageable(health, protections, ignoredTags.CreateMask());
 
             for (int i = 0; i < handlers.Length; i++)
             {
@@ -63,9 +63,6 @@ namespace Core.Damage
             damageable.RemoveHandler(this);
             damageable = null;
         }
-
-        public void AddHandler(IDamageableHandler handler) => damageable.AddHandler(handler);
-        public void RemoveHandler(IDamageableHandler handler) => damageable.RemoveHandler(handler);
 
         public IReadOnlyList<DamageProtection> GetProtections() => damageable.GetProtections();
         public void AddProtection(DamageProtection protection) => damageable.AddProtection(protection);
