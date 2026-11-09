@@ -14,7 +14,7 @@ namespace Core.Quest
         public EventID Event;
         public ActorID Source;
         public ActorTag[] Tags;
-        public byte Amount;
+        [Min(1)] public byte Amount;
 
         public QuestRequirement(EventID @event, ActorID source, ActorTag[] tags, byte amount)
         {
