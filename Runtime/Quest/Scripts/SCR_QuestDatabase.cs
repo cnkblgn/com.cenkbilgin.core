@@ -92,17 +92,10 @@ namespace Core.Quest
         }
         private static bool TryComplete(QuestInstance quest)
         {
-            Debug.Log(
-     $"[QUEST COMPLETE DEBUG] ID: {quest.Definition.ID.Key} | " +
-     $"IsCompleted: {quest.IsCompleted} | CanComplete: {quest.CanComplete()}"
- );
-
             if (quest.IsCompleted || !quest.CanComplete())
             {
                 return false;
             }
-
-            Debug.Log($"[QUEST COMPLETE DEBUG] Completing: {quest.Definition.ID.Key}");
 
             quest.Complete();
 
