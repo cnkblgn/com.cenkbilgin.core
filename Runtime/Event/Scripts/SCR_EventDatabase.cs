@@ -13,6 +13,7 @@ namespace Core.Event
         private static List<Action<EventContext>>[] listeners = Array.Empty<List<Action<EventContext>>>();
         private static int invokeDepth;
         private static bool isDebugEnabled;
+        private static bool isDepthProtectionEnabled = true;
 
         internal static void Build(string[] _ids)
         {
@@ -46,7 +47,7 @@ namespace Core.Event
         }
         public static void Clear()
         {
-            if (invokeDepth > 0)
+            if (isDepthProtectionEnabled && invokeDepth > 0)
             {
                 Debug.LogError("Event database clear failed! Cannot clear while invoking!");
                 return;
@@ -66,7 +67,7 @@ namespace Core.Event
         }
         public static void Subscribe(EventID id, Action<EventContext> callback)
         {
-            if (invokeDepth > 0)
+            if (isDepthProtectionEnabled && invokeDepth > 0)
             {
                 Debug.LogError($"Event database subscribe failed! Cannot subscribe to event [{id}] while invoking.");
                 return;
@@ -94,9 +95,9 @@ namespace Core.Event
         }
         public static void Unsubscribe(EventID id, Action<EventContext> callback)
         {
-            if (invokeDepth > 0)
+            if (isDepthProtectionEnabled && invokeDepth > 0)
             {
-                Debug.LogError($"Event database unsubscribe failed! Cannot unsubscribe fromt event [{id}] while invoking.");
+                Debug.LogError($"Event database unsubscribe failed! Cannot unsubscribe from event [{id}] while invoking.");
                 return;
             }
 
@@ -165,6 +166,9 @@ namespace Core.Event
                 invokeDepth--;
             }
         }
+
+        public static void EnableDepthProtection() => isDepthProtectionEnabled = true;
+        public static void DisableDepthProtection() => isDepthProtectionEnabled = false;
 
         public static bool EnableDebug() => isDebugEnabled = true;
         public static bool DisableDebug() => isDebugEnabled = false;
