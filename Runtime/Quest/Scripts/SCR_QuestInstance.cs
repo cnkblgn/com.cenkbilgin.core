@@ -122,11 +122,32 @@ namespace Core.Quest
                 int previous = Progress[i];
                 int progress = previous + context.Amount;
 
+                Debug.Log(
+                    $"[QUEST DEBUG] Index: {i} | " +
+                    $"Previous: {previous} | " +
+                    $"Context Amount: {context.Amount} | " +
+                    $"Requirement Amount: {requirement.Amount} | " +
+                    $"Calculated: {progress}"
+                );
+
                 Progress[i] = requirement.Amount > 0 ? Math.Min(progress, requirement.Amount) : progress;
+
+
+                Debug.Log(
+                    $"[QUEST DEBUG] After Assignment | " +
+                    $"Progress[{i}]: {Progress[i]} | " +
+                    $"Changed: {previous != Progress[i]}"
+                );
+
 
                 if (previous != Progress[i])
                 {
+                    Debug.Log("[QUEST DEBUG] Progress changed -> Calling NotifyProgress");
                     QuestDatabase.NotifyProgress(this);
+                }
+                else
+                {
+                    Debug.LogWarning("[QUEST DEBUG] Progress DID NOT change!");
                 }
             }
         }
