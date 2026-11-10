@@ -6,6 +6,7 @@ using UnityEngine.UI;
 namespace Core.UI
 {
     [DisallowMultipleComponent]
+    [RequireComponent(typeof(CanvasGroup))]
     public abstract class UIViewportItem : MonoBehaviour
     {
         internal string ID => id;
@@ -21,7 +22,7 @@ namespace Core.UI
         internal float Size => canvasSize;
         internal float Priority => priority;
         protected Camera Camera => viewportCanvases[0].Camera;
-        internal Canvas Canvas => viewportCanvases[0].Canvas;
+        internal CanvasGroup Canvas => thisCanvas;
         internal RectTransform Transform => viewportCanvases[0].Transform;
         internal RenderTexture Texture => renderTexture;
         internal ViewportMesh Mesh => viewportMesh;
@@ -31,7 +32,6 @@ namespace Core.UI
         [SerializeField] private bool debug = false;
 
         [Header("_")]
-        [SerializeField] private bool useLayerSystem = true;
         [SerializeField, Required] private string activeLayer = "UIViewport";
         [SerializeField, Required] private string hiddenLayer = "Hidden";
 
@@ -45,6 +45,7 @@ namespace Core.UI
         [SerializeField] private bool receiveInput = false;
         [SerializeField] private bool renderOnce = false;
 
+        private CanvasGroup thisCanvas;
         private UIViewportCanvas[] viewportCanvases;
         private ViewportMesh viewportMesh;
         private EventSystem eventSystem;
@@ -360,15 +361,8 @@ namespace Core.UI
                 );
             }
 
-            if (useLayerSystem)
-            {
-                gameObject.SetLayer(viewportHiddenLayer);
-                Canvas.Show();
-            }
-            else
-            {
-                Canvas.Hide();
-            }
+            gameObject.SetLayer(viewportHiddenLayer);
+            Canvas.Hide();
 
             eventSystem = EventSystem.current;
             eventData = new(eventSystem);
@@ -471,19 +465,8 @@ namespace Core.UI
 
             hasCanvasShown = true;
 
-            if (useLayerSystem)
-            {
-                if (!Canvas.enabled)
-                {
-                    Canvas.Show();
-                }
-
-                gameObject.SetLayer(viewportActiveLayer);
-            }
-            else
-            {
-                Canvas.Show();
-            }
+            Canvas.Show();
+            gameObject.SetLayer(viewportActiveLayer);
         }
         private void HideCanvas()
         {
@@ -494,14 +477,8 @@ namespace Core.UI
 
             hasCanvasShown = false;
 
-            if (useLayerSystem)
-            {
-                gameObject.SetLayer(viewportHiddenLayer);
-            }
-            else
-            {
-                Canvas.Hide();
-            }
+            gameObject.SetLayer(viewportHiddenLayer);
+            Canvas.Hide();
         }
 
         internal void BeginPass() => ShowCanvas();
