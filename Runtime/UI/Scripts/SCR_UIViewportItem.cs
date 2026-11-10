@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -31,6 +32,11 @@ namespace Core.UI
         [SerializeField] private bool debug = false;
 
         [Header("_")]
+        [SerializeField] private bool useLayerSystem = true;
+        [SerializeField, Required] private string activeLayer = "UIViewport";
+        [SerializeField, Required] private string hiddenLayer = "Hidden";
+
+        [Header("_")]
         [SerializeField, Required] private string id = string.Empty;
         [SerializeField, Required] private RenderTexture renderTexture = null;
         [SerializeField, Min(1)] private float canvasSize = 165;
@@ -59,6 +65,8 @@ namespace Core.UI
         private bool hasCanvasShown = false;
         private bool hasRenderedOnce = false;
         private bool hasTickedOnce = false;
+        private int viewportActiveLayer;
+        private int viewportHiddenLayer;
 
         private void OnEnable()
         {
@@ -332,6 +340,9 @@ namespace Core.UI
                 return;
             }
 
+            viewportActiveLayer = LayerMask.NameToLayer(activeLayer);
+            viewportHiddenLayer = LayerMask.NameToLayer(hiddenLayer);
+
             isInitialized = true;
             isRendering = false;
             isActive = false;
@@ -350,7 +361,15 @@ namespace Core.UI
                 );
             }
 
-            Canvas.Hide();
+            if (useLayerSystem)
+            {
+                gameObject.SetLayer(viewportHiddenLayer);
+                Canvas.Show();
+            }
+            else
+            {
+                Canvas.Hide();
+            }
 
             eventSystem = EventSystem.current;
             eventData = new(eventSystem);
@@ -452,7 +471,20 @@ namespace Core.UI
             }
 
             hasCanvasShown = true;
-            Canvas.Show();
+
+            if (useLayerSystem)
+            {
+                if (!Canvas.enabled)
+                {
+                    Canvas.Show();
+                }
+
+                gameObject.SetLayer(viewportActiveLayer);
+            }
+            else
+            {
+                Canvas.Show();
+            }
         }
         private void HideCanvas()
         {
@@ -462,7 +494,15 @@ namespace Core.UI
             }
 
             hasCanvasShown = false;
-            Canvas.Hide();
+
+            if (useLayerSystem)
+            {
+                gameObject.SetLayer(viewportHiddenLayer);
+            }
+            else
+            {
+                Canvas.Hide();
+            }
         }
 
         internal void BeginPass() => ShowCanvas();
