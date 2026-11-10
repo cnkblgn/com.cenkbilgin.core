@@ -363,6 +363,8 @@ namespace Core.UI
 
             //gameObject.SetLayer(viewportHiddenLayer);
             Canvas.Hide();
+            Debug.Log("Canvas Hide: " + Canvas.alpha, Canvas);
+
 
             eventSystem = EventSystem.current;
             eventData = new(eventSystem);
@@ -466,6 +468,7 @@ namespace Core.UI
             hasCanvasShown = true;
 
             Canvas.Show();
+            Debug.Log("Canvas Show: " + Canvas.alpha, Canvas);
             //gameObject.SetLayer(viewportActiveLayer);
         }
         private void HideCanvas()
@@ -479,6 +482,7 @@ namespace Core.UI
 
             //gameObject.SetLayer(viewportHiddenLayer);
             Canvas.Hide();
+            Debug.Log("Canvas Hide: " + Canvas.alpha, Canvas);
         }
 
         internal void BeginPass() => ShowCanvas();
