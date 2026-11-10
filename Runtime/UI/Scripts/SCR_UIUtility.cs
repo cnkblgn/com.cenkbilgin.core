@@ -212,11 +212,21 @@ namespace Core.UI
                 return;
             }
 
+            if (canvas == null)
+            {
+                return;
+            }
+
             canvas.enabled = false;
         }
         public static void Show(this Canvas canvas)
         {
             if (canvas.enabled)
+            {
+                return;
+            }
+
+            if (canvas == null)
             {
                 return;
             }
