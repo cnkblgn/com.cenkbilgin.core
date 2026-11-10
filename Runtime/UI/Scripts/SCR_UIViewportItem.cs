@@ -372,9 +372,6 @@ namespace Core.UI
             Canvas.interactable = false;
             Canvas.blocksRaycasts = false;
 
-            Debug.Log("Canvas Hide: " + Canvas.alpha, Canvas);
-
-
             eventSystem = EventSystem.current;
             eventData = new(eventSystem);
 
@@ -488,9 +485,6 @@ namespace Core.UI
                 Canvas.interactable = true;
                 Canvas.blocksRaycasts = true;
             }
-
-            //Debug.Log("Canvas Show: " + Canvas.alpha, Canvas);
-            //gameObject.SetLayer(viewportActiveLayer);
         }
         private void HideCanvas()
         {
@@ -513,11 +507,6 @@ namespace Core.UI
                 Canvas.interactable = false;
                 Canvas.blocksRaycasts = false;
             }
-
-            //gameObject.SetLayer(viewportHiddenLayer);
-            Canvas.Hide();
-
-            //Debug.Log("Canvas Hide: " + Canvas.alpha, Canvas);
         }
 
         internal void BeginPass() => ShowCanvas();
