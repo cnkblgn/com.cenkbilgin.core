@@ -361,7 +361,7 @@ namespace Core.UI
                 );
             }
 
-            gameObject.SetLayer(viewportHiddenLayer);
+            //gameObject.SetLayer(viewportHiddenLayer);
             Canvas.Hide();
 
             eventSystem = EventSystem.current;
@@ -466,7 +466,7 @@ namespace Core.UI
             hasCanvasShown = true;
 
             Canvas.Show();
-            gameObject.SetLayer(viewportActiveLayer);
+            //gameObject.SetLayer(viewportActiveLayer);
         }
         private void HideCanvas()
         {
@@ -477,7 +477,7 @@ namespace Core.UI
 
             hasCanvasShown = false;
 
-            gameObject.SetLayer(viewportHiddenLayer);
+            //gameObject.SetLayer(viewportHiddenLayer);
             Canvas.Hide();
         }
 
