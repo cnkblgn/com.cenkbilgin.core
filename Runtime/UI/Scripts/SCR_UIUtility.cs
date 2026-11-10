@@ -207,12 +207,12 @@ namespace Core.UI
         }
         public static void Hide(this Canvas canvas)
         {
-            if (!canvas.enabled)
+            if (canvas == null)
             {
                 return;
             }
 
-            if (canvas == null)
+            if (!canvas.enabled)
             {
                 return;
             }
@@ -221,12 +221,12 @@ namespace Core.UI
         }
         public static void Show(this Canvas canvas)
         {
-            if (canvas.enabled)
+            if (canvas == null)
             {
                 return;
             }
 
-            if (canvas == null)
+            if (canvas.enabled)
             {
                 return;
             }
