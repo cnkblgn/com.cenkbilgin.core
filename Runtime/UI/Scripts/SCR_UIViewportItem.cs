@@ -22,7 +22,7 @@ namespace Core.UI
         internal float Size => canvasSize;
         internal float Priority => priority;
         protected Camera Camera => viewportCanvases[0].Camera;
-        internal CanvasGroup Canvas => thisCanvas;
+        internal Canvas Canvas => viewportCanvases[0].Canvas;
         internal RectTransform Transform => viewportCanvases[0].Transform;
         internal RenderTexture Texture => renderTexture;
         internal ViewportMesh Mesh => viewportMesh;
@@ -378,7 +378,7 @@ namespace Core.UI
 
             isInitialized = false;
             OnDeinitialized();
-        }
+        } 
 
         internal void ShowViewport(ViewportMesh mesh)
         {
