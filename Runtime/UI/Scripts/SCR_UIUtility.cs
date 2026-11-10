@@ -157,22 +157,6 @@ namespace Core.UI
             rectTransform.offsetMax = offsetMax;
         }
 
-        public static void Hide(this CanvasGroup canvasGroup)
-        {
-            if (canvasGroup == null)
-            {
-                return;
-            }
-
-            if (canvasGroup.alpha == 0 && !canvasGroup.interactable && !canvasGroup.blocksRaycasts)
-            {
-                return;
-            }
-
-            canvasGroup.alpha = 0;
-            canvasGroup.interactable = false;
-            canvasGroup.blocksRaycasts = false;
-        }
         public static void Show(this CanvasGroup canvasGroup)
         {
             if (canvasGroup == null)
@@ -204,6 +188,22 @@ namespace Core.UI
             canvasGroup.alpha = 1;
             canvasGroup.interactable = isInteractable;
             canvasGroup.blocksRaycasts = isBlockRaycast;
+        }
+        public static void Hide(this CanvasGroup canvasGroup)
+        {
+            if (canvasGroup == null)
+            {
+                return;
+            } 
+
+            if (canvasGroup.alpha == 0 && !canvasGroup.interactable && !canvasGroup.blocksRaycasts)
+            {
+                return;
+            }
+
+            canvasGroup.alpha = 0;
+            canvasGroup.interactable = false;
+            canvasGroup.blocksRaycasts = false;
         }
         public static void Hide(this Canvas canvas)
         {
