@@ -478,8 +478,14 @@ namespace Core.UI
                 thisCanvas = GetComponent<CanvasGroup>();
             }
 
-            Canvas.Show();
-            Debug.Log("Canvas Show: " + Canvas.alpha, Canvas);
+            Canvas.alpha = 1;
+
+            if (receiveInput)
+            {
+                Canvas.interactable = true;
+            }
+
+            //Debug.Log("Canvas Show: " + Canvas.alpha, Canvas);
             //gameObject.SetLayer(viewportActiveLayer);
         }
         private void HideCanvas()
@@ -496,9 +502,17 @@ namespace Core.UI
                 thisCanvas = GetComponent<CanvasGroup>();
             }
 
+            Canvas.alpha = 0;
+
+            if (receiveInput)
+            {
+                Canvas.interactable = false;
+            }
+
             //gameObject.SetLayer(viewportHiddenLayer);
             Canvas.Hide();
-            Debug.Log("Canvas Hide: " + Canvas.alpha, Canvas);
+
+            //Debug.Log("Canvas Hide: " + Canvas.alpha, Canvas);
         }
 
         internal void BeginPass() => ShowCanvas();
