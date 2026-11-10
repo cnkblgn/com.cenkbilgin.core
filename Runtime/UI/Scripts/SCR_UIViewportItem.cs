@@ -362,6 +362,12 @@ namespace Core.UI
             }
 
             //gameObject.SetLayer(viewportHiddenLayer);
+
+            if (thisCanvas == null)
+            {
+                thisCanvas = GetComponent<CanvasGroup>();
+            }
+
             Canvas.Hide();
             Debug.Log("Canvas Hide: " + Canvas.alpha, Canvas);
 
@@ -467,6 +473,11 @@ namespace Core.UI
 
             hasCanvasShown = true;
 
+            if (thisCanvas == null)
+            {
+                thisCanvas = GetComponent<CanvasGroup>();
+            }
+
             Canvas.Show();
             Debug.Log("Canvas Show: " + Canvas.alpha, Canvas);
             //gameObject.SetLayer(viewportActiveLayer);
@@ -479,6 +490,11 @@ namespace Core.UI
             }
 
             hasCanvasShown = false;
+
+            if (thisCanvas == null)
+            {
+                thisCanvas = GetComponent<CanvasGroup>();
+            }
 
             //gameObject.SetLayer(viewportHiddenLayer);
             Canvas.Hide();
