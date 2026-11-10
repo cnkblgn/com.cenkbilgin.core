@@ -368,7 +368,10 @@ namespace Core.UI
                 thisCanvas = GetComponent<CanvasGroup>();
             }
 
-            Canvas.Hide();
+            Canvas.alpha = 0;
+            Canvas.interactable = false;
+            Canvas.blocksRaycasts = false;
+
             Debug.Log("Canvas Hide: " + Canvas.alpha, Canvas);
 
 
@@ -483,6 +486,7 @@ namespace Core.UI
             if (receiveInput)
             {
                 Canvas.interactable = true;
+                Canvas.blocksRaycasts = true;
             }
 
             //Debug.Log("Canvas Show: " + Canvas.alpha, Canvas);
@@ -507,6 +511,7 @@ namespace Core.UI
             if (receiveInput)
             {
                 Canvas.interactable = false;
+                Canvas.blocksRaycasts = false;
             }
 
             //gameObject.SetLayer(viewportHiddenLayer);
