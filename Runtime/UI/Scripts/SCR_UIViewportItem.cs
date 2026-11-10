@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics.Tracing;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -7,6 +6,7 @@ using UnityEngine.UI;
 namespace Core.UI
 {
     [DisallowMultipleComponent]
+    [RequireComponent(typeof(CanvasGroup))]
     public abstract class UIViewportItem : MonoBehaviour
     {
         internal string ID => id;
@@ -46,13 +46,14 @@ namespace Core.UI
         [SerializeField] private bool receiveInput = false;
         [SerializeField] private bool renderOnce = false;
 
-        private UIViewportCanvas[] viewportCanvases = null;
-        private ViewportMesh viewportMesh = null;
-        private EventSystem eventSystem = null;
-        private PointerEventData eventData = null;
-        private GameObject currentPressedObject = null;
-        private GameObject currentHoveredObject = null;
-        private GameObject currentDraggedObject = null;
+        private CanvasGroup canvasGroup;
+        private UIViewportCanvas[] viewportCanvases;
+        private ViewportMesh viewportMesh;
+        private EventSystem eventSystem;
+        private PointerEventData eventData;
+        private GameObject currentPressedObject;
+        private GameObject currentHoveredObject;
+        private GameObject currentDraggedObject;
         private readonly List<RaycastResult> hitResults = new(16);
         private Vector2 pointerPosition = Vector2.zero;
         private Vector2 lastPixelPosition = Vector2.zero;
@@ -365,6 +366,8 @@ namespace Core.UI
             {
                 gameObject.SetLayer(viewportHiddenLayer);
                 Canvas.Show();
+
+                ShowCanvasGroup();
             }
             else
             {
@@ -463,6 +466,24 @@ namespace Core.UI
             }
         }
 
+        private void ShowCanvasGroup()
+        {
+            if (canvasGroup == null)
+            {
+                canvasGroup = GetComponent<CanvasGroup>();
+            }
+
+            canvasGroup.alpha = 1;
+        }
+        private void HideCanvasGroup()
+        {
+            if (canvasGroup == null)
+            {
+                canvasGroup = GetComponent<CanvasGroup>();
+            }
+
+            canvasGroup.alpha = 0;
+        }
         private void ShowCanvas()
         {
             if (hasCanvasShown)
@@ -479,6 +500,8 @@ namespace Core.UI
                     Canvas.Show();
                 }
 
+
+                ShowCanvasGroup();
                 gameObject.SetLayer(viewportActiveLayer);
             }
             else
@@ -497,6 +520,7 @@ namespace Core.UI
 
             if (useLayerSystem)
             {
+                HideCanvasGroup();
                 gameObject.SetLayer(viewportHiddenLayer);
             }
             else
