@@ -32,10 +32,6 @@ namespace Core.UI
         [SerializeField] private bool debug = false;
 
         [Header("_")]
-        [SerializeField, Required] private string activeLayer = "UIViewport";
-        [SerializeField, Required] private string hiddenLayer = "Hidden";
-
-        [Header("_")]
         [SerializeField, Required] private string id = string.Empty;
         [SerializeField, Required] private RenderTexture renderTexture = null;
         [SerializeField, Min(1)] private float canvasSize = 165;
@@ -47,7 +43,7 @@ namespace Core.UI
 
         private CanvasGroup thisCanvas;
         private UIViewportCanvas[] viewportCanvases;
-        private ViewportMesh viewportMesh;
+        private ViewportMesh viewportMesh;      
         private EventSystem eventSystem;
         private PointerEventData eventData;
         private GameObject currentPressedObject;
@@ -65,8 +61,6 @@ namespace Core.UI
         private bool hasCanvasShown = false;
         private bool hasRenderedOnce = false;
         private bool hasTickedOnce = false;
-        private int viewportActiveLayer;
-        private int viewportHiddenLayer;
 
         private void OnEnable()
         {
@@ -340,9 +334,6 @@ namespace Core.UI
                 return;
             }
 
-            viewportActiveLayer = LayerMask.NameToLayer(activeLayer);
-            viewportHiddenLayer = LayerMask.NameToLayer(hiddenLayer);
-
             isInitialized = true;
             isRendering = false;
             isActive = false;
@@ -403,7 +394,7 @@ namespace Core.UI
             hasRenderedOnce = false;
             isActive = true;
 
-            OnShow(this.viewportMesh = mesh);
+            OnShow(viewportMesh = mesh);
             ShowRenderer();
         }
         internal void HideViewport()

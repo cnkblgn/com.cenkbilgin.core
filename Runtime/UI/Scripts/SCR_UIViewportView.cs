@@ -9,6 +9,7 @@ namespace Core.UI
     {
         [Header("_")]
         [SerializeField] private bool debug = false;
+        [SerializeField] private bool disable = false;
 
         [Header("_")]
         [SerializeField, Required] private Camera rendererCamera = null;
@@ -34,7 +35,6 @@ namespace Core.UI
         private float[] renderTimers = Array.Empty<float>();
         private int renderIndex = 0;
 
-
         private void Awake()
         {
             if (rendererCamera == null)
@@ -57,6 +57,11 @@ namespace Core.UI
 
         public void Tick(in UIInputContext ctx)
         {
+            if (disable)
+            {
+                return;
+            }
+
             if (ManagerGame.Instance.GetGameState() != GameState.RESUME)
             {
                 return;
@@ -324,6 +329,11 @@ namespace Core.UI
 
         public void Add(UIViewportItem prefab)
         {
+            if (disable)
+            {
+                return;
+            }
+
             if (prefab == null)
             {
                 Debug.LogError("You are trying to add null viewport prefab!");
@@ -396,6 +406,11 @@ namespace Core.UI
 
         public void Show(string id, ViewportMesh mesh)
         {
+            if (disable)
+            {
+                return;
+            }
+
             if (mesh == null)
             {
                 Debug.LogError("viewport mesh is null!");
