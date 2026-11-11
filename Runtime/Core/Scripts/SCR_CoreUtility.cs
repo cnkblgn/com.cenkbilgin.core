@@ -1121,6 +1121,21 @@ namespace Core
             transform.SetPositionAndRotation(position, rotation);
             transform.localScale = scale;
         }
+        public static void SetPositionRotationScale(this Transform[] transforms, Vector3 position, Quaternion rotation, Vector3 scale)
+        {
+            for (int i = 0; i < transforms.Length; i++)
+            {
+                transforms[i].SetPositionAndRotation(position, rotation);
+                transforms[i].localScale = scale;
+            }
+        }
+        public static void SetPositionRotation(this Transform[] transforms, Vector3 position, Quaternion rotation)
+        {
+            for (int i = 0; i < transforms.Length; i++)
+            {
+                transforms[i].SetPositionAndRotation(position, rotation);
+            }
+        }
         public static void SnapToGround(this Transform transform, Vector3 point, Vector3 normal)
         {
             Renderer[] renderers = transform.GetComponentsInChildren<Renderer>();
