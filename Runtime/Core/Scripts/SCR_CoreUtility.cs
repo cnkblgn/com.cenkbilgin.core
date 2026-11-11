@@ -1116,9 +1116,19 @@ namespace Core
             transform.GetPositionAndRotation(out position, out rotation);
             scale = transform.localScale;
         }
+        public static void GetLocalPositionRotationScale(this Transform transform, out Vector3 position, out Quaternion rotation, out Vector3 scale)
+        {
+            transform.GetLocalPositionAndRotation(out position, out rotation);
+            scale = transform.localScale;
+        }
         public static void SetPositionRotationScale(this Transform transform, Vector3 position, Quaternion rotation, Vector3 scale)
         {
             transform.SetPositionAndRotation(position, rotation);
+            transform.localScale = scale;
+        }
+        public static void SetLocalPositionRotationScale(this Transform transform, Vector3 position, Quaternion rotation, Vector3 scale)
+        {
+            transform.SetLocalPositionAndRotation(position, rotation);
             transform.localScale = scale;
         }
         public static void SetPositionRotationScale(this Transform[] transforms, Vector3 position, Quaternion rotation, Vector3 scale)
@@ -1134,6 +1144,13 @@ namespace Core
             for (int i = 0; i < transforms.Length; i++)
             {
                 transforms[i].SetPositionAndRotation(position, rotation);
+            }
+        }
+        public static void SetLocalPositionRotation(this Transform[] transforms, Vector3 position, Quaternion rotation)
+        {
+            for (int i = 0; i < transforms.Length; i++)
+            {
+                transforms[i].SetLocalPositionAndRotation(position, rotation);
             }
         }
         public static void SnapToGround(this Transform transform, Vector3 point, Vector3 normal)
