@@ -10,14 +10,14 @@ namespace Core.UI
     public sealed class UISurfaceMesh : MonoBehaviour
     {
         public GameObject Connection => connection;
-        public float Scale => scale; 
+        public Vector3 Scale => scale; 
 
         [Header("_")]
         [SerializeField, Required] private UISurfaceItem prefab;
         [SerializeField, Required] private GameObject connection;
 
         [Header("_")]
-        [SerializeField, Range(0, 1)] private float scale = 0.0025f;
+        [SerializeField] private Vector3 scale = Vector3.one * 0.002f;
         [SerializeField] private bool showOnStart = false;
 
         [Header("_")]

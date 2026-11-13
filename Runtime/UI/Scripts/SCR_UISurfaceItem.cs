@@ -114,7 +114,7 @@ namespace Core.UI
             isActive = true;
 
             transform.SetPositionAndRotation(mesh.transform.position, Quaternion.LookRotation(mesh.transform.forward));
-            transform.localScale = Vector3.one * mesh.Scale;
+            transform.localScale = mesh.Scale;
 
             OnShow(thisMesh = mesh);
             ShowCanvas();
