@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Core.UI
@@ -7,10 +8,9 @@ namespace Core.UI
     public abstract class UISurfaceItem : MonoBehaviour
     {
         internal string ID => id;
+        internal Guid InstanceID => instanceID;
         internal bool IsActive => isActive;
         internal bool HasInput => receiveInput;
-        internal Canvas Canvas => thisCanvas;
-        internal UISurfaceMesh Mesh => thisMesh;
 
         [Header("_")]
         [SerializeField, Required] private string id = string.Empty;
@@ -19,6 +19,7 @@ namespace Core.UI
         private Canvas thisCanvas;
         private Camera thisCamera;
         private UISurfaceMesh thisMesh;
+        private Guid instanceID;
         private bool isInitialized = false;
         private bool isActive = false;
 
@@ -35,15 +36,42 @@ namespace Core.UI
         /// <summary> Called when hide. </summary>
         protected abstract void OnHide();
 
-        internal void Tick(float deltaTime) => OnTick(deltaTime);
+        internal void Tick(float deltaTime)
+        {
+            if (!isActive)
+            {
+                return;
+            }
 
-        internal void Initialize(Camera camera)
+            OnTick(deltaTime);
+        }
+
+        internal bool TryCull(Transform target)
+        {
+            bool isCulled = thisMesh.TryCull(target, out _, out _);
+
+            if (isCulled)
+            {
+                HideCanvas();
+                isActive = false;
+            }
+            else
+            {
+                isActive = true;
+                ShowCanvas();
+            }
+
+            return isCulled;
+        }
+
+        internal void Initialize(Camera camera, Guid instanceID)
         {
             if (isInitialized)
             {
                 return;
             }
 
+            this.instanceID = instanceID;
             thisCamera = camera;
             thisCanvas = GetComponent<Canvas>();
             thisCanvas.Hide();
@@ -103,7 +131,7 @@ namespace Core.UI
 
             if (receiveInput)
             {
-                Canvas.worldCamera = thisCamera;
+                thisCanvas.worldCamera = thisCamera;
             }
         }
         private void HideCanvas()

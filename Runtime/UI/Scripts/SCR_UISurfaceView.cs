@@ -36,13 +36,9 @@ namespace Core.UI
             {
                 UISurfaceItem item = items[i].Item;
 
-                if (item.IsActive && item.Mesh.TryCull(cameraTransform, out _, out _))
+                if (!item.TryCull(cameraTransform))
                 {
-                    items[i].Item.Tick(deltaTime);
-                }
-                else
-                {
-                    item.HideSurface();
+                    item.Tick(deltaTime);
                 }
             }
         }
@@ -56,16 +52,31 @@ namespace Core.UI
                 return;
             }
 
-            if ((instanceID.HasValue && TryGet(instanceID.Value, out _)) || TryGet(prefab.ID, out _))
+            // Instance ID verilmiþse, sadece ayný instance zaten varsa engelle.
+            if (instanceID.HasValue)
+            {
+                if (TryGet(instanceID.Value, out _))
+                {
+#if UNITY_EDITOR
+                    Debug.LogWarning($"Surface [{instanceID.Value}] is already added to system! Ignore if this is intended.");
+#endif
+                    return;
+                }
+            }
+            // Instance ID yoksa, Base ID üzerinden tek bir tane olmasýna izin ver.
+            else if (TryGet(prefab.ID, out _))
             {
 #if UNITY_EDITOR
-                Debug.LogWarning($"Surface [{prefab.ID}] is already added to system! ignore if its intented");
+                Debug.LogWarning($"Surface [{prefab.ID}] is already added to system! Ignore if this is intended.");
 #endif
+                return;
             }
 
-            UISurfaceItem item = GameObject.Instantiate(prefab, container);
-            item.Initialize(thisCamera);
-            items.Add(new(instanceID ?? Guid.NewGuid(), item));
+            Guid id = instanceID ?? Guid.NewGuid();
+
+            UISurfaceItem item = Instantiate(prefab, container);
+            item.Initialize(thisCamera, id);
+            items.Add(new(id, item));
         }
         public void Remove(string id)
         {
