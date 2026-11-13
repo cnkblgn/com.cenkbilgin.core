@@ -118,7 +118,7 @@ namespace Core.UI
 
             dot = Mathf.Min(aDot, bDot);
 
-            return facing;
+            return !facing;
         }
     }
 }
