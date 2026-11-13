@@ -111,7 +111,7 @@ namespace Core.UI
 
             if (distance > cullingDistance)
             {
-                return false;
+                return true;
             }
 
             bool facing = IsFacingEachOther(target.position, center, target.forward, cullingFlipZ ? -transform.forward : transform.forward, cullingDotThreshold, out float aDot, out float bDot, debugCulling);
