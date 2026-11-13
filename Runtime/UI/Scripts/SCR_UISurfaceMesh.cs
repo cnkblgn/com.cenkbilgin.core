@@ -10,12 +10,10 @@ namespace Core.UI
     public sealed class UISurfaceMesh : MonoBehaviour
     {
         public GameObject Connection => connection;
-        public Transform Container => container; 
         public float Scale => scale; 
 
         [Header("_")]
         [SerializeField, Required] private UISurfaceItem prefab;
-        [SerializeField, Required] private Transform container;
         [SerializeField, Required] private GameObject connection;
 
         [Header("_")]
@@ -35,11 +33,6 @@ namespace Core.UI
 
         private void Awake()
         {
-            if (container == null)
-            {
-                throw new NullReferenceException($"UI Overlay container not found! {nameof(container)}");
-            }
-
             if (prefab == null)
             {
                 throw new NullReferenceException($"UI Overlay prefab not found! {nameof(prefab)}");

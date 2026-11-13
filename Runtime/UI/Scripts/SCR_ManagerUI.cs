@@ -125,6 +125,7 @@ namespace Core.UI
         public void HideViewport(string id) => viewportView.Hide(id);
 
         public bool TryGetSurface(Guid instanceID, out UISurfaceEntry entry) => surfaceView.TryGet(instanceID, out entry);
+        public IReadOnlyList<UISurfaceEntry> GetSurfaces() => surfaceView.GetSurfaces();
         public void ClearSurfaces() => surfaceView.Clear();
         public void AddSurface(UISurfaceItem prefab, Guid? instanceID) => surfaceView.Add(prefab, instanceID);
         public void RemoveSurface(string id) => surfaceView.Remove(id);
