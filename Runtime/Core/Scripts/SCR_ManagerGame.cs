@@ -14,7 +14,8 @@ namespace Core
     public sealed class ManagerGame : Manager<ManagerGame>
     {
         public static event Action<GameState> OnStateChanged = null;
-        public static event Action<float> OnCurrentSceneLoading = null;
+        public static event Action<float> OnSceneLoading = null;
+        public static event Action<string> OnSceneLoaded = null;
         public static event Action<string> OnBeforeSceneChanged = null;
         public static event Action<string> OnAfterSceneChanged = null;
         public static event Action<float> OnTimeScaleChanged = null;
@@ -74,8 +75,9 @@ namespace Core
         private static void OnSubsystemRegistration()
         {
             OnStateChanged = null;
-            OnCurrentSceneLoading = null;
+            OnSceneLoading = null;
             OnBeforeSceneChanged = null;
+            OnSceneLoaded = null;
             OnAfterSceneChanged = null;
             OnTimeScaleChanged = null;
 
@@ -236,11 +238,12 @@ namespace Core
 
             while (!asyncLoad.isDone)
             {
-                OnCurrentSceneLoading?.Invoke(asyncLoad.progress);
+                OnSceneLoading?.Invoke(asyncLoad.progress);
 
                 if (asyncLoad.progress >= 0.9f)
                 {
                     yield return new WaitForSecondsRealtime(1f);
+                    OnSceneLoaded?.Invoke(scene);
                     asyncLoad.allowSceneActivation = true;
                 }
 

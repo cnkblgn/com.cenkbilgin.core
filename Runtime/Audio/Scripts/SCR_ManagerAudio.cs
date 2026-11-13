@@ -148,8 +148,7 @@ namespace Core.Audio
             AudioEmitter.OnDestroyed += OnEmitterDestroyed;
 
             ManagerGame.OnStateChanged += OnGameStateChanged;
-            ManagerGame.OnBeforeSceneChanged += OnBeforeSceneChanged;
-            ManagerGame.OnAfterSceneChanged += OnAfterSceneChanged;
+            ManagerGame.OnSceneLoaded += OnSceneLoaded;
             ManagerGame.OnTimeScaleChanged += OnTimeScaleChanged;
         }
         private void OnDisable()
@@ -158,8 +157,7 @@ namespace Core.Audio
             AudioEmitter.OnDestroyed -= OnEmitterDestroyed;
 
             ManagerGame.OnStateChanged -= OnGameStateChanged;
-            ManagerGame.OnBeforeSceneChanged -= OnBeforeSceneChanged;
-            ManagerGame.OnAfterSceneChanged -= OnAfterSceneChanged;
+            ManagerGame.OnSceneLoaded -= OnSceneLoaded;
             ManagerGame.OnTimeScaleChanged -= OnTimeScaleChanged;
         }
 
@@ -196,7 +194,7 @@ namespace Core.Audio
             audioEmitterCollection.Remove(emitter);
         }
 
-        private void OnBeforeSceneChanged(string scene)
+        private void OnSceneLoaded(string scene)
         {
             ResetPool();
 
@@ -221,7 +219,6 @@ namespace Core.Audio
             SetLowpass(AudioGroup.MISC, 22000f);
             SetLowpass(AudioGroup.AMBIENT, 22000f);
         }
-        private void OnAfterSceneChanged(string scene) { }
         private void OnTimeScaleChanged(float timeScale)
         {
             switch (ManagerGame.Instance.GetGameState())
