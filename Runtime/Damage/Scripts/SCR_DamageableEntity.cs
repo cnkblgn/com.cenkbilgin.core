@@ -24,19 +24,14 @@ namespace Core.Damage
         [SerializeField] private List<DamageProtection> protections;
 
         private Damageable damageable;
+        private readonly List<IDamageableHandler> thisHandlers = new();
 
         private void Awake()
         {
             if (origin == null) throw new NullReferenceException(nameof(origin));
 
-            IDamageableHandler[] handlers = GetComponents<IDamageableHandler>();
-
+            GetComponents(thisHandlers);
             damageable = new Damageable(health, protections, ignoredTags.CreateMask());
-
-            for (int i = 0; i < handlers.Length; i++)
-            {
-                damageable.AddHandler(handlers[i]);
-            }
         }
         private void OnDestroy() => Unbind();
 
@@ -51,7 +46,11 @@ namespace Core.Damage
 
             health = damageable.Health;
             this.damageable = damageable;
-            this.damageable.AddHandler(this);
+
+            for (int i = 0; i < thisHandlers.Count; i++)
+            {
+                damageable.AddHandler(thisHandlers[i]);
+            }
         }
         private void Unbind()
         {
@@ -60,7 +59,11 @@ namespace Core.Damage
                 return;
             }
 
-            damageable.RemoveHandler(this);
+            for (int i = 0; i < thisHandlers.Count; i++)
+            {
+                damageable.RemoveHandler(thisHandlers[i]);
+            }
+
             damageable = null;
         }
 
