@@ -38,11 +38,18 @@ namespace Core.UI
         /// <summary> Called when hide. </summary>
         protected abstract void OnHide();
 
-        internal void Tick(float deltaTime)
+        internal void Tick(Camera camera, float deltaTime)
         {
             if (!isActive)
             {
                 return;
+            }
+
+            thisCamera = camera;
+
+            if (receiveInput && thisCanvas.worldCamera == null)
+            {
+                thisCanvas.worldCamera = thisCamera;
             }
 
             OnTick(deltaTime);

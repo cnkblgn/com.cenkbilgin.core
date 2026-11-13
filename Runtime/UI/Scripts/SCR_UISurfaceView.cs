@@ -38,7 +38,7 @@ namespace Core.UI
 
                 if (!item.TryCull(cameraTransform))
                 {
-                    item.Tick(deltaTime);
+                    item.Tick(thisCamera, deltaTime);
                 }
             }
         }
