@@ -10,6 +10,7 @@ namespace Core.UI
         internal string ID => id;
         internal Guid InstanceID => instanceID;
         internal bool IsActive => isActive;
+        internal bool IsRendering => isRendering;
         internal bool HasInput => receiveInput;
 
         [Header("_")]
@@ -21,6 +22,7 @@ namespace Core.UI
         private UISurfaceMesh thisMesh;
         private Guid instanceID;
         private bool isInitialized = false;
+        private bool isRendering = false;
         private bool isActive = false;
 
         private void OnDisable() => OnDeinitialized();
@@ -48,16 +50,19 @@ namespace Core.UI
 
         internal bool TryCull(Transform target)
         {
+            if (!isActive)
+            {
+                return false;
+            }
+
             bool isCulled = thisMesh.TryCull(target, out _, out _);
 
             if (isCulled)
             {
                 HideCanvas();
-                isActive = false;
             }
             else
             {
-                isActive = true;
                 ShowCanvas();
             }
 
@@ -104,7 +109,7 @@ namespace Core.UI
             transform.SetPositionAndRotation(mesh.transform.position, Quaternion.LookRotation(mesh.transform.forward));
             transform.localScale = Vector3.one * mesh.Scale;
 
-            OnShow(this.thisMesh = mesh);
+            OnShow(thisMesh = mesh);
             ShowCanvas();
         }
         internal void HideSurface()
@@ -127,6 +132,12 @@ namespace Core.UI
                 return;
             }
 
+            if (isRendering)
+            {
+                return;
+            }
+
+            isRendering = true;
             thisCanvas.Show();
 
             if (receiveInput)
@@ -141,6 +152,12 @@ namespace Core.UI
                 return;
             }
 
+            if (!isRendering)
+            {
+                return;
+            }
+
+            isRendering = false;
             thisCanvas.Hide();
         }
     }
