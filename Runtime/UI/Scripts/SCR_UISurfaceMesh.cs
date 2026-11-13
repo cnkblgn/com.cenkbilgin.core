@@ -17,7 +17,7 @@ namespace Core.UI
         [SerializeField, Required] private GameObject connection;
 
         [Header("_")]
-        [SerializeField, Range(0, 1)] private float scale = 0.0025;
+        [SerializeField, Range(0, 1)] private float scale = 0.0025f;
         [SerializeField] private bool showOnStart = false;
 
         [Header("_")]
