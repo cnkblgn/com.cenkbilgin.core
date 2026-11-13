@@ -8,6 +8,7 @@ namespace Core.UI
     {
         internal string ID => id;
         internal bool IsActive => isActive;
+        internal bool HasInput => receiveInput;
         internal Canvas Canvas => thisCanvas;
         internal UISurfaceMesh Mesh => thisMesh;
 
@@ -75,11 +76,6 @@ namespace Core.UI
             transform.SetPositionAndRotation(mesh.transform.position, Quaternion.LookRotation(mesh.transform.forward));
             transform.localScale = Vector3.one * mesh.Scale;
 
-            if (receiveInput)
-            {
-                ManagerUI.Instance.ShowCursor();
-            }
-
             OnShow(this.thisMesh = mesh);
             ShowCanvas();
         }
@@ -88,11 +84,6 @@ namespace Core.UI
             if (!isActive)
             {
                 return;
-            }
-
-            if (receiveInput)
-            {
-                ManagerUI.Instance.HideCursor();
             }
 
             OnHide();

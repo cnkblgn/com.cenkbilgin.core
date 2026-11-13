@@ -236,10 +236,7 @@ namespace Core.UI
 
             isActive = true;
 
-            if (receiveInput)
-            {
-                ManagerUI.Instance.ShowCursor();
-            }
+
 
             OnShow(this.mesh = mesh);
             Canvas.Show();
@@ -250,11 +247,6 @@ namespace Core.UI
             if (!isActive)
             {
                 return;
-            }
-
-            if (receiveInput)
-            {
-                ManagerUI.Instance.HideCursor();
             }
 
             OnPointerExit();

@@ -68,7 +68,12 @@ namespace Core.UI
             {
                 ManagerUI.Instance.ShowSurface(baseID, this);
             }
-            
+
+            if (prefab.HasInput)
+            {
+                ManagerUI.Instance.ShowCursor();
+            }
+
             meshRenderer.enabled = false;
         }
         public void HideSurface()
@@ -80,6 +85,11 @@ namespace Core.UI
             else
             {
                 ManagerUI.Instance.HideSurface(baseID);
+            }
+
+            if (prefab.HasInput)
+            {
+                ManagerUI.Instance.HideCursor();
             }
 
             meshRenderer.enabled = true;

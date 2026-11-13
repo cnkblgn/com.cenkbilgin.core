@@ -40,6 +40,10 @@ namespace Core.UI
                 {
                     items[i].Item.Tick(deltaTime);
                 }
+                else
+                {
+                    item.HideSurface();
+                }
             }
         }
 
