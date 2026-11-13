@@ -5,15 +5,14 @@ namespace Core.UI
 {
     internal sealed class UIViewportCanvas
     {
-        public readonly Camera Camera = null;
-        public readonly Canvas Canvas = null;
-        public readonly RectTransform Transform = null;
-        public readonly GraphicRaycaster Raycaster = null;
+        public readonly Camera Camera;
+        public readonly Canvas Canvas;
+        public readonly RectTransform Transform;
+        public readonly GraphicRaycaster Raycaster;
 
         public UIViewportCanvas(Camera camera, Canvas canvas, RectTransform transform, GraphicRaycaster raycaster)
         {
             Camera = camera;
-
             Canvas = canvas;
             Transform = transform;
             Raycaster = raycaster;

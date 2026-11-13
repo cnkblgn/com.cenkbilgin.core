@@ -8,7 +8,7 @@ namespace Core.UI
     [DisallowMultipleComponent]
     [RequireComponent(typeof(MeshCollider))]
     [RequireComponent(typeof(MeshRenderer))]
-    public sealed class ViewportMesh : MonoBehaviour 
+    public sealed class UIViewport : MonoBehaviour 
     {
         public GameObject Connection => connection;
 
@@ -17,10 +17,7 @@ namespace Core.UI
         [SerializeField, Required] private GameObject connection = null;
 
         [Header("_")]
-        [SerializeField] private bool debugVisibility = false;
         [SerializeField] private bool addOnAwake = true;
-        [SerializeField] private bool showOnAwake = false;
-        [SerializeField] private bool flipZ = false;
 
         private new MeshRenderer renderer = null;
         private new MeshCollider collider = null;
@@ -49,11 +46,6 @@ namespace Core.UI
             if (addOnAwake)
             {
                 AddViewport();
-
-                if (showOnAwake)
-                {
-                    ShowViewport();
-                }
             }
         }
 
@@ -61,40 +53,7 @@ namespace Core.UI
         public void ShowViewport() => ManagerUI.Instance.ShowViewport(id, this);
         public void HideViewport() => ManagerUI.Instance.HideViewport(id);
 
-        internal void ShowRenderer()
-        {
-            renderer.enabled = true;
-            //collider.enabled = true;
-        }
-        internal void HideRenderer()
-        {
-            renderer.enabled = false;
-            //collider.enabled = false;
-        }
-        internal bool CheckVisibility(Transform target, float dotThreshold, float maxDistance, out float distance, out float dot)
-        {
-            distance = float.MaxValue;
-            dot = -1f;
-
-            if (renderer == null)
-            {
-                return false;
-            }
-
-            Vector3 center = renderer.bounds.center;
-
-            distance = Vector3.Distance(center, target.position);
-
-            if (distance > maxDistance)
-            {
-                return false;
-            }
-             
-            bool facing = IsFacingEachOther(target.position, center, target.forward, flipZ ? -transform.forward : transform.forward, dotThreshold, out float aDot, out float bDot, debugVisibility);
-
-            dot = Mathf.Min(aDot, bDot);
-
-            return facing;
-        }
+        internal void ShowRenderer() => renderer.enabled = true;
+        internal void HideRenderer() => renderer.enabled = false;
     }
 }

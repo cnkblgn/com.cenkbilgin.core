@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -23,6 +24,7 @@ namespace Core.UI
         [SerializeField, Required] private UITransitionView transitionView = null;
         [SerializeField, Required] private UISubtitleView subtitleView = null;
         [SerializeField, Required] private UIViewportView viewportView = null;
+        [SerializeField, Required] private UISurfaceView surfaceView = null;
 
         private UIInputContext inputContext = default;
         private bool hasInputContext = false;
@@ -41,6 +43,7 @@ namespace Core.UI
             if (promptView == null) throw new NullReferenceException();
             if (transitionView == null) throw new NullReferenceException();
             if (viewportView == null) throw new NullReferenceException();
+            if (surfaceView == null) throw new NullReferenceException();
 
             SetCursor();
             HideCursor();
@@ -62,6 +65,7 @@ namespace Core.UI
 
             cursorView.MoveCursor(inputContext.PointerPosition);
             viewportView.Tick(in inputContext);
+            surfaceView.Tick(in inputContext);
         }
         private void OnEnable() => ManagerGame.OnBeforeSceneChanged += OnBeforeSceneChanged;
         private void OnDisable() => ManagerGame.OnBeforeSceneChanged -= OnBeforeSceneChanged;
@@ -114,11 +118,21 @@ namespace Core.UI
         public void ShowCursor() => cursorView.ShowCursor();
         public void HideCursor() => cursorView.HideCursor();
 
+        public void ClearViewports() => viewportView.Clear();
         public void AddViewport(UIViewportItem prefab) => viewportView.Add(prefab);
         public void RemoveViewport(string id) => viewportView.Remove(id);
-        public void ClearViewports() => viewportView.Clear();
-        public void ShowViewport(string id, ViewportMesh mesh) => viewportView.Show(id, mesh);
+        public void ShowViewport(string id, UIViewport viewport) => viewportView.Show(id, viewport);
         public void HideViewport(string id) => viewportView.Hide(id);
+
+        public bool TryGetSurface(Guid instanceID, out UISurfaceEntry entry) => surfaceView.TryGet(instanceID, out entry);
+        public void ClearSurfaces() => surfaceView.Clear();
+        public void AddSurface(UISurfaceItem prefab, Guid? instanceID) => surfaceView.Add(prefab, instanceID);
+        public void RemoveSurface(string id) => surfaceView.Remove(id);
+        public void RemoveSurface(Guid instanceID) => surfaceView.Remove(instanceID);
+        public void ShowSurface(string id, UISurface surface) => surfaceView.Show(id, surface);
+        public void ShowSurface(Guid instanceID, UISurface surface) => surfaceView.Show(instanceID, surface);
+        public void HideSurface(string id) => surfaceView.Hide(id);
+        public void HideSurface(Guid instanceID) => surfaceView.Hide(instanceID);
 
         public GameObject GetSelectedGameObject() => events.currentSelectedGameObject;
         public void SetSelectedGameObject(GameObject gameObject) => events.SetSelectedGameObject(gameObject);

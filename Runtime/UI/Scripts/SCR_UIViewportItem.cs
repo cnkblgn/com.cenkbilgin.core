@@ -11,21 +11,13 @@ namespace Core.UI
     {
         internal string ID => id;
         internal bool IsActive => isActive;
-        internal bool IsRendering => isRendering;
-        internal bool IsFocused => isFocused;
-        internal bool CanRender => !renderOnce || !hasRenderedOnce;
-        internal bool CanReceiveInput => receiveInput;
-        internal bool HasTickedOnce => hasTickedOnce;
-        internal bool HasRenderedOnce => hasRenderedOnce;
-        internal bool RestShown => isActive && isRendering && receiveInput;
-        internal bool EnableCulling => enableCulling;
+        internal bool HasInput => receiveInput;
         internal float Size => canvasSize;
-        internal float Priority => priority;
-        protected Camera Camera => viewportCanvases[0].Camera;
-        internal CanvasGroup Canvas => thisCanvas;
-        internal RectTransform Transform => viewportCanvases[0].Transform;
         internal RenderTexture Texture => renderTexture;
-        internal ViewportMesh Mesh => viewportMesh;
+        internal UIViewport Viewport => viewport;
+        protected Camera Camera => canvases[0].Camera;
+        protected Canvas Canvas => canvases[0].Canvas;
+        protected RectTransform Transform => canvases[0].Transform;
         protected Vector2 PointerPosition => pointerPosition;
 
         [Header("_")]
@@ -35,32 +27,21 @@ namespace Core.UI
         [SerializeField, Required] private string id = string.Empty;
         [SerializeField, Required] private RenderTexture renderTexture = null;
         [SerializeField, Min(1)] private float canvasSize = 165;
-
-        [Header("_")]
-        [SerializeField] private bool enableCulling = true;
         [SerializeField] private bool receiveInput = false;
-        [SerializeField] private bool renderOnce = false;
 
-        private CanvasGroup thisCanvas;
-        private UIViewportCanvas[] viewportCanvases;
-        private ViewportMesh viewportMesh;      
-        private EventSystem eventSystem;
-        private PointerEventData eventData;
-        private GameObject currentPressedObject;
-        private GameObject currentHoveredObject;
-        private GameObject currentDraggedObject;
+        private UIViewportCanvas[] canvases = null;
+        private UIViewport viewport = null;
+        private EventSystem eventSystem = null;
+        private PointerEventData eventData = null;
+        private GameObject currentPressedObject = null;
+        private GameObject currentHoveredObject = null;
+        private GameObject currentDraggedObject = null;
         private readonly List<RaycastResult> hitResults = new(16);
         private Vector2 pointerPosition = Vector2.zero;
         private Vector2 lastPixelPosition = Vector2.zero;
         private Vector2 lastPressedPosition = Vector2.zero;
-        private float priority = 0f;
         private bool isInitialized = false;
-        private bool isRendering = false;
         private bool isActive = false;
-        private bool isFocused = false;
-        private bool hasCanvasShown = false;
-        private bool hasRenderedOnce = false;
-        private bool hasTickedOnce = false;
 
         private void OnEnable()
         {
@@ -70,36 +51,116 @@ namespace Core.UI
         {
             ManagerGame.OnStateChanged -= OnGameStateChanged;
 
-            OnDeinitialized();
+            if (isInitialized)
+            {
+                OnDeinitialized();
+            }
         }
 
         /// <summary> Called every frame. </summary>
-        protected abstract void OnTick();
-        /// <summary> Called after tick. </summary>
+        protected abstract void OnTick(float deltaTime);
+        /// <summary> Called every render frame. </summary>
         protected abstract void OnRender();
         /// <summary> Called when created. </summary>
         protected abstract void OnInitialized();
         /// <summary> Called when destroyed. </summary>
         protected abstract void OnDeinitialized();
-        /// <summary> Called when interaction enter. </summary>
-        protected abstract void OnShow(ViewportMesh mesh);
-        /// <summary> Called when interaction exit. </summary>
+        /// <summary> Called when show. </summary>
+        protected abstract void OnShow(UIViewport mesh);
+        /// <summary> Called when hide. </summary>
         protected abstract void OnHide();
-        /// <summary> Called when game state changed. </summary>
         protected virtual void OnGameStateChanged(GameState gameState) { }
 
-        internal void Tick()
+        internal void Tick(float deltaTime)
         {
-            OnTick();
-            hasTickedOnce = true;
+            if (!isActive)
+            {
+                return;
+            }
+
+            OnTick(deltaTime);
         }
         internal void Render()
         {
+            if (!isActive)
+            {
+                return;
+            }
+
             OnRender();
-            hasRenderedOnce = true;
         }
 
-        protected void MarkDirty() => hasRenderedOnce = false;
+        internal void UpdateInput(in UIInputContext ctx, Vector2 screenPosition)
+        {
+            if (!receiveInput || !isActive)
+            {
+                return;
+            }
+
+            float renderWidth = Texture.width;
+            float renderHeight = Texture.height;
+
+            pointerPosition = new Vector2
+            (
+                Mathf.Clamp01(screenPosition.x) * renderWidth,
+                Mathf.Clamp01(screenPosition.y) * renderHeight
+            );
+
+            eventData.Reset();
+
+            eventData.delta = pointerPosition - lastPixelPosition;
+            lastPixelPosition = pointerPosition;
+
+            eventData.position = pointerPosition;
+            eventData.scrollDelta = ctx.PointerScroll * 32f;
+
+            hitResults.Clear();
+
+            for (int i = 0; i < canvases.Length; i++)
+            {
+                GraphicRaycaster raycaster = canvases[i].Raycaster;
+
+                if (raycaster != null)
+                {
+                    raycaster.Raycast(eventData, hitResults);
+                }
+            }
+
+            FilterRaycasts();
+            SortRaycasts();
+
+            GameObject topObject = hitResults.Count > 0 ? hitResults[0].gameObject : null;
+            RaycastResult topRaycast = hitResults.Count > 0 ? hitResults[0] : default;
+
+            OnHover(topObject);
+
+            if (eventData.scrollDelta.sqrMagnitude > 0f && topObject != null)
+            {
+                OnScroll(topObject);
+            }
+
+            if (ctx.KeyDown)
+            {
+                OnPointerDown(topObject, topRaycast);
+            }
+
+            OnDrag();
+
+            if (ctx.KeyUp)
+            {
+                OnPointerUp(topObject);
+            }
+
+            if (debug)
+            {
+                Debug.Log
+                (
+                    $"VIEW={ID} | " +
+                    $"TOP={(topObject != null ? topObject.name : "NULL")} | " +
+                    $"HITS={hitResults.Count}"
+                );
+            }
+        }
         protected void EnableInput()
         {
             if (receiveInput)
@@ -108,7 +169,7 @@ namespace Core.UI
             }
 
             receiveInput = true;
-            ClearInput();
+            OnPointerExit();
         }
         protected void DisableInput()
         {
@@ -118,73 +179,120 @@ namespace Core.UI
             }
 
             receiveInput = false;
-            ClearInput();
+            OnPointerExit();
         }
-        internal void UpdateInput(in UIInputContext ctx, Vector2 screenPosition)
+
+        internal void Initialize(Camera camera)
         {
-            if (!receiveInput)
+            if (isInitialized)
             {
                 return;
             }
 
+            isInitialized = true;
+            isActive = false;
+
+            Canvas[] canvases = GetComponentsInChildren<Canvas>();
+
+            this.canvases = new UIViewportCanvas[canvases.Length];
+
+            for (int i = 0; i < canvases.Length; i++)
+            {
+                this.canvases[i] = new
+                (
+                    camera,
+                    canvases[i],
+                    canvases[i].GetComponent<RectTransform>(),
+                    canvases[i].GetComponent<GraphicRaycaster>()
+                );
+            }
+
+            Canvas.Hide();
+
+            eventSystem = EventSystem.current;
+            eventData = new PointerEventData(eventSystem);
+
+            OnInitialized();
+        }
+        internal void Deinitialize()
+        {
+            if (!isInitialized)
+            {
+                return;
+            }
+
+            OnPointerExit();
+            OnDeinitialized();
+
+            isInitialized = false;
+        }
+
+        internal void ShowViewport(UIViewport mesh)
+        {
+            if (isActive)
+            {
+                return;
+            }
+
+            isActive = true;
+
+            if (receiveInput)
+            {
+                ManagerUI.Instance.ShowCursor();
+            }
+
+            OnShow(viewport = mesh);
+            Canvas.Show();
+            viewport.ShowRenderer();
+        }
+        internal void HideViewport()
+        {
             if (!isActive)
             {
                 return;
             }
 
-            isFocused = true;
-
-            Vector2 scrollDelta = ctx.PointerScroll * 32f;
-            bool keyDown = ctx.KeyDown;
-            bool keyUp = ctx.KeyUp;
-
-            float renderWidth = Texture.width;
-            float renderHeight = Texture.height;
-
-            pointerPosition = new(Mathf.Clamp01(screenPosition.x) * renderWidth, Mathf.Clamp01(screenPosition.y) * renderHeight);
-
-            eventData.Reset();
-
-            eventData.delta = pointerPosition - lastPixelPosition;
-            lastPixelPosition = pointerPosition;
-
-            eventData.position = pointerPosition;
-            eventData.scrollDelta = scrollDelta;
-
-            hitResults.Clear();
-            for (int i = 0; i < viewportCanvases.Length; i++)
+            if (receiveInput)
             {
-                if (viewportCanvases[i].Raycaster != null)
-                {
-                    viewportCanvases[i].Raycaster.Raycast(eventData, hitResults);
-                }
+                ManagerUI.Instance.HideCursor();
             }
 
-            // Filtre
-            hitResults.RemoveAll(r =>
+            OnPointerExit();
+            OnHide();
+            Canvas.Hide();
+            viewport.HideRenderer();
+
+            viewport = null;
+            isActive = false;
+        }
+
+        private void FilterRaycasts()
+        {
+            for (int i = hitResults.Count - 1; i >= 0; i--)
             {
-                GameObject gameObject = r.gameObject;
+                GameObject gameObject = hitResults[i].gameObject;
 
                 if (gameObject.TryGetComponent(out Graphic graphic) && !graphic.raycastTarget)
                 {
-                    return true;
+                    hitResults.RemoveAt(i);
+                    continue;
                 }
 
                 if (!gameObject.activeInHierarchy)
                 {
-                    return true;
+                    hitResults.RemoveAt(i);
+                    continue;
                 }
 
                 if (gameObject.TryGetComponent(out LayoutElement layout) && layout.ignoreLayout)
                 {
-                    return true;
+                    hitResults.RemoveAt(i);
                 }
-
-                return false;
-            });
-
-            // Sort
-            hitResults.Sort((a, b) =>
+            }
+        }
+        private void SortRaycasts()
+        {
+            static int compare(RaycastResult a, RaycastResult b)
             {
                 int sortOrder = b.sortingOrder.CompareTo(a.sortingOrder);
 
@@ -201,104 +309,95 @@ namespace Core.UI
                 }
 
                 return a.distance.CompareTo(b.distance);
-            });
-
-            GameObject topObject = hitResults.Count > 0 ? hitResults[0].gameObject : null;
-            RaycastResult topRaycast = hitResults.Count > 0 ? hitResults[0] : default;
-
-            if (debug)
-            {
-                Debug.Log
-                (
-                    $"VIEW={ID} " +
-                    $"TOP={(topObject != null ? topObject.name : null ?? "NULL")} " +
-                    $"HITS={hitResults.Count} " +
-                    $"CAMERA_TEXTURE={(Camera.targetTexture != null ? Camera.targetTexture.name : null ?? "NULL")} " +
-                    $"CAMERA_SIZE={Camera.pixelWidth}x{Camera.pixelHeight}"
-                );
             }
 
-            if (topObject != currentHoveredObject)
-            {
-                if (currentHoveredObject != null)
-                {
-                    // Pointer Exit
-                    ExecuteEvents.Execute(currentHoveredObject, eventData, ExecuteEvents.pointerExitHandler);
-                }
+            hitResults.Sort(compare);
+        }
 
-                if (topObject != null)
-                {
-                    // Pointer Enter
-                    ExecuteEvents.Execute(topObject, eventData, ExecuteEvents.pointerEnterHandler);
-                }
-
-                currentHoveredObject = topObject;
-            }
-
-            // Scroll
-            if (scrollDelta.sqrMagnitude > 0.0f && topObject != null)
-            {
-                ExecuteEvents.ExecuteHierarchy(topObject, eventData, ExecuteEvents.scrollHandler);
-            }
-
-            // Pointer Down
-            if (keyDown)
-            {
-                currentPressedObject = topObject;
-                lastPressedPosition = this.pointerPosition;
-                eventData.pressPosition = this.pointerPosition;
-                eventData.pointerPressRaycast = topRaycast;
-                eventData.pointerCurrentRaycast = topRaycast;
-                eventData.button = PointerEventData.InputButton.Left;
-                eventData.eligibleForClick = true;
-                eventData.useDragThreshold = true;
-
-                ExecuteEvents.Execute(topObject, eventData, ExecuteEvents.pointerDownHandler);
-            }
-
-            // -------- Drag Logic --------
+        internal void OnDrag()
+        {
             if (currentPressedObject != null && currentDraggedObject == null)
             {
-                float dist = Vector2.Distance(lastPressedPosition, this.pointerPosition);
+                const float DRAG_START_DISTANCE = 8f;
 
-                const float dragStartDistance = 8f;
-                if (dist >= dragStartDistance)
+                float distance = Vector2.Distance(lastPressedPosition, pointerPosition);
+
+                if (distance >= DRAG_START_DISTANCE)
                 {
                     currentDraggedObject = currentPressedObject;
 
-                    // Begin Drag
                     ExecuteEvents.Execute(currentDraggedObject, eventData, ExecuteEvents.beginDragHandler);
                 }
             }
 
             if (currentDraggedObject != null)
             {
-                // Drag
                 ExecuteEvents.Execute(currentDraggedObject, eventData, ExecuteEvents.dragHandler);
             }
-
-            if (keyUp)
+        }
+        internal void OnScroll(GameObject topObject)
+        {
+            ExecuteEvents.ExecuteHierarchy(topObject, eventData, ExecuteEvents.scrollHandler);
+        }
+        internal void OnHover(GameObject topObject)
+        {
+            if (topObject == currentHoveredObject)
             {
-                // End Drag
-                if (currentDraggedObject != null)
-                {
-                    ExecuteEvents.Execute(currentDraggedObject, eventData, ExecuteEvents.endDragHandler);
-                    currentDraggedObject = null;
-                }
+                return;
+            }
 
-                // Pointer Up
-                ExecuteEvents.Execute(topObject, eventData, ExecuteEvents.pointerUpHandler);
+            if (currentHoveredObject != null)
+            {
+                ExecuteEvents.Execute(currentHoveredObject, eventData, ExecuteEvents.pointerExitHandler );
+            }
 
-                if (currentPressedObject != null && topObject == currentPressedObject)
-                {
-                    // Pointer Click
-                    ExecuteEvents.Execute(topObject, eventData, ExecuteEvents.pointerClickHandler);
-                }
+            if (topObject != null)
+            {
+                ExecuteEvents.Execute(topObject, eventData, ExecuteEvents.pointerEnterHandler);
+            }
 
-                currentPressedObject = null;
+            currentHoveredObject = topObject;
+        }
+        internal void OnPointerDown(GameObject topObject, RaycastResult topRaycast)
+        {
+            currentPressedObject = topObject;
+
+            lastPressedPosition = pointerPosition;
+
+            eventData.pressPosition = pointerPosition;
+            eventData.pointerPressRaycast = topRaycast;
+            eventData.pointerCurrentRaycast = topRaycast;
+            eventData.button = PointerEventData.InputButton.Left;
+            eventData.eligibleForClick = true;
+            eventData.useDragThreshold = true;
+
+            if (topObject != null)
+            {
+                ExecuteEvents.Execute(topObject, eventData, ExecuteEvents.pointerDownHandler);
             }
         }
-        internal void ClearInput()
+        internal void OnPointerUp(GameObject topObject)
+        {
+            if (currentDraggedObject != null)
+            {
+                ExecuteEvents.Execute(currentDraggedObject, eventData, ExecuteEvents.endDragHandler);
+
+                currentDraggedObject = null;
+            }
+
+            if (topObject != null)
+            {
+                ExecuteEvents.Execute(topObject, eventData, ExecuteEvents.pointerUpHandler);
+            }
+
+            if (currentPressedObject != null && topObject == currentPressedObject) 
+            {
+                ExecuteEvents.Execute(topObject, eventData, ExecuteEvents.pointerClickHandler); 
+            }
+
+            currentPressedObject = null;
+        }
+        internal void OnPointerExit()
         {
             if (eventData == null)
             {
@@ -317,225 +416,18 @@ namespace Core.UI
 
             eventData.position = Vector2.zero;
             eventData.delta = Vector2.zero;
+
             pointerPosition = Vector2.zero;
             lastPixelPosition = Vector2.zero;
+            lastPressedPosition = Vector2.zero;
+
             currentPressedObject = null;
-            currentDraggedObject = null;
             currentHoveredObject = null;
+            currentDraggedObject = null;
+
             eventData.Reset();
+
             hitResults.Clear();
-            isFocused = false;
-        }
-
-        internal void Initialize(Camera renderCamera)
-        {
-            if (isInitialized)
-            {
-                return;
-            }
-
-            isInitialized = true;
-            isRendering = false;
-            isActive = false;
-
-            Canvas[] canvases = GetComponentsInChildren<Canvas>();
-            viewportCanvases = new UIViewportCanvas[canvases.Length];
-
-            for (int i = 0; i < viewportCanvases.Length; i++)
-            {
-                viewportCanvases[i] = new
-                (
-                    renderCamera,
-                    canvases[i],
-                    canvases[i].GetComponent<RectTransform>(),
-                    canvases[i].GetComponent<GraphicRaycaster>()
-                );
-            }
-
-            //gameObject.SetLayer(viewportHiddenLayer);
-
-            if (thisCanvas == null)
-            {
-                thisCanvas = GetComponent<CanvasGroup>();
-            }
-
-            Canvas.alpha = 0;
-            Canvas.interactable = false;
-            Canvas.blocksRaycasts = false;
-
-            eventSystem = EventSystem.current;
-            eventData = new(eventSystem);
-
-            OnInitialized();
-        }
-        internal void Deinitialize()
-        {
-            if (!isInitialized)
-            {
-                return;
-            }
-
-            isInitialized = false;
-            OnDeinitialized();
-        } 
-
-        internal void ShowViewport(ViewportMesh mesh)
-        {
-            if (isActive)
-            {
-                return;
-            }
-
-            if (receiveInput)
-            {
-                ManagerUI.Instance.ShowCursor();
-            }
-
-            hasRenderedOnce = false;
-            isActive = true;
-
-            OnShow(viewportMesh = mesh);
-            ShowRenderer();
-        }
-        internal void HideViewport()
-        {
-            if (!isActive)
-            {
-                return;
-            }
-
-            if (receiveInput)
-            {
-                ManagerUI.Instance.HideCursor();
-            }
-
-            OnHide();
-            HideRenderer();
-            ClearInput();
-
-            isActive = false;
-        }
-
-        internal void ShowRenderer()
-        {
-            if (!isActive || isRendering)
-            {
-                return;
-            }
-
-            isRendering = true;
-
-            if (RestShown)
-            {
-                ShowCanvas();
-            }
-            else
-            {
-                HideCanvas();
-            }
-
-            if (viewportMesh != null)
-            {
-                viewportMesh.ShowRenderer();
-            }
-        }
-        internal void HideRenderer()
-        {
-            if (!isActive || !isRendering)
-            {
-                return;
-            }
-
-            isRendering = false;
-            HideCanvas();
-
-            if (viewportMesh != null)
-            {
-                viewportMesh.HideRenderer();
-            }
-        }
-
-        private void ShowCanvas()
-        {
-            if (hasCanvasShown)
-            {
-                return;
-            }
-
-            hasCanvasShown = true;
-
-            if (thisCanvas == null)
-            {
-                thisCanvas = GetComponent<CanvasGroup>();
-            }
-
-            Canvas.alpha = 1;
-
-            if (receiveInput)
-            {
-                Canvas.interactable = true;
-                Canvas.blocksRaycasts = true;
-            }
-        }
-        private void HideCanvas()
-        {
-            if (!hasCanvasShown)
-            {
-                return;
-            }
-
-            hasCanvasShown = false;
-
-            if (thisCanvas == null)
-            {
-                thisCanvas = GetComponent<CanvasGroup>();
-            }
-
-            Canvas.alpha = 0;
-
-            if (receiveInput)
-            {
-                Canvas.interactable = false;
-                Canvas.blocksRaycasts = false;
-            }
-        }
-
-        internal void BeginPass() => ShowCanvas();
-        internal void SuspendForPass() => HideCanvas();
-        internal void EndPass()
-        {
-            if (RestShown)
-            {
-                ShowCanvas();
-            }
-            else
-            {
-                HideCanvas();
-            }
-        }
-
-        internal void TryCull(Transform target, float dotThreshold, float cullingDistance)
-        {
-            if (!IsActive)
-            {
-                return;
-            }
-
-            bool isInView = viewportMesh.CheckVisibility(target, dotThreshold, cullingDistance, out float distance, out float dot);
-
-            float distanceT = 1f - Mathf.Clamp01(distance / cullingDistance);
-            float angleT = Mathf.InverseLerp(dotThreshold, 1f, dot);
-
-            priority = Mathf.Min(distanceT, angleT);
-
-            if (!isInView)
-            {
-                HideRenderer();
-            }
-            else
-            {
-                ShowRenderer();
-            }
         }
     }
 }
