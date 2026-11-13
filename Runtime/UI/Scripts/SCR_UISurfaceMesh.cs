@@ -90,7 +90,7 @@ namespace Core.UI
             distance = float.MaxValue;
             dot = -1f;
 
-            if (enableCulling)
+            if (!enableCulling)
             {
                 return false;
             }
