@@ -23,6 +23,12 @@ namespace Core.UI
         {
             thisCamera = ctx.Camera;
 
+            if (thisCamera == null)
+            {
+                Debug.LogWarning("UI Surface view tick failed! camera is missing!?");
+                return;
+            }
+
             float deltaTime = Time.deltaTime;
             Transform cameraTransform = thisCamera.transform;
 
