@@ -14,7 +14,7 @@ namespace Core.UI
         internal bool HasInput => receiveInput;
         internal float Size => canvasSize;
         internal RenderTexture Texture => renderTexture;
-        internal UIViewport Viewport => viewport;
+        internal UIViewportMesh Mesh => mesh;
         protected Camera Camera => canvases[0].Camera;
         protected Canvas Canvas => canvases[0].Canvas;
         protected RectTransform Transform => canvases[0].Transform;
@@ -30,7 +30,7 @@ namespace Core.UI
         [SerializeField] private bool receiveInput = false;
 
         private UIViewportCanvas[] canvases = null;
-        private UIViewport viewport = null;
+        private UIViewportMesh mesh = null;
         private EventSystem eventSystem = null;
         private PointerEventData eventData = null;
         private GameObject currentPressedObject = null;
@@ -66,7 +66,7 @@ namespace Core.UI
         /// <summary> Called when destroyed. </summary>
         protected abstract void OnDeinitialized();
         /// <summary> Called when show. </summary>
-        protected abstract void OnShow(UIViewport mesh);
+        protected abstract void OnShow(UIViewportMesh mesh);
         /// <summary> Called when hide. </summary>
         protected abstract void OnHide();
         protected virtual void OnGameStateChanged(GameState gameState) { }
@@ -227,7 +227,7 @@ namespace Core.UI
             isInitialized = false;
         }
 
-        internal void ShowViewport(UIViewport mesh)
+        internal void ShowViewport(UIViewportMesh mesh)
         {
             if (isActive)
             {
@@ -241,9 +241,9 @@ namespace Core.UI
                 ManagerUI.Instance.ShowCursor();
             }
 
-            OnShow(viewport = mesh);
+            OnShow(this.mesh = mesh);
             Canvas.Show();
-            viewport.ShowRenderer();
+            this.mesh.ShowRenderer();
         }
         internal void HideViewport()
         {
@@ -260,9 +260,9 @@ namespace Core.UI
             OnPointerExit();
             OnHide();
             Canvas.Hide();
-            viewport.HideRenderer();
+            mesh.HideRenderer();
 
-            viewport = null;
+            mesh = null;
             isActive = false;
         }
 

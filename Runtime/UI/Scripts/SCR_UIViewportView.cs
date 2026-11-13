@@ -76,12 +76,12 @@ namespace Core.UI
                     continue;
                 }
 
-                if (!hit.collider.TryGetComponent(out UIViewport mesh))
+                if (!hit.collider.TryGetComponent(out UIViewportMesh mesh))
                 {
                     continue;
                 }
 
-                if (mesh != activeItem.Viewport)
+                if (mesh != activeItem.Mesh)
                 {
                     continue;
                 }
@@ -183,7 +183,7 @@ namespace Core.UI
 
             items.Clear();
         }
-        public void Show(string id, UIViewport mesh)
+        public void Show(string id, UIViewportMesh mesh)
         {
             if (mesh == null)
             {

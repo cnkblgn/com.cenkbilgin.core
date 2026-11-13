@@ -9,7 +9,7 @@ namespace Core.UI
         internal string ID => id;
         internal bool IsActive => isActive;
         internal Canvas Canvas => thisCanvas;
-        internal UISurface Overlay => thisSurface;
+        internal UISurfaceMesh Mesh => mesh;
 
         [Header("_")]
         [SerializeField, Required] private string id = string.Empty;
@@ -17,7 +17,7 @@ namespace Core.UI
 
         private Canvas thisCanvas;
         private Camera thisCamera;
-        private UISurface thisSurface;
+        private UISurfaceMesh mesh;
         private bool isInitialized = false;
         private bool isActive = false;
 
@@ -30,7 +30,7 @@ namespace Core.UI
         /// <summary> Called when destroyed. </summary>
         protected abstract void OnDeinitialized();
         /// <summary> Called when show. </summary>
-        protected abstract void OnShow(UISurface surface);
+        protected abstract void OnShow(UISurfaceMesh surface);
         /// <summary> Called when hide. </summary>
         protected abstract void OnHide();
 
@@ -63,7 +63,7 @@ namespace Core.UI
             OnDeinitialized();
         }
 
-        internal void ShowSurface(UISurface overlay)
+        internal void ShowSurface(UISurfaceMesh overlay)
         {
             if (isActive)
             {
@@ -80,7 +80,7 @@ namespace Core.UI
                 ManagerUI.Instance.ShowCursor();
             }
 
-            OnShow(thisSurface = overlay);
+            OnShow(mesh = overlay);
             ShowCanvas();
         }
         internal void HideSurface()

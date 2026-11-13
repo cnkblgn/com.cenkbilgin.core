@@ -8,7 +8,7 @@ namespace Core.UI
     [DisallowMultipleComponent]
     [RequireComponent(typeof(MeshCollider))]
     [RequireComponent(typeof(MeshRenderer))]
-    public sealed class UIViewport : MonoBehaviour 
+    public sealed class UIViewportMesh : MonoBehaviour 
     {
         public GameObject Connection => connection;
 

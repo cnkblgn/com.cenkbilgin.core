@@ -30,7 +30,7 @@ namespace Core.UI
             {
                 UISurfaceItem item = items[i].Item;
 
-                if (item.IsActive && item.Overlay.TryCull(cameraTransform, out _, out _))
+                if (item.IsActive && item.Mesh.TryCull(cameraTransform, out _, out _))
                 {
                     items[i].Item.Tick(deltaTime);
                 }
@@ -94,9 +94,9 @@ namespace Core.UI
             items.Clear();
         }
 
-        public void Show(string id, UISurface overlay)
+        public void Show(string id, UISurfaceMesh mesh)
         {
-            if (overlay == null)
+            if (mesh == null)
             {
                 Debug.LogError("Overlay is null!");
                 return;
@@ -107,11 +107,11 @@ namespace Core.UI
                 return;
             }
 
-            entry.Item.ShowSurface(overlay);
+            entry.Item.ShowSurface(mesh);
         }
-        public void Show(Guid instanceID, UISurface overlay)
+        public void Show(Guid instanceID, UISurfaceMesh mesh)
         {
-            if (overlay == null)
+            if (mesh == null)
             {
                 Debug.LogError("Overlay is null!");
                 return;
@@ -122,7 +122,7 @@ namespace Core.UI
                 return;
             }
 
-            entry.Item.ShowSurface(overlay);
+            entry.Item.ShowSurface(mesh);
         }
         public void Hide(string id)
         {

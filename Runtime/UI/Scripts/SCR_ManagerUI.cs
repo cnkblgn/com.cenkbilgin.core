@@ -121,7 +121,7 @@ namespace Core.UI
         public void ClearViewports() => viewportView.Clear();
         public void AddViewport(UIViewportItem prefab) => viewportView.Add(prefab);
         public void RemoveViewport(string id) => viewportView.Remove(id);
-        public void ShowViewport(string id, UIViewport viewport) => viewportView.Show(id, viewport);
+        public void ShowViewport(string id, UIViewportMesh mesh) => viewportView.Show(id, mesh);
         public void HideViewport(string id) => viewportView.Hide(id);
 
         public bool TryGetSurface(Guid instanceID, out UISurfaceEntry entry) => surfaceView.TryGet(instanceID, out entry);
@@ -129,8 +129,8 @@ namespace Core.UI
         public void AddSurface(UISurfaceItem prefab, Guid? instanceID) => surfaceView.Add(prefab, instanceID);
         public void RemoveSurface(string id) => surfaceView.Remove(id);
         public void RemoveSurface(Guid instanceID) => surfaceView.Remove(instanceID);
-        public void ShowSurface(string id, UISurface surface) => surfaceView.Show(id, surface);
-        public void ShowSurface(Guid instanceID, UISurface surface) => surfaceView.Show(instanceID, surface);
+        public void ShowSurface(string id, UISurfaceMesh mesh) => surfaceView.Show(id, mesh);
+        public void ShowSurface(Guid instanceID, UISurfaceMesh mesh) => surfaceView.Show(instanceID, mesh);
         public void HideSurface(string id) => surfaceView.Hide(id);
         public void HideSurface(Guid instanceID) => surfaceView.Hide(instanceID);
 

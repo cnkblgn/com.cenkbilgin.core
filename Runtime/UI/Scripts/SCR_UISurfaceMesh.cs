@@ -7,7 +7,7 @@ namespace Core.UI
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(MeshRenderer))]
-    public sealed class UISurface : MonoBehaviour
+    public sealed class UISurfaceMesh : MonoBehaviour
     {
         public GameObject Connection => connection;
         public Transform Container => container; 
