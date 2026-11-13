@@ -17,11 +17,11 @@ namespace Core.UI
         [SerializeField, Required] private GameObject connection;
 
         [Header("_")]
-        [SerializeField, Range(0, 1)] private float scale = 1;
+        [SerializeField, Range(0, 1)] private float scale = 0.0025;
         [SerializeField] private bool showOnStart = false;
 
         [Header("_")]
-        [SerializeField] private bool debugCulling = true;
+        [SerializeField] private bool debugCulling = false;
         [SerializeField] private bool enableCulling = true;
         [SerializeField] private bool cullingFlipZ = false;
         [SerializeField, Min(0)] private float cullingDistance = 16;
