@@ -94,6 +94,17 @@ namespace Core.UI
 
             meshRenderer.enabled = true;
         }
+        public void RefreshSurface()
+        {
+            if (showOnStart)
+            {
+                ManagerUI.Instance.RefreshSurface(instanceID);
+            }
+            else
+            {
+                ManagerUI.Instance.RefreshSurface(baseID);
+            }
+        }
 
         internal bool TryCull(Transform target, out float distance, out float dot)
         {

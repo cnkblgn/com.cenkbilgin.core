@@ -37,6 +37,8 @@ namespace Core.UI
         protected abstract void OnShow(UISurfaceMesh surface);
         /// <summary> Called when hide. </summary>
         protected abstract void OnHide();
+        /// <summary> Called when refreshed. </summary>
+        protected abstract void OnRefresh();
 
         internal void Tick(Camera camera, float deltaTime)
         {
@@ -117,6 +119,9 @@ namespace Core.UI
             transform.localScale = mesh.Scale;
 
             OnShow(thisMesh = mesh);
+
+            RefreshSurface();
+
             ShowCanvas();
         }
         internal void HideSurface()
@@ -126,10 +131,22 @@ namespace Core.UI
                 return;
             }
 
+            RefreshSurface();
+
             OnHide();
+
             HideCanvas();
    
             isActive = false;
+        }
+        internal void RefreshSurface()
+        {
+            if (!isActive)
+            {
+                return;
+            }
+
+            OnRefresh();
         }
 
         private void ShowCanvas()

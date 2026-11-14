@@ -163,6 +163,24 @@ namespace Core.UI
 
             entry.Item.HideSurface();
         }
+        public void Refresh(string id)
+        {
+            if (!TryGet(id, out UISurfaceEntry entry))
+            {
+                return;
+            }
+
+            entry.Item.RefreshSurface();
+        }
+        public void Refresh(Guid instanceID)
+        {
+            if (!TryGet(instanceID, out UISurfaceEntry entry))
+            {
+                return;
+            }
+
+            entry.Item.RefreshSurface();
+        }
 
         public bool TryGet(string id, out UISurfaceEntry entry)
         {
