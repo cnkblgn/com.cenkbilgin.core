@@ -134,8 +134,8 @@ namespace Core.UI
         public void ShowSurface(Guid instanceID, UISurfaceMesh mesh) => surfaceView.Show(instanceID, mesh);
         public void HideSurface(string id) => surfaceView.Hide(id);
         public void HideSurface(Guid instanceID) => surfaceView.Hide(instanceID);
-        public void RefreshSurface(string id) => surfaceView.Refresh(id);
-        public void RefreshSurface(Guid instanceID) => surfaceView.Refresh(instanceID);
+        public void FocusSurface(string id, bool isFocused) => surfaceView.Focus(id, isFocused);
+        public void FocusSurface(Guid instanceID, bool isFocused) => surfaceView.Focus(instanceID, isFocused);
 
         public GameObject GetSelectedGameObject() => events.currentSelectedGameObject;
         public void SetSelectedGameObject(GameObject gameObject) => events.SetSelectedGameObject(gameObject);

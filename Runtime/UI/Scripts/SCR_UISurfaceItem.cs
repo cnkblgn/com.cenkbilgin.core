@@ -38,7 +38,7 @@ namespace Core.UI
         /// <summary> Called when hide. </summary>
         protected abstract void OnHide();
         /// <summary> Called when refreshed. </summary>
-        protected abstract void OnRefresh();
+        protected abstract void OnFocus(bool isFocused);
 
         internal void Tick(Camera camera, float deltaTime)
         {
@@ -120,7 +120,7 @@ namespace Core.UI
 
             OnShow(thisMesh = mesh);
 
-            RefreshSurface();
+            FocusSurface(true);
 
             ShowCanvas();
         }
@@ -131,7 +131,7 @@ namespace Core.UI
                 return;
             }
 
-            RefreshSurface();
+            FocusSurface(false);
 
             OnHide();
 
@@ -139,14 +139,14 @@ namespace Core.UI
    
             isActive = false;
         }
-        internal void RefreshSurface()
+        internal void FocusSurface(bool isFocused)
         {
             if (!isActive)
             {
                 return;
             }
 
-            OnRefresh();
+            OnFocus(isFocused);
         }
 
         private void ShowCanvas()

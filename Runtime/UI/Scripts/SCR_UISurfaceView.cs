@@ -163,23 +163,23 @@ namespace Core.UI
 
             entry.Item.HideSurface();
         }
-        public void Refresh(string id)
+        public void Focus(string id, bool isFocused)
         {
             if (!TryGet(id, out UISurfaceEntry entry))
             {
                 return;
             }
 
-            entry.Item.RefreshSurface();
+            entry.Item.FocusSurface(isFocused);
         }
-        public void Refresh(Guid instanceID)
+        public void Focus(Guid instanceID, bool isFocused)
         {
             if (!TryGet(instanceID, out UISurfaceEntry entry))
             {
                 return;
             }
 
-            entry.Item.RefreshSurface();
+            entry.Item.FocusSurface(isFocused);
         }
 
         public bool TryGet(string id, out UISurfaceEntry entry)

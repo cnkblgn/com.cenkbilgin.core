@@ -94,15 +94,15 @@ namespace Core.UI
 
             meshRenderer.enabled = true;
         }
-        public void RefreshSurface()
+        public void FocusSurface(bool isFocused)
         {
             if (showOnStart)
             {
-                ManagerUI.Instance.RefreshSurface(instanceID);
+                ManagerUI.Instance.FocusSurface(instanceID, isFocused);
             }
             else
             {
-                ManagerUI.Instance.RefreshSurface(baseID);
+                ManagerUI.Instance.FocusSurface(baseID, isFocused);
             }
         }
 
