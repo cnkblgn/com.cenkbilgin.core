@@ -42,14 +42,16 @@ namespace Core.UI
                 return;
             }
 
-            if (activeItem == null)
+            UIViewportItem item = activeItem;
+
+            if (item == null)
             {
                 return;
             }
 
-            activeItem.Tick(Time.deltaTime);
+            item.Tick(Time.deltaTime);
 
-            if (activeItem.HasInput && ctx.Camera != null)
+            if (item.HasInput && ctx.Camera != null)
             {
                 UpdateInput(in ctx);
             }
