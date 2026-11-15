@@ -103,6 +103,11 @@ namespace Core.UI
         }
         private void UpdateRender(float deltaTime)
         {
+            if (activeItem == null)
+            {
+                return;
+            }
+
             renderTimer += deltaTime;
 
             if (renderTimer >= renderInterval)
