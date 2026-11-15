@@ -21,7 +21,7 @@ namespace Core.Environment
         [Header("Sky")]
         public ColorParameter SkyZenithColor = new(new(0, 0.15f, 0.50f), true, false, true);
         public ColorParameter SkyHorizonColor = new(new(0.3f, 0.4f, 0.5f), true, false, true);
-        public ClampedFloatParameter SkyHorizonThickness = new(0, 0, 1);
+        public ClampedFloatParameter SkyHorizonThickness = new(0, -1, 1);
         public ClampedFloatParameter SkyHorizonSmoothness = new(1f, 0, 1);
 
         [Header("Stars")]
