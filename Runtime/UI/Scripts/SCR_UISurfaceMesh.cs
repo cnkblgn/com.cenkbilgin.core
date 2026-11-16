@@ -15,6 +15,7 @@ namespace Core.UI
 
         [Header("_")]
         [SerializeField, Required] private UISurfaceItem prefab;
+        [SerializeField, Required] private new MeshRenderer renderer;
         [SerializeField, Required] private GameObject connection;
 
         [Header("_")]
@@ -29,7 +30,6 @@ namespace Core.UI
         [SerializeField, Min(0)] private float cullingDistance = 16;
         [SerializeField, Range(-1, 1)] private float cullingDotThreshold = 0.1f;
 
-        private MeshRenderer meshRenderer;
         private string baseID = STRING_NULL;
         private Guid instanceID;
 
@@ -47,7 +47,6 @@ namespace Core.UI
 
             baseID = prefab.ID;
             instanceID = Guid.NewGuid();
-            meshRenderer = GetComponent<MeshRenderer>();
         }
         private void Start()
         {
@@ -75,8 +74,6 @@ namespace Core.UI
             {
                 ManagerUI.Instance.ShowCursor();
             }
-
-            meshRenderer.enabled = false;
         }
         public void HideSurface()
         {
@@ -93,8 +90,6 @@ namespace Core.UI
             {
                 ManagerUI.Instance.HideCursor();
             }
-
-            meshRenderer.enabled = true;
         }
         public void FocusSurface(bool isFocused)
         {
@@ -118,7 +113,13 @@ namespace Core.UI
                 return false;
             }
 
-            Vector3 center = meshRenderer.bounds.center;
+            if (renderer == null)
+            {
+                Debug.LogWarning("UI Surface mesh cull failed! renderer is null!?");
+                return false;
+            }
+
+            Vector3 center = renderer.bounds.center;
 
             distance = Vector3.Distance(center, target.position);
 
