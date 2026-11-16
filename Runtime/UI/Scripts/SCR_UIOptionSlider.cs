@@ -51,7 +51,9 @@ namespace Core.UI
                 return;
             }
 
-            string text = valueTexts != null && (int)value < valueTexts.Length ? valueTexts[(int)value] : value.ToString("0.00");
+            string format = sliderObject.wholeNumbers ? "0" : "0.00";
+
+            string text = valueTexts != null && (int)value < valueTexts.Length ? valueTexts[(int)value] : value.ToString(format);
             valueText.text = showMax ? $"{text} / {sliderObject.maxValue:0}" : text;
         }
     }
