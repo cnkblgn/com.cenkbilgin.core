@@ -117,6 +117,7 @@ namespace Core.UI
 
             transform.SetPositionAndRotation(mesh.transform.position, Quaternion.LookRotation(mesh.transform.forward));
             transform.localScale = mesh.Scale;
+            transform.localPosition = mesh.Offset;
 
             OnShow(thisMesh = mesh);
 

@@ -11,13 +11,15 @@ namespace Core.UI
     {
         public GameObject Connection => connection;
         public Vector3 Scale => scale; 
+        public Vector3 Offset => offset; 
 
         [Header("_")]
         [SerializeField, Required] private UISurfaceItem prefab;
         [SerializeField, Required] private GameObject connection;
 
         [Header("_")]
-        [SerializeField] private Vector3 scale = Vector3.one * 0.002f;
+        [SerializeField] private Vector3 scale = new(0.002f, 0.002f, 0.002f);
+        [SerializeField] private Vector3 offset = Vector3.zero;
         [SerializeField] private bool showOnStart = false;
 
         [Header("_")]
