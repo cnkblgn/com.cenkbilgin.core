@@ -50,24 +50,8 @@ namespace Core.UI
         }
 
         public void AddViewport() => ManagerUI.Instance.AddViewport(prefab);
-        public void ShowViewport()
-        {
-            ManagerUI.Instance.ShowViewport(id, this);
-
-            if (prefab.HasInput)
-            {
-                ManagerUI.Instance.ShowCursor();
-            }
-        }
-        public void HideViewport()
-        {
-            ManagerUI.Instance.HideViewport(id);
-
-            if (prefab.HasInput)
-            {
-                ManagerUI.Instance.HideCursor();
-            }
-        }
+        public void ShowViewport() => ManagerUI.Instance.ShowViewport(id, this);
+        public void HideViewport() => ManagerUI.Instance.HideViewport(id);
 
         internal void ShowRenderer() => renderer.enabled = true;
         internal void HideRenderer() => renderer.enabled = false;
