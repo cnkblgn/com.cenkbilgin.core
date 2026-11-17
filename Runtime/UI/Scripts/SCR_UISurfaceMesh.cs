@@ -6,7 +6,6 @@ namespace Core.UI
     using static CoreUtility;
 
     [DisallowMultipleComponent]
-    [RequireComponent(typeof(MeshRenderer))]
     public sealed class UISurfaceMesh : MonoBehaviour
     {
         public GameObject Connection => connection;
