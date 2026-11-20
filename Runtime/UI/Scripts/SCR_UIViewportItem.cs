@@ -19,6 +19,7 @@ namespace Core.UI
         [SerializeField] private bool receiveInput = false;
 
         protected Canvas thisCanvas;
+        protected GraphicRaycaster thisRaycaster;
         private Camera thisCamera;
         private UIViewportMesh thisMesh;
         private Guid instanceID;
@@ -86,6 +87,7 @@ namespace Core.UI
 
             this.instanceID = instanceID;
             thisCamera = camera;
+            thisRaycaster = GetComponent<GraphicRaycaster>();
             thisCanvas = GetComponent<Canvas>();
             thisCanvas.Hide();
 
@@ -155,18 +157,18 @@ namespace Core.UI
                 {
                     ManagerUI.Instance.ShowCursor();
 
-                    if (TryGetComponent(out GraphicRaycaster raycaster))
+                    if (thisRaycaster != null)
                     {
-                        raycaster.enabled = true;
+                        thisRaycaster.enabled = true;
                     }
                 }
                 else
                 {
                     ManagerUI.Instance.HideCursor();
 
-                    if (TryGetComponent(out GraphicRaycaster raycaster))
+                    if (thisRaycaster != null)
                     {
-                        raycaster.enabled = false;
+                        thisRaycaster.enabled = false;
                     }
                 }
                 
