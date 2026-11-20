@@ -114,9 +114,11 @@ namespace Core.UI
             isActive = true;
 
             transform.SetParent(mesh.transform);
-            transform.SetPositionAndRotation(mesh.transform.position, Quaternion.LookRotation(mesh.transform.forward));
+            transform.SetPositionAndRotation(mesh.transform.position, Quaternion.identity);
             transform.localScale = mesh.Scale;
             transform.position += transform.rotation * mesh.Offset;
+            transform.localRotation = Quaternion.Euler(mesh.Rotation);
+
 
             OnShow(thisMesh = mesh);
 

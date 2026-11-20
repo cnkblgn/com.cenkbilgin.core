@@ -10,6 +10,7 @@ namespace Core.UI
     {
         public GameObject Connection => connection;
         public Vector3 Scale => scale; 
+        public Vector3 Rotation => rotation; 
         public Vector3 Offset => offset; 
 
         [Header("_")]
@@ -19,6 +20,7 @@ namespace Core.UI
 
         [Header("_")]
         [SerializeField] private Vector3 scale = new(0.002f, 0.002f, 0.002f);
+        [SerializeField] private Vector3 rotation = Vector3.zero;
         [SerializeField] private Vector3 offset = Vector3.zero;
         [SerializeField] private bool showOnStart = false;
 
