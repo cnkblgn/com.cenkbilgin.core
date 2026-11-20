@@ -17,7 +17,7 @@ namespace Core.UI
         [SerializeField, Required] private string id = string.Empty;
         [SerializeField] private bool receiveInput = false;
 
-        private Canvas thisCanvas;
+        protected Canvas thisCanvas;
         private Camera thisCamera;
         private UIViewportMesh thisMesh;
         private Guid instanceID;
