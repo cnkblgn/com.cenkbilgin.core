@@ -1,14 +1,13 @@
 using System;
-using UnityEngine;
 
 namespace Core.UI
 {
-    public readonly struct UISurfaceEntry
+    public readonly struct UIViewportEntry
     {
         public readonly Guid InstanceID;
-        public readonly UISurfaceItem Item;
+        public readonly UIViewportItem Item;
 
-        public UISurfaceEntry(Guid instanceID, UISurfaceItem item)
+        public UIViewportEntry(Guid instanceID, UIViewportItem item)
         {
             InstanceID = instanceID == Guid.Empty ? throw new ArgumentNullException(nameof(instanceID)) : instanceID;
             Item = item != null ? item : throw new ArgumentNullException(nameof(item));

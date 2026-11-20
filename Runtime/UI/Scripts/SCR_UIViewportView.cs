@@ -1,125 +1,50 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 namespace Core.UI
 {
     [DisallowMultipleComponent]
+    [DefaultExecutionOrder(-1)]
     internal sealed class UIViewportView : MonoBehaviour
     {
         [Header("_")]
-        [SerializeField, Required] private Camera rendererCamera = null;
-        [SerializeField] private LayerMask viewportDetectionMask = 0;
-
-        [Header("_")]
-        [SerializeField, Range(1, 60)] private float frameRate = 30;
         [SerializeField, Required] private Transform container = null;
 
-        private UIViewportItem activeItem = null;
-        private readonly List<UIViewportItem> items = new(4);
-        private readonly RaycastHit[] collisionBuffer = new RaycastHit[5];
-        private float renderTimer = 0f;
-        private float renderInterval = 0f;
+        private readonly List<UIViewportEntry> items = new(4);
+        private Camera thisCamera;
 
-        private void Awake()
-        {
-            if (rendererCamera == null)
-            {
-                throw new NullReferenceException($"Viewport renderer camera not found! {nameof(rendererCamera)}");
-            }
-
-            rendererCamera.enabled = false;
-        }
         private void OnEnable() => ManagerGame.OnBeforeSceneChanged += OnBeforeSceneChanged;
         private void OnDisable() => ManagerGame.OnBeforeSceneChanged -= OnBeforeSceneChanged;
 
-        private void OnBeforeSceneChanged(string _) => Clear();
+        private void OnBeforeSceneChanged(string obj) => Clear();
 
         public void Tick(in UIInputContext ctx)
         {
-            if (ManagerGame.Instance.GetGameState() != GameState.RESUME)
+            thisCamera = ctx.Camera;
+
+            if (thisCamera == null)
             {
+                Debug.LogWarning("UI Viewport view tick failed! camera is missing!?");
                 return;
             }
 
-            UIViewportItem item = activeItem;
+            float deltaTime = Time.deltaTime;
+            Transform cameraTransform = thisCamera.transform;
 
-            if (item == null)
+            for (int i = 0; i < items.Count; i++)
             {
-                return;
-            }
+                UIViewportItem item = items[i].Item;
 
-            item.Tick(Time.deltaTime);
-
-            if (item.HasInput && ctx.Camera != null)
-            {
-                UpdateInput(in ctx);
-            }
-
-            renderInterval = 1f / Mathf.Max(1f, frameRate);
-
-            UpdateRender(Time.deltaTime);
-        }
-        private void UpdateInput(in UIInputContext ctx)
-        {
-            Ray ray = ctx.Camera.ScreenPointToRay(ctx.PointerPosition);
-            int count = Physics.RaycastNonAlloc(ray, collisionBuffer, 5.0f, viewportDetectionMask, QueryTriggerInteraction.Ignore);
-
-            Vector2 texturePosition = Vector2.zero;
-            float closestDistance = float.MaxValue;
-            bool hitActiveViewport = false;
-
-            for (int i = 0; i < count; i++)
-            {
-                RaycastHit hit = collisionBuffer[i];
-
-                if (hit.distance >= closestDistance)
+                if (!item.TryCull(cameraTransform))
                 {
-                    continue;
+                    item.Tick(thisCamera, deltaTime);
                 }
-
-                if (!hit.collider.TryGetComponent(out UIViewportMesh mesh))
-                {
-                    continue;
-                }
-
-                if (mesh != activeItem.Mesh)
-                {
-                    continue;
-                }
-
-                closestDistance = hit.distance;
-                texturePosition = hit.textureCoord;
-                hitActiveViewport = true;
             }
-
-            if (!hitActiveViewport)
-            {
-                activeItem.OnPointerExit();
-                return;
-            }
-
-            activeItem.UpdateInput(in ctx, texturePosition);
-        }
-        private void UpdateRender(float deltaTime)
-        {
-            if (activeItem == null)
-            {
-                return;
-            }
-
-            renderTimer += deltaTime;
-
-            if (renderTimer >= renderInterval)
-            {
-                renderTimer -= renderInterval;
-
-                activeItem.Render();
-                rendererCamera.Render();
-            }           
         }
 
-        public void Add(UIViewportItem prefab)
+        public IReadOnlyList<UIViewportEntry> GetViewports() => items;
+        public void Add(UIViewportItem prefab, Guid? instanceID)
         {
             if (prefab == null)
             {
@@ -127,120 +52,165 @@ namespace Core.UI
                 return;
             }
 
-            if (Contains(prefab.ID))
+            // Instance ID verilmiþse, sadece ayný instance zaten varsa engelle.
+            if (instanceID.HasValue)
+            {
+                if (TryGet(instanceID.Value, out _))
+                {
+#if UNITY_EDITOR
+                    Debug.LogWarning($"Viewport [{instanceID.Value}] is already added to system! Ignore if this is intended.");
+#endif
+                    return;
+                }
+            }
+            // Instance ID yoksa, Base ID üzerinden tek bir tane olmasýna izin ver.
+            else if (TryGet(prefab.ID, out _))
             {
 #if UNITY_EDITOR
-                Debug.LogWarning($"Viewport [{prefab.ID}] is already added to manager! Ignore if intended.");
+                Debug.LogWarning($"Viewport [{prefab.ID}] is already added to system! Ignore if this is intended.");
 #endif
                 return;
             }
 
-            UIViewportItem view = Instantiate(prefab, container);
-            view.Initialize(rendererCamera);
-            items.Add(view);
+            Guid id = instanceID ?? Guid.NewGuid();
+
+            UIViewportItem item = Instantiate(prefab, container);
+            item.Initialize(thisCamera, id);
+            items.Add(new(id, item));
         }
         public void Remove(string id)
         {
-            for (int i = 0; i < items.Count; i++)
+            if (!TryGet(id, out UIViewportEntry entry))
             {
-                UIViewportItem view = items[i];
-
-                if (view.ID != id)
-                {
-                    continue;
-                }
-
-                if (activeItem == view)
-                {
-                    view.HideViewport();
-
-                    activeItem = null;
-                    renderTimer = 0f;
-                }
-
-                view.Deinitialize();
-
-                items.RemoveAt(i);
-
-                Destroy(view.gameObject);
-
-                return;
+#if UNITY_EDITOR
+                Debug.LogWarning($"Viewport [{id}] is already added to system! ignore if its intented");
+#endif
             }
 
+            entry.Item.Deinitialize();
+            items.Remove(entry);
+            Destroy(entry.Item.gameObject);
+        }
+        public void Remove(Guid instanceID)
+        {
+            if (!TryGet(instanceID, out UIViewportEntry entry))
+            {
 #if UNITY_EDITOR
-            Debug.LogWarning($"You are trying to remove viewport [{id}] that does not exist! Ignore if intended.");
+                Debug.LogWarning($"Viewport [{instanceID}] is already added to system! ignore if its intented");
 #endif
+            }
+
+            entry.Item.Deinitialize();
+            items.Remove(entry);
+            Destroy(entry.Item.gameObject);
         }
         public void Clear()
         {
-            if (activeItem != null)
-            {
-                activeItem.HideViewport();
-            }
-
             for (int i = 0; i < items.Count; i++)
             {
-                items[i].Deinitialize();
-                Destroy(items[i].gameObject);
+                items[i].Item.Deinitialize();
+                Destroy(items[i].Item.gameObject);
             }
-
-            activeItem = null;
-            renderTimer = 0f;
-            renderInterval = float.MaxValue;
 
             items.Clear();
         }
+
         public void Show(string id, UIViewportMesh mesh)
         {
             if (mesh == null)
             {
-                Debug.LogError("Viewport mesh is null!");
+                Debug.LogError("Viewport show failed! mesh is null!");
                 return;
             }
 
-            UIViewportItem view = Find(id);
-
-            if (view == null)
+            if (!TryGet(id, out UIViewportEntry entry))
             {
-                Debug.LogError($"You are trying to show viewport [{id}] that does not exist!");
                 return;
             }
 
-            if (activeItem != null)
+            entry.Item.ShowViewport(mesh);
+        }
+        public void Show(Guid instanceID, UIViewportMesh mesh)
+        {
+            if (mesh == null)
             {
-                activeItem.HideViewport();
+                Debug.LogError("Viewport show failed! mesh is null!");
+                return;
             }
 
-            activeItem = view;
-            activeItem.ShowViewport(mesh);
+            if (!TryGet(instanceID, out UIViewportEntry entry))
+            {
+                return;
+            }
 
-            rendererCamera.targetTexture = activeItem.Texture;
-            rendererCamera.orthographicSize = activeItem.Size;
+            entry.Item.ShowViewport(mesh);
         }
         public void Hide(string id)
         {
-            if (activeItem == null || activeItem.ID != id)
+            if (!TryGet(id, out UIViewportEntry entry))
             {
                 return;
             }
 
-            activeItem.HideViewport();
-            activeItem = null;
-            renderTimer = 0f;
+            entry.Item.HideViewport();
+        }
+        public void Hide(Guid instanceID)
+        {
+            if (!TryGet(instanceID, out UIViewportEntry entry))
+            {
+                return;
+            }
+
+            entry.Item.HideViewport();
+        }
+        public void Focus(string id, bool isFocused)
+        {
+            if (!TryGet(id, out UIViewportEntry entry))
+            {
+                return;
+            }
+
+            entry.Item.FocusViewport(isFocused);
+        }
+        public void Focus(Guid instanceID, bool isFocused)
+        {
+            if (!TryGet(instanceID, out UIViewportEntry entry))
+            {
+                return;
+            }
+
+            entry.Item.FocusViewport(isFocused);
         }
 
-        private UIViewportItem Find(string id)
+        public bool TryGet(string id, out UIViewportEntry entry)
         {
+            entry = default;
+
             for (int i = 0; i < items.Count; i++)
             {
-                if (items[i].ID == id)
+                if (items[i].Item.ID == id)
                 {
-                    return items[i];
+                    entry = items[i];
+                    return true;
                 }
             }
 
-            return null;
+            return false;
         }
-        private bool Contains(string id) => Find(id) != null;
+        public bool TryGet(Guid instanceID, out UIViewportEntry entry)
+        {
+            entry = default;
+
+            for (int i = 0; i < items.Count; i++)
+            {
+                if (instanceID == items[i].InstanceID)
+                {
+                    entry = items[i];
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }
