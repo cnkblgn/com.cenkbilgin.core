@@ -92,6 +92,11 @@ namespace Core.UI
             thisCanvas = GetComponent<Canvas>();
             thisCanvas.Hide();
 
+            for (int i = 0; i < thisRaycasters.Length; i++)
+            {
+                thisRaycasters[i].enabled = false;
+            }
+
             isInitialized = true;
             isActive = false;
 
