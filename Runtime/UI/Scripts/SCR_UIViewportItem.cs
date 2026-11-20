@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Core.UI
 {
@@ -153,10 +154,20 @@ namespace Core.UI
                 if (isFocused)
                 {
                     ManagerUI.Instance.ShowCursor();
+
+                    if (TryGetComponent(out GraphicRaycaster raycaster))
+                    {
+                        raycaster.enabled = true;
+                    }
                 }
                 else
                 {
                     ManagerUI.Instance.HideCursor();
+
+                    if (TryGetComponent(out GraphicRaycaster raycaster))
+                    {
+                        raycaster.enabled = false;
+                    }
                 }
                 
             }
