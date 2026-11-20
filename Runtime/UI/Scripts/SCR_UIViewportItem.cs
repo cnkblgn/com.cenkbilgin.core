@@ -113,6 +113,7 @@ namespace Core.UI
 
             isActive = true;
 
+            transform.SetParent(mesh.transform);
             transform.SetPositionAndRotation(mesh.transform.position, Quaternion.LookRotation(mesh.transform.forward));
             transform.localScale = mesh.Scale;
             transform.position += transform.rotation * mesh.Offset;

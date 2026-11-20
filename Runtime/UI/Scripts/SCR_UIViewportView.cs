@@ -14,11 +14,6 @@ namespace Core.UI
         private readonly List<UIViewportEntry> items = new(4);
         private Camera thisCamera;
 
-        private void OnEnable() => ManagerGame.OnBeforeSceneChanged += OnBeforeSceneChanged;
-        private void OnDisable() => ManagerGame.OnBeforeSceneChanged -= OnBeforeSceneChanged;
-
-        private void OnBeforeSceneChanged(string obj) => Clear();
-
         public void Tick(in UIInputContext ctx)
         {
             thisCamera = ctx.Camera;

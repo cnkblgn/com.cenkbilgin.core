@@ -72,6 +72,7 @@ namespace Core.UI
             HideWaypoints();
             HideNotification();
             HideSubtitle();
+            ClearViewports();
         }
 
         public void ShowNotification(string text, float duration = 5) => notificationView.Show(text, duration);
