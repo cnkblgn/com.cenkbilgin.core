@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,7 +20,7 @@ namespace Core.UI
         [SerializeField] private bool receiveInput = false;
 
         protected Canvas thisCanvas;
-        protected GraphicRaycaster thisRaycaster;
+        protected GraphicRaycaster[] thisRaycasters;
         private Camera thisCamera;
         private UIViewportMesh thisMesh;
         private Guid instanceID;
@@ -87,7 +88,7 @@ namespace Core.UI
 
             this.instanceID = instanceID;
             thisCamera = camera;
-            thisRaycaster = GetComponent<GraphicRaycaster>();
+            thisRaycasters = GetComponentsInChildren<GraphicRaycaster>();
             thisCanvas = GetComponent<Canvas>();
             thisCanvas.Hide();
 
@@ -157,18 +158,18 @@ namespace Core.UI
                 {
                     ManagerUI.Instance.ShowCursor();
 
-                    if (thisRaycaster != null)
+                    for (int i = 0; i < thisRaycasters.Length; i++)
                     {
-                        thisRaycaster.enabled = true;
+                        thisRaycasters[i].enabled = true;
                     }
                 }
                 else
                 {
                     ManagerUI.Instance.HideCursor();
 
-                    if (thisRaycaster != null)
+                    for (int i = 0; i < thisRaycasters.Length; i++)
                     {
-                        thisRaycaster.enabled = false;
+                        thisRaycasters[i].enabled = false;
                     }
                 }
                 
