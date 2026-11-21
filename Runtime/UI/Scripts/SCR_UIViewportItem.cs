@@ -113,7 +113,7 @@ namespace Core.UI
             OnDeinitialized();
         }
 
-        internal void ShowViewport(UIViewportMesh mesh)
+        internal void ShowViewport(UIViewportMesh mesh, bool isInputFocused)
         {
             if (isActive)
             {
@@ -128,10 +128,9 @@ namespace Core.UI
             transform.localRotation = Quaternion.Euler(mesh.Rotation);
             transform.position += transform.rotation * mesh.Offset;
 
-
             OnShow(thisMesh = mesh);
 
-            FocusViewport(true);
+            FocusViewport(true, isInputFocused);
 
             ShowCanvas();
         }
@@ -142,7 +141,7 @@ namespace Core.UI
                 return;
             }
 
-            FocusViewport(false);
+            FocusViewport(false, true);
 
             OnHide();
 
@@ -150,14 +149,14 @@ namespace Core.UI
    
             isActive = false;
         }
-        internal void FocusViewport(bool isFocused)
+        internal void FocusViewport(bool isFocused, bool isInputFocused)
         {
             if (!isActive)
             {
                 return;
             }
 
-            if (receiveInput)
+            if (receiveInput && isInputFocused)
             {
                 if (isFocused)
                 {

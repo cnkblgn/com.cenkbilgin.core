@@ -122,8 +122,8 @@ namespace Core.UI
         public void AddViewport(UIViewportItem prefab, Guid? instanceID) => viewportView.Add(prefab, instanceID);
         public void RemoveViewport(string id) => viewportView.Remove(id);
         public void RemoveViewport(Guid instanceID) => viewportView.Remove(instanceID);
-        public void ShowViewport(string id, UIViewportMesh mesh) => viewportView.Show(id, mesh);
-        public void ShowViewport(Guid instanceID, UIViewportMesh mesh) => viewportView.Show(instanceID, mesh);
+        public void ShowViewport(string id, UIViewportMesh mesh, bool isInputFocused) => viewportView.Show(id, mesh, isInputFocused);
+        public void ShowViewport(Guid instanceID, UIViewportMesh mesh, bool isInputFocused) => viewportView.Show(instanceID, mesh, isInputFocused);
         public void HideViewport(string id) => viewportView.Hide(id);
         public void HideViewport(Guid instanceID) => viewportView.Hide(instanceID);
         public void FocusViewport(string id, bool isFocused) => viewportView.Focus(id, isFocused);

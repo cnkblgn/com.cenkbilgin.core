@@ -55,20 +55,20 @@ namespace Core.UI
 
             if (showOnStart)
             {
-                ShowViewport();
+                ShowViewport(true);
             }
         }
 
         public void AddViewport() => ManagerUI.Instance.AddViewport(prefab, showOnStart ? instanceID : null);
-        public void ShowViewport()
+        public void ShowViewport(bool isInputFocused)
         {
             if (showOnStart)
             {
-                ManagerUI.Instance.ShowViewport(instanceID, this);
+                ManagerUI.Instance.ShowViewport(instanceID, this, isInputFocused);
             }
             else
             {
-                ManagerUI.Instance.ShowViewport(baseID, this);
+                ManagerUI.Instance.ShowViewport(baseID, this, isInputFocused);
             }
         }
         public void HideViewport()

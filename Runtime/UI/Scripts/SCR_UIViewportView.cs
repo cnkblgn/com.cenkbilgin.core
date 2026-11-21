@@ -110,7 +110,7 @@ namespace Core.UI
             items.Clear();
         }
 
-        public void Show(string id, UIViewportMesh mesh)
+        public void Show(string id, UIViewportMesh mesh, bool isInputFocused)
         {
             if (mesh == null)
             {
@@ -123,9 +123,9 @@ namespace Core.UI
                 return;
             }
 
-            entry.Item.ShowViewport(mesh);
+            entry.Item.ShowViewport(mesh, isInputFocused);
         }
-        public void Show(Guid instanceID, UIViewportMesh mesh)
+        public void Show(Guid instanceID, UIViewportMesh mesh, bool isInputFocused)
         {
             if (mesh == null)
             {
@@ -138,7 +138,7 @@ namespace Core.UI
                 return;
             }
 
-            entry.Item.ShowViewport(mesh);
+            entry.Item.ShowViewport(mesh, isInputFocused);
         }
         public void Hide(string id)
         {
@@ -165,7 +165,7 @@ namespace Core.UI
                 return;
             }
 
-            entry.Item.FocusViewport(isFocused);
+            entry.Item.FocusViewport(isFocused, true);
         }
         public void Focus(Guid instanceID, bool isFocused)
         {
@@ -174,7 +174,7 @@ namespace Core.UI
                 return;
             }
 
-            entry.Item.FocusViewport(isFocused);
+            entry.Item.FocusViewport(isFocused, true);
         }
 
         public bool TryGet(string id, out UIViewportEntry entry)
