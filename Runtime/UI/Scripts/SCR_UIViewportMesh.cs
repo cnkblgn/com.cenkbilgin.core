@@ -55,7 +55,7 @@ namespace Core.UI
 
             if (showOnStart)
             {
-                ShowViewport(true);
+                ShowViewport(false);
             }
         }
 
