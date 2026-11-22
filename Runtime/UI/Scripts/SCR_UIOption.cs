@@ -51,7 +51,8 @@ namespace Core.UI
 
         protected virtual T Validate(T value) => value;
 
-        public void Set(T value, bool notify = true)
+        public void Set(T value) => Set(value, true);
+        public void Set(T value, bool notify)
         {
             currentValue = Validate(value);
 
