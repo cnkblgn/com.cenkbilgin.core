@@ -665,6 +665,8 @@ namespace Core.Audio
             float @base = 1;
             float mult = 1;
 
+            Debug.Log("SetVolumeMult: " + group + " << value: " + value);
+
             switch (group)
             {
                 case AudioGroup.MASTER:
