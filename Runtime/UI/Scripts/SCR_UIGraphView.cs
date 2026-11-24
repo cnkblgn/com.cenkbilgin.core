@@ -36,8 +36,9 @@ namespace Core.UI
         [Header("_")]
         [SerializeField] private bool drawGrid = true;
         [SerializeField] private Color gridColor = new(0.3f, 0.9f, 1f, 0.15f);
-        [SerializeField, Min(2)] private int gridLinesX = 4;
-        [SerializeField, Min(2)] private int gridLinesY = 4;
+        [SerializeField, Range(0.01f, 10.0f)] private int gridLinesThickness = 1;
+        [SerializeField, Min(1)] private int gridLinesX = 4;
+        [SerializeField, Min(1)] private int gridLinesY = 4;
 
         private Vector2[] cache;
         private float[] buffer;
@@ -306,13 +307,13 @@ namespace Core.UI
             for (int i = 1; i < gridLinesX; i++)
             {
                 float x = r.xMin + r.width * i / gridLinesX;
-                AddLineQuad(vh, new(x, r.yMin), new(x, r.yMax), gridColor, 1f);
+                AddLineQuad(vh, new(x, r.yMin), new(x, r.yMax), gridColor, gridLinesThickness);
             }
 
             for (int i = 1; i < gridLinesY; i++)
             {
                 float y = r.yMin + r.height * i / gridLinesY;
-                AddLineQuad(vh, new(r.xMin, y), new(r.xMax, y), gridColor, 1f);
+                AddLineQuad(vh, new(r.xMin, y), new(r.xMax, y), gridColor, gridLinesThickness);
             }
         }
     }
