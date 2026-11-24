@@ -36,7 +36,7 @@ namespace Core.UI
         [Header("_")]
         [SerializeField] private bool drawGrid = true;
         [SerializeField] private Color gridColor = new(0.3f, 0.9f, 1f, 0.15f);
-        [SerializeField, Range(0.01f, 10.0f)] private int gridLinesThickness = 1;
+        [SerializeField, Range(0.01f, 10.0f)] private float gridLinesThickness = 1;
         [SerializeField, Min(1)] private int gridLinesX = 4;
         [SerializeField, Min(1)] private int gridLinesY = 4;
 
