@@ -230,8 +230,8 @@ namespace Core
         private IEnumerator SetCurrentSceneInternal(string scene, LoadSceneMode mode, Action onBeforeChanged = null, Action onLoaded = null, Action onAfterChanged = null)
         {
             isLoading = true;
-            onBeforeChanged?.Invoke();
             OnBeforeSceneChanged?.Invoke(GetCurrentScene());
+            onBeforeChanged?.Invoke();
 
             AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(scene, mode);
             asyncLoad.allowSceneActivation = false;
@@ -243,8 +243,8 @@ namespace Core
                 if (asyncLoad.progress >= 0.9f)
                 {
                     yield return new WaitForSecondsRealtime(1f);
-                    onLoaded?.Invoke();
                     OnSceneLoaded?.Invoke(scene);
+                    onLoaded?.Invoke();
                     asyncLoad.allowSceneActivation = true;
                 }
 
@@ -252,8 +252,8 @@ namespace Core
             }
 
             isLoading = false;
-            onAfterChanged?.Invoke();
             OnAfterSceneChanged?.Invoke(scene);
+            onAfterChanged?.Invoke();
             SetGameState(GameState.RESUME, true);
         }
     }
