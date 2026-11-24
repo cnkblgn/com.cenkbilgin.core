@@ -211,8 +211,8 @@ namespace Core
         public string GetStartingScene() => startingScene.Name;
         public string GetCurrentScene() => activeScene;    
         public void SetCurrentScene(string scene) => SetCurrentScene(scene, LoadSceneMode.Single);
-        public void SetCurrentScene(string scene, Action onStartAction = null, Action onFinishAction = null) => SetCurrentScene(scene, LoadSceneMode.Single, onStartAction, onFinishAction);
-        public void SetCurrentScene(string scene, LoadSceneMode mode, Action onStartAction = null, Action onFinishAction = null)
+        public void SetCurrentScene(string scene, Action onBeforeChanged = null, Action onLoaded = null, Action onAfterChanged = null) => SetCurrentScene(scene, LoadSceneMode.Single, onBeforeChanged, onLoaded, onAfterChanged);
+        public void SetCurrentScene(string scene, LoadSceneMode mode, Action onBeforeChanged = null, Action onLoaded = null, Action onAfterChanged = null)
         {
             if (!GetIsValidScene(scene))
             {
@@ -225,12 +225,12 @@ namespace Core
             }
 
             SetGameState(GameState.NULL, true);
-            StartCoroutine(SetCurrentSceneInternal(scene, mode, onStartAction, onFinishAction));
+            StartCoroutine(SetCurrentSceneInternal(scene, mode, onBeforeChanged, onLoaded, onAfterChanged));
         }
-        private IEnumerator SetCurrentSceneInternal(string scene, LoadSceneMode mode, Action onStartAction = null, Action onFinishAction = null)
+        private IEnumerator SetCurrentSceneInternal(string scene, LoadSceneMode mode, Action onBeforeChanged = null, Action onLoaded = null, Action onAfterChanged = null)
         {
             isLoading = true;
-            onStartAction?.Invoke();
+            onBeforeChanged?.Invoke();
             OnBeforeSceneChanged?.Invoke(GetCurrentScene());
 
             AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(scene, mode);
@@ -243,6 +243,7 @@ namespace Core
                 if (asyncLoad.progress >= 0.9f)
                 {
                     yield return new WaitForSecondsRealtime(1f);
+                    onLoaded?.Invoke();
                     OnSceneLoaded?.Invoke(scene);
                     asyncLoad.allowSceneActivation = true;
                 }
@@ -251,7 +252,7 @@ namespace Core
             }
 
             isLoading = false;
-            onFinishAction?.Invoke();
+            onAfterChanged?.Invoke();
             OnAfterSceneChanged?.Invoke(scene);
             SetGameState(GameState.RESUME, true);
         }
