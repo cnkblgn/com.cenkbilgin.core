@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Rendering;
+using static UnityEngine.LightAnchor;
 
 namespace Core.Environment
 {
@@ -12,6 +13,9 @@ namespace Core.Environment
         [Header("_")]
         [SerializeField, Required] private Light sunLight; 
         [SerializeField, Required] private Light moonLight;
+
+        [Header("_")]
+        [SerializeField] private bool useHeightMask;
 
         private static Light cachedSunLight;
         private static Light cachedMoonLight;
@@ -87,7 +91,7 @@ namespace Core.Environment
                 Vector3 sunDirection = -cachedSunLight.transform.forward;
                 environment.SunDirection.value = sunDirection;
 
-                float multiplier = getHeightIntensity(sunDirection.y);
+                float multiplier = useHeightMask ? getHeightIntensity(sunDirection.y) : 1;
                 float intensity = environment.SunIntensity.value * multiplier;
 
                 cachedSunLight.color = environment.SunColor.value;
@@ -101,7 +105,7 @@ namespace Core.Environment
                 Vector3 moonDirection = -cachedMoonLight.transform.forward;
                 environment.MoonDirection.value = moonDirection;
 
-                float multiplier = getHeightIntensity(moonDirection.y);
+                float multiplier = useHeightMask ? getHeightIntensity(moonDirection.y) : 1;
                 float intensity = environment.MoonIntensity.value * multiplier;
 
                 cachedMoonLight.color = environment.MoonColor.value;
