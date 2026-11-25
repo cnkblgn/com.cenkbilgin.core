@@ -11,7 +11,7 @@ namespace Game
         [Header("_")]
         [SerializeField] private bool startOnAwake = false;
         [SerializeField, Min(0.1f)] private float speed = 1f;
-        [SerializeField, Min(0.01f)] private float fadeSpeed = 2f;
+        [SerializeField, Min(0.01f)] private float fadeDuration = 0.5f;
 
         private CanvasGroup thisCanvas;
         private bool isStarted;
@@ -20,6 +20,8 @@ namespace Game
 
         private float timer;
         private float blinkTimer;
+        private float fadeTimer;
+        private float fadeStartAlpha;
 
         private void Awake()
         {
@@ -31,7 +33,7 @@ namespace Game
             }
             else
             {
-                thisCanvas.alpha = 0;
+                thisCanvas.alpha = 0f;
             }
         }
 
@@ -42,21 +44,14 @@ namespace Game
                 return;
             }
 
-            if (hasTimer)
-            {
-                timer -= Time.deltaTime;
-
-                if (timer <= 0)
-                {
-                    isFading = true;
-                }
-            }
-
             if (isFading)
             {
-                thisCanvas.alpha = Mathf.MoveTowards(thisCanvas.alpha, 0f, fadeSpeed * Time.deltaTime);
+                fadeTimer += Time.deltaTime;
 
-                if (thisCanvas.alpha <= 0f)
+                float t = Mathf.Clamp01(fadeTimer / fadeDuration);
+                thisCanvas.alpha = Mathf.Lerp(fadeStartAlpha, 0f, t);
+
+                if (t >= 1f)
                 {
                     StopBlink();
                 }
@@ -64,33 +59,50 @@ namespace Game
                 return;
             }
 
+            if (hasTimer)
+            {
+                timer -= Time.deltaTime;
+
+                if (timer <= 0f)
+                {
+                    BeginFade();
+                    return;
+                }
+            }
+
             blinkTimer += Time.deltaTime * speed;
             thisCanvas.alpha = Mathf.PingPong(blinkTimer, 1f);
         }
 
+        private void BeginFade()
+        {
+            isFading = true;
+            fadeTimer = 0f;
+            fadeStartAlpha = thisCanvas.alpha;
+        }
+
         public void StartBlink(float duration)
         {
+            StartBlink();
             hasTimer = true;
             timer = duration;
-            StartBlink();
         }
 
         public void StartBlink()
         {
-            blinkTimer = 0f;
             isStarted = true;
-            isFading = false;
             hasTimer = false;
+            isFading = false;
+            blinkTimer = 0f;
             thisCanvas.alpha = 0f;
         }
 
         public void StopBlink()
         {
-            thisCanvas.alpha = 0f;
             isStarted = false;
             hasTimer = false;
             isFading = false;
-            blinkTimer = 0f;
+            thisCanvas.alpha = 0f;
         }
     }
 }
