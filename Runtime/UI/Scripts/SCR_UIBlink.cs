@@ -13,6 +13,9 @@ namespace Game
 
         private CanvasGroup thisCanvas = null;
         private bool isStarted = false;
+        private bool hasTimer = false;
+        private float timer;
+        private float duration;
 
         private void Awake()
         {
@@ -35,9 +38,32 @@ namespace Game
                 return;
             }
 
+            if (hasTimer)
+            {
+                timer -= Time.deltaTime;
+
+                if (timer <= 0)
+                {
+                    thisCanvas.alpha = Mathf.Lerp(thisCanvas.alpha, 0, Time.deltaTime * 2f);
+
+                    if (thisCanvas.alpha <= 0.000001f)
+                    {
+                        StopBlink();
+                    }
+
+                    return;
+                }
+            }
+
             thisCanvas.alpha = Mathf.PingPong(Time.time * speed, 1f);
         }
 
+        public void StartBlink(float duration)
+        {
+            hasTimer = true;
+            this.duration = duration;
+            this.timer = this.duration;
+        }
         public void StartBlink()
         {
             thisCanvas.alpha = 0;
@@ -47,6 +73,7 @@ namespace Game
         {
             thisCanvas.alpha = 0;
             isStarted = false;
+            hasTimer = false;
         }
     }
 }
