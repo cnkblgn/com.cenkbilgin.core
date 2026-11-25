@@ -1,3 +1,4 @@
+
 using UnityEngine;
 using Core;
 
@@ -10,12 +11,15 @@ namespace Game
         [Header("_")]
         [SerializeField] private bool startOnAwake = false;
         [SerializeField, Min(0.1f)] private float speed = 1f;
+        [SerializeField, Min(0.01f)] private float fadeSpeed = 2f;
 
-        private CanvasGroup thisCanvas = null;
-        private bool isStarted = false;
-        private bool hasTimer = false;
+        private CanvasGroup thisCanvas;
+        private bool isStarted;
+        private bool hasTimer;
+        private bool isFading;
+
         private float timer;
-        private float duration;
+        private float blinkTimer;
 
         private void Awake()
         {
@@ -25,15 +29,15 @@ namespace Game
             {
                 StartBlink();
             }
+            else
+            {
+                thisCanvas.alpha = 0;
+            }
         }
+
         private void LateUpdate()
         {
-            if (!isStarted)
-            {
-                return;
-            }
-
-            if (ManagerGame.Instance.GetGameState() != GameState.RESUME)
+            if (!isStarted || ManagerGame.Instance.GetGameState() != GameState.RESUME)
             {
                 return;
             }
@@ -44,36 +48,49 @@ namespace Game
 
                 if (timer <= 0)
                 {
-                    thisCanvas.alpha = Mathf.Lerp(thisCanvas.alpha, 0, Time.deltaTime * 2f);
-
-                    if (thisCanvas.alpha <= 0.000001f)
-                    {
-                        StopBlink();
-                    }
-
-                    return;
+                    isFading = true;
                 }
             }
 
-            thisCanvas.alpha = Mathf.PingPong(Time.time * speed, 1f);
+            if (isFading)
+            {
+                thisCanvas.alpha = Mathf.MoveTowards(thisCanvas.alpha, 0f, fadeSpeed * Time.deltaTime);
+
+                if (thisCanvas.alpha <= 0f)
+                {
+                    StopBlink();
+                }
+
+                return;
+            }
+
+            blinkTimer += Time.deltaTime * speed;
+            thisCanvas.alpha = Mathf.PingPong(blinkTimer, 1f);
         }
 
         public void StartBlink(float duration)
         {
             hasTimer = true;
-            this.duration = duration;
-            this.timer = this.duration;
+            timer = duration;
+            StartBlink();
         }
+
         public void StartBlink()
         {
-            thisCanvas.alpha = 0;
+            blinkTimer = 0f;
             isStarted = true;
+            isFading = false;
+            hasTimer = false;
+            thisCanvas.alpha = 0f;
         }
+
         public void StopBlink()
         {
-            thisCanvas.alpha = 0;
+            thisCanvas.alpha = 0f;
             isStarted = false;
             hasTimer = false;
+            isFading = false;
+            blinkTimer = 0f;
         }
     }
 }
