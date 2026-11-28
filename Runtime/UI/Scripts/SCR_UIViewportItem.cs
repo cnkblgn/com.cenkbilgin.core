@@ -7,6 +7,7 @@ namespace Core.UI
 {
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Canvas))]
+    [DefaultExecutionOrder(100)]
     public abstract class UIViewportItem : MonoBehaviour
     {
         internal string ID => id;
@@ -56,9 +57,7 @@ namespace Core.UI
             }
 
             OnTick(deltaTime);
-        }
-        internal void TickFixed()
-        {
+
             if (!isActive || !thisMesh.FollowTransform)
             {
                 return;

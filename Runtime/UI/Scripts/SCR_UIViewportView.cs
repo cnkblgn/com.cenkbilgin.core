@@ -37,13 +37,6 @@ namespace Core.UI
                 }
             }
         }
-        internal void TickFixed()
-        {
-            for (int i = 0; i < items.Count; i++)
-            {
-                items[i].Item.TickFixed();
-            }
-        }
 
         public IReadOnlyList<UIViewportEntry> GetViewports() => items;
         public void Add(UIViewportItem prefab, Guid? instanceID)

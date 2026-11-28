@@ -53,8 +53,6 @@ namespace Core.UI
                 Debug.LogWarning("Please update UIInput context via UIManager.UpdateContext()!");
                 return;
             }
-
-            viewportView.TickFixed();
         }
         private void LateUpdate()
         {
