@@ -55,6 +55,13 @@ namespace Core.UI
                 thisCanvas.worldCamera = thisCamera;
             }
 
+            if (!isActive || !thisMesh.FollowTransform)
+            {
+                return;
+            }
+
+            ApplyMeshTransform();
+
             OnTick(deltaTime);
         }
 
@@ -113,6 +120,32 @@ namespace Core.UI
             OnDeinitialized();
         }
 
+        private void ApplyMeshTransform()
+        {
+            Transform meshTransform = thisMesh.transform;
+            Quaternion targetRotation = meshTransform.rotation * Quaternion.Euler(thisMesh.Rotation);
+            Vector3 targetPosition = meshTransform.position + targetRotation * thisMesh.Offset;
+            Vector3 targetScale = Vector3.Scale(meshTransform.lossyScale, thisMesh.Scale);
+
+            transform.SetPositionAndRotation(targetPosition, targetRotation);
+
+            Transform parent = transform.parent;
+
+            if (parent == null)
+            {
+                transform.localScale = targetScale;
+            }
+            else
+            {
+                Vector3 parentScale = parent.lossyScale;
+
+                transform.localScale = new Vector3(
+                    parentScale.x != 0f ? targetScale.x / parentScale.x : 0f,
+                    parentScale.y != 0f ? targetScale.y / parentScale.y : 0f,
+                    parentScale.z != 0f ? targetScale.z / parentScale.z : 0f
+                );
+            }
+        }
         internal void ShowViewport(UIViewportMesh mesh, bool isInputFocused)
         {
             if (isActive)
@@ -121,14 +154,22 @@ namespace Core.UI
             }
 
             isActive = true;
+            thisMesh = mesh;
 
-            transform.SetParent(mesh.transform);
-            transform.SetPositionAndRotation(mesh.transform.position, Quaternion.identity);
-            transform.localScale = mesh.Scale;
-            transform.localRotation = Quaternion.Euler(mesh.Rotation);
-            transform.position += transform.rotation * mesh.Offset;
+            if (mesh.FollowTransform)
+            {
+                ApplyMeshTransform();
+            }
+            else
+            {
+                transform.SetParent(mesh.transform);
+                transform.SetPositionAndRotation(mesh.transform.position, Quaternion.identity);
+                transform.localScale = mesh.Scale;
+                transform.localRotation = Quaternion.Euler(mesh.Rotation);
+                transform.position += transform.rotation * mesh.Offset;
+            }
 
-            OnShow(thisMesh = mesh);
+            OnShow(mesh);
 
             FocusViewport(true, isInputFocused);
 
