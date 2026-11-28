@@ -92,7 +92,17 @@ namespace Core.UI
 
             return !facing;
         }
-        public bool TryGetViewport(out UIViewportEntry entry) => ManagerUI.Instance.TryGetViewport(instanceID, out entry);
+        public bool TryGetViewport(out UIViewportEntry entry)
+        {
+            if (showOnStart)
+            {
+                return ManagerUI.Instance.TryGetViewport(instanceID, out entry);
+            }
+            else
+            {
+                return ManagerUI.Instance.TryGetViewport(baseID, out entry);
+            }
+        }
         public void AddViewport() => ManagerUI.Instance.AddViewport(prefab, showOnStart ? instanceID : null);
         public void ShowViewport(bool isInputFocused)
         {

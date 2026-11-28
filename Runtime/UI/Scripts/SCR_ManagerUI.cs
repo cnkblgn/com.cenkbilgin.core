@@ -117,6 +117,7 @@ namespace Core.UI
         public void ShowCursor() => cursorView.ShowCursor();
         public void HideCursor() => cursorView.HideCursor();
 
+        public bool TryGetViewport(string id, out UIViewportEntry entry) => viewportView.TryGet(id, out entry);
         public bool TryGetViewport(Guid instanceID, out UIViewportEntry entry) => viewportView.TryGet(instanceID, out entry);
         public IReadOnlyList<UIViewportEntry> GetViewports() => viewportView.GetViewports();
         public void ClearViewports() => viewportView.Clear();
