@@ -55,14 +55,16 @@ namespace Core.UI
                 thisCanvas.worldCamera = thisCamera;
             }
 
+            OnTick(deltaTime);
+        }
+        internal void TickFixed()
+        {
             if (!isActive || !thisMesh.FollowTransform)
             {
                 return;
             }
 
             ApplyMeshTransform();
-
-            OnTick(deltaTime);
         }
 
         internal bool TryCull(Transform target)
