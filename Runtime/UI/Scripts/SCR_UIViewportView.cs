@@ -110,6 +110,36 @@ namespace Core.UI
             items.Clear();
         }
 
+        public void Sync(string id, UIViewportMesh mesh)
+        {
+            if (mesh == null)
+            {
+                Debug.LogError("Viewport show failed! mesh is null!");
+                return;
+            }
+
+            if (!TryGet(id, out UIViewportEntry entry))
+            {
+                return;
+            }
+
+            entry.Item.SyncViewport();
+        }
+        public void Sync(Guid instanceID, UIViewportMesh mesh)
+        {
+            if (mesh == null)
+            {
+                Debug.LogError("Viewport show failed! mesh is null!");
+                return;
+            }
+
+            if (!TryGet(instanceID, out UIViewportEntry entry))
+            {
+                return;
+            }
+
+            entry.Item.SyncViewport();
+        }
         public void Show(string id, UIViewportMesh mesh, bool isInputFocused)
         {
             if (mesh == null)

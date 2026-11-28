@@ -61,6 +61,17 @@ namespace Core.UI
             }
         }
 
+        public void SyncViewport()
+        {
+            if (showOnStart)
+            {
+                ManagerUI.Instance.SyncViewport(instanceID, this);
+            }
+            else
+            {
+                ManagerUI.Instance.SyncViewport(baseID, this);
+            }
+        }
         public void AddViewport() => ManagerUI.Instance.AddViewport(prefab, showOnStart ? instanceID : null);
         public void ShowViewport(bool isInputFocused)
         {

@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 namespace Core.UI
 {
     [DisallowMultipleComponent]
-    [DefaultExecutionOrder(100)]
+    [DefaultExecutionOrder(-1)]
     public sealed class ManagerUI : Manager<ManagerUI>
     {
         public Canvas Canvas => canvas;
@@ -120,6 +120,8 @@ namespace Core.UI
         public bool TryGetViewport(Guid instanceID, out UIViewportEntry entry) => viewportView.TryGet(instanceID, out entry);
         public IReadOnlyList<UIViewportEntry> GetViewports() => viewportView.GetViewports();
         public void ClearViewports() => viewportView.Clear();
+        public void SyncViewport(string id, UIViewportMesh mesh) => viewportView.Sync(id, mesh);
+        public void SyncViewport(Guid instanceID, UIViewportMesh mesh) => viewportView.Sync(instanceID, mesh);
         public void AddViewport(UIViewportItem prefab, Guid? instanceID) => viewportView.Add(prefab, instanceID);
         public void RemoveViewport(string id) => viewportView.Remove(id);
         public void RemoveViewport(Guid instanceID) => viewportView.Remove(instanceID);

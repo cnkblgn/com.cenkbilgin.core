@@ -7,7 +7,6 @@ namespace Core.UI
 {
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Canvas))]
-    [DefaultExecutionOrder(100)]
     public abstract class UIViewportItem : MonoBehaviour
     {
         internal string ID => id;
@@ -57,13 +56,6 @@ namespace Core.UI
             }
 
             OnTick(deltaTime);
-
-            if (!isActive || !thisMesh.FollowTransform)
-            {
-                return;
-            }
-
-            ApplyMeshTransform();
         }
 
         internal bool TryCull(Transform target)
@@ -121,30 +113,46 @@ namespace Core.UI
             OnDeinitialized();
         }
 
-        private void ApplyMeshTransform()
+        internal void SyncViewport()
         {
-            Transform meshTransform = thisMesh.transform;
-            Quaternion targetRotation = meshTransform.rotation * Quaternion.Euler(thisMesh.Rotation);
-            Vector3 targetPosition = meshTransform.position + targetRotation * thisMesh.Offset;
-            Vector3 targetScale = Vector3.Scale(meshTransform.lossyScale, thisMesh.Scale);
-
-            transform.SetPositionAndRotation(targetPosition, targetRotation);
-
-            Transform parent = transform.parent;
-
-            if (parent == null)
+            if (thisMesh == null)
             {
-                transform.localScale = targetScale;
+                return;
+            }
+
+            if (thisMesh.FollowTransform)
+            {
+                Transform meshTransform = thisMesh.transform;
+                Quaternion targetRotation = meshTransform.rotation * Quaternion.Euler(thisMesh.Rotation);
+                Vector3 targetPosition = meshTransform.position + targetRotation * thisMesh.Offset;
+                Vector3 targetScale = Vector3.Scale(meshTransform.lossyScale, thisMesh.Scale);
+
+                transform.SetPositionAndRotation(targetPosition, targetRotation);
+
+                Transform parent = transform.parent;
+
+                if (parent == null)
+                {
+                    transform.localScale = targetScale;
+                }
+                else
+                {
+                    Vector3 parentScale = parent.lossyScale;
+
+                    transform.localScale = new Vector3(
+                        parentScale.x != 0f ? targetScale.x / parentScale.x : 0f,
+                        parentScale.y != 0f ? targetScale.y / parentScale.y : 0f,
+                        parentScale.z != 0f ? targetScale.z / parentScale.z : 0f
+                    );
+                }
             }
             else
             {
-                Vector3 parentScale = parent.lossyScale;
-
-                transform.localScale = new Vector3(
-                    parentScale.x != 0f ? targetScale.x / parentScale.x : 0f,
-                    parentScale.y != 0f ? targetScale.y / parentScale.y : 0f,
-                    parentScale.z != 0f ? targetScale.z / parentScale.z : 0f
-                );
+                transform.SetParent(thisMesh.transform);
+                transform.SetPositionAndRotation(thisMesh.transform.position, Quaternion.identity);
+                transform.localScale = thisMesh.Scale;
+                transform.localRotation = Quaternion.Euler(thisMesh.Rotation);
+                transform.position += transform.rotation * thisMesh.Offset;
             }
         }
         internal void ShowViewport(UIViewportMesh mesh, bool isInputFocused)
@@ -157,18 +165,7 @@ namespace Core.UI
             isActive = true;
             thisMesh = mesh;
 
-            if (mesh.FollowTransform)
-            {
-                ApplyMeshTransform();
-            }
-            else
-            {
-                transform.SetParent(mesh.transform);
-                transform.SetPositionAndRotation(mesh.transform.position, Quaternion.identity);
-                transform.localScale = mesh.Scale;
-                transform.localRotation = Quaternion.Euler(mesh.Rotation);
-                transform.position += transform.rotation * mesh.Offset;
-            }
+            SyncViewport();
 
             OnShow(mesh);
 
