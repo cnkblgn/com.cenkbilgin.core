@@ -12,7 +12,7 @@ namespace Core.UI
         public Vector3 Scale => scale; 
         public Vector3 Rotation => rotation; 
         public Vector3 Offset => offset;
-        internal bool FollowTransform => followTransform;
+        public Transform Parent => parent;
 
         [Header("_")]
         [SerializeField, Required] private UIViewportItem prefab;
@@ -20,8 +20,8 @@ namespace Core.UI
         [SerializeField, Required] private new MeshRenderer renderer;
 
         [Header("_")]
-        [SerializeField] private bool followTransform = false;
         [SerializeField] private bool showOnStart = false;
+        [SerializeField] private Transform parent = null;
         [SerializeField] private Vector3 scale = new(0.002f, 0.002f, 0.002f);
         [SerializeField] private Vector3 rotation = Vector3.zero;
         [SerializeField] private Vector3 offset = Vector3.zero;
@@ -61,17 +61,38 @@ namespace Core.UI
             }
         }
 
-        public void SyncViewport()
+        internal bool TryCull(Transform target, out float distance, out float dot)
         {
-            if (showOnStart)
+            distance = float.MaxValue;
+            dot = -1f;
+
+            if (!enableCulling)
             {
-                ManagerUI.Instance.SyncViewport(instanceID, this);
+                return false;
             }
-            else
+
+            if (renderer == null)
             {
-                ManagerUI.Instance.SyncViewport(baseID, this);
+                Debug.LogWarning("UI Viewport mesh cull failed! renderer is null!?");
+                return false;
             }
+
+            Vector3 center = renderer.bounds.center;
+
+            distance = Vector3.Distance(center, target.position);
+
+            if (distance > cullingDistance)
+            {
+                return true;
+            }
+
+            bool facing = IsFacingEachOther(target.position, center, target.forward, cullingFlipZ ? -transform.forward : transform.forward, cullingDotThreshold, out float aDot, out float bDot, debugCulling);
+
+            dot = Mathf.Min(aDot, bDot);
+
+            return !facing;
         }
+        public bool TryGetViewport(out UIViewportEntry entry) => ManagerUI.Instance.TryGetViewport(instanceID, out entry);
         public void AddViewport() => ManagerUI.Instance.AddViewport(prefab, showOnStart ? instanceID : null);
         public void ShowViewport(bool isInputFocused)
         {
@@ -107,36 +128,5 @@ namespace Core.UI
             }
         }
 
-        internal bool TryCull(Transform target, out float distance, out float dot)
-        {
-            distance = float.MaxValue;
-            dot = -1f;
-
-            if (!enableCulling)
-            {
-                return false;
-            }
-
-            if (renderer == null)
-            {
-                Debug.LogWarning("UI Viewport mesh cull failed! renderer is null!?");
-                return false;
-            }
-
-            Vector3 center = renderer.bounds.center;
-
-            distance = Vector3.Distance(center, target.position);
-
-            if (distance > cullingDistance)
-            {
-                return true;
-            }
-
-            bool facing = IsFacingEachOther(target.position, center, target.forward, cullingFlipZ ? -transform.forward : transform.forward, cullingDotThreshold, out float aDot, out float bDot, debugCulling);
-
-            dot = Mathf.Min(aDot, bDot);
-
-            return !facing;
-        }
     }
 }

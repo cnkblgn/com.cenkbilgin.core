@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -113,48 +112,6 @@ namespace Core.UI
             OnDeinitialized();
         }
 
-        internal void SyncViewport()
-        {
-            if (thisMesh == null)
-            {
-                return;
-            }
-
-            if (thisMesh.FollowTransform)
-            {
-                Transform meshTransform = thisMesh.transform;
-                Quaternion targetRotation = meshTransform.rotation * Quaternion.Euler(thisMesh.Rotation);
-                Vector3 targetPosition = meshTransform.position + targetRotation * thisMesh.Offset;
-                Vector3 targetScale = Vector3.Scale(meshTransform.lossyScale, thisMesh.Scale);
-
-                transform.SetPositionAndRotation(targetPosition, targetRotation);
-
-                Transform parent = transform.parent;
-
-                if (parent == null)
-                {
-                    transform.localScale = targetScale;
-                }
-                else
-                {
-                    Vector3 parentScale = parent.lossyScale;
-
-                    transform.localScale = new Vector3(
-                        parentScale.x != 0f ? targetScale.x / parentScale.x : 0f,
-                        parentScale.y != 0f ? targetScale.y / parentScale.y : 0f,
-                        parentScale.z != 0f ? targetScale.z / parentScale.z : 0f
-                    );
-                }
-            }
-            else
-            {
-                transform.SetParent(thisMesh.transform);
-                transform.SetPositionAndRotation(thisMesh.transform.position, Quaternion.identity);
-                transform.localScale = thisMesh.Scale;
-                transform.localRotation = Quaternion.Euler(thisMesh.Rotation);
-                transform.position += transform.rotation * thisMesh.Offset;
-            }
-        }
         internal void ShowViewport(UIViewportMesh mesh, bool isInputFocused)
         {
             if (isActive)
@@ -165,7 +122,11 @@ namespace Core.UI
             isActive = true;
             thisMesh = mesh;
 
-            SyncViewport();
+            transform.SetParent(thisMesh.Parent != null ? thisMesh.Parent : thisMesh.transform);
+            transform.SetPositionAndRotation(thisMesh.transform.position, Quaternion.identity);
+            transform.localScale = thisMesh.Scale;
+            transform.localRotation = Quaternion.Euler(thisMesh.Rotation);
+            transform.position += transform.rotation * thisMesh.Offset;
 
             OnShow(mesh);
 
