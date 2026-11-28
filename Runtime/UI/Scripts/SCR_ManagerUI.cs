@@ -6,6 +6,7 @@ using UnityEngine.EventSystems;
 namespace Core.UI
 {
     [DisallowMultipleComponent]
+    [DefaultExecutionOrder(100)]
     public sealed class ManagerUI : Manager<ManagerUI>
     {
         public Canvas Canvas => canvas;
